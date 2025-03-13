@@ -1,7 +1,7 @@
 <x-guest-layout>
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
-<h3>admin page majid</h3>
+<h3>admin page majid for testing</h3>
     <form method="POST" action="{{ route('admin.login.store') }}">
         @csrf
 
