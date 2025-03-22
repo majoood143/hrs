@@ -70,15 +70,16 @@
             font-feature-settings: "cv03", "cv04", "cv11";
         }
     </style>
+    @vite(['resources/js/admin/login.js'])
 </head>
 
 <body class=" d-flex flex-column">
-    <script src="./dist/js/demo-theme.min.js?1692870487"></script>
+    <script src="{{ asset('admin/assets/dist/js/demo-theme.min.js?1692870487') }}"></script>
     <div class="page page-center">
         <div class="container container-tight py-4">
             <div class="text-center mb-4">
                 <a href="." class="navbar-brand navbar-brand-autodark">
-                    <img src="./static/logo.svg" width="110" height="32" alt="Tabler"
+                    <img src="{{ asset('admin/assets/static/logo.svg')}}" width="110" height="32" alt="Tabler"
                         class="navbar-brand-image">
                 </a>
             </div>
@@ -93,7 +94,7 @@
                                 placeholder="your@email.com" required autofocus autocomplete="off">
                             <x-input-error :messages="$errors->get('email')" class="mt-2" />
                         </div>
-                        
+
                         <div class="mb-2">
                             <label class="form-label">
                                 Password
@@ -103,11 +104,11 @@
                             </label>
 
                             <div class="input-group input-group-flat">
-                                <input type="password" name="password" class="form-control" placeholder="Your password"
-                                    autocomplete="off" required >
-                                   
-                                <span class="input-group-text">
-                                    <a href="#" class="link-secondary" title="Show password"
+                                <input type="password" name="password" class="form-control password"
+                                    placeholder="Your password" autocomplete="off" required>
+
+                                <span class="input-group-text toggle-password">
+                                    <a href="javascript:;" class="link-secondary" title="Show password"
                                         data-bs-toggle="tooltip"><!-- Download SVG icon from http://tabler-icons.io/i/eye -->
                                         <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24"
                                             height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
@@ -133,9 +134,9 @@
                         </div>
                     </form>
                 </div>
-               
+
             </div>
-           
+
         </div>
     </div>
     <!-- Libs JS -->
