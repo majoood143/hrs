@@ -3,22 +3,22 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\HorseType;
+use App\Models\HorseGender;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 
-class HorseTypeController extends Controller
+class HorseGenderController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(): View
     {
-        $horse_Types = HorseType::paginate(15);
-        return view('admin.horse.horse-type.index', compact('horse_Types'));
+        $horse_gender = HorseGender::paginate(15);
+        return view('admin.horse.horse-gender.index', compact('horse_gender'));
     }
 
     /**
@@ -26,7 +26,7 @@ class HorseTypeController extends Controller
      */
     public function create()
     {
-        return view('admin.horse.horse-type.create');
+        return view('admin.horse.horse-gender.create');
     }
 
     /**
@@ -34,16 +34,16 @@ class HorseTypeController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate(['en_name' => ['required', 'max:80', 'unique:horse_types,en_name']]);
+        $request->validate(['en_name' => ['required', 'max:80', 'unique:horse_genders,en_name']]);
         $request->validate(['ar_name' => ['required', 'max:80']]);
 
-        $type = new HorseType();
+        $type = new HorseGender();
         $type->en_name = $request->en_name;
         $type->ar_name = $request->ar_name;
 
         $type->save();
-        flash()->success('The Horse Type has been Added');
-        return to_route('admin.horse-type.index');
+        flash()->success('The Horse Gender has been Added');
+        return to_route('admin.horse-gender.index');
     }
 
     /**
@@ -57,37 +57,37 @@ class HorseTypeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(HorseType $horse_type)
+    public function edit(HorseGender $horse_gender)
     {
-        return view('admin.horse.horse-type.update', compact('horse_type'));
+        return view('admin.horse.horse-gender.update', compact('horse_gender'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, HorseType $horse_type)
+    public function update(Request $request, HorseGender $horse_gender)
     {
-        $request->validate(['en_name' => ['required', 'max:80', 'unique:horse_types,en_name']]);
+        $request->validate(['en_name' => ['required', 'max:80', 'unique:horse_genders,en_name']]);
         $request->validate(['ar_name' => ['required', 'max:80']]);
 
 
-        $horse_type->en_name = $request->en_name;
-        $horse_type->ar_name = $request->ar_name;
+        $horse_gender->en_name = $request->en_name;
+        $horse_gender->ar_name = $request->ar_name;
 
-        $horse_type->save();
-        flash()->success('The Horse type has been updated');
+        $horse_gender->save();
+        flash()->success('The Horse Gender has been updated');
 
 
-        return to_route('admin.horse-type.index');
+        return to_route('admin.horse-gender.index');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(HorseType $horse_type)
+    public function destroy(HorseGender $horse_gender)
     {
         try {
-            $horse_type->delete();
+            $horse_gender->delete();
             flash()->success("Your changes have been successfully saved!");
             return response(['message' => 'Deleted'], 200);
         } catch (Exception $e) {

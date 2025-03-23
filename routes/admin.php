@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\Auth\RegisteredUserController;
 use App\Http\Controllers\Admin\Auth\VerifyEmailController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\HorseTypeController;
+use App\Http\Controllers\Admin\HorseGenderController;
+use App\Http\Controllers\Admin\HorseStatusController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(["middleware" => "guest", "prefix" => "admin", "as" => "admin."], function () {
@@ -64,4 +66,10 @@ Route::group(["middleware" => "auth:admin", "prefix" => "admin", "as" => "admin.
 
     /** Horse Types Routs */
     Route::resource('horse-type', HorseTypeController::class);
+    /** Horse Gender Routs */
+    Route::resource('horse-gender', HorseGenderController::class);
+     /** Horse Status Routs */
+     Route::resource('horse-status', HorseStatusController::class);
+
+    
 });

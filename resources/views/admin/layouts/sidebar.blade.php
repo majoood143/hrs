@@ -250,6 +250,18 @@
                                 </a>
 
                             </div>
+                            <div class="dropdown-menu-column">
+                                <a class="dropdown-item" href="{{ route('admin.horse-gender.index') }}">
+                                    Horse Gender
+                                </a>
+
+                            </div>
+                            <div class="dropdown-menu-column">
+                                <a class="dropdown-item" href="{{ route('admin.horse-status.index') }}">
+                                    Horse Status
+                                </a>
+
+                            </div>
 
                         </div>
                     </div>
