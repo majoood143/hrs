@@ -5,9 +5,9 @@
         <div class="container-xl">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Horse Status</h3>
+                    <h3 class="card-title">Horse Color</h3>
                     <div class="card-actions">
-                        <a href="{{ route('admin.horse-status.create') }}" class="btn btn-primary">
+                        <a href="{{ route('admin.horse-color.create') }}" class="btn btn-primary">
                             <!-- Download SVG icon from http://tabler-icons.io/i/plus -->
                             <i class="ti ti-plus"></i>
                             Add new
@@ -23,27 +23,29 @@
                                     <th>ID</th>
                                     <th>EN - Name</th>
                                     <th>AR Name</th>
+                                    <th>Pattern</th>
                                     <th>Action</th>
                                     <th class="w-1"></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse ($horse_status as $item)
+                                @forelse ($horse_color as $item)
                                     <tr>
                                         {{-- Table Items List --}}
                                         <td class="text-secondary">{{ $item->id }}</td>
                                         <td class="text-secondary">{{ $item->en_name }}</td>
                                         <td class="text-secondary">{{ $item->ar_name }}</td>
+                                        <td class="text-secondary">{{ $item->pattern }}</td>
                                         {{-- Actions Buttons --}}
                                         <td>
                                             {{-- Edit Button --}}
-                                            <a href="{{ route('admin.horse-status.edit', $item->id) }}"
+                                            <a href="{{ route('admin.horse-color.edit', $item->id) }}"
                                                 class="btn-sm btn-primary">
                                                 <i class="ti ti-edit"></i>
                                             </a>
                                             {{-- Delete Button --}}
-                                            {{-- <a href="{{ route('admin.horse-status.create', $item->id) }}" --}}
-                                            <a href="{{ route('admin.horse-status.destroy', $item->id) }}" class="text-red delete-item">
+                                            {{-- <a href="{{ route('admin.horse-color.create', $item->id) }}" --}}
+                                            <a href="{{ route('admin.horse-color.destroy', $item->id) }}" class="text-red delete-item">
                                                 <i class="ti ti-trash-x"></i>
                                             </a>
 
@@ -58,7 +60,9 @@
                             </tbody>
                         </table>
                     </div>
-                    {{ $horse_status->links() }}
+                    <div class="mt-4">
+                        {{ $horse_color->links() }}
+                    </div>
                 </div>
             </div>
         </div>

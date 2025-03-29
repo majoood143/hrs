@@ -17,7 +17,7 @@ class HorseGenderController extends Controller
      */
     public function index(): View
     {
-        $horse_gender = HorseGender::paginate(15);
+        $horse_gender = HorseGender::paginate(10);
         return view('admin.horse.horse-gender.index', compact('horse_gender'));
     }
 

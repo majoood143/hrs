@@ -13,6 +13,10 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\HorseTypeController;
 use App\Http\Controllers\Admin\HorseGenderController;
 use App\Http\Controllers\Admin\HorseStatusController;
+use App\Http\Controllers\Admin\HorsePollinationController;
+use App\Http\Controllers\Admin\HorseColorController;
+use App\Http\Controllers\Admin\CountryController;
+use App\Http\Controllers\Admin\RegionController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(["middleware" => "guest", "prefix" => "admin", "as" => "admin."], function () {
@@ -68,8 +72,15 @@ Route::group(["middleware" => "auth:admin", "prefix" => "admin", "as" => "admin.
     Route::resource('horse-type', HorseTypeController::class);
     /** Horse Gender Routs */
     Route::resource('horse-gender', HorseGenderController::class);
-     /** Horse Status Routs */
-     Route::resource('horse-status', HorseStatusController::class);
+    /** Horse Status Routs */
+    Route::resource('horse-status', HorseStatusController::class);
+    /** Horse Pollination Routs */
+    Route::resource('horse-pollination', HorsePollinationController::class);
+    /** Horse Color Routs */
+    Route::resource('horse-color', HorseColorController::class);
+    /**  Country Routs */
+    Route::resource('country', CountryController::class);
+    /**  Country Routs */
+    Route::get('/{country}/region', RegionController::class,'index')->name('region');
 
-    
 });

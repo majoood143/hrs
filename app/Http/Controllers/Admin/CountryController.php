@@ -3,22 +3,22 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\HorseType;
+use App\Models\Country;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 
-class HorseTypeController extends Controller
+class CountryController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(): View
     {
-        $horse_Types = HorseType::paginate(10);
-        return view('admin.horse.horse-type.index', compact('horse_Types'));
+        $country = Country::paginate(10);
+        return view('admin.horse.country.index', compact('country'));
     }
 
     /**
@@ -26,7 +26,7 @@ class HorseTypeController extends Controller
      */
     public function create()
     {
-        return view('admin.horse.horse-type.create');
+        return view('admin.horse.country.create');
     }
 
     /**
@@ -34,16 +34,18 @@ class HorseTypeController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate(['en_name' => ['required', 'max:80', 'unique:horse_types,en_name']]);
+        $request->validate(['en_name' => ['required', 'max:80', 'unique:countries,en_name']]);
         $request->validate(['ar_name' => ['required', 'max:80']]);
 
-        $type = new HorseType();
-        $type->en_name = $request->en_name;
-        $type->ar_name = $request->ar_name;
 
-        $type->save();
-        flash()->success('The Horse Type has been Added');
-        return to_route('admin.horse-type.index');
+        $country = new Country();
+        $country->en_name = $request->en_name;
+        $country->ar_name = $request->ar_name;
+
+
+        $country->save();
+        flash()->success('The Country has been Added');
+        return to_route('admin.country.index');
     }
 
     /**
@@ -57,43 +59,44 @@ class HorseTypeController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(HorseType $horse_type)
+    public function edit(Country $country)
     {
-        return view('admin.horse.horse-type.update', compact('horse_type'));
+        return view('admin.horse.country.update', compact('country'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, HorseType $horse_type)
+    public function update(Request $request, Country $country)
     {
-        $request->validate(['en_name' => ['required', 'max:80', 'unique:horse_types,en_name']]);
+        $request->validate(['en_name' => ['required', 'max:80', 'unique:countries,en_name']]);
         $request->validate(['ar_name' => ['required', 'max:80']]);
 
 
-        $horse_type->en_name = $request->en_name;
-        $horse_type->ar_name = $request->ar_name;
-
-        $horse_type->save();
-        flash()->success('The Horse type has been updated');
+        $country->en_name = $request->en_name;
+        $country->ar_name = $request->ar_name;
 
 
-        return to_route('admin.horse-type.index');
+        $country->save();
+        flash()->success('The Country has been updated');
+
+
+        return to_route('admin.country.index');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(HorseType $horse_type)
+    public function destroy(Country $country)
     {
         try {
-            $horse_type->delete();
+            $country->delete();
             flash()->success("Your changes have been successfully saved!");
             return response(['message' => 'Deleted'], 200);
         } catch (Exception $e) {
             logger($e);
-             // Display an error notification
-             //flash()->error("You must fill out the form before moving forward");
+            // Display an error notification
+            //flash()->error("You must fill out the form before moving forward");
             return response(['message' => 'Someting went wrong!'], 500);
         }
     }

@@ -13,10 +13,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-	<meta name="csrf_token" content="{{ csrf_token() }}">
+    <meta name="csrf_token" content="{{ csrf_token() }}">
     <title>Dashboard</title>
     <!-- CSS files -->
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+    <!-- Notifications -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+    <!-- Tabler Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.28.1/tabler-icons.min.css">
+
+    <!-- other CSS files -->
     <link href="{{ asset('admin/assets/dist/css/tabler.min.css?1692870487') }}" rel="stylesheet" />
     <link href="{{ asset('admin/assets/dist/css/tabler-flags.min.css?1692870487') }}" rel="stylesheet" />
     <link href="{{ asset('admin/assets/dist/css/tabler-payments.min.css?1692870487') }}" rel="stylesheet" />
@@ -33,6 +38,7 @@
             font-feature-settings: "cv03", "cv04", "cv11";
         }
     </style>
+    @vite(['resources/css/admin.css'])
     @vite(['resources/js/admin/admin.js'])
 </head>
 
@@ -207,7 +213,7 @@
     </div>
 
     <!-- Libs JS -->
-	<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script src="{{ asset('admin/assets/dist/libs/apexcharts/dist/apexcharts.min.js?1692870487') }}" defer></script>
     <script src="{{ asset('admin/assets/dist/libs/jsvectormap/dist/js/jsvectormap.min.js?1692870487') }}" defer></script>
     <script src="{{ asset('admin/assets/dist/libs/jsvectormap/dist/maps/world.js?1692870487') }}" defer></script>
