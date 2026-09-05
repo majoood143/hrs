@@ -41,7 +41,11 @@ return [
     |
     */
 
-    'default_filesystem_disk' => env('FILESYSTEM_DISK', 'local'),
+    // Hardcoded (not env('FILESYSTEM_DISK')): Filament v3's implicit default was
+    // 'public', and existing FileUpload attachments (horses.attachment,
+    // attachements.file_path) are already stored there. FILESYSTEM_DISK=local
+    // only controls Laravel's general default disk, unrelated to this.
+    'default_filesystem_disk' => 'public',
 
     /*
     |--------------------------------------------------------------------------
