@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\HorseResource\Pages;
 
+use Filament\Actions\CreateAction;
 use App\Filament\Resources\HorseResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
@@ -17,7 +18,7 @@ class ListHorses extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 
@@ -35,7 +36,7 @@ class ListHorses extends ListRecords
     //         'Pure Arabian' => Tab::make()->query(fn($query) => $query->where('type_id', 1)),
     //         'Arabian' => Tab::make()->query(fn($query) => $query->where('type_id', 2)),
     //         'Thoroughbred' => Tab::make()->query(fn($query) => $query->where('type_id', 3)),
-            
+
     //     ];
     // }
 

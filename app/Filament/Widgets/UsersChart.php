@@ -9,7 +9,7 @@ use Flowframe\Trend\TrendValue;
 
 class UsersChart extends ChartWidget
 {
-    protected static ?string $heading = 'Users Chart';
+    protected ?string $heading = 'Users Chart';
 
     protected function getData(): array
     {

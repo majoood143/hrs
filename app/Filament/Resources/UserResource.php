@@ -2,20 +2,32 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\UserResource\Pages\ListUsers;
+use App\Filament\Resources\UserResource\Pages\CreateUser;
+use App\Filament\Resources\UserResource\Pages\ViewUser;
+use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\ActionGroup;
 use Filament\Forms\Components\Select;
 use Spatie\Permission\Models\Role;
 use Filament\Tables\Columns\BadgeColumn;
 use Illuminate\Support\Collection;
-use Filament\Forms\Get;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Region;
@@ -29,48 +41,48 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
 
     public static function getNavigationBadge(): ?string
     {
         return static::$model::count();
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
+        return $schema
+            ->components([
+                TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('email')
+                TextInput::make('email')
                     ->email()
                     ->unique(User::class, 'email', ignoreRecord: true)
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('civiled_id')
+                TextInput::make('civiled_id')
                     ->required()
                     ->unique(User::class, 'civiled_id', ignoreRecord: true)
                     ->maxLength(255),
-                Forms\Components\TextInput::make('cr_number')
+                TextInput::make('cr_number')
                     ->required()
                     ->unique(User::class, 'cr_number', ignoreRecord: true)
                     ->maxLength(255),
-                Forms\Components\TextInput::make('phone')
+                TextInput::make('phone')
                     ->required()
                     ->maxLength(12),
-            Forms\Components\TextInput::make('postal_code')
+            TextInput::make('postal_code')
                 ->required()
                 ->maxLength(12),
-            Forms\Components\Toggle::make('is_admin')
+            Toggle::make('is_admin')
                 ->required(),
-            Forms\Components\Select::make('country_id')
+            Select::make('country_id')
                 ->relationship(name: 'country', titleAttribute: 'en_name')
                 ->searchable()
                 ->preload()
                 ->live()
                 ->required(),
-            Forms\Components\Select::make('region_id')
+            Select::make('region_id')
                 ->relationship(name: 'region', titleAttribute: 'en_name')
                 ->options(fn(Get $get): Collection => Region::query()
                     ->where('country_id', $get('country_id'))
@@ -78,7 +90,7 @@ class UserResource extends Resource
                 ->searchable()
                 ->preload()
                 ->required(),
-            Forms\Components\Select::make('city_id')
+            Select::make('city_id')
                 ->relationship(name: 'city', titleAttribute: 'en_name')
                 ->options(fn(Get $get): Collection => City::query()
                     ->where('region_id', $get('region_id'))
@@ -86,7 +98,7 @@ class UserResource extends Resource
                 ->searchable()
                 ->preload()
                 ->required(),
-            Forms\Components\Select::make('type')
+            Select::make('type')
                 ->options(function () {
                     $enumValues = DB::select("SHOW COLUMNS FROM users WHERE Field = 'type'")[0]->Type;
                     preg_match('/^enum\((.*)\)$/', $enumValues, $matches);
@@ -94,8 +106,8 @@ class UserResource extends Resource
 
                     return array_combine($values, $values);
                 }),
-                Forms\Components\DateTimePicker::make('email_verified_at'),
-                Forms\Components\TextInput::make('password')
+                DateTimePicker::make('email_verified_at'),
+                TextInput::make('password')
                     ->password()
                     ->required()
                     ->maxLength(255),
@@ -104,7 +116,7 @@ class UserResource extends Resource
                     //->options(Role::all()->pluck('name', 'name'))
                     ->relationship('roles', 'name')
                     ->multiple()
-                    ->options(Role::all()->pluck('name', 'id'))
+                    ->options(ModelsRole::all()->pluck('name', 'id'))
                     ->preload(),
             ]);
     }
@@ -113,23 +125,23 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')
+                TextColumn::make('email')
                     ->searchable(),
                 BadgeColumn::make('roles.name')
                     ->label('Roles')
                     ->color('primary') // Customize the badge color
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('email_verified_at')
+                TextColumn::make('email_verified_at')
                     ->dateTime()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -137,15 +149,15 @@ class UserResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make()->slideOver(),
+                    ViewAction::make(),
+                    EditAction::make()->slideOver(),
                 ])
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                     ExportBulkAction::make(),
                     
                 ]),
@@ -162,10 +174,10 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'view' => Pages\ViewUser::route('/{record}'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'index' => ListUsers::route('/'),
+            'create' => CreateUser::route('/create'),
+            'view' => ViewUser::route('/{record}'),
+            'edit' => EditUser::route('/{record}/edit'),
         ];
     }
 }

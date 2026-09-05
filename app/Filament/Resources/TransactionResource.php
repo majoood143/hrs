@@ -2,12 +2,33 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Components\Wizard\Step;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Select;
+use App\Models\Service;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Schemas\Components\Group;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\FileUpload;
+use Illuminate\Support\Facades\DB;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
+use App\Filament\Resources\TransactionResource\Pages\CreateTransaction;
+use App\Filament\Resources\TransactionResource\Pages\ViewTransaction;
+use App\Filament\Resources\TransactionResource\Pages\EditTransaction;
 use App\Filament\Resources\TransactionResource\Pages;
 use App\Filament\Resources\TransactionResource\RelationManagers;
 use App\Models\Attachement;
 use App\Models\Transaction;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -15,7 +36,6 @@ use Filament\Support\Enums\Alignment;
 use JaOcero\RadioDeck\Forms\Components\RadioDeck;
 use App\Filament\Resources\Model\attachments;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Wizard;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Database\Eloquent\Model;
@@ -27,7 +47,7 @@ class TransactionResource extends Resource
     protected static ?string $model = Transaction::class;
 
     // Define the navigation icon for this resource
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     // Get the navigation badge count
     public static function getNavigationBadge(): ?string
@@ -36,33 +56,33 @@ class TransactionResource extends Resource
     }
 
     // Define the form schema for creating or editing transactions
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
 
                 // Create a wizard form for transaction details
                 Wizard::make([
                     // Define the first step of the wizard
-                    Wizard\Step::make('Transaction Details')
+                    Step::make('Transaction Details')
                         ->schema([
                             // Create a section for transaction information
-                            Forms\Components\Section::make('Transaction Information')
+                            Section::make('Transaction Information')
                                 ->schema([
 
-                        Forms\Components\Select::make('service_id')
+                        Select::make('service_id')
                             ->relationship(name: 'service', titleAttribute: 'name')
                             ->searchable()
                             ->preload()
-                            ->afterStateUpdated(fn(callable $set, $state) => $set('amount', $state ? \App\Models\Service::find($state)->price : null))
+                            ->afterStateUpdated(fn(callable $set, $state) => $set('amount', $state ? Service::find($state)->price : null))
                             ->live()
                             ->required(),
-                        Forms\Components\TextInput::make('amount')
+                        TextInput::make('amount')
                             ->prefix('OMR')
                             //->required()
                             //->disabled(),
                             ->numeric(3),
-                        Forms\Components\TextInput::make('currency')
+                        TextInput::make('currency')
                             ->default('OMR')
                             ->required()
                             ->maxLength(3),
@@ -72,11 +92,11 @@ class TransactionResource extends Resource
                                     //     ->maxLength(255)
                                     //     ->default(null),
                                     // Input for reference number
-                                    Forms\Components\TextInput::make('reference_number')
+                                    TextInput::make('reference_number')
                                         ->maxLength(255)
                                         ->default(null),
                                     // Date picker for transaction date
-                                    Forms\Components\DatePicker::make('transaction_date')
+                                    DatePicker::make('transaction_date')
                                         ->default(now())
                                         ->hidden()
                                         ->required(),
@@ -86,12 +106,12 @@ class TransactionResource extends Resource
                         ]),
                    
                     // Additional steps can be added here
-                    Wizard\Step::make('Additional Information')
+                    Step::make('Additional Information')
                         ->schema([
-                            Forms\Components\Section::make('Additional Information')
+                            Section::make('Additional Information')
                                 ->schema([
 
-                        Forms\Components\Group::make()
+                        Group::make()
                             ->schema(function (callable $get) {
                                 $serviceId = $get('service_id');
 
@@ -99,50 +119,50 @@ class TransactionResource extends Resource
                                 switch ($serviceId) {
                                     case 1 : // e.g. Horse Registration
                                         return [
-                                        Forms\Components\TextInput::make('horse_name')
+                                        TextInput::make('horse_name')
                                                 ->label('Horse Name')
                                                 ->required(),
-                                        Forms\Components\DatePicker::make('birth_date')
+                                        DatePicker::make('birth_date')
                                                 ->label('Birth Date')
                                                 ->required(),
                                         ];
 
                                     case 2: // e.g. Ownership Transfer
                                         return [
-                                        Forms\Components\Select::make('horse_id')
+                                        Select::make('horse_id')
                                             ->label('Horse')
                                             ->relationship(name: 'horse', titleAttribute: 'en_name')
                                             ->searchable()
                                             ->preload()
                                             ->required(),
-                                        Forms\Components\TextInput::make('previous_owner')
+                                        TextInput::make('previous_owner')
                                                 ->label('Previous Owner')
                                                 ->required(),
-                                        Forms\Components\TextInput::make('new_owner')
+                                        TextInput::make('new_owner')
                                                 ->label('New Owner')
                                                 ->required(),
                                         ];
 
                                     case 3: // e.g. Microchip Replacement
                                         return [
-                                        Forms\Components\TextInput::make('old_microchip')
+                                        TextInput::make('old_microchip')
                                                 ->label('Old Microchip ID')
                                                 ->required(),
-                                        Forms\Components\TextInput::make('new_microchip')
+                                        TextInput::make('new_microchip')
                                                 ->label('New Microchip ID')
                                                 ->required(),
                                         ];
 
                                     default:
                                         return [
-                                            Forms\Components\Placeholder::make('no_service')
+                                            Placeholder::make('no_service')
                                                 ->content('Please select a service to show its fields.'),
                                         ];
                                 }
                             })
                             ->reactive(),
                                     // Input for transaction description
-                                    Forms\Components\RichEditor::make('description')
+                                    RichEditor::make('description')
                                         ->maxLength(255)
                                         ->default(null),
                                     
@@ -152,9 +172,9 @@ class TransactionResource extends Resource
                         ]),
 
                 // Additional steps can be added here
-                Wizard\Step::make('Service Details')
+                Step::make('Service Details')
                     ->schema([
-                        Forms\Components\Section::make('Service Information')
+                        Section::make('Service Information')
                             ->schema([
 
                                 // Forms\Components\TextInput::make('service_date')
@@ -176,25 +196,25 @@ class TransactionResource extends Resource
                     //     ->columnSpanFull(),
                     // // Input for horse selection
                     // Wizard::make([
-                    Wizard\Step::make('Horse & Service')
+                    Step::make('Horse & Service')
                         ->schema([
-                            Forms\Components\Section::make('Attachments')
+                            Section::make('Attachments')
                                 ->schema([
-                                    Forms\Components\Repeater::make('attachement')
+                                    Repeater::make('attachement')
                                         ->relationship()
                                         ->schema([
-                                            Forms\Components\TextInput::make('name')
+                                            TextInput::make('name')
                                                 ->maxLength(255)
                                                 ->default(null),
-                                            Forms\Components\RichEditor::make('description')
+                                            RichEditor::make('description')
                                                 ->maxLength(255)
                                                 ->default(null),
-                                            Forms\Components\FileUpload::make('file_path')
+                                            FileUpload::make('file_path')
                                                 ->required(),
                                             //->maxLength(255),
-                                            Forms\Components\Select::make('type')
+                                            Select::make('type')
                                                 ->options(function () {
-                                                    $enumValues = \Illuminate\Support\Facades\DB::select("SHOW COLUMNS FROM attachements WHERE Field = 'type'")[0]->Type;
+                                                    $enumValues = DB::select("SHOW COLUMNS FROM attachements WHERE Field = 'type'")[0]->Type;
                                                     preg_match('/^enum\((.*)\)$/', $enumValues, $matches);
                                                     $values = array_map(fn($value) => trim($value, "'"), explode(',', $matches[1]));
 
@@ -231,7 +251,7 @@ class TransactionResource extends Resource
                 //     ->maxLength(3),
 
 
-                Forms\Components\Toggle::make('is_paid')
+                Toggle::make('is_paid')
                     ->default(true)
                     ->required(),
 
@@ -244,29 +264,29 @@ class TransactionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('horse.en_name')
+                TextColumn::make('horse.en_name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('service.name')
+                TextColumn::make('service.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->numeric(3)
                     ->prefix('OMR ')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('attachement_count')
+                TextColumn::make('attachement_count')
                     ->counts('attachement')
                     ->badge(),
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -274,13 +294,13 @@ class TransactionResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 // Define actions for the table
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -297,10 +317,10 @@ class TransactionResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTransactions::route('/'),
-            'create' => Pages\CreateTransaction::route('/create'),
-            'view' => Pages\ViewTransaction::route('/{record}'),
-            'edit' => Pages\EditTransaction::route('/{record}/edit'),
+            'index' => ListTransactions::route('/'),
+            'create' => CreateTransaction::route('/create'),
+            'view' => ViewTransaction::route('/{record}'),
+            'edit' => EditTransaction::route('/{record}/edit'),
         ];
     }
 }

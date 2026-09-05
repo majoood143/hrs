@@ -9,11 +9,11 @@ use Flowframe\Trend\TrendValue;
 
 class HorsesChart extends ChartWidget
 {
-    protected static ?string $heading = 'Horses Chart';
+    protected ?string $heading = 'Horses Chart';
 
     protected static ?int $sort = 1;
     protected static bool $isLazy = false; // Load the widget only when it is visible on the
-    protected static string $color = 'success'; // Primary, secondary, tertiary, success, warning, danger, in
+    protected string $color = 'success'; // Primary, secondary, tertiary, success, warning, danger, in
     // danger, info, gray, dark, black, white
 
     protected function getData(): array

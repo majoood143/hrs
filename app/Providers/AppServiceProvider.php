@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Exception;
 use Illuminate\Support\ServiceProvider;
 
 use Spatie\Health\Facades\Health;
@@ -65,7 +66,7 @@ class AppServiceProvider extends ServiceProvider
                     Config::set('mail.from.name', $smtpSettings['from_name']);
                 }
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Settings table might not exist during installation
             // Or there might be a database connection issue
         }

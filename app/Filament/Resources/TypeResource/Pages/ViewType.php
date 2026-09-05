@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\TypeResource\Pages;
 
+use Filament\Actions\EditAction;
 use App\Filament\Resources\TypeResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
@@ -13,7 +14,7 @@ class ViewType extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            EditAction::make(),
         ];
     }
 }

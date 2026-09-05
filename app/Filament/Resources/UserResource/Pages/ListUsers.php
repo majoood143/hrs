@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
+use Filament\Actions\CreateAction;
+use Exception;
+use Filament\Schemas\Components\Tabs\Tab;
 use App\Filament\Resources\UserResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Resources\Components\Tab;
 
 use App\Mail\WelcomeEmail;
 use App\Services\SettingsService;
@@ -20,7 +22,7 @@ class ListUsers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
             Action::make('sendWelcomeEmail')
                 ->label('Send Welcome Email')
                 ->action(function (SettingsService $settings) {
@@ -34,7 +36,7 @@ class ListUsers extends ListRecords
                                 ->title("Welcome email sent to {$user->email}")
                                 ->success()
                                 ->send();
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             Notification::make()
                                 ->title("Failed to send email to {$user->email}: {$e->getMessage()}")
                                 ->danger()

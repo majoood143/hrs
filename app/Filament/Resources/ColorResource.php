@@ -2,20 +2,30 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ColorColumn;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\ColorResource\Pages\ListColors;
+use App\Filament\Resources\ColorResource\Pages\CreateColor;
+use App\Filament\Resources\ColorResource\Pages\ViewColor;
+use App\Filament\Resources\ColorResource\Pages\EditColor;
 use App\Filament\Resources\ColorResource\Pages;
 use App\Filament\Resources\ColorResource\RelationManagers;
 use App\Models\Color;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Components\ColorPicker;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
-use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ColorEntry;
 use Rmsramos\Activitylog\Actions\ActivityLogTimelineTableAction;
@@ -24,21 +34,21 @@ class ColorResource extends Resource
 {
     protected static ?string $model = Color::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-swatch';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-swatch';
 
      public static function getNavigationBadge(): ?string
     {
         return static::$model::count();
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
+        return $schema
+            ->components([
+                TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\ColorPicker::make('hex_code')
+                ColorPicker::make('hex_code')
                     ->required()
                     ->regex('/^#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})\b$/'),
                     
@@ -49,16 +59,16 @@ class ColorResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable(),
-                    Tables\Columns\ColorColumn::make('hex_code')
+                    ColorColumn::make('hex_code')
                     ->searchable()
                 ->copyable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -66,25 +76,25 @@ class ColorResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
                 ActivityLogTimelineTableAction::make('Activities'),
                 ])
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                     ExportBulkAction::make(),
                 ]),
             ]);
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
-        return $infolist
-            ->schema([
+        return $schema
+            ->components([
             // ...
             TextEntry::make('name'),
             //     ->label('Name')
@@ -107,10 +117,10 @@ class ColorResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListColors::route('/'),
-            'create' => Pages\CreateColor::route('/create'),
-            'view' => Pages\ViewColor::route('/{record}'),
-            'edit' => Pages\EditColor::route('/{record}/edit'),
+            'index' => ListColors::route('/'),
+            'create' => CreateColor::route('/create'),
+            'view' => ViewColor::route('/{record}'),
+            'edit' => EditColor::route('/{record}/edit'),
         ];
     }
 }

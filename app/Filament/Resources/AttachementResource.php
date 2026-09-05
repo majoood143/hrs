@@ -2,12 +2,28 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\AttachementResource\Pages\ListAttachements;
+use App\Filament\Resources\AttachementResource\Pages\CreateAttachement;
+use App\Filament\Resources\AttachementResource\Pages\ViewAttachement;
+use App\Filament\Resources\AttachementResource\Pages\EditAttachement;
 use App\Filament\Resources\AttachementResource\Pages;
 use App\Filament\Resources\AttachementResource\RelationManagers;
 use App\Models\Attachement;
 use App\Models\Horse;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -15,7 +31,6 @@ use Filament\Forms\Get;
 use Filament\Forms\Components\RichEditor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Filament\Tables\Actions\ActionGroup;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use Filament\Tables\Columns\ViewColumn;
@@ -26,27 +41,27 @@ class AttachementResource extends Resource
 {
     protected static ?string $model = Attachement::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getNavigationBadge(): ?string
     {
         return static::$model::count();
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
+        return $schema
+            ->components([
+                TextInput::make('name')
                     ->maxLength(255)
                     ->default(null),
-                Forms\Components\RichEditor::make('description')
+                RichEditor::make('description')
                     ->maxLength(255)
                     ->default(null),
-                Forms\Components\FileUpload::make('file_path')
+                FileUpload::make('file_path')
                     ->required(),
                     //->maxLength(255),
-                Forms\Components\Select::make('type')
+                Select::make('type')
                     ->options(function () {
                         $enumValues = DB::select("SHOW COLUMNS FROM attachements WHERE Field = 'type'")[0]->Type;
                         preg_match('/^enum\((.*)\)$/', $enumValues, $matches);
@@ -56,20 +71,20 @@ class AttachementResource extends Resource
                     })
                     //->options(Attachement::class)
                     ->required(),
-                Forms\Components\Select::make('horse_id')
+                Select::make('horse_id')
                     ->relationship(name: 'horse', titleAttribute: 'en_name')
                     ->searchable()
                     ->preload()
                     ->required(),
-            Forms\Components\Select::make('user_id')
+            Select::make('user_id')
                     ->relationship(name: 'user', titleAttribute: 'name')
                     ->searchable()
                     ->preload(),
-                Forms\Components\Toggle::make('is_visible_to_client')
+                Toggle::make('is_visible_to_client')
                     ->required(),
-                Forms\Components\Toggle::make('is_active')
+                Toggle::make('is_active')
                     ->required(),
-                Forms\Components\Toggle::make('is_approved')
+                Toggle::make('is_approved')
                     ->required(),
             ]);
     }
@@ -78,34 +93,34 @@ class AttachementResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->searchable(),
-                Tables\Columns\ImageColumn::make('file_path')
+                ImageColumn::make('file_path')
                 ->circular()
                 ->label('File')
                 ->openUrlInNewTab()
                 ->height(50)
                 ->width(50),
-                Tables\Columns\TextColumn::make('type'),
-                Tables\Columns\TextColumn::make('horse.en_name')
+                TextColumn::make('type'),
+                TextColumn::make('horse.en_name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\IconColumn::make('is_visible_to_client')
+                IconColumn::make('is_visible_to_client')
                     ->boolean(),
-                Tables\Columns\IconColumn::make('is_active')
+                IconColumn::make('is_active')
                     ->boolean(),
-                Tables\Columns\IconColumn::make('is_approved')
+                IconColumn::make('is_approved')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -113,15 +128,15 @@ class AttachementResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
+                    ViewAction::make(),
+                    EditAction::make(),
                 ])
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -136,10 +151,10 @@ class AttachementResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListAttachements::route('/'),
-            'create' => Pages\CreateAttachement::route('/create'),
-            'view' => Pages\ViewAttachement::route('/{record}'),
-            'edit' => Pages\EditAttachement::route('/{record}/edit'),
+            'index' => ListAttachements::route('/'),
+            'create' => CreateAttachement::route('/create'),
+            'view' => ViewAttachement::route('/{record}'),
+            'edit' => EditAttachement::route('/{record}/edit'),
         ];
     }
 }
