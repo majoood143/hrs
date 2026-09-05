@@ -5,10 +5,14 @@
         "This file is @generated automatically"
     ],
 <<<<<<< HEAD
+<<<<<<< HEAD
     "content-hash": "7413c9de33b4ff803f1f7affdaf4ac46",
 =======
     "content-hash": "a4806fd5141972cbf8231d310fd5ee99",
 >>>>>>> 16ac09d0 (Upgrade to Filament v4 and compatible ecosystem plugins)
+=======
+    "content-hash": "78e46b78546a4aa5cfa9f5a0f68bf9a6",
+>>>>>>> d95d5223 (Remove filament/upgrade tool; publish v4 filament config)
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
