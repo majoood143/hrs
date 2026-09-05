@@ -2,15 +2,25 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\PollinationResource\Pages\ListPollinations;
+use App\Filament\Resources\PollinationResource\Pages\CreatePollination;
+use App\Filament\Resources\PollinationResource\Pages\ViewPollination;
+use App\Filament\Resources\PollinationResource\Pages\EditPollination;
 use App\Filament\Resources\PollinationResource\Pages;
 use App\Filament\Resources\PollinationResource\RelationManagers;
 use App\Models\Pollination;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
@@ -19,21 +29,21 @@ class PollinationResource extends Resource
 {
     protected static ?string $model = Pollination::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-newspaper';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-newspaper';
 
      public static function getNavigationBadge(): ?string
     {
         return static::$model::count();
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('en_name')
+        return $schema
+            ->components([
+                TextInput::make('en_name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('ar_name')
+                TextInput::make('ar_name')
                     ->required()
                     ->maxLength(255),
             ]);
@@ -43,15 +53,15 @@ class PollinationResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('en_name')
+                TextColumn::make('en_name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('ar_name')
+                TextColumn::make('ar_name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -59,15 +69,15 @@ class PollinationResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
                 ])
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                     ExportBulkAction::make(),
                 ]),
             ]);
@@ -83,10 +93,10 @@ class PollinationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPollinations::route('/'),
-            'create' => Pages\CreatePollination::route('/create'),
-            'view' => Pages\ViewPollination::route('/{record}'),
-            'edit' => Pages\EditPollination::route('/{record}/edit'),
+            'index' => ListPollinations::route('/'),
+            'create' => CreatePollination::route('/create'),
+            'view' => ViewPollination::route('/{record}'),
+            'edit' => EditPollination::route('/{record}/edit'),
         ];
     }
 }

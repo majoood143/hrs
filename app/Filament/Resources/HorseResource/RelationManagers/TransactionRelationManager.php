@@ -2,8 +2,15 @@
 
 namespace App\Filament\Resources\HorseResource\RelationManagers;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -14,11 +21,11 @@ class TransactionRelationManager extends RelationManager
 {
     protected static string $relationship = 'transaction';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('description')
+        return $schema
+            ->components([
+                TextInput::make('description')
                     ->required()
                     ->maxLength(255),
             ]);
@@ -29,9 +36,9 @@ class TransactionRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('description')
             ->columns([
-                Tables\Columns\TextColumn::make('id')->label('Transaction ID'),
-                Tables\Columns\TextColumn::make('service.name')->label('Service'),
-                Tables\Columns\TextColumn::make('status')
+                TextColumn::make('id')->label('Transaction ID'),
+                TextColumn::make('service.name')->label('Service'),
+                TextColumn::make('status')
                 ->badge()
                 ->colors([
                     'warning' => 'pending',
@@ -39,27 +46,27 @@ class TransactionRelationManager extends RelationManager
                     'danger' => 'failed',
                     'primary' => 'refunded',
                 ]),
-                Tables\Columns\TextColumn::make('description'),
-                Tables\Columns\TextColumn::make('amount')
+                TextColumn::make('description'),
+                TextColumn::make('amount')
                     ->money('OMR', true),
-                Tables\Columns\TextColumn::make('currency'),
-                Tables\Columns\TextColumn::make('user.name')->label('Created By'),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('currency'),
+                TextColumn::make('user.name')->label('Created By'),
+                TextColumn::make('created_at')
                     ->dateTime(),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                CreateAction::make(),
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

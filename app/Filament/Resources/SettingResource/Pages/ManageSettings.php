@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\SettingResource\Pages;
 
+use Filament\Actions\CreateAction;
 use App\Filament\Resources\SettingResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ManageRecords;
@@ -13,7 +14,7 @@ class ManageSettings extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

@@ -2,16 +2,28 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\RegionResource\RelationManagers\CityRelationManager;
+use App\Filament\Resources\RegionResource\Pages\ListRegions;
+use App\Filament\Resources\RegionResource\Pages\CreateRegion;
+use App\Filament\Resources\RegionResource\Pages\ViewRegion;
+use App\Filament\Resources\RegionResource\Pages\EditRegion;
 use App\Filament\Resources\RegionResource\Pages;
 use App\Filament\Resources\RegionResource\RelationManagers;
 use App\Models\Region;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
@@ -20,26 +32,26 @@ class RegionResource extends Resource
 {
     protected static ?string $model = Region::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-map';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-map';
 
-    public static ?string $navigationGroup = 'Countries';
+    public static string | \UnitEnum | null $navigationGroup = 'Countries';
 
      public static function getNavigationBadge(): ?string
     {
         return static::$model::count();
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('en_name')
+        return $schema
+            ->components([
+                TextInput::make('en_name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('ar_name')
+                TextInput::make('ar_name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Select::make('country_id')
+                Select::make('country_id')
                     ->relationship(name:'country',titleAttribute:'en_name')
                     ->searchable()
                     ->preload()
@@ -52,20 +64,20 @@ class RegionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('en_name')
+                TextColumn::make('en_name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('ar_name')
+                TextColumn::make('ar_name')
                     ->searchable()
                     ->sortable(),
-                     Tables\Columns\TextColumn::make('country.en_name')
+                     TextColumn::make('country.en_name')
                      ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -77,16 +89,16 @@ class RegionResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
                 ])
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                     ExportBulkAction::make(),
                 ]),
             ]);
@@ -96,17 +108,17 @@ class RegionResource extends Resource
     {
         return [
             //
-            RelationManagers\CityRelationManager::class,
+            CityRelationManager::class,
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRegions::route('/'),
-            'create' => Pages\CreateRegion::route('/create'),
-            'view' => Pages\ViewRegion::route('/{record}'),
-            'edit' => Pages\EditRegion::route('/{record}/edit'),
+            'index' => ListRegions::route('/'),
+            'create' => CreateRegion::route('/create'),
+            'view' => ViewRegion::route('/{record}'),
+            'edit' => EditRegion::route('/{record}/edit'),
         ];
     }
 }

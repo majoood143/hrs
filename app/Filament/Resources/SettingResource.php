@@ -2,11 +2,19 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\SettingResource\Pages\ManageSettings;
 use App\Filament\Resources\SettingResource\Pages;
 use App\Filament\Resources\SettingResource\RelationManagers;
 use App\Models\Setting;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -17,22 +25,22 @@ class SettingResource extends Resource
 {
     protected static ?string $model = Setting::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Settings';
+    protected static string | \UnitEnum | null $navigationGroup = 'Settings';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
             //
-            Forms\Components\TextInput::make('key')
+            TextInput::make('key')
                 ->required()
                 ->maxLength(255)
                 ->unique(ignoreRecord: true),
-            Forms\Components\Textarea::make('value')
+            Textarea::make('value')
                 ->required(),
-            Forms\Components\TextInput::make('group')
+            TextInput::make('group')
                 ->required()
                 ->maxLength(255),
             ]);
@@ -43,26 +51,26 @@ class SettingResource extends Resource
         return $table
             ->columns([
             //
-            Tables\Columns\TextColumn::make('key')
+            TextColumn::make('key')
                 ->searchable(),
-            Tables\Columns\TextColumn::make('value')
+            TextColumn::make('value')
                 ->limit(50),
-            Tables\Columns\TextColumn::make('group')
+            TextColumn::make('group')
                 ->searchable(),
-            Tables\Columns\TextColumn::make('updated_at')
+            TextColumn::make('updated_at')
                 ->dateTime()
                 ->sortable(),
             ])
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -70,7 +78,7 @@ class SettingResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageSettings::route('/'),
+            'index' => ManageSettings::route('/'),
         ];
     }
 }

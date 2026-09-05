@@ -2,6 +2,28 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\Action;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Placeholder;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\HorseResource\Pages\ListHorses;
+use App\Filament\Resources\HorseResource\Pages\CreateHorse;
+use App\Filament\Resources\HorseResource\Pages\ViewHorse;
+use App\Filament\Resources\HorseResource\Pages\EditHorse;
 use App\Filament\Resources\HorseResource\Pages;
 use App\Filament\Resources\HorseResource\RelationManagers;
 use App\Models\City;
@@ -9,11 +31,7 @@ use App\Models\Horse;
 use App\Models\Region;
 use App\Models\User;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tabs\Tab;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -21,8 +39,6 @@ use App\Filament\Resources\Post;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Collection;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\ExportBulkAction as ActionsExportBulkAction;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use App\Filament\Resources\HorseResource\RelationManagers\AttachementRelationManager;
@@ -35,59 +51,59 @@ class HorseResource extends Resource
 {
     protected static ?string $model = Horse::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getNavigationBadge(): ?string
     {
         return static::$model::count();
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
 
                 Tabs::make('Create Horse')
                     ->tabs([
                         Tab::make('Horse Information')
                             ->schema([
 
-                                Forms\Components\TextInput::make('en_name')
+                                TextInput::make('en_name')
 
                                     ->required()
                                     ->maxLength(255)
                                     ->helperText('The name will be used in the QR code and certificate'),
-                                Forms\Components\TextInput::make('ar_name')
+                                TextInput::make('ar_name')
                                     ->required()
                                     ->maxLength(255),
-                                Forms\Components\TextInput::make('microchip')
+                                TextInput::make('microchip')
                                     ->required()
                                     ->maxLength(255),
-                                Forms\Components\TextInput::make('passport_number')
+                                TextInput::make('passport_number')
                                     ->required()
                                     ->maxLength(255),
                                 // Forms\Components\TextInput::make('age')
                                 //     ->required()
                                 //     ->numeric(),
-                                Forms\Components\DatePicker::make('dob')
+                                DatePicker::make('dob')
                                     ->required(),
                                 // Forms\Components\TextInput::make('height')
                                 //     ->required()
                                 //     ->numeric(),
-                                Forms\Components\Select::make('type_id')
+                                Select::make('type_id')
                                     ->relationship(name: 'type', titleAttribute: 'en_name')
                                     ->searchable()
                                     ->preload()
                                     ->live()
                                     ->required(),
 
-                                Forms\Components\Select::make('gender_id')
+                                Select::make('gender_id')
                                     ->relationship(name: 'gender', titleAttribute: 'en_name')
                                     ->searchable()
                                     ->preload()
                                     ->live()
                                     ->required(),
-                                Forms\Components\Select::make('dam_id')
+                                Select::make('dam_id')
                                     ->relationship(name: 'horse', titleAttribute: 'en_name')
                                     ->options(fn(Get $get): Collection => Horse::query()
                                         ->where('type_id', 2)
@@ -96,7 +112,7 @@ class HorseResource extends Resource
                                     ->preload()
                                     ->required()
                                     ->label('Dam (Mother)'),
-                                Forms\Components\Select::make('sire_id')
+                                Select::make('sire_id')
                                     ->relationship(name: 'horse', titleAttribute: 'en_name')
                                     ->options(fn(Get $get): Collection => Horse::query()
                                         ->where('type_id', 1)
@@ -114,13 +130,13 @@ class HorseResource extends Resource
                             ->columns(3),
                         Tab::make('Location')
                             ->schema([
-                                Forms\Components\Select::make('country_id')
+                                Select::make('country_id')
                                     ->relationship(name: 'country', titleAttribute: 'en_name')
                                     ->searchable()
                                     ->preload()
                                     ->live()
                                     ->required(),
-                                Forms\Components\Select::make('region_id')
+                                Select::make('region_id')
                                     ->relationship(name: 'region', titleAttribute: 'en_name')
                                     ->options(fn(Get $get): Collection => Region::query()
                                         ->where('country_id', $get('country_id'))
@@ -128,7 +144,7 @@ class HorseResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->required(),
-                                Forms\Components\Select::make('city_id')
+                                Select::make('city_id')
                                     ->relationship(name: 'city', titleAttribute: 'en_name')
                                     ->options(fn(Get $get): Collection => City::query()
                                         ->where('region_id', $get('region_id'))
@@ -140,7 +156,7 @@ class HorseResource extends Resource
                             ->columns(3),
                         Tab::make('Owner Information')
                             ->schema([
-                                Forms\Components\Select::make('user_id')
+                                Select::make('user_id')
                                     ->relationship(name: 'user', titleAttribute: 'name')
                                     ->options(fn(Get $get): Collection => User::query()
                                         ->where('type', 'owner')
@@ -153,14 +169,14 @@ class HorseResource extends Resource
                                     ->helperText('The owner will be able to manage the horse from his account')
                                     ->placeholder('Select Owner')
                                     ->createOptionForm([
-                                        Forms\Components\TextInput::make('name')
+                                        TextInput::make('name')
                                             ->required()
                                             ->maxLength(255),
-                                        Forms\Components\TextInput::make('email')
+                                        TextInput::make('email')
                                             ->email()
                                             ->required()
                                             ->maxLength(255),
-                                        Forms\Components\TextInput::make('password')
+                                        TextInput::make('password')
                                             ->password()
                                             ->required()
                                             ->maxLength(255),
@@ -210,43 +226,43 @@ class HorseResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('en_name')
+                TextColumn::make('en_name')
                     ->searchable()
                     ->description(fn(Horse $record): string => "Microchip: {$record->microchip}, Passport: {$record->passport_number}")
                     ->sortable(),
-                Tables\Columns\TextColumn::make('ar_name')
+                TextColumn::make('ar_name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('age')
+                TextColumn::make('age')
                     ->label('Age')
                     ->suffix(' years')
                     ->sortable(false),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('city.en_name')
+                TextColumn::make('city.en_name')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('region.en_name')
+                TextColumn::make('region.en_name')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('country.en_name')
+                TextColumn::make('country.en_name')
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('type.en_name')
+                TextColumn::make('type.en_name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('gender.en_name')
+                TextColumn::make('gender.en_name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('user.name')
+                TextColumn::make('user.name')
                     ->searchable()
                     ->sortable()
                     ->label('Owner'),
@@ -254,12 +270,12 @@ class HorseResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
 
-                    Tables\Actions\ViewAction::make(),
-                    Tables\Actions\EditAction::make(),
-                    Tables\Actions\DeleteAction::make(),
+                    ViewAction::make(),
+                    EditAction::make(),
+                    DeleteAction::make(),
 
                     Action::make('printQR')
                         ->label('Print QR')
@@ -290,11 +306,11 @@ class HorseResource extends Resource
                         ->label('Lost passport')
                         ->icon('heroicon-o-arrow-uturn-down')
                         ->color('danger')
-                        ->form([
-                            Forms\Components\DatePicker::make('lost_passport_date')
+                        ->schema([
+                            DatePicker::make('lost_passport_date')
                                 ->required()
                                 ->label('Lost passport date'),
-                            Forms\Components\TextInput::make('lost_passport_reason')
+                            TextInput::make('lost_passport_reason')
                                 ->required()
                                 ->maxLength(65535)
                                 ->label('Lost passport reason'),
@@ -307,27 +323,27 @@ class HorseResource extends Resource
                         ->color('warning')
                         ->modalWidth('xl')
                         ->modalHeading(fn($record) => "Transfer Ownership: {$record->user?->name}")
-                        ->form([
-                            Forms\Components\Grid::make(2)
+                        ->schema([
+                            Grid::make(2)
                                 ->schema([
 
-                                    Forms\Components\Section::make('Current Owner Details')
+                                    Section::make('Current Owner Details')
                                         ->schema([
-                                            Forms\Components\Placeholder::make('user.name')
+                                            Placeholder::make('user.name')
                                                 ->label('Current Owner')
                                                 ->content(fn($record) => $record->user?->name ?? 'Unassigned'),
-                                            Forms\Components\Placeholder::make('user.email')
+                                            Placeholder::make('user.email')
                                                 ->label('Email')
                                                 ->content(fn($record) => $record->user?->email ?? 'Unassigned'),
-                                            Forms\Components\Placeholder::make('user.phone')
+                                            Placeholder::make('user.phone')
                                                 ->label('Mobile')
                                                 ->content(fn($record) => $record->user?->phone ?? 'Unassigned'),
                                         ])
                                         ->columns(2),
                                     //->content(fn (Horse $record): string => $record->user->name),
-                                    Forms\Components\Section::make('New Owner Details')
+                                    Section::make('New Owner Details')
                                         ->schema([
-                                            Forms\Components\Select::make('user_id')
+                                            Select::make('user_id')
                                                 ->relationship(name: 'user', titleAttribute: 'name')
                                                 ->options(fn(Get $get): Collection => User::query()
                                                     ->where('type', 'owner')
@@ -341,14 +357,14 @@ class HorseResource extends Resource
                                                 ->placeholder('Select Owner')
 
                                                 ->createOptionForm([
-                                                    Forms\Components\TextInput::make('name')
+                                                    TextInput::make('name')
                                                         ->required()
                                                         ->maxLength(255),
-                                                    Forms\Components\TextInput::make('email')
+                                                    TextInput::make('email')
                                                         ->email()
                                                         ->required()
                                                         ->maxLength(255),
-                                                    Forms\Components\TextInput::make('password')
+                                                    TextInput::make('password')
                                                         ->password()
                                                         ->required()
                                                         ->maxLength(255),
@@ -364,31 +380,31 @@ class HorseResource extends Resource
                         ->label('Export Horse')
                         ->icon('heroicon-o-arrow-right-end-on-rectangle')
                         ->requiresConfirmation()
-                        ->form([
-                            Forms\Components\Grid::make(2)
+                        ->schema([
+                            Grid::make(2)
                                 ->schema([
 
-                                    Forms\Components\Section::make('Current Location Details')
+                                    Section::make('Current Location Details')
                                         ->schema([
-                                            Forms\Components\Placeholder::make('country.en_name')
+                                            Placeholder::make('country.en_name')
                                                 ->label('Country')
                                                 ->content(fn($record) => $record->country?->en_name ?? 'Unassigned'),
-                                            Forms\Components\Placeholder::make('region.en_name')
+                                            Placeholder::make('region.en_name')
                                                 ->label('Region')
                                                 ->content(fn($record) => $record->region?->en_name ?? 'Unassigned'),
-                                            Forms\Components\Placeholder::make('city.en_name')
+                                            Placeholder::make('city.en_name')
                                                 ->label('City')
                                                 ->content(fn($record) => $record->city?->en_name ?? 'Unassigned'),
                                         ])->columns(3),
-                                    Forms\Components\Section::make('Export Location Details')
+                                    Section::make('Export Location Details')
                                         ->schema([
-                                            Forms\Components\Select::make('country_id')
+                                            Select::make('country_id')
                                                 ->relationship(name: 'country', titleAttribute: 'en_name')
                                                 ->searchable()
                                                 ->preload()
                                                 ->live()
                                                 ->required(),
-                                            Forms\Components\Select::make('region_id')
+                                            Select::make('region_id')
                                                 ->relationship(name: 'region', titleAttribute: 'en_name')
                                                 ->options(fn(Get $get): Collection => Region::query()
                                                     ->where('country_id', $get('country_id'))
@@ -396,7 +412,7 @@ class HorseResource extends Resource
                                                 ->searchable()
                                                 ->preload()
                                                 ->required(),
-                                            Forms\Components\Select::make('city_id')
+                                            Select::make('city_id')
                                                 ->relationship(name: 'city', titleAttribute: 'en_name')
                                                 ->options(fn(Get $get): Collection => City::query()
                                                     ->where('region_id', $get('region_id'))
@@ -418,9 +434,9 @@ class HorseResource extends Resource
                     ->successNotificationTitle('Horse Export updated successfully'),
                 ]),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                     ExportBulkAction::make(),
                 ]),
 
@@ -441,10 +457,10 @@ class HorseResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListHorses::route('/'),
-            'create' => Pages\CreateHorse::route('/create'),
-            'view' => Pages\ViewHorse::route('/{record}'),
-            'edit' => Pages\EditHorse::route('/{record}/edit'),
+            'index' => ListHorses::route('/'),
+            'create' => CreateHorse::route('/create'),
+            'view' => ViewHorse::route('/{record}'),
+            'edit' => EditHorse::route('/{record}/edit'),
         ];
     }
 }

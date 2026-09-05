@@ -2,15 +2,25 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\StatusResource\Pages\ListStatuses;
+use App\Filament\Resources\StatusResource\Pages\CreateStatus;
+use App\Filament\Resources\StatusResource\Pages\ViewStatus;
+use App\Filament\Resources\StatusResource\Pages\EditStatus;
 use App\Filament\Resources\StatusResource\Pages;
 use App\Filament\Resources\StatusResource\RelationManagers;
 use App\Models\Status;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
@@ -19,21 +29,21 @@ class StatusResource extends Resource
 {
     protected static ?string $model = Status::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-beaker';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-beaker';
 
      public static function getNavigationBadge(): ?string
     {
         return static::$model::count();
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('en_name')
+        return $schema
+            ->components([
+                TextInput::make('en_name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('ar_name')
+                TextInput::make('ar_name')
                     ->required()
                     ->maxLength(255),
             ]);
@@ -43,15 +53,15 @@ class StatusResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('en_name')
+                TextColumn::make('en_name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('ar_name')
+                TextColumn::make('ar_name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -59,15 +69,15 @@ class StatusResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
                 ])
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                     ExportBulkAction::make(),
                 ]),
             ]);
@@ -83,10 +93,10 @@ class StatusResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListStatuses::route('/'),
-            'create' => Pages\CreateStatus::route('/create'),
-            'view' => Pages\ViewStatus::route('/{record}'),
-            'edit' => Pages\EditStatus::route('/{record}/edit'),
+            'index' => ListStatuses::route('/'),
+            'create' => CreateStatus::route('/create'),
+            'view' => ViewStatus::route('/{record}'),
+            'edit' => EditStatus::route('/{record}/edit'),
         ];
     }
 }

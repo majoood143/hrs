@@ -2,11 +2,22 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\VaccinationResource\Pages\ListVaccinations;
+use App\Filament\Resources\VaccinationResource\Pages\CreateVaccination;
+use App\Filament\Resources\VaccinationResource\Pages\ViewVaccination;
+use App\Filament\Resources\VaccinationResource\Pages\EditVaccination;
 use App\Filament\Resources\VaccinationResource\Pages;
 use App\Filament\Resources\VaccinationResource\RelationManagers;
 use App\Models\Vaccination;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -19,21 +30,21 @@ class VaccinationResource extends Resource
 {
     protected static ?string $model = Vaccination::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-puzzle-piece';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-puzzle-piece';
 
     public static function getNavigationBadge(): ?string
     {
         return static::$model::count();
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('vaccine_type')
+        return $schema
+            ->components([
+                TextInput::make('vaccine_type')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\DatePicker::make('date_administered')
+                DatePicker::make('date_administered')
                     ->required(),
             ]);
     }
@@ -42,20 +53,20 @@ class VaccinationResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('vaccine_type')
+                TextColumn::make('vaccine_type')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('date_administered')
+                TextColumn::make('date_administered')
                     ->date()
                     ->sortable(),
-            Tables\Columns\TextColumn::make('next_due_date')
+            TextColumn::make('next_due_date')
                 ->date()
                 ->sortable(),
                     
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -63,13 +74,13 @@ class VaccinationResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                     ExportBulkAction::make(),
                 ]),
             ]);
@@ -85,10 +96,10 @@ class VaccinationResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListVaccinations::route('/'),
-            'create' => Pages\CreateVaccination::route('/create'),
-            'view' => Pages\ViewVaccination::route('/{record}'),
-            'edit' => Pages\EditVaccination::route('/{record}/edit'),
+            'index' => ListVaccinations::route('/'),
+            'create' => CreateVaccination::route('/create'),
+            'view' => ViewVaccination::route('/{record}'),
+            'edit' => EditVaccination::route('/{record}/edit'),
         ];
     }
 }

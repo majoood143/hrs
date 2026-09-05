@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -15,10 +16,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
+<<<<<<< HEAD
     /** @use HasFactory<\Database\Factories\UserFactory> */
 <<<<<<< HEAD
     use HasFactory, Notifiable;
 =======
+=======
+    /** @use HasFactory<UserFactory> */
+>>>>>>> 8bf96602 (Run filament-v4 automated codemod (namespace migrations))
     use HasFactory, Notifiable,HasRoles;
 >>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
 

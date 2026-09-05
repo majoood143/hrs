@@ -2,16 +2,27 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\CityResource\Pages\ListCities;
+use App\Filament\Resources\CityResource\Pages\CreateCity;
+use App\Filament\Resources\CityResource\Pages\ViewCity;
+use App\Filament\Resources\CityResource\Pages\EditCity;
 use App\Filament\Resources\CityResource\Pages;
 use App\Filament\Resources\CityResource\RelationManagers;
 use App\Filament\Resources\CityResource\RelationManagers\HorseRelationManager;
 use App\Models\City;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
@@ -21,26 +32,26 @@ class CityResource extends Resource
 {
     protected static ?string $model = City::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-map-pin';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-map-pin';
 
-    public static ?string $navigationGroup = 'Countries';
+    public static string | \UnitEnum | null $navigationGroup = 'Countries';
 
         public static function getNavigationBadge(): ?string
     {
         return static::$model::count();
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('en_name')
+        return $schema
+            ->components([
+                TextInput::make('en_name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('ar_name')
+                TextInput::make('ar_name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\Select::make('region_id')
+                Select::make('region_id')
                 ->relationship(name:'region',titleAttribute:'en_name')
                     ->searchable()
                     ->preload()
@@ -53,20 +64,20 @@ class CityResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('en_name')
+                TextColumn::make('en_name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('ar_name')
+                TextColumn::make('ar_name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('region.en_name')
+                TextColumn::make('region.en_name')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -74,15 +85,15 @@ class CityResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
                 ])
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                     ExportBulkAction::make(),
                 ]),
             ]);
@@ -99,10 +110,10 @@ class CityResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCities::route('/'),
-            'create' => Pages\CreateCity::route('/create'),
-            'view' => Pages\ViewCity::route('/{record}'),
-            'edit' => Pages\EditCity::route('/{record}/edit'),
+            'index' => ListCities::route('/'),
+            'create' => CreateCity::route('/create'),
+            'view' => ViewCity::route('/{record}'),
+            'edit' => EditCity::route('/{record}/edit'),
         ];
     }
 }

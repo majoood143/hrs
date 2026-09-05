@@ -2,15 +2,25 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\TypeResource\Pages\ListTypes;
+use App\Filament\Resources\TypeResource\Pages\CreateType;
+use App\Filament\Resources\TypeResource\Pages\ViewType;
+use App\Filament\Resources\TypeResource\Pages\EditType;
 use App\Filament\Resources\TypeResource\Pages;
 use App\Filament\Resources\TypeResource\RelationManagers;
 use App\Models\Type;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Actions\ActionGroup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
@@ -19,21 +29,21 @@ class TypeResource extends Resource
 {
     protected static ?string $model = Type::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-bookmark';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-bookmark';
 
      public static function getNavigationBadge(): ?string
     {
         return static::$model::count();
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('en_name')
+        return $schema
+            ->components([
+                TextInput::make('en_name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('ar_name')
+                TextInput::make('ar_name')
                     ->required()
                     ->maxLength(255),
             ]);
@@ -43,15 +53,15 @@ class TypeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('en_name')
+                TextColumn::make('en_name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('ar_name')
+                TextColumn::make('ar_name')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -59,15 +69,15 @@ class TypeResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
                 ])
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                     ExportBulkAction::make(),
                 ]),
             ]);
@@ -83,10 +93,10 @@ class TypeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTypes::route('/'),
-            'create' => Pages\CreateType::route('/create'),
-            'view' => Pages\ViewType::route('/{record}'),
-            'edit' => Pages\EditType::route('/{record}/edit'),
+            'index' => ListTypes::route('/'),
+            'create' => CreateType::route('/create'),
+            'view' => ViewType::route('/{record}'),
+            'edit' => EditType::route('/{record}/edit'),
         ];
     }
 }
