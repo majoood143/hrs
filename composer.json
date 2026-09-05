@@ -7,17 +7,26 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "bezhansalleh/filament-shield": "^3.3",
-        "ffhs/filament-package_ffhs_approvals": "^1.0",
-        "filament/filament": "3.3",
+        "bezhansalleh/filament-shield": "^4.0",
+        "ffhs/filament-package_ffhs_approvals": "^2.0",
+        "filament/filament": "^4.0",
         "flowframe/laravel-trend": "^0.4.0",
-        "jaocero/radio-deck": "^1.4",
+        "jaocero/radio-deck": "^1.0",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+<<<<<<< HEAD
         "pxlrbt/filament-excel": "^2.5",
         "rmsramos/activitylog": "^2.0",
         "shuvroroy/filament-spatie-laravel-backup": "^2.2",
         "shuvroroy/filament-spatie-laravel-health": "^2.3"
+=======
+        "nunomaduro/termwind": "2.3.1",
+        "pxlrbt/filament-excel": "^3.0",
+        "rmsramos/activitylog": "^3.0",
+        "shuvroroy/filament-spatie-laravel-backup": "^3.0",
+        "shuvroroy/filament-spatie-laravel-health": "^3.0",
+        "symfony/console": "7.3.2"
+>>>>>>> 16ac09d0 (Upgrade to Filament v4 and compatible ecosystem plugins)
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
