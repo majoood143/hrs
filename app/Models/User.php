@@ -6,11 +6,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+<<<<<<< HEAD
+=======
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
+<<<<<<< HEAD
     use HasFactory, Notifiable;
+=======
+    use HasFactory, Notifiable,HasRoles;
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
 
     /**
      * The attributes that are mass assignable.
@@ -21,6 +31,17 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+<<<<<<< HEAD
+=======
+        'civiled_id',
+        'cr_number',
+        'phone',
+        'is_admin',
+        'type',
+        //'country_id',
+        'region',
+        'city',
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
     ];
 
     /**
@@ -45,4 +66,22 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+<<<<<<< HEAD
+=======
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    public function region(): BelongsTo
+    {
+        return $this->belongsTo(Region::class);
+    }
+
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(City::class);
+    }
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
 }

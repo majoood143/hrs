@@ -1,0 +1,374 @@
+# Changelog
+
+All notable changes to `filament-spatie-laravel-health` will be documented in this file.
+
+## v3.3.2 - 2026-08-27
+
+### What's Changed
+
+* chore(deps): bump actions/checkout from 6 to 7 by @dependabot[bot] in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/103
+* Fix Russian translations by @saythe0 in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/104
+
+### New Contributors
+
+* @saythe0 made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/104
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v3.3.1...v3.3.2
+
+## v3.3.1 - 2026-06-14
+
+### What's Changed
+
+* Created czech translation. by @Th3JK in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/102
+
+### New Contributors
+
+* @Th3JK made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/102
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v3.3.0...v3.3.1
+
+## v3.3.0 - 2026-04-21
+
+### What's Changed
+
+* chore(deps): bump ramsey/composer-install from 3 to 4 by @dependabot[bot] in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/96
+* chore(deps): bump dependabot/fetch-metadata from 2.5.0 to 3.1.0 by @dependabot[bot] in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/99
+* Add Laravel 13 support by @tranKILL in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/98
+* Support php 8.5 by @shuvroroy in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/101
+* Support UnitEnum for navigation group by @jyrkidn in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/95
+
+### New Contributors
+
+* @tranKILL made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/98
+* @jyrkidn made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/95
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v3.2.0...v3.3.0
+
+## v3.2.0 - 2026-01-17
+
+### What's Changed
+
+* chore(deps): bump dependabot/fetch-metadata from 2.4.0 to 2.5.0 by @dependabot[bot] in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/93
+* Add support to Filament 5 by @marcogermani87 in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/94
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v3.1.3...v3.2.0
+
+## v3.1.3 - 2026-01-04
+
+### What's Changed
+
+* chore(deps): bump actions/checkout from 5 to 6 by @dependabot[bot] in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/91
+* Update health.php Spanish language by @sauljavieravila in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/92
+
+### New Contributors
+
+* @sauljavieravila made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/92
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v3.1.2...v3.1.3
+
+## v3.1.2 - 2025-10-22
+
+### What's Changed
+
+* Change icon for skipped health check status by @marcogermani87 in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/90
+
+### New Contributors
+
+* @marcogermani87 made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/90
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v3.1.1...v3.1.2
+
+## v3.1.1 - 2025-10-15
+
+### What's Changed
+
+* fix: use navigation label for page title (translatable & customizable) by @relisiuol in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/89
+* chore(deps): bump stefanzweifel/git-auto-commit-action from 6 to 7 by @dependabot[bot] in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/88
+* chore: Fix typo in README for 'Health' page by @zoispag in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/87
+
+### New Contributors
+
+* @relisiuol made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/89
+* @zoispag made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/87
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v3.1.0...v3.1.1
+
+## v3.1.0 - 2025-10-04
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v3.0.0...v3.1.0
+
+## v3.0.0-beta1 - 2025-07-06
+
+### What's Changed
+
+* chore(deps): bump dependabot/fetch-metadata from 2.3.0 to 2.4.0 by @dependabot in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/75
+* Update health.php by @panservicesas in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/81
+* Upgrade to filament v4 by @dododedodonl in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/80
+
+### New Contributors
+
+* @dododedodonl made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/80
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v2.3.6...v3.0.0-beta1
+
+## v2.3.6 - 2025-04-13
+
+### What's Changed
+
+* Updated health.php translation and health-check-results.blade.php css by @panservicesas in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/73
+* Fixing French translations by @azorgh in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/74
+
+### New Contributors
+
+* @panservicesas made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/73
+* @azorgh made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/74
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v2.3.5...v2.3.6
+
+## v2.3.5 - 2025-02-17
+
+### What's Changed
+
+* Document the authorize method by @SanderMuller in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/69
+* chore(deps): bump dependabot/fetch-metadata from 2.2.0 to 2.3.0 by @dependabot in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/70
+* chore(deps): bump aglipanci/laravel-pint-action from 2.4 to 2.5 by @dependabot in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/71
+* Update health.php pt_BR by @samuelterra22 in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/72
+
+### New Contributors
+
+* @samuelterra22 made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/72
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v2.3.4...v2.3.5
+
+## v2.3.4 - 2025-01-15
+
+### What's Changed
+
+* Fix Lang by @lloricode in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/68
+
+### New Contributors
+
+* @lloricode made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/68
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v2.3.3...v2.3.4
+
+## v2.3.3 - 2025-01-14
+
+### What's Changed
+
+* Fix Dutch translations by @SanderMuller in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/64
+* Make PHPStan pass again by @SanderMuller in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/67
+
+### New Contributors
+
+* @SanderMuller made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/64
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v2.3.2...v2.3.3
+
+## v2.3.2 - 2025-01-14
+
+### What's Changed
+
+* feat: add Indonesian language support for health check results by @cuinc99 in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/66
+
+### New Contributors
+
+* @cuinc99 made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/66
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v2.3.1...v2.3.2
+
+## v2.3.1 - 2024-12-28
+
+### What's Changed
+
+* Update HealthCheckResults.php by @0x7k in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/59
+* Update FilamentSpatieLaravelHealthPlugin.php by @0x7k in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/60
+
+### New Contributors
+
+* @0x7k made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/59
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v2.3.0...v2.3.1
+
+## v2.3.0 - 2024-12-27
+
+### What's Changed
+
+* added some new options + lang file by @phpust in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/58
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v2.2.0...v2.3.0
+
+## v2.2.0 - 2024-12-06
+
+### What's Changed
+
+* Added missing semicolon to README.md example by @chrisreedio in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/55
+* added authorize method  by @phpust in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/52
+
+### New Contributors
+
+* @chrisreedio made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/55
+* @phpust made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/52
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v2.1.0...v2.2.0
+
+## v2.1.0 - 2024-07-27
+
+### What's Changed
+
+* Fix view functions redeclaration. by @mxm1070 in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/51
+* Slovak translation by @hamrak in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/50
+* add lang pt_PT by @maxime9446 in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/48
+* add lang ja by @maxime9446 in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/47
+* add lang nl by @maxime9446 in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/46
+* add lang ru by @maxime9446 in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/45
+* add lang it by @maxime9446 in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/44
+* add lang fr by @maxime9446 in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/43
+
+### New Contributors
+
+* @mxm1070 made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/51
+* @hamrak made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/50
+* @maxime9446 made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/48
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v2.0.1...v2.1.0
+
+## v2.0.1 - 2023-10-30
+
+### What's Changed
+
+- Spanish lang by @fiere210 in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/40
+
+### New Contributors
+
+- @fiere210 made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/40
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v2.0.0...v2.0.1
+
+## v2.0.0 - 2023-08-04
+
+### What's Changed
+
+- Georgian Transaltion by @ngfw in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/33
+- Support v3 by @shuvroroy in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/37
+
+### New Contributors
+
+- @ngfw made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/33
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v1.6.1...v2.0.0
+
+## v1.6.1 - 2023-05-01
+
+### What's Changed
+
+- chore(deps): bump dependabot/fetch-metadata from 1.3.4 to 1.3.5 by @dependabot in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/23
+- chore(deps): bump ramsey/composer-install from 1 to 2 by @dependabot in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/24
+- chore(deps): bump dependabot/fetch-metadata from 1.3.5 to 1.3.6 by @dependabot in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/27
+- chore(deps): bump dependabot/fetch-metadata from 1.3.6 to 1.4.0 by @dependabot in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/30
+- lang: Add pt_BR lang support by @joaoprado in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/29
+
+### New Contributors
+
+- @joaoprado made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/29
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/1.6.0...v1.6.1
+
+## v1.6.0 - 2022-10-18
+
+### What's Changed
+
+- chore(deps): bump dependabot/fetch-metadata from 1.3.3 to 1.3.4 by @dependabot in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/21
+- Resolve `ResultStore` from the `Container` by @mabdullahsari in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/22
+
+### New Contributors
+
+- @mabdullahsari made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/22
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v1.5.0...1.6.0
+
+## v1.5.0 - 2022-08-30
+
+### What's Changed
+
+- fix: css style breaking issue by @shuvroroy in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/19
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v1.4.2...v1.5.0
+
+## v1.4.2 - 2022-08-11
+
+### What's Changed
+
+- chore(deps): bump dependabot/fetch-metadata from 1.1.1 to 1.2.0 by @dependabot in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/6
+- chore(deps): bump dependabot/fetch-metadata from 1.2.0 to 1.2.1 by @dependabot in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/7
+- chore(deps): bump dependabot/fetch-metadata from 1.2.1 to 1.3.0 by @dependabot in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/8
+- chore(deps): bump dependabot/fetch-metadata from 1.3.0 to 1.3.1 by @dependabot in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/11
+- chore(deps): bump dependabot/fetch-metadata from 1.3.1 to 1.3.3 by @dependabot in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/15
+- chore(deps): bump actions/checkout from 2 to 3 by @dependabot in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/9
+- Vietnamese translations by @datlechin in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/17
+
+### New Contributors
+
+- @datlechin made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/17
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v1.4.1...v1.4.2
+
+## v1.4.1 - 2022-02-17
+
+## What's Changed
+
+- Added basic darkmode by @morganchorlton3 in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/5
+
+## New Contributors
+
+- @morganchorlton3 made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/5
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v1.4.0...v1.4.1
+
+## v1.4.0 - 2022-02-11
+
+## What's Changed
+
+- Add support for Turkish (tr) translation by @trk in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/3
+- chore: laravel 9 support by @shuvroroy in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/4
+
+## New Contributors
+
+- @trk made their first contribution in https://github.com/shuvroroy/filament-spatie-laravel-health/pull/3
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v1.3.1...v1.4.0
+
+## v1.3.1 - 2022-01-17
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v1.3.0...v1.3.1
+
+## v1.3.0 - 2022-01-17
+
+- page register via config file @shuvroroy
+
+**Full Changelog**: https://github.com/shuvroroy/filament-spatie-laravel-health/compare/v1.2.0...v1.3.0
+
+## v1.2.0 - 2022-01-02
+
+- localization support by @mohamedsabil83
+
+## v1.1.1 - 2021-12-31
+
+- update config
+
+## v1.1.0 - 2021-12-31
+
+- allow page heading customising option
+- allow page navigation customising option
+
+## v1.0.1 - 2021-12-30
+
+- update style
+
+## v1.0.0 - 2021-12-29
+
+- initial release
+
+## 1.0.0 - 202X-XX-XX
+
+- initial release

@@ -101,7 +101,11 @@ return [
 
     'previous_keys' => [
         ...array_filter(
+<<<<<<< HEAD
             explode(',', env('APP_PREVIOUS_KEYS', ''))
+=======
+            explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
         ),
     ],
 
@@ -123,4 +127,13 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+<<<<<<< HEAD
+=======
+    // 'providers' => [
+    //     // ...
+    //     App\Providers\MailConfigServiceProvider::class,
+    // ],
+
+
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
 ];

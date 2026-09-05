@@ -1,12 +1,18 @@
 <?php
 
+<<<<<<< HEAD
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+=======
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\HorseQRController;
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
 
 Route::get('/', function () {
     return view('welcome');
 });
 
+<<<<<<< HEAD
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -23,3 +29,5 @@ Route::get('/admin/dashboard', function () {
 
 require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';
+=======
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)

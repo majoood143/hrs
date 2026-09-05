@@ -13,8 +13,13 @@ return [
     | incoming requests. Laravel supports a variety of storage options to
     | persist session data. Database storage is a great default choice.
     |
+<<<<<<< HEAD
     | Supported: "file", "cookie", "database", "apc",
     |            "memcached", "redis", "dynamodb", "array"
+=======
+    | Supported: "file", "cookie", "database", "memcached",
+    |            "redis", "dynamodb", "array"
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
     |
     */
 
@@ -97,7 +102,11 @@ return [
     | define the cache store which should be used to store the session data
     | between requests. This must match one of your defined cache stores.
     |
+<<<<<<< HEAD
     | Affects: "apc", "dynamodb", "memcached", "redis"
+=======
+    | Affects: "dynamodb", "memcached", "redis"
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
     |
     */
 
@@ -129,7 +138,11 @@ return [
 
     'cookie' => env(
         'SESSION_COOKIE',
+<<<<<<< HEAD
         Str::slug(env('APP_NAME', 'laravel'), '_').'_session'
+=======
+        Str::slug(env('APP_NAME', 'laravel')).'-session'
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
     ),
 
     /*

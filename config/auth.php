@@ -40,10 +40,13 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+<<<<<<< HEAD
         'admin' => [
             'driver' => 'session',
             'provider' => 'admins',
         ],
+=======
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
     ],
 
     /*
@@ -68,10 +71,13 @@ return [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
+<<<<<<< HEAD
         'admins' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\Admin::class),
         ],
+=======
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
 
         // 'users' => [
         //     'driver' => 'database',
@@ -105,12 +111,15 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+<<<<<<< HEAD
         'admins' => [
             'provider' => 'admins',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
             'expire' => 60,
             'throttle' => 60,
         ],
+=======
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
     ],
 
     /*
@@ -118,7 +127,11 @@ return [
     | Password Confirmation Timeout
     |--------------------------------------------------------------------------
     |
+<<<<<<< HEAD
     | Here you may define the amount of seconds before a password confirmation
+=======
+    | Here you may define the number of seconds before a password confirmation
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
     | window expires and users are asked to re-enter their password via the
     | confirmation screen. By default, the timeout lasts for three hours.
     |

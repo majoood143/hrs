@@ -147,7 +147,11 @@ return [
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
+<<<<<<< HEAD
             'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
+=======
+            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-database-'),
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
             'persistent' => env('REDIS_PERSISTENT', false),
         ],
 

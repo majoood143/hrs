@@ -18,16 +18,26 @@ return [
         'token' => env('POSTMARK_TOKEN'),
     ],
 
+<<<<<<< HEAD
+=======
+    'resend' => [
+        'key' => env('RESEND_KEY'),
+    ],
+
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+<<<<<<< HEAD
     'resend' => [
         'key' => env('RESEND_KEY'),
     ],
 
+=======
+>>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
