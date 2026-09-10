@@ -8,7 +8,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class FarriersOverview extends StatsOverviewWidget
 {
-    protected int | string | array $columnSpan = 1;
+    protected int | string | array $columnSpan = 2;
 
     public static function canView(): bool
     {
