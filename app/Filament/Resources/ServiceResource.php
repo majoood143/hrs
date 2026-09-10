@@ -52,7 +52,7 @@ class ServiceResource extends Resource
                 TextInput::make('price')
                     ->required()
                     ->numeric()
-                    ->prefix('OMR'),
+                    ->prefix(fn () => \App\Models\SiteSetting::currency()['symbol']),
                 Toggle::make('is_active')
                     ->required(),
             ]);
@@ -65,7 +65,7 @@ class ServiceResource extends Resource
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('price')
-                    ->money('OMR')
+                    ->money(fn () => \App\Models\SiteSetting::currency()['code'])
                     ->summarize([
                         Average::make(),
                         Range::make(),

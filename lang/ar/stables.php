@@ -1,0 +1,43 @@
+<?php
+
+return [
+    'nav_label' => 'الإسطبلات',
+    'nav_group' => 'دليل الإسطبلات',
+    'board_title' => 'الإسطبلات',
+    'view_stable' => 'عرض الإسطبل',
+
+    'filter_country' => 'الدولة',
+    'filter_city' => 'المدينة',
+    'filter_service' => 'الخدمة',
+    'any' => 'أي',
+    'any_city' => 'أي مدينة',
+    'filters_button' => 'الفلاتر',
+    'apply_filters' => 'تطبيق الفلاتر',
+    'clear_filters' => 'مسح الكل',
+    'close' => 'إغلاق',
+    'sort_label' => 'الترتيب',
+    'sort_name' => 'الاسم (أ-ي)',
+    'sort_newest' => 'الأحدث',
+    'results_count' => ':count إسطبل يطابق بحثك|:count إسطبلات تطابق بحثك',
+    'no_results_title' => 'لا توجد إسطبلات تطابق بحثك',
+    'no_results_body' => 'جرّب توسيع نطاق الفلاتر أو إزالة أحدها.',
+
+    'address' => 'العنوان',
+    'open_in_maps' => 'فتح في خرائط جوجل',
+    'description' => 'نبذة',
+    'services' => 'الخدمات',
+    'opening_hours' => 'ساعات العمل',
+    'closed' => 'مغلق',
+    'gallery' => 'معرض الصور',
+    'back_to_stables' => 'العودة إلى الإسطبلات',
+
+    'days' => [
+        'mon' => 'الإثنين',
+        'tue' => 'الثلاثاء',
+        'wed' => 'الأربعاء',
+        'thu' => 'الخميس',
+        'fri' => 'الجمعة',
+        'sat' => 'السبت',
+        'sun' => 'الأحد',
+    ],
+];

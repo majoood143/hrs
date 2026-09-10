@@ -23,4 +23,9 @@ class Region extends Model
             return $this->hasMany(City::class,'region_id');
         }
 
+        public function getNameAttribute(): string
+        {
+            return app()->getLocale() === 'ar' ? $this->ar_name : $this->en_name;
+        }
+
 }

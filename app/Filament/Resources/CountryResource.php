@@ -4,7 +4,10 @@ namespace App\Filament\Resources;
 
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
@@ -50,6 +53,9 @@ class CountryResource extends Resource
                 TextInput::make('ar_name')
                     ->required()
                     ->maxLength(255),
+                Toggle::make('is_public')
+                    ->label('Visible in public transfer form')
+                    ->default(true),
             ]);
     }
 
@@ -66,6 +72,8 @@ class CountryResource extends Resource
                 TextColumn::make('region_count')
                     ->counts('region')
                     ->badge(),
+                ToggleColumn::make('is_public')
+                    ->label('Public'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -76,7 +84,8 @@ class CountryResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                TernaryFilter::make('is_public')
+                    ->label('Public visibility'),
             ])
             ->recordActions([
                 ActionGroup::make([

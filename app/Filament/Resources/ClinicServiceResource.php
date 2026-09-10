@@ -1,0 +1,97 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\ClinicServiceResource\Pages\ListClinicServices;
+use App\Filament\Resources\ClinicServiceResource\Pages\CreateClinicService;
+use App\Filament\Resources\ClinicServiceResource\Pages\ViewClinicService;
+use App\Filament\Resources\ClinicServiceResource\Pages\EditClinicService;
+use App\Filament\Resources\ClinicServiceResource\Pages;
+use App\Models\ClinicService;
+use Filament\Resources\Resource;
+use Filament\Tables\Table;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+
+class ClinicServiceResource extends Resource
+{
+    protected static ?string $model = ClinicService::class;
+
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-check';
+
+    public static function getNavigationBadge(): ?string
+    {
+        return static::$model::count();
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('en_name')
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('ar_name')
+                    ->required()
+                    ->maxLength(255),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('en_name')
+                    ->searchable(),
+                TextColumn::make('ar_name')
+                    ->searchable(),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                //
+            ])
+            ->recordActions([
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                ])
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                    ExportBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListClinicServices::route('/'),
+            'create' => CreateClinicService::route('/create'),
+            'view' => ViewClinicService::route('/{record}'),
+            'edit' => EditClinicService::route('/{record}/edit'),
+        ];
+    }
+}

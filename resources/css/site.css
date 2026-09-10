@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+@theme {
+    --color-warm-50: #fffaf3;
+    --color-warm-100: #fef3e2;
+    --color-warm-200: #fde3c2;
+    --color-warm-300: #fbcb8e;
+    --color-warm-400: #f7a94f;
+    --color-warm-500: #f28c1f;
+    --color-warm-600: #e06f0f;
+    --color-warm-700: #b8540c;
+    --color-warm-800: #944211;
+    --color-warm-900: #783813;
+    --color-warm-950: #411a06;
+
+    --color-clay-50: #fdf6f3;
+    --color-clay-600: #c2632f;
+    --color-clay-700: #9c4d24;
+
+    --font-display: "Fraunces", "Georgia", serif;
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--color-warm-50);
+    color: var(--color-warm-950);
+    font-family: var(--font-sans);
+}
+
+.font-display {
+    font-family: var(--font-display);
+}
+
+.text-balance {
+    text-wrap: balance;
+}
+
+.btn-warm {
+    @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 font-semibold shadow-lg transition;
+    background-color: var(--btn-bg, var(--color-warm-600));
+    color: var(--btn-text, #fff);
+}
+
+.btn-warm:hover {
+    background-color: var(--btn-bg-hover, var(--color-warm-700));
+}
+
+.btn-warm-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border-2 px-6 py-3 font-semibold transition;
+    border-color: var(--btn-bg, var(--color-warm-600));
+    color: var(--btn-bg, var(--color-warm-700));
+}
+
+.btn-warm-outline:hover {
+    background-color: var(--btn-bg, var(--color-warm-600));
+    color: var(--btn-text, #fff);
+}
+
+.card-warm {
+    @apply rounded-3xl border border-warm-200/70 bg-white shadow-sm shadow-warm-900/5 transition hover:shadow-xl hover:shadow-warm-900/10;
+}
+
+.section-eyebrow {
+    @apply text-sm font-semibold uppercase tracking-[0.2em] text-warm-600;
+}
+
+/* Initial hidden state for [data-animate] is set by GSAP in JS (not CSS),
+   so content stays visible by default if JavaScript fails to load. */
+
+@media (max-width: 767px) {
+    [data-board-panel] {
+        position: fixed;
+        inset-inline: 0;
+        bottom: 0;
+        z-index: 50;
+        max-height: 80vh;
+        overflow-y: auto;
+        border-radius: 1.5rem 1.5rem 0 0;
+        transform: translateY(100%);
+        transition: transform 0.3s ease;
+    }
+
+    [data-board-panel].is-open {
+        transform: translateY(0);
+    }
+}
+
+[data-board-drawer-backdrop].is-open {
+    display: block;
+}
+
+[data-mobile-menu] {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.25s ease;
+}
+
+[data-mobile-menu] > nav {
+    overflow: hidden;
+    min-height: 0;
+}
+
+[data-mobile-menu].is-open {
+    grid-template-rows: 1fr;
+}
+
+@media (min-width: 1024px) {
+
+    [data-mobile-menu],
+    [data-mobile-menu-backdrop] {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-mobile-menu] {
+        transition: none;
+    }
+}
