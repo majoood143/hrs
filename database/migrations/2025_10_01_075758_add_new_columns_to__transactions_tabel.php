@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('Transactions', function (Blueprint $table) {
+        Schema::table('transactions', function (Blueprint $table) {
             //
             $table->enum('status', ['pending', 'completed', 'failed', 'refunded'])->default('pending');
         });

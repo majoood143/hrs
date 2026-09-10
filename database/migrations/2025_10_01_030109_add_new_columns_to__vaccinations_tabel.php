@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('Vaccinations', function (Blueprint $table) {
+        Schema::table('vaccinations', function (Blueprint $table) {
             //
             // Core vaccine information
             // $table->enum('name', [
@@ -70,7 +70,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('Vaccinations', function (Blueprint $table) {
+        Schema::table('vaccinations', function (Blueprint $table) {
             //
         });
     }
