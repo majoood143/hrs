@@ -11,6 +11,7 @@ export default defineConfig({
     plugins: [
         laravel({
 <<<<<<< HEAD
+<<<<<<< HEAD
             input: [
                 "resources/css/app.css",
                 "resources/css/admin.css",
@@ -21,6 +22,14 @@ export default defineConfig({
         }),
 =======
             input: ['resources/css/app.css', 'resources/js/app.js'],
+=======
+            input: [
+                'resources/css/app.css',
+                'resources/js/app.js',
+                'resources/css/site.css',
+                'resources/js/site.js',
+            ],
+>>>>>>> bbd33618 (Add transfer board creation and listing views)
             refresh: true,
         }),
         tailwindcss(),

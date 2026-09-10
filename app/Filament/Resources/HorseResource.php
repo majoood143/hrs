@@ -18,6 +18,8 @@ use Filament\Actions\Action;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\HorseResource\Pages\ListHorses;
@@ -194,6 +196,27 @@ class HorseResource extends Resource
                             ->schema([])->icon('heroicon-o-puzzle-piece'),
                         Tab::make('Transactions')
                             ->schema([])->icon('heroicon-o-queue-list'),
+                        Tab::make(__('horse.website_profile.tab'))
+                            ->schema([
+                                Toggle::make('is_featured')
+                                    ->label(__('horse.website_profile.is_featured'))
+                                    ->helperText(__('horse.website_profile.is_featured_helper')),
+                                FileUpload::make('cover_photo')
+                                    ->label(__('horse.website_profile.cover_photo'))
+                                    ->helperText(__('horse.website_profile.cover_photo_helper'))
+                                    ->image()
+                                    ->disk('public')
+                                    ->directory('horses/covers'),
+                                Textarea::make('public_story_en')
+                                    ->label(__('horse.website_profile.public_story_en'))
+                                    ->helperText(__('horse.website_profile.public_story_helper'))
+                                    ->rows(3),
+                                Textarea::make('public_story_ar')
+                                    ->label(__('horse.website_profile.public_story_ar'))
+                                    ->rows(3)
+                                    ->extraInputAttributes(['dir' => 'rtl']),
+                            ])->icon('heroicon-o-globe-alt')
+                            ->columns(2),
                     ])->columnSpanFull(),
 
 

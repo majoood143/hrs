@@ -23,4 +23,9 @@ class City extends Model
     {
         return $this->hasMany(Horse::class);
     }
+
+    public function getNameAttribute(): string
+    {
+        return app()->getLocale() === 'ar' ? $this->ar_name : $this->en_name;
+    }
 }

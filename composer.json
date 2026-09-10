@@ -10,21 +10,30 @@
         "bezhansalleh/filament-shield": "^4.0",
         "ffhs/filament-package_ffhs_approvals": "^2.0",
         "filament/filament": "^4.0",
+        "filament/spatie-laravel-media-library-plugin": "^4.0",
+        "filament/spatie-laravel-tags-plugin": "^4.12",
         "flowframe/laravel-trend": "^0.4.0",
         "jaocero/radio-deck": "^1.0",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+<<<<<<< HEAD
 <<<<<<< HEAD
         "pxlrbt/filament-excel": "^2.5",
         "rmsramos/activitylog": "^2.0",
         "shuvroroy/filament-spatie-laravel-backup": "^2.2",
         "shuvroroy/filament-spatie-laravel-health": "^2.3"
 =======
+=======
+        "marcogermani87/filament-captcha": "^2.3",
+>>>>>>> bbd33618 (Add transfer board creation and listing views)
         "nunomaduro/termwind": "2.3.1",
         "pxlrbt/filament-excel": "^3.0",
         "rmsramos/activitylog": "^3.0",
         "shuvroroy/filament-spatie-laravel-backup": "^3.0",
         "shuvroroy/filament-spatie-laravel-health": "^3.0",
+        "spatie/laravel-medialibrary": "^11.23",
+        "spatie/laravel-tags": "^4.12",
+        "spatie/laravel-translatable": "^6.14",
         "symfony/console": "7.3.2"
 >>>>>>> 16ac09d0 (Upgrade to Filament v4 and compatible ecosystem plugins)
     },

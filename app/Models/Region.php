@@ -33,5 +33,13 @@ class Region extends Model
             return $this->hasMany(City::class,'region_id');
         }
 
+<<<<<<< HEAD
 >>>>>>> 9019a60 (Baseline before Filament v4 upgrade)
+=======
+        public function getNameAttribute(): string
+        {
+            return app()->getLocale() === 'ar' ? $this->ar_name : $this->en_name;
+        }
+
+>>>>>>> bbd33618 (Add transfer board creation and listing views)
 }

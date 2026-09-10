@@ -78,12 +78,12 @@ class TransactionResource extends Resource
                             ->live()
                             ->required(),
                         TextInput::make('amount')
-                            ->prefix('OMR')
+                            ->prefix(fn () => \App\Models\SiteSetting::currency()['symbol'])
                             //->required()
                             //->disabled(),
                             ->numeric(3),
                         TextInput::make('currency')
-                            ->default('OMR')
+                            ->default(fn () => \App\Models\SiteSetting::currency()['code'])
                             ->required()
                             ->maxLength(3),
                                     
@@ -275,7 +275,7 @@ class TransactionResource extends Resource
                     ->sortable(),
                 TextColumn::make('amount')
                     ->numeric(3)
-                    ->prefix('OMR ')
+                    ->prefix(fn () => \App\Models\SiteSetting::currency()['symbol'] . ' ')
                     ->sortable(),
                 TextColumn::make('attachement_count')
                     ->counts('attachement')

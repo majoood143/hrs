@@ -45,7 +45,10 @@ class ColorResource extends Resource
     {
         return $schema
             ->components([
-                TextInput::make('name')
+                TextInput::make('en_name')
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('ar_name')
                     ->required()
                     ->maxLength(255),
                 ColorPicker::make('hex_code')
@@ -59,8 +62,12 @@ class ColorResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')
-                    ->searchable(),
+                TextColumn::make('en_name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('ar_name')
+                    ->searchable()
+                    ->sortable(),
                     ColorColumn::make('hex_code')
                     ->searchable()
                 ->copyable(),
@@ -96,7 +103,8 @@ class ColorResource extends Resource
         return $schema
             ->components([
             // ...
-            TextEntry::make('name'),
+            TextEntry::make('en_name'),
+            TextEntry::make('ar_name'),
             //     ->label('Name')
             //     ->content(fn (Color $record): string => $record->name),
              ColorEntry::make('hex_code')

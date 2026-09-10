@@ -1,108 +1,75 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
-use App\Models\User;
+use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Horse;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class HorsePolicy
 {
     use HandlesAuthorization;
-
-    /**
-     * Determine whether the user can view any models.
-     */
-    public function viewAny(User $user): bool
+    
+    public function viewAny(AuthUser $authUser): bool
     {
-        return $user->can('view_any_horse');
+        return $authUser->can('ViewAny:Horse');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
-    public function view(User $user, Horse $horse): bool
+    public function view(AuthUser $authUser, Horse $horse): bool
     {
-        return $user->can('view_horse');
+        return $authUser->can('View:Horse');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
-    public function create(User $user): bool
+    public function create(AuthUser $authUser): bool
     {
-        return $user->can('create_horse');
+        return $authUser->can('Create:Horse');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
-    public function update(User $user, Horse $horse): bool
+    public function update(AuthUser $authUser, Horse $horse): bool
     {
-        return $user->can('update_horse');
+        return $authUser->can('Update:Horse');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
-    public function delete(User $user, Horse $horse): bool
+    public function delete(AuthUser $authUser, Horse $horse): bool
     {
-        return $user->can('delete_horse');
+        return $authUser->can('Delete:Horse');
     }
 
-    /**
-     * Determine whether the user can bulk delete.
-     */
-    public function deleteAny(User $user): bool
+    public function deleteAny(AuthUser $authUser): bool
     {
-        return $user->can('delete_any_horse');
+        return $authUser->can('DeleteAny:Horse');
     }
 
-    /**
-     * Determine whether the user can permanently delete.
-     */
-    public function forceDelete(User $user, Horse $horse): bool
+    public function restore(AuthUser $authUser, Horse $horse): bool
     {
-        return $user->can('force_delete_horse');
+        return $authUser->can('Restore:Horse');
     }
 
-    /**
-     * Determine whether the user can permanently bulk delete.
-     */
-    public function forceDeleteAny(User $user): bool
+    public function forceDelete(AuthUser $authUser, Horse $horse): bool
     {
-        return $user->can('force_delete_any_horse');
+        return $authUser->can('ForceDelete:Horse');
     }
 
-    /**
-     * Determine whether the user can restore.
-     */
-    public function restore(User $user, Horse $horse): bool
+    public function forceDeleteAny(AuthUser $authUser): bool
     {
-        return $user->can('restore_horse');
+        return $authUser->can('ForceDeleteAny:Horse');
     }
 
-    /**
-     * Determine whether the user can bulk restore.
-     */
-    public function restoreAny(User $user): bool
+    public function restoreAny(AuthUser $authUser): bool
     {
-        return $user->can('restore_any_horse');
+        return $authUser->can('RestoreAny:Horse');
     }
 
-    /**
-     * Determine whether the user can replicate.
-     */
-    public function replicate(User $user, Horse $horse): bool
+    public function replicate(AuthUser $authUser, Horse $horse): bool
     {
-        return $user->can('replicate_horse');
+        return $authUser->can('Replicate:Horse');
     }
 
-    /**
-     * Determine whether the user can reorder.
-     */
-    public function reorder(User $user): bool
+    public function reorder(AuthUser $authUser): bool
     {
-        return $user->can('reorder_horse');
+        return $authUser->can('Reorder:Horse');
     }
+
 }

@@ -48,7 +48,7 @@ class TransactionRelationManager extends RelationManager
                 ]),
                 TextColumn::make('description'),
                 TextColumn::make('amount')
-                    ->money('OMR', true),
+                    ->money(fn () => \App\Models\SiteSetting::currency()['code'], true),
                 TextColumn::make('currency'),
                 TextColumn::make('user.name')->label('Created By'),
                 TextColumn::make('created_at')

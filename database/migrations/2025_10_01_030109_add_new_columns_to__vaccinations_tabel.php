@@ -61,11 +61,7 @@ return new class extends Migration
             // General notes
             $table->text('notes')->nullable();
 
-            //$table->index('user_id');
             $table->index('horse_id');
-            $table->index('next_due_date');
-            $table->index(['user_id', 'next_due_date']); // Composite for reminders
-            $table->index('date_given');
         });
     }
 
