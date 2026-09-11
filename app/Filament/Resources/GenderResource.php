@@ -31,6 +31,21 @@ class GenderResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-squares-plus';
 
+    public static function getModelLabel(): string
+    {
+        return __('admin_gender.navigation.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin_gender.navigation.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin_gender.navigation.plural');
+    }
+
     public static function getNavigationBadge(): ?string
     {
         return static::$model::count();

@@ -18,8 +18,8 @@ class FarriersOverview extends StatsOverviewWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Farriers', Farrier::count())
-                ->description(Farrier::where('status', 'active')->count() . ' active')
+            Stat::make(__('admin_widgets.farriers_overview.stat_label'), Farrier::count())
+                ->description(__('admin_widgets.farriers_overview.active_suffix', ['count' => Farrier::where('status', 'active')->count()]))
                 ->icon('heroicon-o-wrench-screwdriver'),
         ];
     }

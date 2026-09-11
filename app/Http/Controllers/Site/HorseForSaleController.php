@@ -10,12 +10,15 @@ use App\Models\Gender;
 use App\Models\HorseSalePost;
 use App\Models\SiteSetting;
 use App\Models\Type;
+use App\Support\ImageCompressor;
 use App\Support\Seo;
 use Gregwar\Captcha\CaptchaBuilder;
 use Gregwar\Captcha\PhraseBuilder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use MarcoGermani87\FilamentCaptcha\Rules\Captcha;
 
@@ -27,6 +30,20 @@ class HorseForSaleController extends Controller
             'horses-for-sale',
             __('horses-for-sale.board_title') . ' — ' . SiteSetting::siteName(),
         ));
+    }
+
+    public function show(int $id): View
+    {
+        $post = HorseSalePost::visible()
+            ->with(['type', 'gender', 'color', 'city', 'country'])
+            ->findOrFail($id);
+
+        return view('site.horses-for-sale.show', [
+            'post' => $post,
+            'seoTitle' => $post->name . ' — ' . SiteSetting::siteName(),
+            'seoDescription' => $post->description ? Str::limit($post->description, 160) : null,
+            'seoImage' => $post->cover_photo_url,
+        ]);
     }
 
     public function create(): View
@@ -75,6 +92,8 @@ class HorseForSaleController extends Controller
         $city = City::with('region')->findOrFail($validated['city_id']);
 
         $coverPhotoPath = $request->file('cover_photo')->store('horse-sale/covers', 'public');
+
+        ImageCompressor::compress(Storage::disk('public')->path($coverPhotoPath));
 
         HorseSalePost::create([
             'en_name' => $validated['en_name'],

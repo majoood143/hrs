@@ -43,7 +43,25 @@ class StableResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-home-modern';
 
-    public static string | \UnitEnum | null $navigationGroup = 'Stables';
+    public static function getNavigationGroup(): string | \UnitEnum | null
+    {
+        return __('admin_navigation.stables');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('admin_stable.navigation.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin_stable.navigation.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin_stable.navigation.plural');
+    }
 
     public static function getNavigationBadge(): ?string
     {

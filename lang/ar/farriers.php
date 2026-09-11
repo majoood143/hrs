@@ -45,6 +45,8 @@ return [
     'no_results_title' => 'لا يوجد بياطرة يطابقون بحثك',
     'no_results_body' => 'جرّب توسيع نطاق الفلاتر أو إزالة أحدها.',
     'contact_reveal' => 'التواصل مع البيطار',
+    'view_details' => 'عرض التفاصيل',
+    'back_to_listing' => 'العودة إلى البياطرة',
     'years_experience_badge' => 'سنة خبرة واحدة|:count سنوات خبرة',
 
     'post_page_title' => 'أضف خدماتك كبيطار',

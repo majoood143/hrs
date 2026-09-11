@@ -199,6 +199,10 @@
                                 {{ __('tools-for-sale.contact_reveal') }}
                             </button>
                         </div>
+
+                        <a href="{{ route('tools-for-sale.show', $tool->id) }}" class="btn-warm-outline mt-3 inline-flex w-full justify-center !py-2 text-sm">
+                            {{ __('tools-for-sale.view_details') }}
+                        </a>
                     </div>
                 </article>
             @endforeach

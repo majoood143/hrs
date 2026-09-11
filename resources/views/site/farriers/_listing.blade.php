@@ -177,6 +177,10 @@
                                 {{ __('farriers.contact_reveal') }}
                             </button>
                         </div>
+
+                        <a href="{{ route('farriers.show', $farrier->id) }}" class="btn-warm-outline mt-3 inline-flex w-full justify-center !py-2 text-sm">
+                            {{ __('farriers.view_details') }}
+                        </a>
                     </div>
                 </article>
             @endforeach

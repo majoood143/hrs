@@ -18,8 +18,8 @@ class ClinicsOverview extends StatsOverviewWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Clinics', Clinic::count())
-                ->description(Clinic::where('is_active', true)->count() . ' active')
+            Stat::make(__('admin_widgets.clinics_overview.stat_label'), Clinic::count())
+                ->description(__('admin_widgets.clinics_overview.active_suffix', ['count' => Clinic::where('is_active', true)->count()]))
                 ->icon('heroicon-o-building-office-2'),
         ];
     }

@@ -35,6 +35,21 @@ class ServiceResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    public static function getModelLabel(): string
+    {
+        return __('admin_service.navigation.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin_service.navigation.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin_service.navigation.plural');
+    }
+
     public static function getNavigationBadge(): ?string
     {
         return static::$model::count();

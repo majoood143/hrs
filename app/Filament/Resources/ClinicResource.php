@@ -43,7 +43,25 @@ class ClinicResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-plus-circle';
 
-    public static string | \UnitEnum | null $navigationGroup = 'Clinics';
+    public static function getNavigationGroup(): string | \UnitEnum | null
+    {
+        return __('admin_navigation.clinics');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('admin_clinic.navigation.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin_clinic.navigation.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin_clinic.navigation.plural');
+    }
 
     public static function getNavigationBadge(): ?string
     {

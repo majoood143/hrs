@@ -40,9 +40,25 @@ class HorseSalePostResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-tag';
 
-    public static string | \UnitEnum | null $navigationGroup = 'Horse Marketplace';
+    public static function getNavigationGroup(): string | \UnitEnum | null
+    {
+        return __('admin_navigation.horse_marketplace');
+    }
 
-    protected static ?string $modelLabel = 'Horse for Sale';
+    public static function getModelLabel(): string
+    {
+        return __('admin_horse_sale_post.navigation.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin_horse_sale_post.navigation.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin_horse_sale_post.navigation.plural');
+    }
 
     public static function getNavigationBadge(): ?string
     {

@@ -18,8 +18,8 @@ class ToolsForSaleOverview extends StatsOverviewWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Tools for Sale', ToolSalePost::count())
-                ->description(ToolSalePost::where('status', 'active')->count() . ' active')
+            Stat::make(__('admin_widgets.tools_for_sale_overview.stat_label'), ToolSalePost::count())
+                ->description(__('admin_widgets.tools_for_sale_overview.active_suffix', ['count' => ToolSalePost::where('status', 'active')->count()]))
                 ->icon('heroicon-o-wrench'),
         ];
     }

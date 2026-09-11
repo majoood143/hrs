@@ -219,6 +219,10 @@
                                 {{ __('horses-for-sale.contact_reveal') }}
                             </button>
                         </div>
+
+                        <a href="{{ route('horses-for-sale.show', $post->id) }}" class="btn-warm-outline mt-3 inline-flex w-full justify-center !py-2 text-sm">
+                            {{ __('horses-for-sale.view_details') }}
+                        </a>
                     </div>
                 </article>
             @endforeach

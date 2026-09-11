@@ -8,7 +8,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class HorsesForSaleOverview extends StatsOverviewWidget
 {
-    protected int | string | array $columnSpan = 2;
+    protected int | string | array $columnSpan = 1;
 
     public static function canView(): bool
     {
@@ -18,8 +18,8 @@ class HorsesForSaleOverview extends StatsOverviewWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Horses for Sale', HorseSalePost::count())
-                ->description(HorseSalePost::where('status', 'active')->count() . ' active')
+            Stat::make(__('admin_widgets.horses_for_sale_overview.stat_label'), HorseSalePost::count())
+                ->description(__('admin_widgets.horses_for_sale_overview.active_suffix', ['count' => HorseSalePost::where('status', 'active')->count()]))
                 ->icon('heroicon-o-tag'),
         ];
     }

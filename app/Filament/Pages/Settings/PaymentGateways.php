@@ -22,7 +22,10 @@ class PaymentGateways extends Page implements HasForms
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-credit-card';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Settings';
+    public static function getNavigationGroup(): string|\UnitEnum|null
+    {
+        return __('admin_navigation.settings');
+    }
 
     protected static ?int $navigationSort = 20;
 

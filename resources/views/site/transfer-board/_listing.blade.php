@@ -259,6 +259,10 @@
                             {{ __('transportation.contact_reveal') }}
                         </button>
                     </div>
+
+                    <a href="{{ route('transfer-board.show', $post->id) }}" class="btn-warm-outline mt-3 inline-flex w-full justify-center !py-2 text-sm">
+                        {{ __('transportation.view_details') }}
+                    </a>
                 </article>
             @endforeach
         </div>

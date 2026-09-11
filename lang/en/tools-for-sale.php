@@ -62,6 +62,8 @@ return [
     'no_results_title' => 'No tools match your search',
     'no_results_body' => 'Try widening your filters or clearing one.',
     'contact_reveal' => 'Contact Seller',
+    'view_details' => 'View Details',
+    'back_to_listing' => 'Back to Tools for Sale',
 
     'post_page_title' => 'List a Tool for Sale',
     'post_page_subtitle' => 'Reach serious buyers — it takes a couple of minutes.',

@@ -32,6 +32,21 @@ class AuthorityResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-building-office';
 
+    public static function getModelLabel(): string
+    {
+        return __('admin_authority.navigation.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin_authority.navigation.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin_authority.navigation.plural');
+    }
+
      public static function getNavigationBadge(): ?string
     {
         return static::$model::count();

@@ -22,11 +22,13 @@ Route::get('/transfer-board', [TransferBoardController::class, 'index'])->name('
 Route::get('/transfer-board/post', [TransferBoardController::class, 'create'])->name('transfer-board.create');
 Route::post('/transfer-board/post', [TransferBoardController::class, 'store'])->name('transfer-board.store');
 Route::get('/transfer-board/captcha', [TransferBoardController::class, 'captcha'])->name('transfer-board.captcha');
+Route::get('/transfer-board/{transferPost}', [TransferBoardController::class, 'show'])->name('transfer-board.show');
 
 Route::get('/horses-for-sale', [HorseForSaleController::class, 'index'])->name('horses-for-sale.index');
 Route::get('/horses-for-sale/post', [HorseForSaleController::class, 'create'])->name('horses-for-sale.create');
 Route::post('/horses-for-sale/post', [HorseForSaleController::class, 'store'])->name('horses-for-sale.store');
 Route::get('/horses-for-sale/captcha', [HorseForSaleController::class, 'captcha'])->name('horses-for-sale.captcha');
+Route::get('/horses-for-sale/{horseSalePost}', [HorseForSaleController::class, 'show'])->name('horses-for-sale.show');
 
 Route::get('/stables', [StableController::class, 'index'])->name('stables.index');
 Route::get('/stables/{slug}', [StableController::class, 'show'])->name('stables.show');
@@ -38,11 +40,13 @@ Route::get('/farriers', [FarrierController::class, 'index'])->name('farriers.ind
 Route::get('/farriers/post', [FarrierController::class, 'create'])->name('farriers.create');
 Route::post('/farriers/post', [FarrierController::class, 'store'])->name('farriers.store');
 Route::get('/farriers/captcha', [FarrierController::class, 'captcha'])->name('farriers.captcha');
+Route::get('/farriers/{farrier}', [FarrierController::class, 'show'])->name('farriers.show');
 
 Route::get('/tools-for-sale', [ToolSaleController::class, 'index'])->name('tools-for-sale.index');
 Route::get('/tools-for-sale/post', [ToolSaleController::class, 'create'])->name('tools-for-sale.create');
 Route::post('/tools-for-sale/post', [ToolSaleController::class, 'store'])->name('tools-for-sale.store');
 Route::get('/tools-for-sale/captcha', [ToolSaleController::class, 'captcha'])->name('tools-for-sale.captcha');
+Route::get('/tools-for-sale/{toolSalePost}', [ToolSaleController::class, 'show'])->name('tools-for-sale.show');
 
 Route::get('/{slug}', [PageController::class, 'show'])
     ->where('slug', '^(?!admin|transportation|blog|transfer-board|horses-for-sale|stables|clinics|farriers|tools-for-sale).*$')

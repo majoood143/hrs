@@ -34,7 +34,25 @@ class RegionResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-map';
 
-    public static string | \UnitEnum | null $navigationGroup = 'Countries';
+    public static function getNavigationGroup(): string | \UnitEnum | null
+    {
+        return __('admin_navigation.countries');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('admin_region.navigation.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin_region.navigation.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin_region.navigation.plural');
+    }
 
      public static function getNavigationBadge(): ?string
     {

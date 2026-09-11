@@ -18,8 +18,8 @@ class StablesOverview extends StatsOverviewWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Stables', Stable::count())
-                ->description(Stable::where('is_active', true)->count() . ' active')
+            Stat::make(__('admin_widgets.stables_overview.stat_label'), Stable::count())
+                ->description(__('admin_widgets.stables_overview.active_suffix', ['count' => Stable::where('is_active', true)->count()]))
                 ->icon('heroicon-o-home-modern'),
         ];
     }

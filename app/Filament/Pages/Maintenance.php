@@ -25,7 +25,10 @@ class Maintenance extends Page implements HasForms
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-wrench-screwdriver';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'System';
+    public static function getNavigationGroup(): string|\UnitEnum|null
+    {
+        return __('admin_navigation.system');
+    }
 
     protected static ?int $navigationSort = 100;
 

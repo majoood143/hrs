@@ -37,9 +37,25 @@ class TransferPostResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-truck';
 
-    public static string | \UnitEnum | null $navigationGroup = 'Transportation Service';
+    public static function getNavigationGroup(): string | \UnitEnum | null
+    {
+        return __('admin_navigation.transportation_service');
+    }
 
-    protected static ?string $modelLabel = 'Transfer Post';
+    public static function getModelLabel(): string
+    {
+        return __('admin_transfer_post.navigation.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin_transfer_post.navigation.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin_transfer_post.navigation.plural');
+    }
 
     public static function getNavigationBadge(): ?string
     {

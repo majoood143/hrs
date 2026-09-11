@@ -54,6 +54,9 @@ return [
     'spaces_available' => '1 space|:count spaces',
     'budget_open' => 'Budget: open',
     'contact_reveal' => 'Contact',
+    'view_details' => 'View Details',
+    'back_to_listing' => 'Back to Transfer Board',
+    'transfer_details_title' => 'Transfer Details',
 
     'post_page_title' => 'Post a Transfer',
     'post_page_subtitle' => 'Offer a ride or ask for one — it takes less than a minute.',

@@ -3,7 +3,7 @@
     $days = \App\Models\Stable::DAYS;
 @endphp
 
-<x-layouts.site :seo-title="$seoTitle">
+<x-layouts.site :seo-title="$seoTitle" :seo-description="$seoDescription ?? null" :seo-image="$seoImage ?? null">
     <div class="mx-auto max-w-5xl px-6 py-14">
         <a href="{{ route('stables.index') }}" class="text-sm font-semibold text-warm-600 hover:text-warm-800">
             &larr; {{ __('stables.back_to_stables') }}
@@ -81,6 +81,8 @@
                         @endforeach
                     </dl>
                 </div>
+
+                <x-share-buttons :url="url()->current()" :title="$stable->name" />
             </div>
         </div>
     </div>

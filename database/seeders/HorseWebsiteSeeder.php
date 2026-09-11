@@ -16,6 +16,7 @@ class HorseWebsiteSeeder extends Seeder
         $this->seedSiteSettings();
         $this->seedHomepage();
         $this->seedModulePages();
+        $this->seedAboutAndContactPages();
         $this->seedMenus();
         $this->seedPartners();
         $this->seedSuccessStories();
@@ -209,6 +210,175 @@ class HorseWebsiteSeeder extends Seeder
         }
     }
 
+    private function seedAboutAndContactPages(): void
+    {
+        $pages = [
+            [
+                'slug' => 'about-us',
+                'title' => ['en' => 'About Us', 'ar' => 'من نحن'],
+                'meta_description' => [
+                    'en' => 'Learn about the team and mission behind our horse transfer marketplace.',
+                    'ar' => 'تعرف على الفريق والرسالة وراء منصتنا لنقل الخيول.',
+                ],
+                'content' => [
+                    [
+                        'type' => 'hero',
+                        'data' => [
+                            'heading' => ['en' => 'About Us', 'ar' => 'من نحن'],
+                            'subheading' => [
+                                'en' => 'We connect horse owners with caring, vetted transporters and stables across the region — because every horse deserves a safe journey.',
+                                'ar' => 'نربط ملاك الخيول بناقلين وإسطبلات موثوقة ومهتمة في جميع أنحاء المنطقة — لأن كل حصان يستحق رحلة آمنة.',
+                            ],
+                        ],
+                    ],
+                    [
+                        'type' => 'heading',
+                        'data' => [
+                            'text' => ['en' => 'Our Story', 'ar' => 'قصتنا'],
+                            'level' => 'h2',
+                            'alignment' => 'center',
+                        ],
+                    ],
+                    [
+                        'type' => 'rich_text',
+                        'data' => [
+                            'content' => [
+                                'en' => '<p>We started this platform because arranging a safe, trustworthy journey for a horse was harder than it should be. Today we bring together owners, transporters, stables, and veterinary partners on one platform built around care, transparency, and trust.</p>',
+                                'ar' => '<p>أطلقنا هذه المنصة لأن ترتيب رحلة آمنة وموثوقة للحصان كان أصعب مما ينبغي. اليوم نجمع الملاك والناقلين والإسطبلات والشركاء البيطريين في منصة واحدة مبنية على الاهتمام والشفافية والثقة.</p>',
+                            ],
+                        ],
+                    ],
+                    [
+                        'type' => 'columns',
+                        'data' => [
+                            'items' => [
+                                [
+                                    'heading' => ['en' => 'Safety First', 'ar' => 'السلامة أولاً'],
+                                    'text' => [
+                                        'en' => 'Every transporter and partner is vetted so your horse travels in caring, capable hands.',
+                                        'ar' => 'يتم التحقق من كل ناقل وشريك حتى يسافر حصانك في أيدٍ أمينة وقادرة.',
+                                    ],
+                                ],
+                                [
+                                    'heading' => ['en' => 'Transparency', 'ar' => 'الشفافية'],
+                                    'text' => [
+                                        'en' => 'Clear pricing, live updates, and direct contact with your transporter every step of the way.',
+                                        'ar' => 'أسعار واضحة وتحديثات مباشرة وتواصل مباشر مع الناقل في كل خطوة من الرحلة.',
+                                    ],
+                                ],
+                                [
+                                    'heading' => ['en' => 'Community', 'ar' => 'المجتمع'],
+                                    'text' => [
+                                        'en' => 'A growing network of owners, stables, and clinics who care about horses as much as you do.',
+                                        'ar' => 'شبكة متنامية من الملاك والإسطبلات والعيادات الذين يهتمون بالخيول بقدر اهتمامك.',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    [
+                        'type' => 'partners',
+                        'data' => [
+                            'heading' => ['en' => 'Trusted partners', 'ar' => 'شركاء موثوقون'],
+                            'subheading' => [
+                                'en' => 'The stables, transporters, and vets who help make every journey safe.',
+                                'ar' => 'الإسطبلات والناقلون والأطباء البيطريون الذين يساهمون في جعل كل رحلة آمنة.',
+                            ],
+                        ],
+                    ],
+                    [
+                        'type' => 'cta',
+                        'data' => [
+                            'heading' => [
+                                'en' => 'Ready to give your horse a caring journey?',
+                                'ar' => 'هل أنت مستعد لرحلة مليئة بالاهتمام لحصانك؟',
+                            ],
+                            'subheading' => [
+                                'en' => 'Post your transfer in minutes and connect with a trusted transporter today.',
+                                'ar' => 'انشر طلب النقل في دقائق وتواصل مع ناقل موثوق اليوم.',
+                            ],
+                            'button_text' => ['en' => 'Book a Transfer', 'ar' => 'احجز نقلة'],
+                            'button_url' => '/transportation',
+                            'style' => 'warm',
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'slug' => 'contact-us',
+                'title' => ['en' => 'Contact Us', 'ar' => 'تواصل معنا'],
+                'meta_description' => [
+                    'en' => 'Get in touch with our team by phone, email, or message.',
+                    'ar' => 'تواصل مع فريقنا عبر الهاتف أو البريد الإلكتروني أو الرسائل.',
+                ],
+                'content' => [
+                    [
+                        'type' => 'hero',
+                        'data' => [
+                            'heading' => ['en' => 'Contact Us', 'ar' => 'تواصل معنا'],
+                            'subheading' => [
+                                'en' => 'Questions about a transfer, a listing, or becoming a partner? We would love to hear from you.',
+                                'ar' => 'لديك أسئلة حول نقلة أو إعلان أو الانضمام كشريك؟ يسعدنا أن نسمع منك.',
+                            ],
+                        ],
+                    ],
+                    [
+                        'type' => 'columns',
+                        'data' => [
+                            'items' => [
+                                [
+                                    'heading' => ['en' => 'Phone', 'ar' => 'الهاتف'],
+                                    'text' => ['en' => '+968 9000 0000', 'ar' => '968 9000 0000+'],
+                                ],
+                                [
+                                    'heading' => ['en' => 'Email', 'ar' => 'البريد الإلكتروني'],
+                                    'text' => ['en' => 'hello@horsetransfer.example', 'ar' => 'hello@horsetransfer.example'],
+                                ],
+                                [
+                                    'heading' => ['en' => 'Hours', 'ar' => 'ساعات العمل'],
+                                    'text' => [
+                                        'en' => 'Sunday – Thursday, 9:00 AM – 6:00 PM',
+                                        'ar' => 'الأحد إلى الخميس، 9:00 صباحًا – 6:00 مساءً',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    [
+                        'type' => 'cta',
+                        'data' => [
+                            'heading' => ['en' => 'Send us a message', 'ar' => 'أرسل لنا رسالة'],
+                            'subheading' => [
+                                'en' => 'Email our team and we will get back to you as soon as possible.',
+                                'ar' => 'راسل فريقنا وسنرد عليك في أقرب وقت ممكن.',
+                            ],
+                            'button_text' => ['en' => 'Email Us', 'ar' => 'راسلنا'],
+                            'button_url' => 'mailto:hello@horsetransfer.example',
+                            'style' => 'dark',
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        foreach ($pages as $data) {
+            CmsPage::firstOrCreate(
+                ['slug' => $data['slug']],
+                [
+                    'title' => $data['title'],
+                    'meta_title' => $data['title'],
+                    'meta_description' => $data['meta_description'],
+                    'status' => 'published',
+                    'published_at' => now(),
+                    'is_homepage' => false,
+                    'is_system' => false,
+                    'show_title' => false,
+                    'content' => $data['content'],
+                ]
+            );
+        }
+    }
+
     private function seedMenus(): void
     {
         $header = CmsMenu::firstOrCreate(
@@ -233,6 +403,27 @@ class HorseWebsiteSeeder extends Seeder
                 ['label' => ['en' => 'Transfer Board', 'ar' => 'لوحة النقلات'], 'url' => '/transportation', 'order' => 1],
                 ['label' => ['en' => 'Stories', 'ar' => 'قصص'], 'url' => '/blog', 'order' => 2],
             ]);
+        }
+
+        $aboutPage = CmsPage::where('slug', 'about-us')->first();
+        $contactPage = CmsPage::where('slug', 'contact-us')->first();
+
+        foreach ([$header, $footer] as $menu) {
+            if ($aboutPage && $menu->allItems()->where('page_id', $aboutPage->id)->doesntExist()) {
+                $menu->allItems()->create([
+                    'label' => ['en' => 'About Us', 'ar' => 'من نحن'],
+                    'page_id' => $aboutPage->id,
+                    'order' => 3,
+                ]);
+            }
+
+            if ($contactPage && $menu->allItems()->where('page_id', $contactPage->id)->doesntExist()) {
+                $menu->allItems()->create([
+                    'label' => ['en' => 'Contact Us', 'ar' => 'تواصل معنا'],
+                    'page_id' => $contactPage->id,
+                    'order' => 4,
+                ]);
+            }
         }
     }
 

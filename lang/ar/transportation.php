@@ -54,6 +54,9 @@ return [
     'spaces_available' => 'مكان واحد|:count أماكن',
     'budget_open' => 'الميزانية: مفتوحة',
     'contact_reveal' => 'التواصل',
+    'view_details' => 'عرض التفاصيل',
+    'back_to_listing' => 'العودة إلى لوحة النقل',
+    'transfer_details_title' => 'تفاصيل النقل',
 
     'post_page_title' => 'انشر إعلان نقل',
     'post_page_subtitle' => 'اعرض رحلة أو اطلب واحدة — الأمر يستغرق أقل من دقيقة.',

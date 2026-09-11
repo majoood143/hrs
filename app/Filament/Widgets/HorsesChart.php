@@ -9,7 +9,11 @@ use Flowframe\Trend\TrendValue;
 
 class HorsesChart extends ChartWidget
 {
-    protected ?string $heading = 'Horses Chart';
+    public function getHeading(): string | \Illuminate\Contracts\Support\Htmlable | null
+    {
+        return __('admin_widgets.horses_chart.heading');
+    }
+    protected int | string | array $columnSpan = 2;
 
     protected static ?int $sort = 1;
     protected static bool $isLazy = false; // Load the widget only when it is visible on the
@@ -29,7 +33,7 @@ class HorsesChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Horses Registered',
+                    'label' => __('admin_widgets.horses_chart.dataset_label'),
                     'data' => $data->map(fn(TrendValue $value) => $value->aggregate),
                 ],
             ],

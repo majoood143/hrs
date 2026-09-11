@@ -263,6 +263,37 @@ function contactReveal() {
     });
 }
 
+function copyLink() {
+    document.querySelectorAll('[data-copy-link]').forEach((button) => {
+        button.addEventListener('click', async () => {
+            const url = button.dataset.copyLink ?? window.location.href;
+
+            try {
+                await navigator.clipboard.writeText(url);
+            } catch {
+                return;
+            }
+
+            const icon = button.querySelector('[data-copy-icon]');
+            const originalTitle = button.getAttribute('aria-label');
+            button.setAttribute('aria-label', button.dataset.copiedLabel ?? originalTitle);
+            button.classList.add('!bg-emerald-600', '!text-white');
+
+            if (icon) {
+                icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />';
+            }
+
+            setTimeout(() => {
+                button.setAttribute('aria-label', originalTitle ?? button.dataset.copyLabel);
+                button.classList.remove('!bg-emerald-600', '!text-white');
+                if (icon) {
+                    icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757M10.81 15.313a4.5 4.5 0 0 1-1.242-7.244l4.5-4.5a4.5 4.5 0 0 1 6.364 6.364l-1.757 1.757" />';
+                }
+            }, 2000);
+        });
+    });
+}
+
 function transferBoardWizard() {
     const wizard = document.querySelector('[data-wizard="transfer"]');
     if (!wizard) return;
@@ -608,6 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
     transferBoardFilters();
     mobileMenu();
     contactReveal();
+    copyLink();
     transferBoardWizard();
     horseSaleWizard();
     farrierWizard();

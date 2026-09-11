@@ -50,6 +50,8 @@ return [
     'no_results_title' => 'No horses match your search',
     'no_results_body' => 'Try widening your filters or clearing one.',
     'contact_reveal' => 'Contact Seller',
+    'view_details' => 'View Details',
+    'back_to_listing' => 'Back to Horses for Sale',
     'years_old' => ':count year old|:count years old',
     'months_old' => ':count month old|:count months old',
 

@@ -21,11 +21,24 @@ class SmtpSettings extends Page
 
     protected string $view = 'filament.pages.smtp-settings';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Settings';
-
     protected static ?int $navigationSort = 1;
 
     public ?array $data = [];
+
+    public static function getNavigationGroup(): string | \UnitEnum | null
+    {
+        return __('admin_navigation.settings');
+    }
+
+    public function getTitle(): string
+    {
+        return __('admin_smtp_settings.title');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin_smtp_settings.navigation_label');
+    }
 
     public function mount(SettingsService $settings): void
     {

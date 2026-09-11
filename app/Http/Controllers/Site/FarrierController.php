@@ -7,12 +7,15 @@ use App\Models\City;
 use App\Models\Country;
 use App\Models\Farrier;
 use App\Models\SiteSetting;
+use App\Support\ImageCompressor;
 use App\Support\Seo;
 use Gregwar\Captcha\CaptchaBuilder;
 use Gregwar\Captcha\PhraseBuilder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use MarcoGermani87\FilamentCaptcha\Rules\Captcha;
 
@@ -24,6 +27,20 @@ class FarrierController extends Controller
             'farriers',
             __('farriers.board_title') . ' — ' . SiteSetting::siteName(),
         ));
+    }
+
+    public function show(int $id): View
+    {
+        $farrier = Farrier::visible()
+            ->with(['city', 'country'])
+            ->findOrFail($id);
+
+        return view('site.farriers.show', [
+            'farrier' => $farrier,
+            'seoTitle' => $farrier->name . ' — ' . SiteSetting::siteName(),
+            'seoDescription' => $farrier->description ? Str::limit($farrier->description, 160) : null,
+            'seoImage' => $farrier->cover_photo_url,
+        ]);
     }
 
     public function create(): View
@@ -63,6 +80,8 @@ class FarrierController extends Controller
         $city = City::with('region')->findOrFail($validated['city_id']);
 
         $coverPhotoPath = $request->file('cover_photo')->store('farriers/covers', 'public');
+
+        ImageCompressor::compress(Storage::disk('public')->path($coverPhotoPath));
 
         Farrier::create([
             'en_name' => $validated['en_name'],

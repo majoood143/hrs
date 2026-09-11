@@ -38,7 +38,25 @@ class FarrierResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-wrench-screwdriver';
 
-    public static string | \UnitEnum | null $navigationGroup = 'Farrier Marketplace';
+    public static function getNavigationGroup(): string | \UnitEnum | null
+    {
+        return __('admin_navigation.farrier_marketplace');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('admin_farrier.navigation.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin_farrier.navigation.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin_farrier.navigation.plural');
+    }
 
     public static function getNavigationBadge(): ?string
     {

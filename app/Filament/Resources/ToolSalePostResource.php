@@ -38,9 +38,25 @@ class ToolSalePostResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-wrench';
 
-    public static string | \UnitEnum | null $navigationGroup = 'Tool Marketplace';
+    public static function getNavigationGroup(): string | \UnitEnum | null
+    {
+        return __('admin_navigation.tool_marketplace');
+    }
 
-    protected static ?string $modelLabel = 'Tool for Sale';
+    public static function getModelLabel(): string
+    {
+        return __('admin_tool_sale_post.navigation.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin_tool_sale_post.navigation.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin_tool_sale_post.navigation.plural');
+    }
 
     public static function getNavigationBadge(): ?string
     {

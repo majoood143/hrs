@@ -27,7 +27,25 @@ class SettingResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | \UnitEnum | null $navigationGroup = 'Settings';
+    public static function getNavigationGroup(): string | \UnitEnum | null
+    {
+        return __('admin_navigation.settings');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('admin_setting.navigation.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin_setting.navigation.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin_setting.navigation.plural');
+    }
 
     public static function form(Schema $schema): Schema
     {

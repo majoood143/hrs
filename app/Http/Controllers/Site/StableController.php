@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SiteSetting;
 use App\Models\Stable;
 use App\Support\Seo;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class StableController extends Controller
@@ -28,6 +29,8 @@ class StableController extends Controller
         return view('site.stables.show', [
             'stable' => $stable,
             'seoTitle' => $stable->name . ' — ' . SiteSetting::siteName(),
+            'seoDescription' => $stable->description ? Str::limit($stable->description, 160) : null,
+            'seoImage' => $stable->cover_photo_url,
         ]);
     }
 }

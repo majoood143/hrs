@@ -43,6 +43,21 @@ class UserResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-user-group';
 
+    public static function getModelLabel(): string
+    {
+        return __('admin_user.navigation.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin_user.navigation.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin_user.navigation.plural');
+    }
+
     public static function getNavigationBadge(): ?string
     {
         return static::$model::count();

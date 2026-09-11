@@ -7,12 +7,15 @@ use App\Models\City;
 use App\Models\Country;
 use App\Models\SiteSetting;
 use App\Models\ToolSalePost;
+use App\Support\ImageCompressor;
 use App\Support\Seo;
 use Gregwar\Captcha\CaptchaBuilder;
 use Gregwar\Captcha\PhraseBuilder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use MarcoGermani87\FilamentCaptcha\Rules\Captcha;
 
@@ -24,6 +27,20 @@ class ToolSaleController extends Controller
             'tools-for-sale',
             __('tools-for-sale.board_title') . ' — ' . SiteSetting::siteName(),
         ));
+    }
+
+    public function show(int $id): View
+    {
+        $tool = ToolSalePost::visible()
+            ->with(['city', 'country'])
+            ->findOrFail($id);
+
+        return view('site.tools-for-sale.show', [
+            'tool' => $tool,
+            'seoTitle' => $tool->name . ' — ' . SiteSetting::siteName(),
+            'seoDescription' => $tool->description ? Str::limit($tool->description, 160) : null,
+            'seoImage' => $tool->cover_photo_url,
+        ]);
     }
 
     public function create(): View
@@ -66,6 +83,8 @@ class ToolSaleController extends Controller
         $city = City::with('region')->findOrFail($validated['city_id']);
 
         $coverPhotoPath = $request->file('cover_photo')->store('tools-for-sale/covers', 'public');
+
+        ImageCompressor::compress(Storage::disk('public')->path($coverPhotoPath));
 
         ToolSalePost::create([
             'en_name' => $validated['en_name'],

@@ -45,6 +45,8 @@ return [
     'no_results_title' => 'No farriers match your search',
     'no_results_body' => 'Try widening your filters or clearing one.',
     'contact_reveal' => 'Contact Farrier',
+    'view_details' => 'View Details',
+    'back_to_listing' => 'Back to Farriers',
     'years_experience_badge' => ':count year of experience|:count years of experience',
 
     'post_page_title' => 'List Your Farrier Services',

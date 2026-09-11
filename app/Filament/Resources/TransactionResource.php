@@ -49,6 +49,21 @@ class TransactionResource extends Resource
     // Define the navigation icon for this resource
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    public static function getModelLabel(): string
+    {
+        return __('admin_transaction.navigation.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin_transaction.navigation.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin_transaction.navigation.plural');
+    }
+
     // Get the navigation badge count
     public static function getNavigationBadge(): ?string
     {

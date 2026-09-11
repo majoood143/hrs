@@ -29,7 +29,10 @@ class GeneralSettings extends Page implements HasForms
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Settings';
+    public static function getNavigationGroup(): string|\UnitEnum|null
+    {
+        return __('admin_navigation.settings');
+    }
 
     protected static ?int $navigationSort = 10;
 
@@ -123,6 +126,11 @@ class GeneralSettings extends Page implements HasForms
             'success_page_message_en' => SiteSetting::get('success_page_message_en', ''),
             'success_page_message_ar' => SiteSetting::get('success_page_message_ar', ''),
             'success_page_message_color' => SiteSetting::get('success_page_message_color', 'blue'),
+
+            'image_compression_enabled' => (bool) SiteSetting::get('image_compression_enabled', true),
+            'image_compression_quality' => (string) SiteSetting::get('image_compression_quality', 75),
+            'image_compression_max_width' => (string) SiteSetting::get('image_compression_max_width', 2000),
+            'image_compression_max_height' => (string) SiteSetting::get('image_compression_max_height', 2000),
         ]);
     }
 
@@ -314,6 +322,49 @@ class GeneralSettings extends Page implements HasForms
                                                 ->options(collect(config('fonts', []))->map(fn ($font) => $font['label']))
                                                 ->native(false)
                                                 ->required(),
+                                        ]),
+                                    ]),
+                            ]),
+
+                        Tab::make(__('general_settings.tabs.media'))
+                            ->icon('heroicon-o-photo')
+                            ->schema([
+                                Section::make(__('general_settings.sections.image_compression'))
+                                    ->description(__('general_settings.sections.image_compression_desc'))
+                                    ->schema([
+                                        Toggle::make('image_compression_enabled')
+                                            ->label(__('general_settings.fields.image_compression_enabled'))
+                                            ->helperText(__('general_settings.fields.image_compression_enabled_helper'))
+                                            ->live(),
+
+                                        Grid::make(3)->schema([
+                                            TextInput::make('image_compression_quality')
+                                                ->label(__('general_settings.fields.image_compression_quality'))
+                                                ->helperText(__('general_settings.fields.image_compression_quality_helper'))
+                                                ->numeric()
+                                                ->minValue(1)
+                                                ->maxValue(100)
+                                                ->suffix('%')
+                                                ->required()
+                                                ->visible(fn (Get $get) => (bool) $get('image_compression_enabled')),
+
+                                            TextInput::make('image_compression_max_width')
+                                                ->label(__('general_settings.fields.image_compression_max_width'))
+                                                ->helperText(__('general_settings.fields.image_compression_max_width_helper'))
+                                                ->numeric()
+                                                ->minValue(100)
+                                                ->suffix('px')
+                                                ->required()
+                                                ->visible(fn (Get $get) => (bool) $get('image_compression_enabled')),
+
+                                            TextInput::make('image_compression_max_height')
+                                                ->label(__('general_settings.fields.image_compression_max_height'))
+                                                ->helperText(__('general_settings.fields.image_compression_max_height_helper'))
+                                                ->numeric()
+                                                ->minValue(100)
+                                                ->suffix('px')
+                                                ->required()
+                                                ->visible(fn (Get $get) => (bool) $get('image_compression_enabled')),
                                         ]),
                                     ]),
                             ]),
@@ -680,6 +731,9 @@ class GeneralSettings extends Page implements HasForms
             'success_page_message_en' => 'text',
             'success_page_message_ar' => 'text',
             'success_page_message_color' => 'text',
+            'image_compression_quality' => 'number',
+            'image_compression_max_width' => 'number',
+            'image_compression_max_height' => 'number',
         ];
 
         foreach ($typed as $key => $type) {
@@ -704,6 +758,7 @@ class GeneralSettings extends Page implements HasForms
             'module_cms_enabled',
             'module_pos_enabled',
             'module_pos_shop_enabled',
+            'image_compression_enabled',
         ];
 
         foreach ($booleans as $key) {

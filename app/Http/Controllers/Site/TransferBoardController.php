@@ -26,6 +26,20 @@ class TransferBoardController extends Controller
         ));
     }
 
+    public function show(int $id): View
+    {
+        $post = TransferPost::visible()
+            ->with(['fromCity', 'fromCountry', 'toCity', 'toCountry'])
+            ->findOrFail($id);
+
+        $title = $post->fromCity?->name . ' → ' . $post->toCity?->name . ' — ' . SiteSetting::siteName();
+
+        return view('site.transfer-board.show', [
+            'post' => $post,
+            'seoTitle' => $title,
+        ]);
+    }
+
     public function create(): View
     {
         return view('site.transfer-board.create', [

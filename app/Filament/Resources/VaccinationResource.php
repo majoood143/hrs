@@ -32,6 +32,21 @@ class VaccinationResource extends Resource
 
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-puzzle-piece';
 
+    public static function getModelLabel(): string
+    {
+        return __('admin_vaccination.navigation.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('admin_vaccination.navigation.plural');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin_vaccination.navigation.plural');
+    }
+
     public static function getNavigationBadge(): ?string
     {
         return static::$model::count();

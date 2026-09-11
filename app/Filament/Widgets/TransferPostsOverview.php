@@ -18,8 +18,8 @@ class TransferPostsOverview extends StatsOverviewWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Transfer Posts', TransferPost::count())
-                ->description(TransferPost::where('status', 'active')->count() . ' active')
+            Stat::make(__('admin_widgets.transfer_posts_overview.stat_label'), TransferPost::count())
+                ->description(__('admin_widgets.transfer_posts_overview.active_suffix', ['count' => TransferPost::where('status', 'active')->count()]))
                 ->icon('heroicon-o-truck'),
         ];
     }
