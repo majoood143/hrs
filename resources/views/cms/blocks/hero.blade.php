@@ -6,7 +6,7 @@
 
 @if(count($slides))
 <section data-hero-slider data-autoplay="{{ $autoplay }}" data-autoplay-delay="{{ $autoplayDelay }}"
-    class="relative overflow-hidden" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+    class="relative z-0 overflow-hidden" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
     <div class="swiper hero-swiper min-h-[70vh]">
         <div class="swiper-wrapper">
             @foreach($slides as $slide)
@@ -28,9 +28,9 @@
                     </div>
 
                     <div class="mx-auto flex max-w-4xl flex-col items-center px-6 py-28 text-center {{ $hasImage ? 'text-white' : 'text-warm-950' }}">
-                        <span data-hero-eyebrow class="section-eyebrow {{ $hasImage ? '!text-warm-200' : '' }}">
-                            🐴 {{ __('A warmer way to move horses') }}
-                        </span>
+                        {{-- <span data-hero-eyebrow class="section-eyebrow {{ $hasImage ? '!text-warm-200' : '' }}">
+                            {{ __('A warmer way to move horses') }}
+                        </span> --}}
 
                         <h1 data-hero-heading class="mt-4 text-balance font-display text-4xl font-semibold leading-tight sm:text-5xl md:text-6xl">
                             {{ $heading }}
