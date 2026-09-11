@@ -25,6 +25,10 @@
     @endif
 
     <title>{{ $seoTitle ?? \App\Models\SiteSetting::siteName() }}</title>
+
+    @if ($faviconUrl = \App\Models\SiteSetting::faviconUrl())
+        <link rel="icon" href="{{ $faviconUrl }}">
+    @endif
     @if (!empty($seoDescription))
         <meta name="description" content="{{ $seoDescription }}">
     @endif
@@ -74,6 +78,7 @@
         $bodyFont = $fonts[$theme['body_font']];
         $primaryShades = \App\Support\ColorPalette::shades($theme['primary']);
         $secondaryShades = \App\Support\ColorPalette::shades($theme['secondary']);
+        $accentShades = \App\Support\ColorPalette::shades($theme['accent']);
         $buttonHoverShade = \App\Support\ColorPalette::shades($theme['button_color'])[700];
     @endphp
 
@@ -93,6 +98,9 @@
             --color-clay-50: {{ $secondaryShades[50] }};
             --color-clay-600: {{ $secondaryShades[600] }};
             --color-clay-700: {{ $secondaryShades[700] }};
+            --color-accent-50: {{ $accentShades[50] }};
+            --color-accent-600: {{ $accentShades[600] }};
+            --color-accent-700: {{ $accentShades[700] }};
             --font-display: '{{ $headingFont['label'] }}',
             {{ $headingFont['fallback'] }};
             --font-sans: '{{ $bodyFont['label'] }}',
@@ -120,8 +128,13 @@
         <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
             <a href="{{ url('/') }}"
                 class="flex min-w-0 items-center gap-2 font-display text-lg font-semibold text-warm-800 sm:text-xl">
-                <span class="text-2xl">🐴</span>
-                <span class="truncate">{{ \App\Models\SiteSetting::siteName() }}</span>
+                @if ($siteLogoUrl = \App\Models\SiteSetting::siteLogoUrl())
+                    <img src="{{ $siteLogoUrl }}" alt="{{ \App\Models\SiteSetting::siteName() }}"
+                        class="h-8 w-auto max-w-40 object-contain sm:h-9">
+                @else
+                    <span class="text-2xl">🐴</span>
+                    <span class="truncate">{{ \App\Models\SiteSetting::siteName() }}</span>
+                @endif
             </a>
 
             <nav class="hidden items-center gap-6 text-sm font-medium text-warm-800 lg:flex xl:gap-8"
@@ -129,29 +142,11 @@
                 @php($headerMenu = \App\Models\CmsMenu::query()->where('location', 'header')->with('items.children')->first())
                 @forelse(($headerMenu?->items ?? collect()) as $item)
                     <a href="{{ $item->resolvedUrl() }}" target="{{ $item->target }}"
-                        class="whitespace-nowrap transition hover:text-warm-600">{{ $item->label }}</a>
+                        class="{{ $item->is_button ? 'btn-warm !py-2 !px-5 text-sm' : 'whitespace-nowrap transition hover:text-warm-600' }}">{{ $item->label }}</a>
                 @empty
                     <a href="{{ url('/') }}" class="whitespace-nowrap transition hover:text-warm-600">{{ __('Home') }}</a>
                     <a href="{{ url('/blog') }}" class="whitespace-nowrap transition hover:text-warm-600">{{ __('Stories') }}</a>
                 @endforelse
-                <a href="{{ url('/stables') }}" class="whitespace-nowrap transition hover:text-warm-600">
-                    {{ __('stables.nav_label') }}
-                </a>
-                <a href="{{ url('/clinics') }}" class="whitespace-nowrap transition hover:text-warm-600">
-                    {{ __('clinics.nav_label') }}
-                </a>
-                <a href="{{ url('/horses-for-sale') }}" class="whitespace-nowrap transition hover:text-warm-600">
-                    {{ __('horses-for-sale.nav_label') }}
-                </a>
-                <a href="{{ url('/farriers') }}" class="whitespace-nowrap transition hover:text-warm-600">
-                    {{ __('farriers.nav_label') }}
-                </a>
-                <a href="{{ url('/tools-for-sale') }}" class="whitespace-nowrap transition hover:text-warm-600">
-                    {{ __('tools-for-sale.nav_label') }}
-                </a>
-                <a href="{{ url('/transfer-board') }}" class="btn-warm !py-2 !px-5 text-sm">
-                    {{ __('Find a Transfer') }}
-                </a>
                 <x-language-switcher />
             </nav>
 
@@ -178,36 +173,13 @@
             <nav class="flex flex-col gap-1 px-4 py-4" aria-label="{{ __('Mobile') }}">
                 @forelse(($headerMenu?->items ?? collect()) as $item)
                     <a href="{{ $item->resolvedUrl() }}" target="{{ $item->target }}"
-                        class="rounded-xl px-3 py-3 text-base font-medium text-warm-800 transition hover:bg-warm-200/60">{{ $item->label }}</a>
+                        class="{{ $item->is_button ? 'btn-warm mt-2 w-full justify-center' : 'rounded-xl px-3 py-3 text-base font-medium text-warm-800 transition hover:bg-warm-200/60' }}">{{ $item->label }}</a>
                 @empty
                     <a href="{{ url('/') }}"
                         class="rounded-xl px-3 py-3 text-base font-medium text-warm-800 transition hover:bg-warm-200/60">{{ __('Home') }}</a>
                     <a href="{{ url('/blog') }}"
                         class="rounded-xl px-3 py-3 text-base font-medium text-warm-800 transition hover:bg-warm-200/60">{{ __('Stories') }}</a>
                 @endforelse
-                <a href="{{ url('/stables') }}"
-                    class="rounded-xl px-3 py-3 text-base font-medium text-warm-800 transition hover:bg-warm-200/60">
-                    {{ __('stables.nav_label') }}
-                </a>
-                <a href="{{ url('/clinics') }}"
-                    class="rounded-xl px-3 py-3 text-base font-medium text-warm-800 transition hover:bg-warm-200/60">
-                    {{ __('clinics.nav_label') }}
-                </a>
-                <a href="{{ url('/horses-for-sale') }}"
-                    class="rounded-xl px-3 py-3 text-base font-medium text-warm-800 transition hover:bg-warm-200/60">
-                    {{ __('horses-for-sale.nav_label') }}
-                </a>
-                <a href="{{ url('/farriers') }}"
-                    class="rounded-xl px-3 py-3 text-base font-medium text-warm-800 transition hover:bg-warm-200/60">
-                    {{ __('farriers.nav_label') }}
-                </a>
-                <a href="{{ url('/tools-for-sale') }}"
-                    class="rounded-xl px-3 py-3 text-base font-medium text-warm-800 transition hover:bg-warm-200/60">
-                    {{ __('tools-for-sale.nav_label') }}
-                </a>
-                <a href="{{ url('/transfer-board') }}" class="btn-warm mt-2 w-full justify-center">
-                    {{ __('Find a Transfer') }}
-                </a>
             </nav>
         </div>
     </header>
@@ -339,10 +311,21 @@
                 </div>
             </div>
 
-            <p class="mt-12 text-xs text-warm-900/50">
-                &copy; {{ now()->year }} {{ \App\Models\SiteSetting::siteName() }}.
-                {{ __('All rights reserved.') }}
-            </p>
+            <div class="mt-12 flex flex-col gap-4 border-t border-warm-200/60 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-xs text-warm-900/50">
+                    &copy; {{ now()->year }} {{ \App\Models\SiteSetting::siteName() }}.
+                    {{ __('All rights reserved.') }}
+                </p>
+                @php($legalMenu = \App\Models\CmsMenu::query()->where('location', 'footer_legal')->with('items')->first())
+                <ul class="flex flex-wrap gap-x-6 gap-y-2 text-xs text-warm-900/60">
+                    @forelse(($legalMenu?->items ?? collect()) as $item)
+                        <li><a href="{{ $item->resolvedUrl() }}" class="hover:text-warm-600">{{ $item->label }}</a></li>
+                    @empty
+                        <li><a href="{{ url('/privacy-policy') }}" class="hover:text-warm-600">{{ __('Privacy Policy') }}</a></li>
+                        <li><a href="{{ url('/terms-and-conditions') }}" class="hover:text-warm-600">{{ __('Terms & Conditions') }}</a></li>
+                    @endforelse
+                </ul>
+            </div>
         </div>
     </footer>
 

@@ -7,12 +7,14 @@ use App\Models\City;
 use App\Models\Country;
 use App\Models\SiteSetting;
 use App\Models\TransferPost;
+use App\Support\ImageCompressor;
 use App\Support\Seo;
 use Gregwar\Captcha\CaptchaBuilder;
 use Gregwar\Captcha\PhraseBuilder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use MarcoGermani87\FilamentCaptcha\Rules\Captcha;
 
@@ -57,6 +59,7 @@ class TransferBoardController extends Controller
             'capacity' => ['required', 'integer', 'min:1'],
             'transfer_date' => ['required', 'date', 'after_or_equal:today'],
             'price' => ['nullable', 'required_if:type,offer', 'numeric', 'min:0'],
+            'cover_photo' => ['nullable', 'image', 'max:4096'],
             'contact_number' => ['required', 'string', 'max:30'],
             'captcha' => ['required', new Captcha],
         ], [], [
@@ -66,12 +69,21 @@ class TransferBoardController extends Controller
             'capacity' => __('transportation.capacity'),
             'transfer_date' => __('transportation.transfer_date'),
             'price' => __('transportation.price'),
+            'cover_photo' => __('transportation.cover_photo'),
             'contact_number' => __('transportation.contact_number'),
             'captcha' => __('transportation.captcha_label'),
         ]);
 
         $fromCity = City::with('region')->findOrFail($validated['from_city_id']);
         $toCity = City::with('region')->findOrFail($validated['to_city_id']);
+
+        $coverPhotoPath = null;
+
+        if ($request->hasFile('cover_photo')) {
+            $coverPhotoPath = $request->file('cover_photo')->store('transfer-board/covers', 'public');
+
+            ImageCompressor::compress(Storage::disk('public')->path($coverPhotoPath));
+        }
 
         TransferPost::create([
             'type' => $validated['type'],
@@ -84,6 +96,7 @@ class TransferBoardController extends Controller
             'capacity' => $validated['capacity'],
             'transfer_date' => $validated['transfer_date'],
             'price' => $validated['type'] === 'offer' ? $validated['price'] : null,
+            'cover_photo' => $coverPhotoPath,
             'contact_number' => $validated['contact_number'],
             'status' => 'active',
         ]);

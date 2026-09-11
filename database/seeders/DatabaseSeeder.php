@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(HorseWebsiteSeeder::class);
         $this->call(ColorSeeder::class);
+        $this->call(TypeSeeder::class);
         $this->call(GenderSeeder::class);
         $this->call(RegionSeeder::class);
         $this->call(CitySeeder::class);

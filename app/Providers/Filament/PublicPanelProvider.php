@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Http\Middleware\SetLocale;
+use App\Models\SiteSetting;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
@@ -25,6 +26,7 @@ class PublicPanelProvider extends PanelProvider
             ->id('public')
             ->path('transportation')
             ->brandName('Horse Transfer Service')
+            ->favicon(fn () => SiteSetting::faviconUrl())
             ->colors([
                 'primary' => Color::Amber,
             ])

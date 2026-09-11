@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class TransferPost extends Model
 {
@@ -19,6 +20,7 @@ class TransferPost extends Model
         'capacity',
         'transfer_date',
         'price',
+        'cover_photo',
         'contact_number',
         'status',
     ];
@@ -63,5 +65,10 @@ class TransferPost extends Model
     {
         return $query->where('status', 'active')
             ->where('transfer_date', '>=', now()->toDateString());
+    }
+
+    public function getCoverPhotoUrlAttribute(): ?string
+    {
+        return $this->cover_photo ? Storage::disk('public')->url($this->cover_photo) : null;
     }
 }

@@ -23,6 +23,7 @@ use App\Models\Setting;
 use Filament\Forms\Components\FileUpload;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Spatie\MediaLibrary\MediaCollections\Events\MediaHasBeenAddedEvent;
+use Illuminate\Support\Facades\Gate;
 
 
 
@@ -45,6 +46,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(SettingsService $settings): void
     {
         //
+        Gate::define('viewApiDocs', function ($user) {
+            return $user?->hasRole('super_admin') ?? false;
+        });
+
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $switch
                 ->locales(array_keys(config('languages.available', ['en' => [], 'ar' => []])))

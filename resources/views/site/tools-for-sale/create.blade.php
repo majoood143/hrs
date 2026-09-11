@@ -151,7 +151,10 @@
                     </div>
                     <div class="flex items-center justify-between px-5 py-3">
                         <dt class="text-warm-900/60">{{ __('tools-for-sale.price') }}</dt>
-                        <dd data-review="price" class="font-semibold text-warm-900"></dd>
+                        <dd class="flex items-center gap-1 font-semibold text-warm-900">
+                            <x-currency-symbol />
+                            <span data-review="price"></span>
+                        </dd>
                     </div>
                     <div class="flex items-center justify-between px-5 py-3">
                         <dt class="text-warm-900/60">{{ __('tools-for-sale.contact_number') }}</dt>

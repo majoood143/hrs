@@ -19,15 +19,15 @@ return [
     'available' => [
         'en' => [
             'name' => 'English',
-            'native' => 'English',
+            'native' => 'EN',
             'dir' => 'ltr',
-            'flag' => '🇬🇧',
+            //'flag' => '🇬🇧',
         ],
         'ar' => [
             'name' => 'Arabic',
-            'native' => 'العربية',
+            'native' => 'عربي',
             'dir' => 'rtl',
-            'flag' => '🇴🇲',
+            //'flag' => '🇴🇲',
         ],
     ],
 

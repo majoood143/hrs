@@ -71,6 +71,7 @@ class GeneralSettings extends Page implements HasForms
             'favicon' => SiteSetting::get('favicon'),
             'primary_color' => SiteSetting::get('primary_color', '#05602b'),
             'secondary_color' => SiteSetting::get('secondary_color', '#0da74c'),
+            'accent_color' => SiteSetting::get('accent_color', '#0ea5e9'),
             'panel_primary_color' => SiteSetting::get('panel_primary_color', '#16a34a'),
             'button_color' => SiteSetting::get('button_color', ''),
             'button_text_color' => SiteSetting::get('button_text_color', '#ffffff'),
@@ -280,7 +281,7 @@ class GeneralSettings extends Page implements HasForms
                                 Section::make(__('general_settings.sections.colors'))
                                     ->description(__('general_settings.sections.colors_desc'))
                                     ->schema([
-                                        Grid::make(3)->schema([
+                                        Grid::make(4)->schema([
                                             ColorPicker::make('primary_color')
                                                 ->label(__('general_settings.fields.primary_color'))
                                                 ->helperText(__('general_settings.fields.primary_color_helper')),
@@ -288,6 +289,10 @@ class GeneralSettings extends Page implements HasForms
                                             ColorPicker::make('secondary_color')
                                                 ->label(__('general_settings.fields.secondary_color'))
                                                 ->helperText(__('general_settings.fields.secondary_color_helper')),
+
+                                            ColorPicker::make('accent_color')
+                                                ->label(__('general_settings.fields.accent_color'))
+                                                ->helperText(__('general_settings.fields.accent_color_helper')),
 
                                             ColorPicker::make('panel_primary_color')
                                                 ->label(__('general_settings.fields.panel_primary_color'))
@@ -702,6 +707,7 @@ class GeneralSettings extends Page implements HasForms
             'favicon' => 'file',
             'primary_color' => 'color',
             'secondary_color' => 'color',
+            'accent_color' => 'color',
             'panel_primary_color' => 'color',
             'button_color' => 'color',
             'button_text_color' => 'color',

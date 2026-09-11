@@ -2,7 +2,7 @@
     $errorStep = 0;
     if ($errors->hasAny(['from_city_id', 'to_city_id'])) {
         $errorStep = 1;
-    } elseif ($errors->hasAny(['capacity', 'transfer_date', 'price', 'contact_number'])) {
+    } elseif ($errors->hasAny(['capacity', 'transfer_date', 'price', 'cover_photo', 'contact_number'])) {
         $errorStep = 2;
     } elseif ($errors->hasAny(['captcha'])) {
         $errorStep = 3;
@@ -43,7 +43,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('transfer-board.store') }}" class="mt-8" novalidate>
+        <form method="POST" action="{{ route('transfer-board.store') }}" class="mt-8" enctype="multipart/form-data" novalidate>
             @csrf
 
             {{-- Step 1: Type --}}
@@ -128,6 +128,14 @@
                     <div>
                         <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('transportation.contact_number') }}</label>
                         <input type="tel" name="contact_number" required value="{{ old('contact_number') }}" class="w-full rounded-xl border border-warm-200 bg-warm-50 px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('transportation.cover_photo_optional') }}</label>
+                        <div class="flex items-center gap-4">
+                            <img data-photo-preview class="hidden h-20 w-20 rounded-xl object-cover" alt="">
+                            <input type="file" name="cover_photo" accept="image/*" data-photo-input class="block w-full text-sm text-warm-900 file:mr-4 file:rounded-full file:border-0 file:bg-warm-900 file:px-4 file:py-2 file:text-xs file:font-bold file:text-white">
+                        </div>
+                        <p class="mt-1 text-xs text-warm-900/50">{{ __('transportation.photo_upload_hint') }}</p>
                     </div>
                 </div>
             </div>

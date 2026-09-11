@@ -1,30 +1,88 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Swiper from 'swiper';
+import { Autoplay, EffectCreative, Pagination, Keyboard, A11y } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/effect-creative';
+import 'swiper/css/pagination';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-function heroTimeline() {
-    const hero = document.querySelector('[data-hero]');
-    if (!hero || reduceMotion) return;
+function heroSlideshow() {
+    const root = document.querySelector('[data-hero-slider]');
+    if (!root) return;
 
-    const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-    const eyebrow = hero.querySelector('[data-hero-eyebrow]');
-    const heading = hero.querySelector('[data-hero-heading]');
-    const sub = hero.querySelector('[data-hero-sub]');
-    const ctas = hero.querySelectorAll('[data-hero-cta]');
-    const image = hero.querySelector('[data-hero-image]');
+    const container = root.querySelector('.hero-swiper');
+    if (!container) return;
 
-    gsap.set([eyebrow, heading, sub, ...ctas], { opacity: 0, y: 24 });
-    if (image) gsap.set(image, { opacity: 0, scale: 1.05 });
+    const slideCount = container.querySelectorAll('.swiper-slide').length;
+    const autoplayEnabled = root.dataset.autoplay !== 'false' && !reduceMotion && slideCount > 1;
+    const delay = parseInt(root.dataset.autoplayDelay ?? '6000', 10);
 
-    tl.to(eyebrow, { opacity: 1, y: 0, duration: 0.5 })
-        .to(heading, { opacity: 1, y: 0, duration: 0.7 }, '-=0.3')
-        .to(sub, { opacity: 1, y: 0, duration: 0.6 }, '-=0.4')
-        .to(ctas, { opacity: 1, y: 0, duration: 0.5, stagger: 0.1 }, '-=0.3');
+    function animateSlide(slideEl) {
+        if (!slideEl) return;
 
-    if (image) tl.to(image, { opacity: 1, scale: 1, duration: 1 }, '-=0.9');
+        const bg = slideEl.querySelector('[data-hero-slide-image]');
+        const eyebrow = slideEl.querySelector('[data-hero-eyebrow]');
+        const heading = slideEl.querySelector('[data-hero-heading]');
+        const sub = slideEl.querySelector('[data-hero-sub]');
+        const ctas = slideEl.querySelectorAll('[data-hero-cta]');
+        const targets = [eyebrow, heading, sub, ...ctas].filter(Boolean);
+
+        if (reduceMotion) {
+            gsap.set(targets, { opacity: 1, y: 0 });
+            if (bg) gsap.set(bg, { scale: 1 });
+            return;
+        }
+
+        gsap.set(targets, { opacity: 0, y: 24 });
+
+        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+        if (eyebrow) tl.to(eyebrow, { opacity: 1, y: 0, duration: 0.5 });
+        if (heading) tl.to(heading, { opacity: 1, y: 0, duration: 0.7 }, '-=0.3');
+        if (sub) tl.to(sub, { opacity: 1, y: 0, duration: 0.6 }, '-=0.4');
+        if (ctas.length) tl.to(ctas, { opacity: 1, y: 0, duration: 0.5, stagger: 0.1 }, '-=0.3');
+
+        if (bg) {
+            gsap.killTweensOf(bg);
+            gsap.fromTo(bg, { scale: 1 }, { scale: 1.12, duration: delay / 1000 + 1.5, ease: 'none' });
+        }
+    }
+
+    const swiper = new Swiper(container, {
+        modules: [Autoplay, EffectCreative, Pagination, Keyboard, A11y],
+        effect: 'creative',
+        creativeEffect: {
+            prev: { shadow: true, translate: [0, 0, -300], opacity: 0.6 },
+            next: { translate: ['100%', 0, 0] },
+        },
+        speed: reduceMotion ? 0 : 900,
+        loop: slideCount > 1,
+        keyboard: { enabled: true },
+        a11y: { enabled: true },
+        pagination: slideCount > 1 ? {
+            el: root.querySelector('[data-hero-pagination]'),
+            clickable: true,
+        } : false,
+        autoplay: autoplayEnabled ? {
+            delay,
+            disableOnInteraction: false,
+            pauseOnMouseEnter: true,
+        } : false,
+        on: {
+            init(sw) {
+                animateSlide(sw.slides[sw.activeIndex]);
+            },
+            slideChangeTransitionStart(sw) {
+                animateSlide(sw.slides[sw.activeIndex]);
+            },
+        },
+    });
+
+    root.addEventListener('focusin', () => swiper.autoplay?.stop());
+    root.addEventListener('focusout', () => swiper.autoplay?.start());
 }
 
 function revealOnScroll() {
@@ -350,6 +408,19 @@ function transferBoardWizard() {
     wizard.querySelectorAll('[name="type"]').forEach((input) => input.addEventListener('change', syncPriceVisibility));
     syncPriceVisibility();
 
+    const photoInput = wizard.querySelector('[data-photo-input]');
+    const photoPreview = wizard.querySelector('[data-photo-preview]');
+    photoInput?.addEventListener('change', () => {
+        const file = photoInput.files?.[0];
+        if (!file || !photoPreview) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            photoPreview.src = e.target.result;
+            photoPreview.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    });
+
     function fillReview() {
         const setReview = (key, value) => {
             const el = wizard.querySelector(`[data-review="${key}"]`);
@@ -449,7 +520,7 @@ function horseSaleWizard() {
 
         setReview('name', wizard.querySelector('[name="en_name"]')?.value);
         setReview('city', citySelect?.selectedOptions[0]?.textContent ?? '');
-        setReview('price', priceInput?.value ? (wizard.dataset.currencySymbol ?? '') + priceInput.value : '');
+        setReview('price', priceInput?.value ?? '');
         setReview('contact', wizard.querySelector('[name="contact_number"]')?.value);
     }
 
@@ -617,7 +688,7 @@ function toolSaleWizard() {
 
         setReview('name', wizard.querySelector('[name="en_name"]')?.value);
         setReview('city', citySelect?.selectedOptions[0]?.textContent ?? '');
-        setReview('price', priceInput?.value ? (wizard.dataset.currencySymbol ?? '') + priceInput.value : '');
+        setReview('price', priceInput?.value ?? '');
         setReview('contact', wizard.querySelector('[name="contact_number"]')?.value);
     }
 
@@ -631,7 +702,7 @@ function toolSaleWizard() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    heroTimeline();
+    heroSlideshow();
     revealOnScroll();
     horseCardTilt();
     animatedCounters();

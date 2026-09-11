@@ -31,7 +31,7 @@
             <div class="mx-auto max-w-3xl px-6 pb-16">
                 <div class="flex flex-wrap gap-2">
                     @foreach($post->tags as $tag)
-                        <a href="{{ url('/blog/tag/' . $tag->slug) }}" class="rounded-full bg-warm-100 px-3 py-1 text-xs font-semibold text-warm-700 hover:bg-warm-200">
+                        <a href="{{ url('/blog/tag/' . $tag->slug) }}" class="badge-accent">
                             #{{ $tag->getTranslation('name', app()->getLocale()) }}
                         </a>
                     @endforeach

@@ -233,36 +233,42 @@
     @else
         <div data-reveal-group class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             @foreach($posts as $post)
-                <article data-reveal-item class="card-warm p-5">
-                    <span class="inline-block rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide {{ $post->type === 'offer' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700' }}">
-                        {{ $post->type === 'offer' ? __('transportation.type_offer') : __('transportation.type_request') }}
-                    </span>
+                <article data-reveal-item class="card-warm overflow-hidden {{ $post->cover_photo_url ? 'p-0' : 'p-5' }}">
+                    @if($post->cover_photo_url)
+                        <img src="{{ $post->cover_photo_url }}" alt="" class="h-40 w-full object-cover">
+                    @endif
 
-                    <p class="mt-3 font-display text-lg font-semibold text-warm-900">
-                        {{ $post->fromCity?->name }}, {{ $post->fromCountry?->name }}
-                        <span aria-hidden="true">→</span>
-                        {{ $post->toCity?->name }}, {{ $post->toCountry?->name }}
-                    </p>
+                    <div @class(['p-5' => $post->cover_photo_url])>
+                        <span class="inline-block rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wide {{ $post->type === 'offer' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700' }}">
+                            {{ $post->type === 'offer' ? __('transportation.type_offer') : __('transportation.type_request') }}
+                        </span>
 
-                    <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-warm-900/60">
-                        <span>📅 {{ $post->transfer_date->format('M d, Y') }}</span>
-                        <span>🐎 {{ trans_choice('transportation.spaces_available', $post->capacity, ['count' => $post->capacity]) }}</span>
+                        <p class="mt-3 font-display text-lg font-semibold text-warm-900">
+                            {{ $post->fromCity?->name }}, {{ $post->fromCountry?->name }}
+                            <span aria-hidden="true">→</span>
+                            {{ $post->toCity?->name }}, {{ $post->toCountry?->name }}
+                        </p>
+
+                        <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-warm-900/60">
+                            <span>📅 {{ $post->transfer_date->format('M d, Y') }}</span>
+                            <span>🐎 {{ trans_choice('transportation.spaces_available', $post->capacity, ['count' => $post->capacity]) }}</span>
+                        </div>
+
+                        <div class="mt-4 flex items-center justify-between border-t border-dashed border-warm-200 pt-4">
+                            @if($post->type === 'offer' && filled($post->price))
+                                <x-currency-price :amount="$post->price" class="font-display text-sm font-semibold text-warm-900" />
+                            @else
+                                <span class="font-display text-sm font-semibold text-warm-900">{{ __('transportation.budget_open') }}</span>
+                            @endif
+                            <button type="button" data-reveal-contact="{{ $post->contact_number }}" class="js-reveal rounded-full bg-warm-900 px-4 py-1.5 text-xs font-bold text-white">
+                                {{ __('transportation.contact_reveal') }}
+                            </button>
+                        </div>
+
+                        <a href="{{ route('transfer-board.show', $post->id) }}" class="btn-warm-outline mt-3 inline-flex w-full justify-center !py-2 text-sm">
+                            {{ __('transportation.view_details') }}
+                        </a>
                     </div>
-
-                    <div class="mt-4 flex items-center justify-between border-t border-dashed border-warm-200 pt-4">
-                        @if($post->type === 'offer' && filled($post->price))
-                            <x-currency-price :amount="$post->price" class="font-display text-sm font-semibold text-warm-900" />
-                        @else
-                            <span class="font-display text-sm font-semibold text-warm-900">{{ __('transportation.budget_open') }}</span>
-                        @endif
-                        <button type="button" data-reveal-contact="{{ $post->contact_number }}" class="js-reveal rounded-full bg-warm-900 px-4 py-1.5 text-xs font-bold text-white">
-                            {{ __('transportation.contact_reveal') }}
-                        </button>
-                    </div>
-
-                    <a href="{{ route('transfer-board.show', $post->id) }}" class="btn-warm-outline mt-3 inline-flex w-full justify-center !py-2 text-sm">
-                        {{ __('transportation.view_details') }}
-                    </a>
                 </article>
             @endforeach
         </div>

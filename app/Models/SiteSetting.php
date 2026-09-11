@@ -65,6 +65,27 @@ class SiteSetting extends Model
         return (string) static::get($key, '');
     }
 
+    public static function siteLogoUrl(): ?string
+    {
+        $path = static::get('site_logo');
+
+        return $path ? \Illuminate\Support\Facades\Storage::disk('public')->url($path) : null;
+    }
+
+    public static function appLogoUrl(): ?string
+    {
+        $path = static::get('app_logo');
+
+        return $path ? \Illuminate\Support\Facades\Storage::disk('public')->url($path) : null;
+    }
+
+    public static function faviconUrl(): ?string
+    {
+        $path = static::get('favicon');
+
+        return $path ? \Illuminate\Support\Facades\Storage::disk('public')->url($path) : null;
+    }
+
     /**
      * Configured currency, with sane fallbacks so every consumer (Filament
      * resources, blade views, JS) reads from a single, already-defaulted place.
@@ -92,12 +113,13 @@ class SiteSetting extends Model
      * Public-website theme values, with sane fallbacks so every consumer
      * (layout, CSS) reads from a single, already-defaulted place.
      *
-     * @return array{primary: string, secondary: string, button_color: string, button_text_color: string, heading_font: string, body_font: string}
+     * @return array{primary: string, secondary: string, accent: string, button_color: string, button_text_color: string, heading_font: string, body_font: string}
      */
     public static function branding(): array
     {
         $primary = static::get('primary_color', '#05602b');
         $secondary = static::get('secondary_color', '#0da74c');
+        $accent = static::get('accent_color', '#0ea5e9');
         $buttonColor = static::get('button_color', '');
         $fonts = config('fonts', []);
         $headingFont = static::get('heading_font', 'fraunces');
@@ -106,6 +128,7 @@ class SiteSetting extends Model
         return [
             'primary' => $primary,
             'secondary' => $secondary,
+            'accent' => $accent,
             'button_color' => $buttonColor !== '' ? $buttonColor : $primary,
             'button_text_color' => static::get('button_text_color', '') ?: '#ffffff',
             'heading_font' => array_key_exists($headingFont, $fonts) ? $headingFont : 'fraunces',

@@ -11,7 +11,11 @@ class CmsMenuItem extends Model
 {
     use HasTranslations;
 
-    protected $fillable = ['menu_id', 'parent_id', 'page_id', 'label', 'url', 'target', 'order'];
+    protected $fillable = ['menu_id', 'parent_id', 'page_id', 'label', 'url', 'route_name', 'target', 'is_button', 'order'];
+
+    protected $casts = [
+        'is_button' => 'boolean',
+    ];
 
     public array $translatable = ['label'];
 
@@ -41,6 +45,24 @@ class CmsMenuItem extends Model
             return $this->page->is_homepage ? '/' : '/' . $this->page->slug;
         }
 
+        if ($this->route_name && \Illuminate\Support\Facades\Route::has($this->route_name)) {
+            return route($this->route_name);
+        }
+
         return $this->url ?? '#';
+    }
+
+    public static function siteSectionOptions(): array
+    {
+        return [
+            'home' => __('Home'),
+            'blog.index' => __('Stories'),
+            'stables.index' => __('stables.nav_label'),
+            'clinics.index' => __('clinics.nav_label'),
+            'horses-for-sale.index' => __('horses-for-sale.nav_label'),
+            'farriers.index' => __('farriers.nav_label'),
+            'tools-for-sale.index' => __('tools-for-sale.nav_label'),
+            'transfer-board.index' => __('Find a Transfer'),
+        ];
     }
 }

@@ -12,8 +12,10 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -43,13 +45,27 @@ class CmsMenuItemsRelationManager extends RelationManager
                     ->options(fn () => CmsPage::query()->get()->mapWithKeys(fn (CmsPage $page) => [$page->id => $page->getTranslation('title', app()->getLocale())]))
                     ->searchable()
                     ->native(false)
-                    ->live(),
+                    ->live()
+                    ->afterStateUpdated(fn ($state, $set) => blank($state) ?: $set('route_name', null)),
+
+                Select::make('route_name')
+                    ->label(__('cms_menu_item.fields.site_section'))
+                    ->options(fn () => CmsMenuItem::siteSectionOptions())
+                    ->searchable()
+                    ->native(false)
+                    ->live()
+                    ->visible(fn ($get) => blank($get('page_id')))
+                    ->afterStateUpdated(fn ($state, $set) => blank($state) ?: $set('url', null)),
 
                 TextInput::make('url')
                     ->label(__('cms_menu_item.fields.url'))
                     ->url()
                     ->maxLength(255)
-                    ->visible(fn ($get) => blank($get('page_id'))),
+                    ->visible(fn ($get) => blank($get('page_id')) && blank($get('route_name'))),
+
+                Toggle::make('is_button')
+                    ->label(__('cms_menu_item.fields.is_button'))
+                    ->helperText(__('cms_menu_item.fields.is_button_helper')),
 
                 Select::make('target')
                     ->label(__('cms_menu_item.fields.target'))
@@ -83,6 +99,10 @@ class CmsMenuItemsRelationManager extends RelationManager
                 TextColumn::make('target')
                     ->label(__('cms_menu_item.columns.target'))
                     ->badge(),
+
+                IconColumn::make('is_button')
+                    ->label(__('cms_menu_item.fields.is_button'))
+                    ->boolean(),
 
                 TextColumn::make('order')
                     ->label(__('cms_menu_item.columns.order'))

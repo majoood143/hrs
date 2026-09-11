@@ -10,6 +10,7 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 
 class CmsBlocks
@@ -31,6 +32,7 @@ class CmsBlocks
             static::heading(),
             static::richText(),
             static::image(),
+            static::video(),
             static::columns(),
             static::divider(),
         ];
@@ -56,20 +58,42 @@ class CmsBlocks
             ->label(__('cms.blocks.hero'))
             ->icon('heroicon-o-photo')
             ->schema([
-                static::headingField(),
-                static::subheadingField(),
-                FileUpload::make('background_image')
-                    ->label(__('cms.blocks.background_image'))
-                    ->image()
-                    ->disk('public')
-                    ->directory('cms/hero')
+                Repeater::make('slides')
+                    ->label(__('cms.blocks.slides'))
+                    ->schema([
+                        static::headingField(),
+                        static::subheadingField(),
+                        FileUpload::make('background_image')
+                            ->label(__('cms.blocks.background_image'))
+                            ->image()
+                            ->disk('public')
+                            ->directory('cms/hero')
+                            ->required()
+                            ->columnSpanFull(),
+                        TranslatableInput::grid(fn ($code, $meta) => TextInput::make("primary_button_text.{$code}")
+                            ->label(__('cms.blocks.primary_button_text') . ' (' . $meta['native'] . ')')),
+                        TextInput::make('primary_button_url')->label(__('cms.blocks.primary_button_url')),
+                        TranslatableInput::grid(fn ($code, $meta) => TextInput::make("secondary_button_text.{$code}")
+                            ->label(__('cms.blocks.secondary_button_text') . ' (' . $meta['native'] . ')')),
+                        TextInput::make('secondary_button_url')->label(__('cms.blocks.secondary_button_url')),
+                    ])
+                    ->columns(2)
+                    ->minItems(1)
+                    ->defaultItems(1)
+                    ->reorderable()
+                    ->collapsible()
+                    ->itemLabel(fn (array $state): ?string => \App\Support\Localized::value($state, 'heading') ?: __('cms.blocks.slide'))
                     ->columnSpanFull(),
-                TranslatableInput::grid(fn ($code, $meta) => TextInput::make("primary_button_text.{$code}")
-                    ->label(__('cms.blocks.primary_button_text') . ' (' . $meta['native'] . ')')),
-                TextInput::make('primary_button_url')->label(__('cms.blocks.primary_button_url')),
-                TranslatableInput::grid(fn ($code, $meta) => TextInput::make("secondary_button_text.{$code}")
-                    ->label(__('cms.blocks.secondary_button_text') . ' (' . $meta['native'] . ')')),
-                TextInput::make('secondary_button_url')->label(__('cms.blocks.secondary_button_url')),
+                Toggle::make('autoplay')
+                    ->label(__('cms.blocks.autoplay'))
+                    ->default(true),
+                TextInput::make('autoplay_delay')
+                    ->label(__('cms.blocks.autoplay_delay'))
+                    ->helperText(__('cms.blocks.autoplay_delay_helper'))
+                    ->numeric()
+                    ->default(6000)
+                    ->minValue(2000)
+                    ->suffix('ms'),
             ])
             ->columns(2);
     }
@@ -231,6 +255,23 @@ class CmsBlocks
                     ->label(__('cms.blocks.caption') . ' (' . $meta['native'] . ')')),
                 TranslatableInput::grid(fn ($code, $meta) => TextInput::make("alt.{$code}")
                     ->label(__('cms.blocks.alt') . ' (' . $meta['native'] . ')')),
+            ]);
+    }
+
+    public static function video(): Block
+    {
+        return Block::make('video')
+            ->label(__('cms.blocks.video'))
+            ->icon('heroicon-o-play-circle')
+            ->schema([
+                Textarea::make('url')
+                    ->label(__('cms.blocks.video_url'))
+                    ->helperText(__('cms.blocks.video_url_helper'))
+                    ->rows(2)
+                    ->required()
+                    ->columnSpanFull(),
+                TranslatableInput::grid(fn ($code, $meta) => TextInput::make("caption.{$code}")
+                    ->label(__('cms.blocks.caption') . ' (' . $meta['native'] . ')')),
             ]);
     }
 

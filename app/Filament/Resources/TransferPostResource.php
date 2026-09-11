@@ -18,11 +18,13 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -145,6 +147,11 @@ class TransferPostResource extends Resource
                 TextInput::make('contact_number')
                     ->tel()
                     ->required(),
+                FileUpload::make('cover_photo')
+                    ->image()
+                    ->disk('public')
+                    ->directory('transfer-board/covers')
+                    ->columnSpanFull(),
             ])
             ->columns(2);
     }
@@ -153,6 +160,9 @@ class TransferPostResource extends Resource
     {
         return $table
             ->columns([
+                ImageColumn::make('cover_photo')
+                    ->disk('public')
+                    ->square(),
                 TextColumn::make('type')
                     ->badge()
                     ->color(fn (string $state): string => $state === 'offer' ? 'success' : 'info')
