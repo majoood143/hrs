@@ -66,6 +66,8 @@ return [
     'type_offer_hint' => 'أنا أنقل خيولًا ولدي مكان إضافي.',
     'type_request_hint' => 'أحتاج رحلة آمنة لحصاني.',
     'select_city' => 'اختر مدينة',
+    'select_country' => 'اختر الدولة',
+    'select_region' => 'اختر المنطقة',
     'step_of' => 'الخطوة :current من :total',
     'form_errors_title' => 'يرجى تصحيح ما يلي قبل نشر الإعلان:',
     'review_title' => 'المراجعة والتحقق',

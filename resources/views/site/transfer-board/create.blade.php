@@ -72,35 +72,30 @@
             {{-- Step 2: Route --}}
             <div data-step class="hidden">
                 <h2 class="font-display text-xl font-semibold text-warm-900">{{ __('transportation.route') }}</h2>
+                <script type="application/json" data-location-tree>{!! json_encode($locationTree, JSON_UNESCAPED_UNICODE) !!}</script>
                 <div class="mt-5 grid gap-5 sm:grid-cols-2">
-                    <div>
-                        <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('transportation.filter_from') }}</label>
-                        <select name="from_city_id" required class="w-full rounded-xl border border-warm-200 bg-warm-50 px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                    <div class="space-y-3" data-location-group="from">
+                        <label class="block text-sm font-semibold text-warm-800">{{ __('transportation.filter_from') }}</label>
+                        <select data-location-country class="w-full rounded-xl border border-warm-200 bg-warm-50 px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                            <option value="">{{ __('transportation.select_country') }}</option>
+                        </select>
+                        <select data-location-region required disabled class="w-full rounded-xl border border-warm-200 bg-warm-50 px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300 disabled:cursor-not-allowed disabled:opacity-50">
+                            <option value="">{{ __('transportation.select_region') }}</option>
+                        </select>
+                        <select name="from_city_id" data-location-city data-old-value="{{ old('from_city_id') }}" required disabled class="w-full rounded-xl border border-warm-200 bg-warm-50 px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300 disabled:cursor-not-allowed disabled:opacity-50">
                             <option value="">{{ __('transportation.select_city') }}</option>
-                            @foreach($countries as $country)
-                                @php($cities = $country->region->flatMap->city)
-                                @continue($cities->isEmpty())
-                                <optgroup label="{{ $country->name }}">
-                                    @foreach($cities as $city)
-                                        <option value="{{ $city->id }}" @selected((string) old('from_city_id') === (string) $city->id)>{{ $city->name }}</option>
-                                    @endforeach
-                                </optgroup>
-                            @endforeach
                         </select>
                     </div>
-                    <div>
-                        <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('transportation.filter_to') }}</label>
-                        <select name="to_city_id" required class="w-full rounded-xl border border-warm-200 bg-warm-50 px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                    <div class="space-y-3" data-location-group="to">
+                        <label class="block text-sm font-semibold text-warm-800">{{ __('transportation.filter_to') }}</label>
+                        <select data-location-country class="w-full rounded-xl border border-warm-200 bg-warm-50 px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                            <option value="">{{ __('transportation.select_country') }}</option>
+                        </select>
+                        <select data-location-region required disabled class="w-full rounded-xl border border-warm-200 bg-warm-50 px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300 disabled:cursor-not-allowed disabled:opacity-50">
+                            <option value="">{{ __('transportation.select_region') }}</option>
+                        </select>
+                        <select name="to_city_id" data-location-city data-old-value="{{ old('to_city_id') }}" required disabled class="w-full rounded-xl border border-warm-200 bg-warm-50 px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300 disabled:cursor-not-allowed disabled:opacity-50">
                             <option value="">{{ __('transportation.select_city') }}</option>
-                            @foreach($countries as $country)
-                                @php($cities = $country->region->flatMap->city)
-                                @continue($cities->isEmpty())
-                                <optgroup label="{{ $country->name }}">
-                                    @foreach($cities as $city)
-                                        <option value="{{ $city->id }}" @selected((string) old('to_city_id') === (string) $city->id)>{{ $city->name }}</option>
-                                    @endforeach
-                                </optgroup>
-                            @endforeach
                         </select>
                     </div>
                 </div>

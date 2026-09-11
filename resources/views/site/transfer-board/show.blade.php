@@ -17,7 +17,7 @@
                 <p class="section-eyebrow mt-4">{{ __('transportation.transfer_details_title') }}</p>
                 <h1 class="mt-2 font-display text-3xl font-semibold text-warm-900 sm:text-4xl">
                     {{ $post->fromCity?->name }}, {{ $post->fromCountry?->name }}
-                    <span aria-hidden="true">→</span>
+                    <span aria-hidden="true">{{ app()->getLocale() === 'ar' ? '←' : '→' }}</span>
                     {{ $post->toCity?->name }}, {{ $post->toCountry?->name }}
                 </p>
 
@@ -45,7 +45,7 @@
                     </button>
                 </div>
 
-                <x-share-buttons :url="url()->current()" :title="__('transportation.transfer_details_title') . ': ' . $post->fromCity?->name . ' → ' . $post->toCity?->name" />
+                <x-share-buttons :url="url()->current()" :title="__('transportation.transfer_details_title') . ': ' . $post->fromCity?->name . ' ' . (app()->getLocale() === 'ar' ? '←' : '→') . ' ' . $post->toCity?->name" />
             </div>
         </div>
     </div>

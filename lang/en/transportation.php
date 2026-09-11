@@ -66,6 +66,8 @@ return [
     'type_offer_hint' => "I'm transporting horses and have room to spare.",
     'type_request_hint' => 'I need a safe ride for my horse.',
     'select_city' => 'Select a city',
+    'select_country' => 'Select a country',
+    'select_region' => 'Select a region',
     'step_of' => 'Step :current of :total',
     'form_errors_title' => "Please fix the following before we can post this:",
     'review_title' => 'Review & verify',

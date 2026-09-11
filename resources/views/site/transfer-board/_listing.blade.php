@@ -245,7 +245,7 @@
 
                         <p class="mt-3 font-display text-lg font-semibold text-warm-900">
                             {{ $post->fromCity?->name }}, {{ $post->fromCountry?->name }}
-                            <span aria-hidden="true">→</span>
+                            <span aria-hidden="true">{{ app()->getLocale() === 'ar' ? '←' : '→' }}</span>
                             {{ $post->toCity?->name }}, {{ $post->toCountry?->name }}
                         </p>
 

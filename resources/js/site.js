@@ -445,8 +445,86 @@ function transferBoardWizard() {
         if (img) img.src = img.dataset.src + '?t=' + Date.now();
     });
 
+    initLocationCascades(wizard);
+
     const errorStep = parseInt(wizard.dataset.errorStep ?? '0', 10);
     show(Number.isNaN(errorStep) ? 0 : errorStep);
+}
+
+function initLocationCascades(wizard) {
+    const treeEl = wizard.querySelector('[data-location-tree]');
+    if (!treeEl) return;
+
+    let tree = [];
+    try {
+        tree = JSON.parse(treeEl.textContent || '[]');
+    } catch {
+        tree = [];
+    }
+
+    function populateSelect(select, items, placeholder) {
+        select.innerHTML = '';
+        const placeholderOption = document.createElement('option');
+        placeholderOption.value = '';
+        placeholderOption.textContent = placeholder;
+        select.appendChild(placeholderOption);
+        items.forEach((item) => {
+            const option = document.createElement('option');
+            option.value = item.id;
+            option.textContent = item.name;
+            select.appendChild(option);
+        });
+    }
+
+    function findCityLocation(cityId) {
+        for (const country of tree) {
+            for (const region of country.regions) {
+                const city = region.cities.find((c) => String(c.id) === String(cityId));
+                if (city) return { country, region };
+            }
+        }
+        return null;
+    }
+
+    wizard.querySelectorAll('[data-location-group]').forEach((group) => {
+        const countrySelect = group.querySelector('[data-location-country]');
+        const regionSelect = group.querySelector('[data-location-region]');
+        const citySelect = group.querySelector('[data-location-city]');
+        if (!countrySelect || !regionSelect || !citySelect) return;
+
+        const countryPlaceholder = countrySelect.querySelector('option')?.textContent ?? '';
+        const regionPlaceholder = regionSelect.querySelector('option')?.textContent ?? '';
+        const cityPlaceholder = citySelect.querySelector('option')?.textContent ?? '';
+
+        populateSelect(countrySelect, tree, countryPlaceholder);
+
+        countrySelect.addEventListener('change', () => {
+            const country = tree.find((c) => String(c.id) === countrySelect.value);
+            populateSelect(regionSelect, country ? country.regions : [], regionPlaceholder);
+            populateSelect(citySelect, [], cityPlaceholder);
+            regionSelect.disabled = !country;
+            citySelect.disabled = true;
+        });
+
+        regionSelect.addEventListener('change', () => {
+            const country = tree.find((c) => String(c.id) === countrySelect.value);
+            const region = country?.regions.find((r) => String(r.id) === regionSelect.value);
+            populateSelect(citySelect, region ? region.cities : [], cityPlaceholder);
+            citySelect.disabled = !region;
+        });
+
+        const oldValue = citySelect.dataset.oldValue;
+        const location = oldValue ? findCityLocation(oldValue) : null;
+        if (location) {
+            populateSelect(regionSelect, location.country.regions, regionPlaceholder);
+            populateSelect(citySelect, location.region.cities, cityPlaceholder);
+            countrySelect.value = String(location.country.id);
+            regionSelect.value = String(location.region.id);
+            citySelect.value = String(oldValue);
+            regionSelect.disabled = false;
+            citySelect.disabled = false;
+        }
+    });
 }
 
 function horseSaleWizard() {
