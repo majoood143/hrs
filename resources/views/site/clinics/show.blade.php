@@ -58,6 +58,35 @@
                     @endif
                 </div>
 
+                @if($clinic->phone || $clinic->website_url || $clinic->instagram_url)
+                    <div class="card-warm p-5">
+                        <h2 class="font-display text-base font-semibold text-warm-900">{{ __('clinics.contact') }}</h2>
+                        <ul class="mt-3 space-y-2 text-sm">
+                            @if($clinic->phone)
+                                <li>
+                                    <a href="tel:{{ $clinic->phone }}" class="flex items-center gap-2 text-warm-900/80 hover:text-warm-700">
+                                        📞 <span>{{ $clinic->phone }}</span>
+                                    </a>
+                                </li>
+                            @endif
+                            @if($clinic->website_url)
+                                <li>
+                                    <a href="{{ $clinic->website_url }}" target="_blank" rel="noopener" class="flex items-center gap-2 text-warm-900/80 hover:text-warm-700">
+                                        🌐 <span>{{ __('clinics.website') }}</span>
+                                    </a>
+                                </li>
+                            @endif
+                            @if($clinic->instagram_url)
+                                <li>
+                                    <a href="{{ $clinic->instagram_url }}" target="_blank" rel="noopener" class="flex items-center gap-2 text-warm-900/80 hover:text-warm-700">
+                                        📷 <span>{{ __('clinics.instagram') }}</span>
+                                    </a>
+                                </li>
+                            @endif
+                        </ul>
+                    </div>
+                @endif
+
                 <div class="card-warm p-5">
                     <h2 class="font-display text-base font-semibold text-warm-900">{{ __('clinics.opening_hours') }}</h2>
                     <dl class="mt-3 divide-y divide-warm-200 text-sm">

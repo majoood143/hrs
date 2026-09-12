@@ -138,6 +138,18 @@ class ClinicResource extends Resource
                                     ->url()
                                     ->maxLength(255)
                                     ->columnSpanFull(),
+                                TextInput::make('phone')
+                                    ->label('Contact Number')
+                                    ->tel()
+                                    ->maxLength(255),
+                                TextInput::make('website_url')
+                                    ->label('Website URL')
+                                    ->url()
+                                    ->maxLength(255),
+                                TextInput::make('instagram_url')
+                                    ->label('Instagram URL')
+                                    ->url()
+                                    ->maxLength(255),
                             ])->icon('heroicon-o-map-pin')
                             ->columns(3),
                         Tab::make('Description')

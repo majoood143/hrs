@@ -30,6 +30,9 @@ return [
     'closed' => 'Closed',
     'gallery' => 'Gallery',
     'back_to_clinics' => 'Back to Clinics',
+    'contact' => 'Contact',
+    'website' => 'Visit Website',
+    'instagram' => 'Instagram',
 
     'days' => [
         'mon' => 'Monday',
