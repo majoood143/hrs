@@ -1,10 +1,11 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Swiper from 'swiper';
-import { Autoplay, EffectCreative, Pagination, Keyboard, A11y } from 'swiper/modules';
+import { Autoplay, EffectCreative, Pagination, Navigation, Keyboard, A11y } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-creative';
 import 'swiper/css/pagination';
+import 'swiper/css/navigation';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -83,6 +84,28 @@ function heroSlideshow() {
 
     root.addEventListener('focusin', () => swiper.autoplay?.stop());
     root.addEventListener('focusout', () => swiper.autoplay?.start());
+}
+
+function horseGallerySlider() {
+    const root = document.querySelector('[data-gallery-slider]');
+    if (!root) return;
+
+    const container = root.querySelector('.gallery-swiper');
+    if (!container) return;
+
+    const slideCount = container.querySelectorAll('.swiper-slide').length;
+
+    new Swiper(container, {
+        modules: [Pagination, Navigation, Keyboard, A11y],
+        loop: slideCount > 1,
+        keyboard: { enabled: true },
+        a11y: { enabled: true },
+        pagination: { el: container.querySelector('.swiper-pagination'), clickable: true },
+        navigation: {
+            nextEl: container.querySelector('.swiper-button-next'),
+            prevEl: container.querySelector('.swiper-button-prev'),
+        },
+    });
 }
 
 function revealOnScroll() {
@@ -316,6 +339,21 @@ function contactReveal() {
             link.href = 'tel:' + number.replace(/[^0-9+]/g, '');
             link.className = button.className.replace('js-reveal', '');
             link.textContent = number;
+            button.replaceWith(link);
+        }, { once: true });
+    });
+}
+
+function passportReveal() {
+    document.querySelectorAll('[data-reveal-passport]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const url = button.dataset.revealPassport ?? '';
+            const link = document.createElement('a');
+            link.href = url;
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.className = button.className.replace('js-reveal', '');
+            link.innerHTML = button.innerHTML;
             button.replaceWith(link);
         }, { once: true });
     });
@@ -587,19 +625,62 @@ function horseSaleWizard() {
         reader.readAsDataURL(file);
     });
 
+    const galleryInput = wizard.querySelector('[data-gallery-input]');
+    const galleryPreviews = wizard.querySelector('[data-gallery-previews]');
+    galleryInput?.addEventListener('change', () => {
+        if (!galleryPreviews) return;
+        galleryPreviews.innerHTML = '';
+
+        const files = Array.from(galleryInput.files ?? []);
+        galleryPreviews.classList.toggle('hidden', files.length === 0);
+
+        files.forEach((file) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.alt = '';
+                img.className = 'h-16 w-16 rounded-lg object-cover';
+                galleryPreviews.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
     function fillReview() {
         const setReview = (key, value) => {
             const el = wizard.querySelector(`[data-review="${key}"]`);
             if (el) el.textContent = value || '—';
         };
 
+        const setOptionalRow = (key, value) => {
+            const row = wizard.querySelector(`[data-review-row="${key}"]`);
+            if (!row) return value;
+            row.classList.toggle('hidden', !value);
+            row.classList.toggle('flex', !!value);
+            setReview(key, value);
+            return value;
+        };
+
         const citySelect = wizard.querySelector('[name="city_id"]');
         const priceInput = wizard.querySelector('[name="price"]');
+        const birthCountrySelect = wizard.querySelector('[name="birth_country_id"]');
+        const passportFile = wizard.querySelector('[name="passport_document"]')?.files?.[0];
 
         setReview('name', wizard.querySelector('[name="en_name"]')?.value);
         setReview('city', citySelect?.selectedOptions[0]?.textContent ?? '');
         setReview('price', priceInput?.value ?? '');
         setReview('contact', wizard.querySelector('[name="contact_number"]')?.value);
+
+        const hasPedigree = [
+            setOptionalRow('dam', wizard.querySelector('[name="dam"]')?.value),
+            setOptionalRow('sire', wizard.querySelector('[name="sire"]')?.value),
+            setOptionalRow('birth_country', birthCountrySelect?.value ? birthCountrySelect.selectedOptions[0]?.textContent : ''),
+            setOptionalRow('passport_number', wizard.querySelector('[name="passport_number"]')?.value),
+            setOptionalRow('passport_document', passportFile?.name),
+        ].some(Boolean);
+
+        wizard.querySelector('[data-review-pedigree]')?.classList.toggle('hidden', !hasPedigree);
     }
 
     wizard.querySelector('[data-captcha-refresh]')?.addEventListener('click', () => {
@@ -781,6 +862,7 @@ function toolSaleWizard() {
 
 document.addEventListener('DOMContentLoaded', () => {
     heroSlideshow();
+    horseGallerySlider();
     revealOnScroll();
     horseCardTilt();
     animatedCounters();
@@ -788,6 +870,7 @@ document.addEventListener('DOMContentLoaded', () => {
     transferBoardFilters();
     mobileMenu();
     contactReveal();
+    passportReveal();
     copyLink();
     transferBoardWizard();
     horseSaleWizard();

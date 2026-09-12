@@ -1,4 +1,4 @@
-@props(['amount', 'decimals' => 2])
+@props(['amount', 'decimals' => 3])
 
 @php
     $formatted = number_format((float) $amount, $decimals);

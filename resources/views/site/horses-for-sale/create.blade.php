@@ -1,10 +1,10 @@
 @php
     $errorStep = 0;
-    if ($errors->hasAny(['en_name', 'ar_name', 'type_id', 'gender_id', 'color_id', 'breed', 'dob'])) {
+    if ($errors->hasAny(['en_name', 'ar_name', 'type_id', 'gender_id', 'color_id', 'breed', 'dob', 'dam', 'sire', 'birth_country_id', 'passport_number', 'passport_document'])) {
         $errorStep = 0;
     } elseif ($errors->hasAny(['city_id'])) {
         $errorStep = 1;
-    } elseif ($errors->hasAny(['cover_photo', 'price', 'description_en', 'description_ar', 'contact_number'])) {
+    } elseif ($errors->hasAny(['cover_photo', 'images', 'price', 'description_en', 'description_ar', 'contact_number'])) {
         $errorStep = 2;
     } elseif ($errors->hasAny(['captcha'])) {
         $errorStep = 3;
@@ -95,6 +95,41 @@
                         <input type="date" name="dob" max="{{ now()->subDay()->toDateString() }}" value="{{ old('dob') }}" class="w-full rounded-xl border border-warm-200 bg-warm-50 px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
                     </div>
                 </div>
+
+                <details class="mt-6 rounded-xl border border-warm-200 bg-warm-50/60" data-optional-section>
+                    <summary class="cursor-pointer select-none px-4 py-3 text-sm font-semibold text-warm-800">
+                        {{ __('horses-for-sale.pedigree_section_title') }}
+                        <span class="ml-1 font-normal text-warm-900/50">({{ __('horses-for-sale.optional') }})</span>
+                    </summary>
+                    <div class="grid gap-5 border-t border-warm-200 p-4 sm:grid-cols-2">
+                        <div>
+                            <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('horses-for-sale.dam') }}</label>
+                            <input type="text" name="dam" value="{{ old('dam') }}" class="w-full rounded-xl border border-warm-200 bg-white px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('horses-for-sale.sire') }}</label>
+                            <input type="text" name="sire" value="{{ old('sire') }}" class="w-full rounded-xl border border-warm-200 bg-white px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('horses-for-sale.birth_country') }}</label>
+                            <select name="birth_country_id" class="w-full rounded-xl border border-warm-200 bg-white px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                                <option value="">{{ __('horses-for-sale.select_option') }}</option>
+                                @foreach($countries as $country)
+                                    <option value="{{ $country->id }}" @selected((string) old('birth_country_id') === (string) $country->id)>{{ $country->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('horses-for-sale.passport_number') }}</label>
+                            <input type="text" name="passport_number" value="{{ old('passport_number') }}" class="w-full rounded-xl border border-warm-200 bg-white px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('horses-for-sale.passport_document') }}</label>
+                            <input type="file" name="passport_document" accept="image/*,.pdf" class="block w-full text-sm text-warm-900 file:mr-4 file:rounded-full file:border-0 file:bg-warm-900 file:px-4 file:py-2 file:text-xs file:font-bold file:text-white">
+                            <p class="mt-1 text-xs text-warm-900/50">{{ __('horses-for-sale.passport_upload_hint') }}</p>
+                        </div>
+                    </div>
+                </details>
             </div>
 
             {{-- Step 2: Location --}}
@@ -128,6 +163,12 @@
                             <input type="file" name="cover_photo" accept="image/*" required data-photo-input class="block w-full text-sm text-warm-900 file:mr-4 file:rounded-full file:border-0 file:bg-warm-900 file:px-4 file:py-2 file:text-xs file:font-bold file:text-white">
                         </div>
                         <p class="mt-1 text-xs text-warm-900/50">{{ __('horses-for-sale.photo_upload_hint') }}</p>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('horses-for-sale.gallery_photos') }}</label>
+                        <div data-gallery-previews class="mb-3 hidden flex flex-wrap gap-3"></div>
+                        <input type="file" name="images[]" accept="image/*" multiple data-gallery-input class="block w-full text-sm text-warm-900 file:mr-4 file:rounded-full file:border-0 file:bg-warm-900 file:px-4 file:py-2 file:text-xs file:font-bold file:text-white">
+                        <p class="mt-1 text-xs text-warm-900/50">{{ __('horses-for-sale.gallery_upload_hint') }}</p>
                     </div>
                     <div>
                         <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('horses-for-sale.price') }}</label>
@@ -175,6 +216,32 @@
                         <dd data-review="contact" class="font-semibold text-warm-900"></dd>
                     </div>
                 </dl>
+
+                <div class="mt-6 hidden" data-review-pedigree>
+                    <h3 class="text-sm font-semibold text-warm-800">{{ __('horses-for-sale.pedigree_section_title') }}</h3>
+                    <dl class="mt-2 divide-y divide-warm-200 overflow-hidden rounded-2xl border border-warm-200 bg-white text-sm">
+                        <div class="hidden items-center justify-between px-5 py-3" data-review-row="dam">
+                            <dt class="text-warm-900/60">{{ __('horses-for-sale.dam') }}</dt>
+                            <dd data-review="dam" class="font-semibold text-warm-900"></dd>
+                        </div>
+                        <div class="hidden items-center justify-between px-5 py-3" data-review-row="sire">
+                            <dt class="text-warm-900/60">{{ __('horses-for-sale.sire') }}</dt>
+                            <dd data-review="sire" class="font-semibold text-warm-900"></dd>
+                        </div>
+                        <div class="hidden items-center justify-between px-5 py-3" data-review-row="birth_country">
+                            <dt class="text-warm-900/60">{{ __('horses-for-sale.birth_country') }}</dt>
+                            <dd data-review="birth_country" class="font-semibold text-warm-900"></dd>
+                        </div>
+                        <div class="hidden items-center justify-between px-5 py-3" data-review-row="passport_number">
+                            <dt class="text-warm-900/60">{{ __('horses-for-sale.passport_number') }}</dt>
+                            <dd data-review="passport_number" class="font-semibold text-warm-900"></dd>
+                        </div>
+                        <div class="hidden items-center justify-between px-5 py-3" data-review-row="passport_document">
+                            <dt class="text-warm-900/60">{{ __('horses-for-sale.passport_document') }}</dt>
+                            <dd data-review="passport_document" class="font-semibold text-warm-900"></dd>
+                        </div>
+                    </dl>
+                </div>
 
                 <div class="mt-6">
                     <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('horses-for-sale.captcha_label') }}</label>

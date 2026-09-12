@@ -18,11 +18,17 @@ class HorseSalePost extends Model
         'color_id',
         'breed',
         'dob',
+        'dam',
+        'sire',
+        'birth_country_id',
+        'passport_number',
+        'passport_document',
         'country_id',
         'region_id',
         'city_id',
         'price',
         'cover_photo',
+        'images',
         'description_en',
         'description_ar',
         'contact_number',
@@ -32,6 +38,7 @@ class HorseSalePost extends Model
     protected $casts = [
         'dob' => 'date',
         'price' => 'decimal:3',
+        'images' => 'array',
     ];
 
     public function type(): BelongsTo
@@ -52,6 +59,11 @@ class HorseSalePost extends Model
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
+    }
+
+    public function birthCountry(): BelongsTo
+    {
+        return $this->belongsTo(Country::class, 'birth_country_id');
     }
 
     public function region(): BelongsTo
@@ -82,6 +94,21 @@ class HorseSalePost extends Model
     public function getCoverPhotoUrlAttribute(): ?string
     {
         return $this->cover_photo ? Storage::disk('public')->url($this->cover_photo) : null;
+    }
+
+    public function getPassportDocumentUrlAttribute(): ?string
+    {
+        return $this->passport_document ? Storage::disk('public')->url($this->passport_document) : null;
+    }
+
+    public function getGalleryImageUrlsAttribute(): array
+    {
+        return collect($this->images ?? [])
+            ->map(fn (string $path): string => Storage::disk('public')->url($path))
+            ->prepend($this->cover_photo_url)
+            ->filter()
+            ->values()
+            ->all();
     }
 
     public function getAgeAttribute(): ?int

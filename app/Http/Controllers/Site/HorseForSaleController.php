@@ -67,9 +67,16 @@ class HorseForSaleController extends Controller
             'color_id' => ['nullable', 'exists:colors,id'],
             'breed' => ['nullable', 'string', 'max:255'],
             'dob' => ['nullable', 'date', 'before:today'],
+            'dam' => ['nullable', 'string', 'max:255'],
+            'sire' => ['nullable', 'string', 'max:255'],
+            'birth_country_id' => ['nullable', 'exists:countries,id'],
+            'passport_number' => ['nullable', 'string', 'max:255'],
+            'passport_document' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:4096'],
             'city_id' => ['required', 'exists:cities,id'],
             'price' => ['required', 'numeric', 'min:0'],
             'cover_photo' => ['required', 'image', 'max:4096'],
+            'images' => ['nullable', 'array', 'max:10'],
+            'images.*' => ['image', 'max:4096'],
             'description_en' => ['nullable', 'string'],
             'description_ar' => ['nullable', 'string'],
             'contact_number' => ['required', 'string', 'max:30'],
@@ -82,9 +89,15 @@ class HorseForSaleController extends Controller
             'color_id' => __('horses-for-sale.color'),
             'breed' => __('horses-for-sale.breed'),
             'dob' => __('horses-for-sale.dob'),
+            'dam' => __('horses-for-sale.dam'),
+            'sire' => __('horses-for-sale.sire'),
+            'birth_country_id' => __('horses-for-sale.birth_country'),
+            'passport_number' => __('horses-for-sale.passport_number'),
+            'passport_document' => __('horses-for-sale.passport_document'),
             'city_id' => __('horses-for-sale.city'),
             'price' => __('horses-for-sale.price'),
             'cover_photo' => __('horses-for-sale.cover_photo'),
+            'images' => __('horses-for-sale.gallery_photos'),
             'contact_number' => __('horses-for-sale.contact_number'),
             'captcha' => __('horses-for-sale.captcha_label'),
         ]);
@@ -95,6 +108,19 @@ class HorseForSaleController extends Controller
 
         ImageCompressor::compress(Storage::disk('public')->path($coverPhotoPath));
 
+        $galleryPaths = [];
+        foreach ($request->file('images', []) as $image) {
+            $path = $image->store('horse-sale/gallery', 'public');
+            ImageCompressor::compress(Storage::disk('public')->path($path));
+            $galleryPaths[] = $path;
+        }
+
+        $passportDocumentPath = null;
+        if ($request->hasFile('passport_document')) {
+            $passportDocumentPath = $request->file('passport_document')->store('horse-sale/passports', 'public');
+            ImageCompressor::compress(Storage::disk('public')->path($passportDocumentPath));
+        }
+
         HorseSalePost::create([
             'en_name' => $validated['en_name'],
             'ar_name' => $validated['ar_name'],
@@ -103,11 +129,17 @@ class HorseForSaleController extends Controller
             'color_id' => $validated['color_id'] ?? null,
             'breed' => $validated['breed'] ?? null,
             'dob' => $validated['dob'] ?? null,
+            'dam' => $validated['dam'] ?? null,
+            'sire' => $validated['sire'] ?? null,
+            'birth_country_id' => $validated['birth_country_id'] ?? null,
+            'passport_number' => $validated['passport_number'] ?? null,
+            'passport_document' => $passportDocumentPath,
             'country_id' => $city->region->country_id,
             'region_id' => $city->region_id,
             'city_id' => $city->id,
             'price' => $validated['price'],
             'cover_photo' => $coverPhotoPath,
+            'images' => $galleryPaths,
             'description_en' => $validated['description_en'] ?? null,
             'description_ar' => $validated['description_ar'] ?? null,
             'contact_number' => $validated['contact_number'],

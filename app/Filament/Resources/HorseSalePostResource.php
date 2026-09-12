@@ -98,6 +98,29 @@ class HorseSalePostResource extends Resource
                                 DatePicker::make('dob'),
                             ])->icon('heroicon-o-information-circle')
                             ->columns(3),
+                        Tab::make('Pedigree & Papers')
+                            ->schema([
+                                TextInput::make('dam')
+                                    ->label('Dam (Mother)')
+                                    ->maxLength(255),
+                                TextInput::make('sire')
+                                    ->label('Sire (Father)')
+                                    ->maxLength(255),
+                                Select::make('birth_country_id')
+                                    ->label('Birth Country')
+                                    ->relationship(name: 'birthCountry', titleAttribute: 'en_name')
+                                    ->searchable()
+                                    ->preload(),
+                                TextInput::make('passport_number')
+                                    ->label('Passport Number')
+                                    ->maxLength(255),
+                                FileUpload::make('passport_document')
+                                    ->label('Passport')
+                                    ->disk('public')
+                                    ->directory('horse-sale/passports')
+                                    ->columnSpanFull(),
+                            ])->icon('heroicon-o-identification')
+                            ->columns(2),
                         Tab::make('Location')
                             ->schema([
                                 Select::make('country_id')
@@ -148,6 +171,14 @@ class HorseSalePostResource extends Resource
                                     ->disk('public')
                                     ->directory('horse-sale/covers')
                                     ->required()
+                                    ->columnSpanFull(),
+                                FileUpload::make('images')
+                                    ->label('Gallery Photos')
+                                    ->image()
+                                    ->multiple()
+                                    ->reorderable()
+                                    ->disk('public')
+                                    ->directory('horse-sale/gallery')
                                     ->columnSpanFull(),
                                 Textarea::make('description_en')
                                     ->rows(3),

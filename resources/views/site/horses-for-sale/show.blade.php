@@ -4,7 +4,26 @@
             &larr; {{ __('horses-for-sale.back_to_listing') }}
         </a>
 
-        <img src="{{ $post->cover_photo_url }}" alt="{{ $post->name }}" class="mt-6 h-72 w-full rounded-3xl object-cover sm:h-96">
+        @php($galleryImages = $post->gallery_image_urls)
+
+        @if(count($galleryImages) > 1)
+            <div class="mt-6" data-gallery-slider>
+                <div class="swiper gallery-swiper overflow-hidden rounded-3xl">
+                    <div class="swiper-wrapper">
+                        @foreach($galleryImages as $image)
+                            <div class="swiper-slide">
+                                <img src="{{ $image }}" alt="{{ $post->name }}" class="h-72 w-full object-cover sm:h-96">
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="swiper-pagination"></div>
+                    <div class="swiper-button-prev !text-white"></div>
+                    <div class="swiper-button-next !text-white"></div>
+                </div>
+            </div>
+        @else
+            <img src="{{ $post->cover_photo_url }}" alt="{{ $post->name }}" class="mt-6 h-72 w-full rounded-3xl object-cover sm:h-96">
+        @endif
 
         <div class="mt-8 grid gap-10 lg:grid-cols-3">
             <div class="lg:col-span-2">
@@ -27,6 +46,43 @@
                     <p class="mt-1 text-warm-900/60">{{ $post->breed }}</p>
                 @endif
                 <p class="mt-2 text-sm text-warm-900/60">📍 {{ $post->city?->name }}, {{ $post->country?->name }}</p>
+
+                @if($post->dam || $post->sire || $post->birthCountry || $post->passport_number)
+                    <div class="mt-8">
+                        <h2 class="font-display text-xl font-semibold text-warm-900">{{ __('horses-for-sale.pedigree_section_title') }}</h2>
+                        <dl class="mt-3 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+                            @if($post->dam)
+                                <div class="flex justify-between gap-2 border-b border-dashed border-warm-200 py-1.5">
+                                    <dt class="text-warm-900/60">{{ __('horses-for-sale.dam') }}</dt>
+                                    <dd class="font-semibold text-warm-900">{{ $post->dam }}</dd>
+                                </div>
+                            @endif
+                            @if($post->sire)
+                                <div class="flex justify-between gap-2 border-b border-dashed border-warm-200 py-1.5">
+                                    <dt class="text-warm-900/60">{{ __('horses-for-sale.sire') }}</dt>
+                                    <dd class="font-semibold text-warm-900">{{ $post->sire }}</dd>
+                                </div>
+                            @endif
+                            @if($post->birthCountry)
+                                <div class="flex justify-between gap-2 border-b border-dashed border-warm-200 py-1.5">
+                                    <dt class="text-warm-900/60">{{ __('horses-for-sale.birth_country') }}</dt>
+                                    <dd class="font-semibold text-warm-900">{{ $post->birthCountry->name }}</dd>
+                                </div>
+                            @endif
+                            @if($post->passport_number)
+                                <div class="flex justify-between gap-2 border-b border-dashed border-warm-200 py-1.5">
+                                    <dt class="text-warm-900/60">{{ __('horses-for-sale.passport_number') }}</dt>
+                                    <dd class="font-semibold text-warm-900">{{ $post->passport_number }}</dd>
+                                </div>
+                            @endif
+                        </dl>
+                        @if($post->passport_document_url)
+                            <button type="button" data-reveal-passport="{{ $post->passport_document_url }}" class="js-reveal mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-warm-600 underline underline-offset-2">
+                                {{ __('horses-for-sale.passport_document_reveal') }}
+                            </button>
+                        @endif
+                    </div>
+                @endif
 
                 @if($post->description)
                     <div class="mt-8">
