@@ -31,9 +31,10 @@ class User extends Authenticatable
         'phone',
         'is_admin',
         'type',
-        //'country_id',
-        'region',
-        'city',
+        'country_id',
+        'region_id',
+        'city_id',
+        'postal_code',
     ];
 
     /**
