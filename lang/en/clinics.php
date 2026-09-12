@@ -6,10 +6,15 @@ return [
     'board_title' => 'Clinics',
     'view_clinic' => 'View Clinic',
 
+    'filter_type' => 'Type',
     'filter_country' => 'Country',
+    'filter_region' => 'Region',
     'filter_city' => 'City',
     'filter_service' => 'Service',
     'any' => 'Any',
+    'any_type' => 'Any type',
+    'any_country' => 'Any country',
+    'any_region' => 'Any region',
     'any_city' => 'Any city',
     'filters_button' => 'Filters',
     'apply_filters' => 'Apply filters',
@@ -33,6 +38,11 @@ return [
     'contact' => 'Contact',
     'website' => 'Visit Website',
     'instagram' => 'Instagram',
+
+    'types' => [
+        'clinic' => 'Clinic',
+        'pharmacy' => 'Pharmacy',
+    ],
 
     'days' => [
         'mon' => 'Monday',

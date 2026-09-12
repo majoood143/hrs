@@ -33,6 +33,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
@@ -101,6 +102,11 @@ class ClinicResource extends Resource
                                     ->required()
                                     ->unique(ignoreRecord: true)
                                     ->maxLength(255),
+                                Select::make('type')
+                                    ->options(Clinic::TYPES)
+                                    ->default('clinic')
+                                    ->required()
+                                    ->live(),
                                 Toggle::make('is_active')
                                     ->default(true),
                             ])->icon('heroicon-o-information-circle')
@@ -166,7 +172,11 @@ class ClinicResource extends Resource
                         Tab::make('Services')
                             ->schema([
                                 Select::make('services')
-                                    ->relationship('services', 'en_name')
+                                    ->relationship(
+                                        name: 'services',
+                                        titleAttribute: 'en_name',
+                                        modifyQueryUsing: fn (Builder $query, Get $get) => $query->forType($get('type')),
+                                    )
                                     ->multiple()
                                     ->searchable()
                                     ->preload()
@@ -218,6 +228,10 @@ class ClinicResource extends Resource
                 TextColumn::make('en_name')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('type')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => Clinic::TYPES[$state] ?? $state)
+                    ->sortable(),
                 TextColumn::make('city.en_name')
                     ->label('City')
                     ->description(fn (Clinic $record): string => $record->country?->en_name ?? '')
@@ -236,6 +250,8 @@ class ClinicResource extends Resource
             ])
             ->defaultSort('en_name')
             ->filters([
+                SelectFilter::make('type')
+                    ->options(Clinic::TYPES),
                 SelectFilter::make('city_id')
                     ->label('City')
                     ->relationship('city', 'en_name'),

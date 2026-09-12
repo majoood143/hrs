@@ -12,9 +12,15 @@ class Clinic extends Model
 {
     public const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
+    public const TYPES = [
+        'clinic' => 'Clinic',
+        'pharmacy' => 'Pharmacy',
+    ];
+
     protected $fillable = [
         'en_name',
         'ar_name',
+        'type',
         'slug',
         'country_id',
         'region_id',
@@ -66,6 +72,16 @@ class Clinic extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
+    }
+
+    public function scopeOfType(Builder $query, ?string $type): Builder
+    {
+        return $query->when($type, fn (Builder $q) => $q->where('type', $type));
+    }
+
+    public function getTypeLabelAttribute(): string
+    {
+        return __('clinics.types.' . $this->type);
     }
 
     public function getNameAttribute(): string

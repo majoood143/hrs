@@ -1,13 +1,19 @@
 @php
+    $selectedType = in_array(request('type'), array_keys(\App\Models\Clinic::TYPES), true) ? request('type') : null;
     $selectedServiceId = request()->filled('service_id') ? (int) request('service_id') : null;
+    $selectedCountryId = request()->filled('country_id') ? (int) request('country_id') : null;
+    $selectedRegionId = request()->filled('region_id') ? (int) request('region_id') : null;
+    $selectedCityId = request()->filled('city_id') ? (int) request('city_id') : null;
 
     $sort = in_array(request('sort'), ['name', 'newest'], true) ? request('sort') : 'name';
 
     $query = \App\Models\Clinic::query()
         ->active()
+        ->ofType($selectedType)
         ->with(['city', 'country', 'services'])
-        ->when(request('city_id'), fn ($q, $v) => $q->where('city_id', $v))
-        ->when(request('country_id'), fn ($q, $v) => $q->where('country_id', $v))
+        ->when($selectedCountryId, fn ($q, $v) => $q->where('country_id', $v))
+        ->when($selectedRegionId, fn ($q, $v) => $q->where('region_id', $v))
+        ->when($selectedCityId, fn ($q, $v) => $q->where('city_id', $v))
         ->when($selectedServiceId, fn ($q, $v) => $q->whereHas('services', fn ($q2) => $q2->where('clinic_services.id', $v)));
 
     match ($sort) {
@@ -18,19 +24,38 @@
     $clinics = $query->paginate(9)->withQueryString();
 
     $countries = \App\Models\Country::query()->public()->with('region.city')->orderBy('en_name')->get();
-    $services = \App\Models\ClinicService::query()->orderBy('en_name')->get();
+    $allRegions = $countries->flatMap->region;
+
+    $regions = $selectedCountryId
+        ? ($countries->firstWhere('id', $selectedCountryId)?->region ?? collect())
+        : $allRegions;
+
+    $groupCitiesByCountry = ! $selectedCountryId && ! $selectedRegionId;
+    $groupCitiesByRegion = $selectedCountryId && ! $selectedRegionId;
+
+    if ($selectedRegionId) {
+        $cities = $allRegions->firstWhere('id', $selectedRegionId)?->city ?? collect();
+    } elseif ($selectedCountryId) {
+        $cities = $regions->flatMap->city;
+    } else {
+        $cities = null;
+    }
+
+    $services = \App\Models\ClinicService::query()->forType($selectedType)->orderBy('en_name')->get();
 
     $chips = [];
 
-    if ($cityId = request('city_id')) {
-        if ($city = \App\Models\City::find($cityId)) {
-            $chips[] = ['label' => __('clinics.filter_city') . ': ' . $city->name, 'keys' => ['city_id']];
-        }
+    if ($selectedType) {
+        $chips[] = ['label' => __('clinics.filter_type') . ': ' . __('clinics.types.' . $selectedType), 'keys' => ['type']];
     }
-    if ($countryId = request('country_id')) {
-        if ($country = \App\Models\Country::find($countryId)) {
-            $chips[] = ['label' => __('clinics.filter_country') . ': ' . $country->name, 'keys' => ['country_id']];
-        }
+    if ($selectedCountryId && $country = \App\Models\Country::find($selectedCountryId)) {
+        $chips[] = ['label' => __('clinics.filter_country') . ': ' . $country->name, 'keys' => ['country_id', 'region_id', 'city_id']];
+    }
+    if ($selectedRegionId && $region = $allRegions->firstWhere('id', $selectedRegionId)) {
+        $chips[] = ['label' => __('clinics.filter_region') . ': ' . $region->name, 'keys' => ['region_id', 'city_id']];
+    }
+    if ($selectedCityId && $city = \App\Models\City::find($selectedCityId)) {
+        $chips[] = ['label' => __('clinics.filter_city') . ': ' . $city->name, 'keys' => ['city_id']];
     }
     if ($selectedServiceId && $service = $services->firstWhere('id', $selectedServiceId)) {
         $chips[] = ['label' => __('clinics.filter_service') . ': ' . $service->name, 'keys' => ['service_id']];
@@ -54,29 +79,74 @@
             </button>
         </div>
 
-        <div class="mt-6 grid grid-cols-1 gap-4 rounded-3xl border border-warm-200/70 bg-white p-5 shadow-sm shadow-warm-900/5 md:grid-cols-4" data-board-panel>
+        <div class="mt-6 grid grid-cols-1 gap-4 rounded-3xl border border-warm-200/70 bg-white p-5 shadow-sm shadow-warm-900/5 sm:grid-cols-2 lg:grid-cols-6" data-board-panel>
             <div class="flex items-center justify-between md:hidden">
                 <p class="font-display text-base font-semibold text-warm-900">{{ __('clinics.filters_button') }}</p>
                 <button type="button" data-board-drawer-close class="text-sm font-semibold text-warm-600">{{ __('clinics.close') }}</button>
             </div>
 
-            <div class="md:col-span-1">
-                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('clinics.filter_city') }}</label>
-                <select name="city_id" data-auto-submit class="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
-                    <option value="">{{ __('clinics.any_city') }}</option>
-                    @foreach($countries as $country)
-                        @php($cities = $country->region->flatMap->city)
-                        @continue($cities->isEmpty())
-                        <optgroup label="{{ $country->name }}">
-                            @foreach($cities as $city)
-                                <option value="{{ $city->id }}" @selected(request('city_id') == $city->id)>{{ $city->name }}</option>
-                            @endforeach
-                        </optgroup>
+            <div>
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('clinics.filter_type') }}</label>
+                <select name="type" data-auto-submit data-reset-on-change="service_id" class="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                    <option value="">{{ __('clinics.any_type') }}</option>
+                    @foreach(\App\Models\Clinic::TYPES as $value => $label)
+                        <option value="{{ $value }}" @selected($selectedType === $value)>{{ __('clinics.types.' . $value) }}</option>
                     @endforeach
                 </select>
             </div>
 
-            <div class="md:col-span-1">
+            <div>
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('clinics.filter_country') }}</label>
+                <select name="country_id" data-auto-submit data-reset-on-change="region_id,city_id" class="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                    <option value="">{{ __('clinics.any_country') }}</option>
+                    @foreach($countries as $country)
+                        <option value="{{ $country->id }}" @selected($selectedCountryId === $country->id)>{{ $country->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('clinics.filter_region') }}</label>
+                <select name="region_id" data-auto-submit data-reset-on-change="city_id" class="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                    <option value="">{{ __('clinics.any_region') }}</option>
+                    @foreach($regions as $region)
+                        <option value="{{ $region->id }}" @selected($selectedRegionId === $region->id)>{{ $region->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('clinics.filter_city') }}</label>
+                <select name="city_id" data-auto-submit class="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                    <option value="">{{ __('clinics.any_city') }}</option>
+                    @if($groupCitiesByCountry)
+                        @foreach($countries as $country)
+                            @php($countryCities = $country->region->flatMap->city)
+                            @continue($countryCities->isEmpty())
+                            <optgroup label="{{ $country->name }}">
+                                @foreach($countryCities as $city)
+                                    <option value="{{ $city->id }}" @selected($selectedCityId === $city->id)>{{ $city->name }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endforeach
+                    @elseif($groupCitiesByRegion)
+                        @foreach($regions as $region)
+                            @continue($region->city->isEmpty())
+                            <optgroup label="{{ $region->name }}">
+                                @foreach($region->city as $city)
+                                    <option value="{{ $city->id }}" @selected($selectedCityId === $city->id)>{{ $city->name }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endforeach
+                    @else
+                        @foreach($cities as $city)
+                            <option value="{{ $city->id }}" @selected($selectedCityId === $city->id)>{{ $city->name }}</option>
+                        @endforeach
+                    @endif
+                </select>
+            </div>
+
+            <div>
                 <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('clinics.filter_service') }}</label>
                 <select name="service_id" data-auto-submit class="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
                     <option value="">{{ __('clinics.any') }}</option>
@@ -86,8 +156,8 @@
                 </select>
             </div>
 
-            <div class="flex items-end md:col-span-2 md:justify-end">
-                <button type="submit" class="btn-warm w-full md:w-auto">{{ __('clinics.apply_filters') }}</button>
+            <div class="flex items-end">
+                <button type="submit" class="btn-warm w-full">{{ __('clinics.apply_filters') }}</button>
             </div>
         </div>
     </form>
@@ -138,7 +208,8 @@
                     @endif
 
                     <div class="p-5">
-                        <p class="font-display text-lg font-semibold text-warm-900">{{ $clinic->name }}</p>
+                        <span class="rounded-full bg-warm-900/5 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-warm-600">{{ $clinic->type_label }}</span>
+                        <p class="mt-2 font-display text-lg font-semibold text-warm-900">{{ $clinic->name }}</p>
                         <p class="mt-1 text-xs text-warm-900/60">📍 {{ $clinic->city?->name }}, {{ $clinic->country?->name }}</p>
 
                         @if($clinic->services->isNotEmpty())

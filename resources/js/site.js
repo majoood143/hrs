@@ -273,6 +273,12 @@ function transferBoardFilters() {
 
     form.querySelectorAll('[data-auto-submit]').forEach((field) => {
         field.addEventListener('change', () => {
+            const resetNames = (field.dataset.resetOnChange || '').split(',').map((n) => n.trim()).filter(Boolean);
+            resetNames.forEach((name) => {
+                const target = form.querySelector(`[name="${name}"]`);
+                if (target) target.value = '';
+            });
+
             if (isDesktop()) form.submit();
         });
     });

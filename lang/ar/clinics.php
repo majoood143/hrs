@@ -6,10 +6,15 @@ return [
     'board_title' => 'العيادات',
     'view_clinic' => 'عرض العيادة',
 
+    'filter_type' => 'النوع',
     'filter_country' => 'الدولة',
+    'filter_region' => 'المنطقة',
     'filter_city' => 'المدينة',
     'filter_service' => 'الخدمة',
     'any' => 'أي',
+    'any_type' => 'أي نوع',
+    'any_country' => 'أي دولة',
+    'any_region' => 'أي منطقة',
     'any_city' => 'أي مدينة',
     'filters_button' => 'الفلاتر',
     'apply_filters' => 'تطبيق الفلاتر',
@@ -33,6 +38,11 @@ return [
     'contact' => 'التواصل',
     'website' => 'زيارة الموقع الإلكتروني',
     'instagram' => 'إنستغرام',
+
+    'types' => [
+        'clinic' => 'عيادة',
+        'pharmacy' => 'صيدلية',
+    ],
 
     'days' => [
         'mon' => 'الإثنين',

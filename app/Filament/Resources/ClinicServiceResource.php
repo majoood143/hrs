@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\ActionGroup;
@@ -56,6 +57,11 @@ class ClinicServiceResource extends Resource
                 TextInput::make('ar_name')
                     ->required()
                     ->maxLength(255),
+                Select::make('applies_to')
+                    ->label('Applies To')
+                    ->options(ClinicService::APPLIES_TO)
+                    ->default('both')
+                    ->required(),
             ]);
     }
 
@@ -67,6 +73,10 @@ class ClinicServiceResource extends Resource
                     ->searchable(),
                 TextColumn::make('ar_name')
                     ->searchable(),
+                TextColumn::make('applies_to')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => ClinicService::APPLIES_TO[$state] ?? $state)
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
