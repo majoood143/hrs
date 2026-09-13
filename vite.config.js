@@ -10,6 +10,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/css/site.css',
                 'resources/js/site.js',
+                'resources/css/filament/admin/theme.css',
             ],
             refresh: true,
         }),

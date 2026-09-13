@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(HorseWebsiteSeeder::class);
+        $this->call(CountrySeeder::class);
         $this->call(ColorSeeder::class);
         $this->call(TypeSeeder::class);
         $this->call(GenderSeeder::class);
@@ -32,5 +33,6 @@ class DatabaseSeeder extends Seeder
         $this->call(CenterServiceSeeder::class);
         $this->call(ShopServiceSeeder::class);
         $this->call(CmsCategorySeeder::class);
+        $this->call(MediaLibrarySeeder::class);
     }
 }

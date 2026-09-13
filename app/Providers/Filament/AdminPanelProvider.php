@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dashboard;
 use App\Models\SiteSetting;
+use Ardavan\FilamentFileExplorer\FilamentFileExplorerPlugin;
 use Filament\Http\Middleware\Authenticate;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -35,6 +36,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->login(Login::class)
             ->registration()
             ->profile()
@@ -74,6 +76,7 @@ class AdminPanelProvider extends PanelProvider
                 ActivitylogPlugin::make(),
                 ApiServicePlugin::make(),
                 FilamentCaptcha::make(),
+                FilamentFileExplorerPlugin::make(),
             ])
             ->authMiddleware([
                 Authenticate::class,
