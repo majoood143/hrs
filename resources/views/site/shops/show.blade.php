@@ -15,7 +15,12 @@
 
         <div class="mt-8 grid gap-10 lg:grid-cols-3">
             <div class="lg:col-span-2">
-                <span class="rounded-full bg-warm-900/5 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-warm-600">{{ $shop->type_label }}</span>
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="rounded-full bg-warm-900/5 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-warm-600">{{ $shop->type_label }}</span>
+                    @if($shop->is_online)
+                        <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-700">🌐 {{ __('shops.online_badge') }}</span>
+                    @endif
+                </div>
                 <h1 class="mt-2 font-display text-3xl font-semibold text-warm-900 sm:text-4xl">{{ $shop->name }}</h1>
                 <p class="mt-2 text-sm text-warm-900/60">📍 {{ $shop->city?->name }}, {{ $shop->country?->name }}</p>
 
@@ -47,17 +52,37 @@
             </div>
 
             <div class="space-y-6">
-                <div class="card-warm p-5">
-                    <h2 class="font-display text-base font-semibold text-warm-900">{{ __('shops.address') }}</h2>
-                    @if($shop->address)
-                        <p class="mt-2 text-sm text-warm-900/80">{{ $shop->address }}</p>
-                    @endif
-                    @if($shop->map_link)
-                        <a href="{{ $shop->map_link }}" target="_blank" rel="noopener" class="btn-warm-outline mt-3 inline-flex w-full justify-center !py-2 text-sm">
-                            {{ __('shops.open_in_maps') }}
-                        </a>
-                    @endif
-                </div>
+                @if($shop->is_online)
+                    <div class="card-warm p-5">
+                        <h2 class="font-display text-base font-semibold text-warm-900">{{ __('shops.online_shop') }}</h2>
+                        @if($shop->delivery_scope_label)
+                            <p class="mt-2 flex items-center gap-2 text-sm text-warm-900/80">🚚 <span>{{ $shop->delivery_scope_label }}</span></p>
+                        @endif
+                    </div>
+                @else
+                    <div class="card-warm p-5">
+                        <h2 class="font-display text-base font-semibold text-warm-900">{{ __('shops.address') }}</h2>
+                        @if($shop->address)
+                            <p class="mt-2 text-sm text-warm-900/80">{{ $shop->address }}</p>
+                        @endif
+                        @if($shop->map_link)
+                            <a href="{{ $shop->map_link }}" target="_blank" rel="noopener" class="btn-warm-outline mt-3 inline-flex w-full justify-center !py-2 text-sm">
+                                {{ __('shops.open_in_maps') }}
+                            </a>
+                        @endif
+                    </div>
+                @endif
+
+                @if(!empty($shop->payment_option_labels))
+                    <div class="card-warm p-5">
+                        <h2 class="font-display text-base font-semibold text-warm-900">{{ __('shops.payment_options') }}</h2>
+                        <div class="mt-3 flex flex-wrap gap-1.5">
+                            @foreach($shop->payment_option_labels as $label)
+                                <span class="rounded-full bg-warm-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-warm-700">{{ $label }}</span>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
 
                 @if($shop->phone || $shop->website_url || $shop->instagram_url)
                     <div class="card-warm p-5">

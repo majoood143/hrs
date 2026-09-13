@@ -39,11 +39,31 @@ return [
     'website' => 'زيارة الموقع الإلكتروني',
     'instagram' => 'إنستغرام',
 
+    'online_shop' => 'متجر إلكتروني',
+    'online_badge' => 'إلكتروني',
+    'delivery' => 'التوصيل',
+    'payment_options' => 'خيارات الدفع',
+
     'types' => [
         'tack' => 'سروج وعدة',
         'feed_supplements' => 'أعلاف ومكملات',
         'equipment' => 'معدات',
         'saddlery' => 'سراجة',
+    ],
+
+    'delivery_scopes' => [
+        'local' => 'توصيل محلي',
+        'international' => 'توصيل دولي',
+        'both' => 'توصيل محلي ودولي',
+    ],
+
+    'payment_options_list' => [
+        'cash' => 'نقداً',
+        'card' => 'بطاقة',
+        'bank_transfer' => 'تحويل بنكي',
+        'apple_pay' => 'آبل باي',
+        'online_payment' => 'دفع إلكتروني',
+        'cash_on_delivery' => 'الدفع عند الاستلام',
     ],
 
     'days' => [

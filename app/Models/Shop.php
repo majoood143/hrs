@@ -19,6 +19,21 @@ class Shop extends Model
         'saddlery' => 'Saddlery',
     ];
 
+    public const DELIVERY_SCOPES = [
+        'local' => 'Local Delivery',
+        'international' => 'International Delivery',
+        'both' => 'Local & International Delivery',
+    ];
+
+    public const PAYMENT_OPTIONS = [
+        'cash' => 'Cash',
+        'card' => 'Card',
+        'bank_transfer' => 'Bank Transfer',
+        'apple_pay' => 'Apple Pay',
+        'online_payment' => 'Online Payment',
+        'cash_on_delivery' => 'Cash on Delivery',
+    ];
+
     protected $fillable = [
         'en_name',
         'ar_name',
@@ -38,12 +53,17 @@ class Shop extends Model
         'gallery',
         'opening_hours',
         'is_active',
+        'is_online',
+        'delivery_scope',
+        'payment_options',
     ];
 
     protected $casts = [
         'gallery' => 'array',
         'opening_hours' => 'array',
         'is_active' => 'boolean',
+        'is_online' => 'boolean',
+        'payment_options' => 'array',
     ];
 
     public function getRouteKeyName(): string
@@ -81,9 +101,26 @@ class Shop extends Model
         return $query->when($type, fn (Builder $q) => $q->where('type', $type));
     }
 
+    public function scopeOnline(Builder $query): Builder
+    {
+        return $query->where('is_online', true);
+    }
+
     public function getTypeLabelAttribute(): string
     {
         return __('shops.types.' . $this->type);
+    }
+
+    public function getDeliveryScopeLabelAttribute(): ?string
+    {
+        return $this->delivery_scope ? __('shops.delivery_scopes.' . $this->delivery_scope) : null;
+    }
+
+    public function getPaymentOptionLabelsAttribute(): array
+    {
+        return collect($this->payment_options ?? [])
+            ->map(fn (string $option) => __('shops.payment_options_list.' . $option))
+            ->all();
     }
 
     public function getNameAttribute(): string

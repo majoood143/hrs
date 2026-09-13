@@ -16,6 +16,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -109,6 +110,11 @@ class ShopResource extends Resource
                                     ->live(),
                                 Toggle::make('is_active')
                                     ->default(true),
+                                Toggle::make('is_online')
+                                    ->label('Online Shop')
+                                    ->helperText('Enable if this shop has no physical storefront and sells online.')
+                                    ->live()
+                                    ->default(false),
                             ])->icon('heroicon-o-information-circle')
                             ->columns(2),
                         Tab::make('Location')
@@ -138,11 +144,19 @@ class ShopResource extends Resource
                                     ->required(),
                                 TextInput::make('address')
                                     ->maxLength(255)
+                                    ->hidden(fn (Get $get) => $get('is_online'))
                                     ->columnSpanFull(),
                                 TextInput::make('map_link')
                                     ->label('Map Link')
                                     ->url()
                                     ->maxLength(255)
+                                    ->hidden(fn (Get $get) => $get('is_online'))
+                                    ->columnSpanFull(),
+                                Select::make('delivery_scope')
+                                    ->label('Delivery Scope')
+                                    ->options(Shop::DELIVERY_SCOPES)
+                                    ->visible(fn (Get $get) => $get('is_online'))
+                                    ->required(fn (Get $get) => $get('is_online'))
                                     ->columnSpanFull(),
                                 TextInput::make('phone')
                                     ->label('Contact Number')
@@ -182,6 +196,13 @@ class ShopResource extends Resource
                                     ->preload()
                                     ->required(),
                             ])->icon('heroicon-o-clipboard-document-check'),
+                        Tab::make('Payment Options')
+                            ->schema([
+                                CheckboxList::make('payment_options')
+                                    ->label('Accepted Payment Options')
+                                    ->options(Shop::PAYMENT_OPTIONS)
+                                    ->columns(2),
+                            ])->icon('heroicon-o-credit-card'),
                         Tab::make('Opening Hours')
                             ->schema(collect(static::dayLabels())->map(
                                 fn (string $label, string $day) => Fieldset::make($label)
@@ -240,6 +261,10 @@ class ShopResource extends Resource
                     ->label('Services')
                     ->badge()
                     ->separator(','),
+                IconColumn::make('is_online')
+                    ->label('Online')
+                    ->boolean()
+                    ->sortable(),
                 IconColumn::make('is_active')
                     ->boolean()
                     ->sortable(),
@@ -262,6 +287,9 @@ class ShopResource extends Resource
                     ->relationship('services', 'en_name'),
                 SelectFilter::make('is_active')
                     ->options([1 => 'Active', 0 => 'Inactive']),
+                SelectFilter::make('is_online')
+                    ->label('Shop Mode')
+                    ->options([1 => 'Online', 0 => 'Physical']),
             ])
             ->recordActions([
                 ActionGroup::make([

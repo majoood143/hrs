@@ -208,7 +208,12 @@
                     @endif
 
                     <div class="p-5">
-                        <span class="rounded-full bg-warm-900/5 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-warm-600">{{ $shop->type_label }}</span>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="rounded-full bg-warm-900/5 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-warm-600">{{ $shop->type_label }}</span>
+                            @if($shop->is_online)
+                                <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-700">🌐 {{ __('shops.online_badge') }}</span>
+                            @endif
+                        </div>
                         <p class="mt-2 font-display text-lg font-semibold text-warm-900">{{ $shop->name }}</p>
                         <p class="mt-1 text-xs text-warm-900/60">📍 {{ $shop->city?->name }}, {{ $shop->country?->name }}</p>
 

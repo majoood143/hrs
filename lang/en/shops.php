@@ -39,11 +39,31 @@ return [
     'website' => 'Visit Website',
     'instagram' => 'Instagram',
 
+    'online_shop' => 'Online Shop',
+    'online_badge' => 'Online',
+    'delivery' => 'Delivery',
+    'payment_options' => 'Payment Options',
+
     'types' => [
         'tack' => 'Tack',
         'feed_supplements' => 'Feed & Supplements',
         'equipment' => 'Equipment',
         'saddlery' => 'Saddlery',
+    ],
+
+    'delivery_scopes' => [
+        'local' => 'Local Delivery',
+        'international' => 'International Delivery',
+        'both' => 'Local & International Delivery',
+    ],
+
+    'payment_options_list' => [
+        'cash' => 'Cash',
+        'card' => 'Card',
+        'bank_transfer' => 'Bank Transfer',
+        'apple_pay' => 'Apple Pay',
+        'online_payment' => 'Online Payment',
+        'cash_on_delivery' => 'Cash on Delivery',
     ],
 
     'days' => [
