@@ -59,6 +59,8 @@ class CmsMenuItem extends Model
             'blog.index' => __('Stories'),
             'stables.index' => __('stables.nav_label'),
             'clinics.index' => __('clinics.nav_label'),
+            'centers.index' => __('centers.nav_label'),
+            'shops.index' => __('shops.nav_label'),
             'horses-for-sale.index' => __('horses-for-sale.nav_label'),
             'farriers.index' => __('farriers.nav_label'),
             'tools-for-sale.index' => __('tools-for-sale.nav_label'),

@@ -1,0 +1,58 @@
+<?php
+
+return [
+    'nav_label' => 'المراكز',
+    'nav_group' => 'دليل المراكز',
+    'board_title' => 'المراكز',
+    'view_center' => 'عرض المركز',
+
+    'filter_type' => 'النوع',
+    'filter_country' => 'الدولة',
+    'filter_region' => 'المنطقة',
+    'filter_city' => 'المدينة',
+    'filter_service' => 'الخدمة',
+    'any' => 'أي',
+    'any_type' => 'أي نوع',
+    'any_country' => 'أي دولة',
+    'any_region' => 'أي منطقة',
+    'any_city' => 'أي مدينة',
+    'filters_button' => 'الفلاتر',
+    'apply_filters' => 'تطبيق الفلاتر',
+    'clear_filters' => 'مسح الكل',
+    'close' => 'إغلاق',
+    'sort_label' => 'الترتيب',
+    'sort_name' => 'الاسم (أ-ي)',
+    'sort_newest' => 'الأحدث',
+    'results_count' => ':count مركز يطابق بحثك|:count مراكز تطابق بحثك',
+    'no_results_title' => 'لا توجد مراكز تطابق بحثك',
+    'no_results_body' => 'جرّب توسيع نطاق الفلاتر أو إزالة أحدها.',
+
+    'address' => 'العنوان',
+    'open_in_maps' => 'فتح في خرائط جوجل',
+    'description' => 'نبذة',
+    'services' => 'الخدمات',
+    'opening_hours' => 'ساعات العمل',
+    'closed' => 'مغلق',
+    'gallery' => 'معرض الصور',
+    'back_to_centers' => 'العودة إلى المراكز',
+    'contact' => 'التواصل',
+    'website' => 'زيارة الموقع الإلكتروني',
+    'instagram' => 'إنستغرام',
+
+    'types' => [
+        'training' => 'تدريب',
+        'breeding' => 'تربية',
+        'boarding' => 'إيواء',
+        'rehabilitation' => 'إعادة تأهيل',
+    ],
+
+    'days' => [
+        'mon' => 'الإثنين',
+        'tue' => 'الثلاثاء',
+        'wed' => 'الأربعاء',
+        'thu' => 'الخميس',
+        'fri' => 'الجمعة',
+        'sat' => 'السبت',
+        'sun' => 'الأحد',
+    ],
+];

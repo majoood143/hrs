@@ -1,0 +1,11 @@
+<x-layouts.site
+    :seo-title="$seoTitle"
+    :seo-description="$seoDescription"
+    :seo-image="$seoImage"
+    :og-type="$ogType"
+    :canonical-url="$canonicalUrl"
+    :noindex="$noindex"
+    :nofollow="$nofollow"
+>
+    @include('site.centers._listing')
+</x-layouts.site>

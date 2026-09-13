@@ -1,0 +1,58 @@
+<?php
+
+return [
+    'nav_label' => 'Centers',
+    'nav_group' => 'Centers Directory',
+    'board_title' => 'Centers',
+    'view_center' => 'View Center',
+
+    'filter_type' => 'Type',
+    'filter_country' => 'Country',
+    'filter_region' => 'Region',
+    'filter_city' => 'City',
+    'filter_service' => 'Service',
+    'any' => 'Any',
+    'any_type' => 'Any type',
+    'any_country' => 'Any country',
+    'any_region' => 'Any region',
+    'any_city' => 'Any city',
+    'filters_button' => 'Filters',
+    'apply_filters' => 'Apply filters',
+    'clear_filters' => 'Clear all',
+    'close' => 'Close',
+    'sort_label' => 'Sort',
+    'sort_name' => 'Name (A-Z)',
+    'sort_newest' => 'Newest',
+    'results_count' => ':count center matches your search|:count centers match your search',
+    'no_results_title' => 'No centers match your search',
+    'no_results_body' => 'Try widening your filters or clearing one.',
+
+    'address' => 'Address',
+    'open_in_maps' => 'Open in Google Maps',
+    'description' => 'About',
+    'services' => 'Services',
+    'opening_hours' => 'Opening Hours',
+    'closed' => 'Closed',
+    'gallery' => 'Gallery',
+    'back_to_centers' => 'Back to Centers',
+    'contact' => 'Contact',
+    'website' => 'Visit Website',
+    'instagram' => 'Instagram',
+
+    'types' => [
+        'training' => 'Training',
+        'breeding' => 'Breeding',
+        'boarding' => 'Boarding',
+        'rehabilitation' => 'Rehabilitation',
+    ],
+
+    'days' => [
+        'mon' => 'Monday',
+        'tue' => 'Tuesday',
+        'wed' => 'Wednesday',
+        'thu' => 'Thursday',
+        'fri' => 'Friday',
+        'sat' => 'Saturday',
+        'sun' => 'Sunday',
+    ],
+];

@@ -141,8 +141,31 @@
                 aria-label="{{ __('Primary') }}">
                 @php($headerMenu = \App\Models\CmsMenu::query()->where('location', 'header')->with('items.children')->first())
                 @forelse(($headerMenu?->items ?? collect()) as $item)
-                    <a href="{{ $item->resolvedUrl() }}" target="{{ $item->target }}"
-                        class="{{ $item->is_button ? 'btn-warm !py-2 !px-5 text-sm' : 'whitespace-nowrap transition hover:text-warm-600' }}">{{ $item->label }}</a>
+                    @if ($item->children->isNotEmpty())
+                        <div class="group relative">
+                            <a href="{{ $item->resolvedUrl() }}" target="{{ $item->target }}"
+                                class="flex items-center gap-1 whitespace-nowrap transition hover:text-warm-600">
+                                {{ $item->label }}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 transition group-hover:rotate-180"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                                    aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                </svg>
+                            </a>
+                            <div
+                                class="invisible absolute start-0 top-full z-20 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                                <div class="min-w-48 rounded-xl border border-warm-200/60 bg-warm-50 py-2 shadow-lg">
+                                    @foreach ($item->children as $child)
+                                        <a href="{{ $child->resolvedUrl() }}" target="{{ $child->target }}"
+                                            class="block whitespace-nowrap px-4 py-2 text-sm text-warm-800 transition hover:bg-warm-200/60 hover:text-warm-600">{{ $child->label }}</a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <a href="{{ $item->resolvedUrl() }}" target="{{ $item->target }}"
+                            class="{{ $item->is_button ? 'btn-warm !py-2 !px-5 text-sm' : 'whitespace-nowrap transition hover:text-warm-600' }}">{{ $item->label }}</a>
+                    @endif
                 @empty
                     <a href="{{ url('/') }}" class="whitespace-nowrap transition hover:text-warm-600">{{ __('Home') }}</a>
                     <a href="{{ url('/blog') }}" class="whitespace-nowrap transition hover:text-warm-600">{{ __('Stories') }}</a>
@@ -172,8 +195,28 @@
         <div id="mobile-menu" data-mobile-menu class="border-t border-warm-200/60 bg-warm-50">
             <nav class="flex flex-col gap-1 px-4 py-4" aria-label="{{ __('Mobile') }}">
                 @forelse(($headerMenu?->items ?? collect()) as $item)
-                    <a href="{{ $item->resolvedUrl() }}" target="{{ $item->target }}"
-                        class="{{ $item->is_button ? 'btn-warm mt-2 w-full justify-center' : 'rounded-xl px-3 py-3 text-base font-medium text-warm-800 transition hover:bg-warm-200/60' }}">{{ $item->label }}</a>
+                    @if ($item->children->isNotEmpty())
+                        <details class="group rounded-xl">
+                            <summary
+                                class="flex cursor-pointer list-none items-center justify-between rounded-xl px-3 py-3 text-base font-medium text-warm-800 transition hover:bg-warm-200/60">
+                                {{ $item->label }}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition group-open:rotate-180"
+                                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                                    aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                                </svg>
+                            </summary>
+                            <div class="ms-3 flex flex-col gap-1 border-s border-warm-200/60 py-1 ps-3">
+                                @foreach ($item->children as $child)
+                                    <a href="{{ $child->resolvedUrl() }}" target="{{ $child->target }}"
+                                        class="rounded-xl px-3 py-2 text-sm text-warm-800 transition hover:bg-warm-200/60">{{ $child->label }}</a>
+                                @endforeach
+                            </div>
+                        </details>
+                    @else
+                        <a href="{{ $item->resolvedUrl() }}" target="{{ $item->target }}"
+                            class="{{ $item->is_button ? 'btn-warm mt-2 w-full justify-center' : 'rounded-xl px-3 py-3 text-base font-medium text-warm-800 transition hover:bg-warm-200/60' }}">{{ $item->label }}</a>
+                    @endif
                 @empty
                     <a href="{{ url('/') }}"
                         class="rounded-xl px-3 py-3 text-base font-medium text-warm-800 transition hover:bg-warm-200/60">{{ __('Home') }}</a>
@@ -296,11 +339,21 @@
 
                 <div>
                     <p class="section-eyebrow">{{ __('Explore') }}</p>
-                    @php($footerMenu = \App\Models\CmsMenu::query()->where('location', 'footer')->with('items')->first())
+                    @php($footerMenu = \App\Models\CmsMenu::query()->where('location', 'footer')->with('items.children')->first())
                     <ul class="mt-3 space-y-2 text-sm text-warm-900/80">
                         @forelse(($footerMenu?->items ?? collect()) as $item)
-                            <li><a href="{{ $item->resolvedUrl() }}"
-                                    class="hover:text-warm-600">{{ $item->label }}</a></li>
+                            <li>
+                                <a href="{{ $item->resolvedUrl() }}"
+                                    class="hover:text-warm-600">{{ $item->label }}</a>
+                                @if ($item->children->isNotEmpty())
+                                    <ul class="mt-2 space-y-2 ps-4">
+                                        @foreach ($item->children as $child)
+                                            <li><a href="{{ $child->resolvedUrl() }}"
+                                                    class="hover:text-warm-600">{{ $child->label }}</a></li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                            </li>
                         @empty
                             <li><a href="{{ url('/transfer-board') }}"
                                     class="hover:text-warm-600">{{ __('Transfer Board') }}</a></li>

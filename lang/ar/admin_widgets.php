@@ -5,6 +5,14 @@ return [
         'stat_label' => 'العيادات',
         'active_suffix' => ':count نشطة',
     ],
+    'centers_overview' => [
+        'stat_label' => 'المراكز',
+        'active_suffix' => ':count نشطة',
+    ],
+    'shops_overview' => [
+        'stat_label' => 'المتاجر',
+        'active_suffix' => ':count نشطة',
+    ],
     'farriers_overview' => [
         'stat_label' => 'الحدادون',
         'active_suffix' => ':count نشط',

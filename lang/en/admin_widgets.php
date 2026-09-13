@@ -5,6 +5,14 @@ return [
         'stat_label' => 'Clinics',
         'active_suffix' => ':count active',
     ],
+    'centers_overview' => [
+        'stat_label' => 'Centers',
+        'active_suffix' => ':count active',
+    ],
+    'shops_overview' => [
+        'stat_label' => 'Shops',
+        'active_suffix' => ':count active',
+    ],
     'farriers_overview' => [
         'stat_label' => 'Farriers',
         'active_suffix' => ':count active',

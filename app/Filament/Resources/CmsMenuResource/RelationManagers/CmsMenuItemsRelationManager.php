@@ -35,7 +35,10 @@ class CmsMenuItemsRelationManager extends RelationManager
 
                 Select::make('parent_id')
                     ->label(__('cms_menu_item.fields.parent'))
-                    ->options(fn () => $this->getOwnerRecord()->allItems()->get()
+                    ->helperText(__('cms_menu_item.fields.parent_helper'))
+                    ->options(fn (?CmsMenuItem $record) => $this->getOwnerRecord()->items()
+                        ->when($record, fn ($query) => $query->where('id', '!=', $record->id))
+                        ->get()
                         ->mapWithKeys(fn (CmsMenuItem $item) => [$item->id => $item->getTranslation('label', app()->getLocale())]))
                     ->searchable()
                     ->native(false),
@@ -90,7 +93,12 @@ class CmsMenuItemsRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('label')
                     ->label(__('cms_menu_item.columns.label'))
-                    ->weight('bold'),
+                    ->weight('bold')
+                    ->formatStateUsing(fn ($state, CmsMenuItem $record) => $record->parent_id ? '— ' . $state : $state),
+
+                TextColumn::make('parent.label')
+                    ->label(__('cms_menu_item.columns.parent'))
+                    ->placeholder('—'),
 
                 TextColumn::make('resolvedUrl')
                     ->label(__('cms_menu_item.fields.url'))
@@ -108,7 +116,7 @@ class CmsMenuItemsRelationManager extends RelationManager
                     ->label(__('cms_menu_item.columns.order'))
                     ->sortable(),
             ])
-            ->defaultSort('order')
+            ->modifyQueryUsing(fn ($query) => $query->orderByRaw('COALESCE(parent_id, id) asc, parent_id is not null asc, `order` asc'))
             ->headerActions([
                 CreateAction::make(),
             ])

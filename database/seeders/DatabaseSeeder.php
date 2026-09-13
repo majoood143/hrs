@@ -29,6 +29,8 @@ class DatabaseSeeder extends Seeder
         $this->call(StatusSeeder::class);
         $this->call(StableServiceSeeder::class);
         $this->call(ClinicServiceSeeder::class);
+        $this->call(CenterServiceSeeder::class);
+        $this->call(ShopServiceSeeder::class);
         $this->call(CmsCategorySeeder::class);
     }
 }

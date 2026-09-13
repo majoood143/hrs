@@ -14,6 +14,7 @@ return [
         'site_section' => 'Site Section',
         'url' => 'URL',
         'parent' => 'Parent Item',
+        'parent_helper' => 'Nest this item under a top-level item to show it as a submenu/dropdown.',
         'target' => 'Open In',
         'target_self' => 'Same Tab',
         'target_blank' => 'New Tab',
@@ -23,6 +24,7 @@ return [
     ],
     'columns' => [
         'label' => 'Label',
+        'parent' => 'Parent',
         'target' => 'Target',
         'order' => 'Order',
     ],

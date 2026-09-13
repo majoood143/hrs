@@ -3,6 +3,8 @@
 return [
     'countries' => 'الدول',
     'clinics' => 'العيادات',
+    'centers' => 'المراكز',
+    'shops' => 'المتاجر',
     'farrier_marketplace' => 'سوق الحدادين',
     'horse_marketplace' => 'سوق الخيول',
     'tool_marketplace' => 'سوق الأدوات',
