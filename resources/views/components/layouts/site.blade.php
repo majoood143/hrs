@@ -116,6 +116,13 @@
             {!! $customCss !!}
         </style>
     @endif
+
+    @if ($headerScripts = \App\Models\SiteSetting::get('custom_header_scripts'))
+        {!! $headerScripts !!}
+    @endif
+    @if (!empty($customHeadScripts))
+        {!! $customHeadScripts !!}
+    @endif
 </head>
 
 <body class="bg-warm-50 text-warm-950 antialiased">
@@ -381,6 +388,13 @@
             </div>
         </div>
     </footer>
+
+    @if ($bodyScripts = \App\Models\SiteSetting::get('custom_body_scripts'))
+        {!! $bodyScripts !!}
+    @endif
+    @if (!empty($customBodyScripts))
+        {!! $customBodyScripts !!}
+    @endif
 
 </body>
 

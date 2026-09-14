@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f2946819307804b8f8ba41ab7352a982",
+    "content-hash": "bcc73754242a05fbae62e48a724c6505",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5678,6 +5678,93 @@
                 }
             ],
             "time": "2025-09-03T16:03:54+00:00"
+        },
+        {
+            "name": "packstub/filament-form-builder",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/packstub/filament-form-builder.git",
+                "reference": "83fa72eb7b72d5815d6a9a91ad74fec3131a411c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/packstub/filament-form-builder/zipball/83fa72eb7b72d5815d6a9a91ad74fec3131a411c",
+                "reference": "83fa72eb7b72d5815d6a9a91ad74fec3131a411c",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^4.0 || ^5.0",
+                "illuminate/contracts": "^12.0 || ^13.0",
+                "php": "^8.3",
+                "spatie/laravel-package-tools": "^1.92"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.27",
+                "orchestra/testbench": "^10.0 || ^11.0",
+                "pestphp/pest": "^4.0 || ^5.0",
+                "pestphp/pest-plugin-laravel": "^4.0 || ^5.0",
+                "pestphp/pest-plugin-livewire": "^4.0 || ^5.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "FormBuilder": "Packstub\\FormBuilder\\Facades\\FormBuilder"
+                    },
+                    "providers": [
+                        "Packstub\\FormBuilder\\FormBuilderServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Packstub\\FormBuilder\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ion Caliman",
+                    "email": "icaliman92@gmail.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Packstub",
+                    "email": "support@packstub.dev",
+                    "homepage": "https://packstub.dev"
+                }
+            ],
+            "description": "Form builder for Filament panels: build forms in the admin, render them with Blade, Livewire or JSON, collect and export submissions.",
+            "homepage": "https://github.com/packstub/filament-form-builder",
+            "keywords": [
+                "Forms",
+                "contact-form",
+                "filament",
+                "filament-form-builder",
+                "filament-plugin",
+                "filament-v5",
+                "form-builder",
+                "laravel",
+                "no-code",
+                "packstub",
+                "submissions"
+            ],
+            "support": {
+                "docs": "https://packstub.dev/docs/filament-form-builder",
+                "issues": "https://github.com/packstub/filament-form-builder/issues",
+                "source": "https://github.com/packstub/filament-form-builder"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/icaliman",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-09-09T13:08:00+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",

@@ -210,6 +210,18 @@ class CmsPageResource extends Resource
                                             ->helperText(__('cms_page.fields.custom_css_helper'))
                                             ->rows(6)
                                             ->extraInputAttributes(['class' => 'font-mono text-sm', 'dir' => 'ltr']),
+
+                                        Textarea::make('custom_head_scripts')
+                                            ->label(__('cms_page.fields.custom_head_scripts'))
+                                            ->helperText(__('cms_page.fields.custom_head_scripts_helper'))
+                                            ->rows(6)
+                                            ->extraInputAttributes(['class' => 'font-mono text-sm', 'dir' => 'ltr']),
+
+                                        Textarea::make('custom_body_scripts')
+                                            ->label(__('cms_page.fields.custom_body_scripts'))
+                                            ->helperText(__('cms_page.fields.custom_body_scripts_helper'))
+                                            ->rows(6)
+                                            ->extraInputAttributes(['class' => 'font-mono text-sm', 'dir' => 'ltr']),
                                     ]),
                             ]),
 

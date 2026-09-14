@@ -54,6 +54,8 @@ return [
         'seo_desc' => 'القيم الافتراضية المستخدمة عندما لا تحدد الصفحة قيمها الخاصة.',
         'google_tag_manager' => 'مدير علامات جوجل',
         'google_tag_manager_desc' => 'تحميل مدير علامات جوجل (Google Tag Manager) في جميع صفحات الموقع العام.',
+        'custom_scripts' => 'أكواد مخصصة',
+        'custom_scripts_desc' => 'الصق أي بكسل تتبع، أو أداة محادثة، أو كود تحقق، أو أي HTML/JavaScript آخر من طرف ثالث — يتم إدراجه في جميع صفحات الموقع العام.',
     ],
 
     'fields' => [
@@ -158,6 +160,10 @@ return [
         'seo_og_image_helper' => 'تُستخدم عند مشاركة صفحة على وسائل التواصل ولا تحتوي على صورة خاصة بها.',
         'google_tag_manager_id' => 'معرّف حاوية Google Tag Manager',
         'google_tag_manager_id_helper' => 'مثال: GTM-XXXXXXX. اتركه فارغًا للتعطيل. يمكنك إيجاده في مساحة عمل GTM ضمن Admin > Container Settings.',
+        'custom_header_scripts' => 'أكواد رأس الصفحة',
+        'custom_header_scripts_helper' => 'تُدرج قبل </head> في جميع الصفحات. تعمل كما هي مكتوبة تمامًا على الموقع المباشر — الصق فقط كودًا من مصادر تثق بها.',
+        'custom_body_scripts' => 'أكواد نهاية الصفحة',
+        'custom_body_scripts_helper' => 'تُدرج قبل </body> في جميع الصفحات. تعمل كما هي مكتوبة تمامًا على الموقع المباشر — الصق فقط كودًا من مصادر تثق بها.',
         'success_page_back_url' => 'رابط الرجوع',
         'success_page_back_url_helper' => 'مثال: الصفحة الرئيسية لموقعك.',
         'success_page_message_en' => 'الرسالة (إنجليزي)',

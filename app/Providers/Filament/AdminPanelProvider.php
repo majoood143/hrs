@@ -25,6 +25,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use MarcoGermani87\FilamentCaptcha\FilamentCaptcha;
+use Packstub\FormBuilder\FormBuilderPlugin;
 use Rmsramos\Activitylog\ActivitylogPlugin;
 use Rupadana\ApiService\ApiServicePlugin;
 
@@ -77,6 +78,7 @@ class AdminPanelProvider extends PanelProvider
                 ApiServicePlugin::make(),
                 FilamentCaptcha::make(),
                 FilamentFileExplorerPlugin::make(),
+                FormBuilderPlugin::make()->navigationGroup(__('cms.navigation.group')),
             ])
             ->authMiddleware([
                 Authenticate::class,

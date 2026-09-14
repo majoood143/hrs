@@ -19,6 +19,7 @@ class CmsPost extends Model implements HasMedia
     protected $fillable = [
         'title', 'slug', 'excerpt', 'content', 'category_id', 'status', 'published_at',
         'template', 'container_width', 'show_title', 'custom_css',
+        'custom_head_scripts', 'custom_body_scripts',
         'meta_title', 'meta_description', 'canonical_url',
     ];
 

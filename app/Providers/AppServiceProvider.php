@@ -24,6 +24,8 @@ use Filament\Forms\Components\FileUpload;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Spatie\MediaLibrary\MediaCollections\Events\MediaHasBeenAddedEvent;
 use Illuminate\Support\Facades\Gate;
+use App\Policies\FormPolicy;
+use Packstub\FormBuilder\Models\Form as FormBuilderForm;
 
 
 
@@ -49,6 +51,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('viewApiDocs', function ($user) {
             return $user?->hasRole('super_admin') ?? false;
         });
+
+        Gate::policy(FormBuilderForm::class, FormPolicy::class);
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $switch

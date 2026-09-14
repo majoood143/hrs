@@ -65,6 +65,7 @@ class CmsMenuItem extends Model
             'farriers.index' => __('farriers.nav_label'),
             'tools-for-sale.index' => __('tools-for-sale.nav_label'),
             'transfer-board.index' => __('Find a Transfer'),
+            'events.index' => __('events.nav_label'),
         ];
     }
 }

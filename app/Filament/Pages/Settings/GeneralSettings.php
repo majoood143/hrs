@@ -122,6 +122,8 @@ class GeneralSettings extends Page implements HasForms
             'seo_og_image' => SiteSetting::get('seo_og_image'),
 
             'google_tag_manager_id' => SiteSetting::get('google_tag_manager_id', ''),
+            'custom_header_scripts' => SiteSetting::get('custom_header_scripts', ''),
+            'custom_body_scripts' => SiteSetting::get('custom_body_scripts', ''),
 
             'success_page_back_url' => SiteSetting::get('success_page_back_url', ''),
             'success_page_message_en' => SiteSetting::get('success_page_message_en', ''),
@@ -679,6 +681,24 @@ class GeneralSettings extends Page implements HasForms
                                             ->maxLength(20)
                                             ->placeholder('GTM-XXXXXXX'),
                                     ]),
+
+                                Section::make(__('general_settings.sections.custom_scripts'))
+                                    ->description(__('general_settings.sections.custom_scripts_desc'))
+                                    ->schema([
+                                        Textarea::make('custom_header_scripts')
+                                            ->label(__('general_settings.fields.custom_header_scripts'))
+                                            ->helperText(__('general_settings.fields.custom_header_scripts_helper'))
+                                            ->rows(8)
+                                            ->extraInputAttributes(['class' => 'font-mono text-sm', 'dir' => 'ltr'])
+                                            ->columnSpanFull(),
+
+                                        Textarea::make('custom_body_scripts')
+                                            ->label(__('general_settings.fields.custom_body_scripts'))
+                                            ->helperText(__('general_settings.fields.custom_body_scripts_helper'))
+                                            ->rows(8)
+                                            ->extraInputAttributes(['class' => 'font-mono text-sm', 'dir' => 'ltr'])
+                                            ->columnSpanFull(),
+                                    ]),
                             ]),
                     ])
                     ->columnSpanFull(),
@@ -733,6 +753,8 @@ class GeneralSettings extends Page implements HasForms
             'seo_meta_description' => 'text',
             'seo_og_image' => 'file',
             'google_tag_manager_id' => 'text',
+            'custom_header_scripts' => 'text',
+            'custom_body_scripts' => 'text',
             'success_page_back_url' => 'text',
             'success_page_message_en' => 'text',
             'success_page_message_ar' => 'text',

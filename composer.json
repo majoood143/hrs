@@ -22,6 +22,7 @@
         "laravel/tinker": "^2.10.1",
         "marcogermani87/filament-captcha": "^2.3",
         "nunomaduro/termwind": "2.3.1",
+        "packstub/filament-form-builder": "^1.0",
         "pxlrbt/filament-excel": "^3.0",
         "rmsramos/activitylog": "^3.0",
         "rupadana/filament-api-service": "^4.0",

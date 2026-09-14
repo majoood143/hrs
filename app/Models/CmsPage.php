@@ -16,7 +16,7 @@ class CmsPage extends Model implements HasMedia
     protected $fillable = [
         'title', 'slug', 'excerpt', 'content', 'status', 'published_at',
         'template', 'layout', 'is_homepage', 'is_system', 'container_width', 'show_title',
-        'custom_css', 'meta_title', 'meta_description', 'canonical_url',
+        'custom_css', 'custom_head_scripts', 'custom_body_scripts', 'meta_title', 'meta_description', 'canonical_url',
         'noindex', 'nofollow', 'og_type',
     ];
 

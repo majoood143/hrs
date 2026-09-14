@@ -190,6 +190,14 @@ class HorseWebsiteSeeder extends Seeder
                     'ar' => 'بيع وشراء أدوات ومعدات العناية بالخيول.',
                 ],
             ],
+            [
+                'slug' => 'events',
+                'title' => ['en' => 'Events Calendar', 'ar' => 'تقويم الفعاليات'],
+                'meta_description' => [
+                    'en' => 'Browse upcoming events, meetings, and important dates.',
+                    'ar' => 'تصفح الفعاليات القادمة والاجتماعات والمواعيد المهمة.',
+                ],
+            ],
         ];
 
         foreach ($pages as $data) {

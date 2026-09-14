@@ -3,6 +3,8 @@
     :seo-description="$post->getTranslation('meta_description', app()->getLocale()) ?: $post->getTranslation('excerpt', app()->getLocale())"
     :canonical-url="$post->canonical_url"
     :custom-css="$post->custom_css"
+    :custom-head-scripts="$post->custom_head_scripts"
+    :custom-body-scripts="$post->custom_body_scripts"
 >
     <article>
         @if($post->featuredImageUrl())

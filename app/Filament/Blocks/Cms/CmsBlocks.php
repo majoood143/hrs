@@ -12,6 +12,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
+use Packstub\FormBuilder\Models\Form as FormBuilderForm;
 
 class CmsBlocks
 {
@@ -34,6 +35,8 @@ class CmsBlocks
             static::image(),
             static::video(),
             static::columns(),
+            static::htmlEmbed(),
+            static::form(),
             static::divider(),
         ];
     }
@@ -275,15 +278,91 @@ class CmsBlocks
             ]);
     }
 
+    /**
+     * @return array<string, string>
+     */
+    private static function columnIconOptions(): array
+    {
+        return [
+            'heroicon-o-trophy' => __('cms.blocks.icon_trophy'),
+            'heroicon-o-shield-check' => __('cms.blocks.icon_shield_check'),
+            'heroicon-o-truck' => __('cms.blocks.icon_truck'),
+            'heroicon-o-users' => __('cms.blocks.icon_users'),
+            'heroicon-o-chart-bar' => __('cms.blocks.icon_chart_bar'),
+            'heroicon-o-map-pin' => __('cms.blocks.icon_map_pin'),
+            'heroicon-o-calendar' => __('cms.blocks.icon_calendar'),
+            'heroicon-o-currency-dollar' => __('cms.blocks.icon_currency_dollar'),
+            'heroicon-o-academic-cap' => __('cms.blocks.icon_academic_cap'),
+            'heroicon-o-heart' => __('cms.blocks.icon_heart'),
+            'heroicon-o-star' => __('cms.blocks.icon_star'),
+            'heroicon-o-globe-alt' => __('cms.blocks.icon_globe_alt'),
+            'heroicon-o-clock' => __('cms.blocks.icon_clock'),
+            'heroicon-o-check-circle' => __('cms.blocks.icon_check_circle'),
+            'heroicon-o-sparkles' => __('cms.blocks.icon_sparkles'),
+            'heroicon-o-building-storefront' => __('cms.blocks.icon_building_storefront'),
+        ];
+    }
+
     public static function columns(): Block
     {
         return Block::make('columns')
             ->label(__('cms.blocks.columns'))
             ->icon('heroicon-o-view-columns')
             ->schema([
+                Select::make('columns_per_row')
+                    ->label(__('cms.blocks.columns_per_row'))
+                    ->options([
+                        'auto' => __('cms.blocks.columns_per_row_auto'),
+                        '2' => '2',
+                        '3' => '3',
+                        '4' => '4',
+                    ])
+                    ->default('auto')
+                    ->native(false),
+                Select::make('card_style')
+                    ->label(__('cms.blocks.card_style'))
+                    ->options([
+                        'card' => __('cms.blocks.card_style_card'),
+                        'minimal' => __('cms.blocks.card_style_minimal'),
+                        'bordered' => __('cms.blocks.card_style_bordered'),
+                    ])
+                    ->default('card')
+                    ->native(false),
+                Select::make('alignment')
+                    ->label(__('cms.blocks.alignment'))
+                    ->options([
+                        'left' => __('cms.blocks.left'),
+                        'center' => __('cms.blocks.center'),
+                    ])
+                    ->default('left')
+                    ->native(false),
                 Repeater::make('items')
                     ->label(__('cms.blocks.items'))
                     ->schema([
+                        Select::make('media_type')
+                            ->label(__('cms.blocks.media_type'))
+                            ->options([
+                                'none' => __('cms.blocks.media_type_none'),
+                                'icon' => __('cms.blocks.media_type_icon'),
+                                'image' => __('cms.blocks.media_type_image'),
+                            ])
+                            ->default('none')
+                            ->native(false)
+                            ->live()
+                            ->columnSpanFull(),
+                        Select::make('icon')
+                            ->label(__('cms.blocks.icon'))
+                            ->options(static::columnIconOptions())
+                            ->native(false)
+                            ->visible(fn ($get) => $get('media_type') === 'icon')
+                            ->columnSpanFull(),
+                        FileUpload::make('image')
+                            ->label(__('cms.blocks.image'))
+                            ->image()
+                            ->disk('public')
+                            ->directory('cms/columns')
+                            ->visible(fn ($get) => $get('media_type') === 'image')
+                            ->columnSpanFull(),
                         TranslatableInput::grid(fn ($code, $meta) => TextInput::make("heading.{$code}")
                             ->label(__('cms.blocks.heading') . ' (' . $meta['native'] . ')')
                             ->required($code === TranslatableInput::defaultLocale()))
@@ -292,10 +371,74 @@ class CmsBlocks
                             ->label(__('cms.blocks.text') . ' (' . $meta['native'] . ')')
                             ->rows(3))
                             ->columnSpanFull(),
+                        TranslatableInput::grid(fn ($code, $meta) => TextInput::make("link_label.{$code}")
+                            ->label(__('cms.blocks.link_label') . ' (' . $meta['native'] . ')'))
+                            ->columnSpanFull(),
+                        TextInput::make('link_url')
+                            ->label(__('cms.blocks.link_url'))
+                            ->url()
+                            ->columnSpanFull(),
                     ])
                     ->columns(1)
-                    ->defaultItems(2),
+                    ->defaultItems(2)
+                    ->reorderable()
+                    ->collapsible()
+                    ->itemLabel(fn (array $state): ?string => \App\Support\Localized::value($state, 'heading') ?: __('cms.blocks.item'))
+                    ->columnSpanFull(),
+            ])
+            ->columns(3);
+    }
+
+    public static function htmlEmbed(): Block
+    {
+        return Block::make('html_embed')
+            ->label(__('cms.blocks.html_embed'))
+            ->icon('heroicon-o-code-bracket')
+            ->schema([
+                Textarea::make('code')
+                    ->label(__('cms.blocks.html_embed_code'))
+                    ->helperText(__('cms.blocks.html_embed_code_helper'))
+                    ->rows(10)
+                    ->required()
+                    ->extraInputAttributes(['class' => 'font-mono text-sm', 'dir' => 'ltr'])
+                    ->columnSpanFull(),
+                Select::make('container')
+                    ->label(__('cms.blocks.html_embed_container'))
+                    ->options([
+                        'boxed' => __('cms.blocks.html_embed_container_boxed'),
+                        'full' => __('cms.blocks.html_embed_container_full'),
+                    ])
+                    ->default('boxed')
+                    ->native(false),
             ]);
+    }
+
+    public static function form(): Block
+    {
+        return Block::make('form')
+            ->label(__('cms.blocks.form'))
+            ->icon('heroicon-o-clipboard-document-check')
+            ->schema([
+                static::headingField(required: false),
+                static::subheadingField(),
+                Select::make('form_slug')
+                    ->label(__('cms.blocks.form_select'))
+                    ->helperText(__('cms.blocks.form_select_helper'))
+                    ->options(fn () => FormBuilderForm::query()->where('is_active', true)->orderBy('name')->pluck('name', 'slug'))
+                    ->searchable()
+                    ->native(false)
+                    ->required()
+                    ->columnSpanFull(),
+                Select::make('container')
+                    ->label(__('cms.blocks.html_embed_container'))
+                    ->options([
+                        'boxed' => __('cms.blocks.html_embed_container_boxed'),
+                        'full' => __('cms.blocks.html_embed_container_full'),
+                    ])
+                    ->default('boxed')
+                    ->native(false),
+            ])
+            ->columns(2);
     }
 
     public static function divider(): Block

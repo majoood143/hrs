@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Site\CenterController;
 use App\Http\Controllers\Site\ClinicController;
+use App\Http\Controllers\Site\EventController;
 use App\Http\Controllers\Site\FarrierController;
 use App\Http\Controllers\Site\HorseForSaleController;
 use App\Http\Controllers\Site\PageController;
@@ -56,8 +57,10 @@ Route::post('/tools-for-sale/post', [ToolSaleController::class, 'store'])->name(
 Route::get('/tools-for-sale/captcha', [ToolSaleController::class, 'captcha'])->name('tools-for-sale.captcha');
 Route::get('/tools-for-sale/{toolSalePost}', [ToolSaleController::class, 'show'])->name('tools-for-sale.show');
 
+Route::get('/events', [EventController::class, 'index'])->name('events.index');
+
 Route::get('/{slug}', [PageController::class, 'show'])
-    ->where('slug', '^(?!admin|transportation|blog|transfer-board|horses-for-sale|stables|clinics|centers|shops|farriers|tools-for-sale).*$')
+    ->where('slug', '^(?!admin|transportation|blog|transfer-board|horses-for-sale|stables|clinics|centers|shops|farriers|tools-for-sale|events).*$')
     ->name('page.show');
 
 Route::fallback(function () {

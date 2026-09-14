@@ -34,5 +34,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ShopServiceSeeder::class);
         $this->call(CmsCategorySeeder::class);
         $this->call(MediaLibrarySeeder::class);
+        $this->call(EventCategorySeeder::class);
     }
 }

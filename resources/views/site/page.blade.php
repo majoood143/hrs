@@ -7,6 +7,8 @@
     :noindex="$noindex"
     :nofollow="$nofollow"
     :custom-css="$page->custom_css"
+    :custom-head-scripts="$page->custom_head_scripts"
+    :custom-body-scripts="$page->custom_body_scripts"
 >
     @if($page->show_title && !$page->is_homepage)
         <div class="mx-auto max-w-4xl px-6 pt-16 text-center">

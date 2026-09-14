@@ -54,6 +54,8 @@ return [
         'seo_desc' => 'Fallback SEO values used when a page does not define its own.',
         'google_tag_manager' => 'Google Tag Manager',
         'google_tag_manager_desc' => 'Loads Google Tag Manager on every page of the public website.',
+        'custom_scripts' => 'Custom Scripts',
+        'custom_scripts_desc' => 'Paste any tracking pixel, chat widget, verification tag, or other third-party HTML/JavaScript — it is injected on every page of the public website.',
     ],
 
     'fields' => [
@@ -158,6 +160,10 @@ return [
         'seo_og_image_helper' => 'Used when a page is shared on social media and has no image of its own.',
         'google_tag_manager_id' => 'Google Tag Manager Container ID',
         'google_tag_manager_id_helper' => 'e.g. GTM-XXXXXXX. Leave blank to disable. Found in your GTM workspace under Admin > Container Settings.',
+        'custom_header_scripts' => 'Header Scripts',
+        'custom_header_scripts_helper' => 'Injected before </head> on every page. Runs exactly as typed on the live site — only paste code from sources you trust.',
+        'custom_body_scripts' => 'Body Scripts',
+        'custom_body_scripts_helper' => 'Injected before </body> on every page. Runs exactly as typed on the live site — only paste code from sources you trust.',
         'success_page_back_url' => 'Back URL',
         'success_page_back_url_helper' => 'e.g. your main website homepage.',
         'success_page_message_en' => 'Message (English)',
