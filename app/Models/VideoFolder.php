@@ -82,4 +82,44 @@ class VideoFolder extends Model
 
         return $ids;
     }
+
+    /**
+     * Full breadcrumb from the top-level ancestor down to this folder, e.g.
+     * "Main Folder - Sub Folder", so admins can tell apart folders that
+     * share a name under different parents.
+     */
+    public function getPathLabelAttribute(): string
+    {
+        return $this->parent ? $this->parent->path_label . ' - ' . $this->name : $this->name;
+    }
+
+    /**
+     * The top-level ancestor of this folder (itself, when it has no parent).
+     */
+    public function rootAncestor(): self
+    {
+        return $this->parent ? $this->parent->rootAncestor() : $this;
+    }
+
+    /**
+     * Breadcrumb of subfolder names below the top-level ancestor, e.g.
+     * "Sub Folder - Sub Sub Folder", or null when this folder is itself
+     * top-level.
+     */
+    public function getSubPathLabelAttribute(): ?string
+    {
+        if (! $this->parent) {
+            return null;
+        }
+
+        $names = [];
+        $node = $this;
+
+        while ($node->parent) {
+            array_unshift($names, $node->name);
+            $node = $node->parent;
+        }
+
+        return implode(' - ', $names);
+    }
 }

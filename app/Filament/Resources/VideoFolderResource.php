@@ -80,7 +80,7 @@ class VideoFolderResource extends Resource
                             ->when($excludeIds, fn ($query) => $query->whereNotIn('id', $excludeIds))
                             ->ordered()
                             ->get()
-                            ->mapWithKeys(fn (VideoFolder $folder) => [$folder->id => $folder->name]);
+                            ->mapWithKeys(fn (VideoFolder $folder) => [$folder->id => $folder->path_label]);
                     })
                     ->native(false)
                     ->searchable()

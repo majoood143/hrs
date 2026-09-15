@@ -61,7 +61,7 @@ class VideoResource extends Resource
                 Select::make('folder_id')
                     ->label(__('videos.fields.folder'))
                     ->relationship('folder', 'id')
-                    ->getOptionLabelFromRecordUsing(fn (VideoFolder $record) => $record->name)
+                    ->getOptionLabelFromRecordUsing(fn (VideoFolder $record) => $record->path_label)
                     ->native(false)
                     ->searchable()
                     ->preload()
@@ -119,6 +119,7 @@ class VideoResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with('folder.parent'))
             ->columns([
                 ImageColumn::make('thumbnail_url')
                     ->label(''),
@@ -132,6 +133,8 @@ class VideoResource extends Resource
 
                 TextColumn::make('folder.name')
                     ->label(__('videos.fields.folder'))
+                    ->getStateUsing(fn (Video $record) => $record->folder?->rootAncestor()->name)
+                    ->description(fn (Video $record) => $record->folder?->sub_path_label)
                     ->badge(),
 
                 TextColumn::make('order')
@@ -147,7 +150,7 @@ class VideoResource extends Resource
                 SelectFilter::make('folder_id')
                     ->label(__('videos.filters.folder'))
                     ->relationship('folder', 'id')
-                    ->getOptionLabelFromRecordUsing(fn (VideoFolder $record) => $record->name),
+                    ->getOptionLabelFromRecordUsing(fn (VideoFolder $record) => $record->path_label),
             ])
             ->recordActions([
                 ActionGroup::make([
