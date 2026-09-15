@@ -15,16 +15,35 @@ class VideoLibraryController extends Controller
     public function index(): View
     {
         $folders = VideoFolder::active()
-            ->orderBy('order')
-            ->orderByDesc('id')
-            ->with(['videos' => fn ($query) => $query->active()->orderBy('order')->orderBy('id')])
-            ->get()
-            ->filter(fn (VideoFolder $folder) => $folder->videos->isNotEmpty());
+            ->roots()
+            ->ordered()
+            ->with(['children' => fn ($query) => $query->active(), 'children.videos', 'videos'])
+            ->get();
 
         return view('site.video-library.index', Seo::forSlug(
             'video-library',
             __('videos.library.title') . ' — ' . SiteSetting::siteName(),
         ) + ['folders' => $folders]);
+    }
+
+    public function folder(string $slug): View
+    {
+        $folder = VideoFolder::active()
+            ->where('slug', $slug)
+            ->with(['parent'])
+            ->firstOrFail();
+
+        $children = $folder->children()->active()->ordered()->with(['children.videos', 'videos'])->get();
+        $videos = $folder->videos()->active()->orderBy('order')->orderBy('id')->get();
+
+        return view('site.video-library.folder', [
+            'folder' => $folder,
+            'children' => $children,
+            'videos' => $videos,
+            'seoTitle' => $folder->name . ' — ' . SiteSetting::siteName(),
+            'seoDescription' => null,
+            'seoImage' => $videos->first()?->thumbnail_url,
+        ]);
     }
 
     public function show(string $slug): View

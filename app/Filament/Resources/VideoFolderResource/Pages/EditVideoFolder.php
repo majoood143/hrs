@@ -14,7 +14,7 @@ class EditVideoFolder extends EditRecord
     {
         return [
             DeleteAction::make()
-                ->disabled(fn () => $this->record->videos()->exists()),
+                ->disabled(fn () => $this->record->videos()->exists() || $this->record->children()->exists()),
         ];
     }
 

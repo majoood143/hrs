@@ -12,9 +12,11 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -68,6 +70,22 @@ class VideoFolderResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
 
+                Select::make('parent_id')
+                    ->label(__('video_folders.fields.parent'))
+                    ->helperText(__('video_folders.fields.parent_helper'))
+                    ->options(function (Get $get, $record) {
+                        $excludeIds = $record ? $record->selfAndDescendantIds() : [];
+
+                        return VideoFolder::query()
+                            ->when($excludeIds, fn ($query) => $query->whereNotIn('id', $excludeIds))
+                            ->ordered()
+                            ->get()
+                            ->mapWithKeys(fn (VideoFolder $folder) => [$folder->id => $folder->name]);
+                    })
+                    ->native(false)
+                    ->searchable()
+                    ->preload(),
+
                 TextInput::make('order')
                     ->label(__('video_folders.fields.order'))
                     ->helperText(__('video_folders.fields.order_helper'))
@@ -91,6 +109,12 @@ class VideoFolderResource extends Resource
                     ->sortable()
                     ->weight('bold'),
 
+                TextColumn::make('parent.name')
+                    ->label(__('video_folders.fields.parent'))
+                    ->getStateUsing(fn (VideoFolder $record) => $record->parent?->name)
+                    ->badge()
+                    ->placeholder('—'),
+
                 TextColumn::make('order')
                     ->label(__('video_folders.fields.order'))
                     ->sortable(),
@@ -102,13 +126,17 @@ class VideoFolderResource extends Resource
                 TextColumn::make('videos_count')
                     ->label(__('video_folders.navigation.videos'))
                     ->counts('videos'),
+
+                TextColumn::make('children_count')
+                    ->label(__('video_folders.navigation.subfolders'))
+                    ->counts('children'),
             ])
             ->defaultSort('order')
             ->recordActions([
                 ActionGroup::make([
                     EditAction::make(),
                     DeleteAction::make()
-                        ->disabled(fn (VideoFolder $record) => $record->videos()->exists()),
+                        ->disabled(fn (VideoFolder $record) => $record->videos()->exists() || $record->children()->exists()),
                 ]),
             ])
             ->toolbarActions([

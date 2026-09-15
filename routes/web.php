@@ -62,7 +62,8 @@ Route::get('/tools-for-sale/{toolSalePost}', [ToolSaleController::class, 'show']
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 
 Route::get('/video-library', [VideoLibraryController::class, 'index'])->name('video-library.index');
-Route::get('/video-library/{slug}', [VideoLibraryController::class, 'show'])->name('video-library.show');
+Route::get('/video-library/watch/{slug}', [VideoLibraryController::class, 'show'])->name('video-library.show');
+Route::get('/video-library/{slug}', [VideoLibraryController::class, 'folder'])->name('video-library.folder');
 
 Route::get('/promo/{ad}/go', [AdClickController::class, 'redirect'])->name('promo.click');
 

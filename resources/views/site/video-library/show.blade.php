@@ -1,7 +1,7 @@
 <x-layouts.site :seo-title="$seoTitle" :seo-description="$seoDescription ?? null" :seo-image="$seoImage ?? null">
     <div class="mx-auto max-w-5xl px-6 py-14">
-        <a href="{{ route('video-library.index') }}" class="text-sm font-semibold text-warm-600 hover:text-warm-800">
-            &larr; {{ __('videos.back_to_library') }}
+        <a href="{{ route('video-library.folder', $video->folder->slug) }}" class="text-sm font-semibold text-warm-600 hover:text-warm-800">
+            &larr; {{ $video->folder->name }}
         </a>
 
         <div class="mt-6">

@@ -32,6 +32,9 @@ return [
         'no_results_title' => 'No videos yet',
         'no_results_body' => 'Check back soon for new videos.',
         'view_all' => 'View all videos',
+        'videos_count' => ':count video|:count videos',
+        'no_folder_results_title' => 'Nothing here yet',
+        'no_folder_results_body' => 'This folder is empty for now.',
     ],
     'back_to_library' => 'Back to video library',
 ];
