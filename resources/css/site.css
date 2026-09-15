@@ -345,3 +345,17 @@ body {
     border-radius: 9999px;
     background: var(--color-warm-400);
 }
+
+/* Promo (ads area) slider — pagination/nav follow the site's primary brand color */
+.promo-swiper {
+    --swiper-theme-color: var(--color-warm-600);
+}
+
+.promo-swiper .swiper-pagination-bullet {
+    background: var(--color-warm-300);
+    opacity: 1;
+}
+
+.promo-swiper .swiper-pagination-bullet-active {
+    background: var(--color-warm-600);
+}

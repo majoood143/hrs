@@ -77,6 +77,7 @@ return [
     ],
     'actions' => [
         'create_first' => 'أنشئ صفحتك الأولى',
+        'view' => 'عرض',
     ],
     'empty_state' => [
         'heading' => 'لا توجد صفحات بعد',

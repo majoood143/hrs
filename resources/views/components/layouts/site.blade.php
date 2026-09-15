@@ -144,7 +144,7 @@
                 @endif
             </a>
 
-            <nav class="hidden items-center gap-6 text-sm font-medium text-warm-800 lg:flex xl:gap-8"
+            <nav class="hidden items-center gap-6 text-sm font-medium text-warm-800 lg:flex lg:flex-1 xl:gap-8"
                 aria-label="{{ __('Primary') }}">
                 @php($headerMenu = \App\Models\CmsMenu::query()->where('location', 'header')->with('items.children')->first())
                 @forelse(($headerMenu?->items ?? collect()) as $item)
@@ -177,7 +177,7 @@
                     <a href="{{ url('/') }}" class="whitespace-nowrap transition hover:text-warm-600">{{ __('Home') }}</a>
                     <a href="{{ url('/blog') }}" class="whitespace-nowrap transition hover:text-warm-600">{{ __('Stories') }}</a>
                 @endforelse
-                <x-language-switcher />
+                <x-language-switcher class="ms-auto" />
             </nav>
 
             <div class="flex items-center gap-2 lg:hidden">

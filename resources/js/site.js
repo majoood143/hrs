@@ -108,6 +108,56 @@ function horseGallerySlider() {
     });
 }
 
+function promoSliders() {
+    document.querySelectorAll('[data-promo-slider]').forEach((root) => {
+        const container = root.querySelector('.promo-swiper');
+        if (!container) return;
+
+        const slideCount = container.querySelectorAll('.swiper-slide').length;
+        const columns = Math.min(parseInt(root.dataset.columns ?? '1', 10), slideCount) || 1;
+        const autoplayEnabled = root.dataset.autoplay !== 'false' && !reduceMotion && slideCount > 1;
+        const delay = parseInt(root.dataset.autoplayDelay ?? '5000', 10);
+
+        function playActiveVideo(sw) {
+            container.querySelectorAll('[data-promo-video]').forEach((video) => video.pause());
+            const activeVideo = sw.slides[sw.activeIndex]?.querySelector('[data-promo-video]');
+            if (activeVideo) activeVideo.play().catch(() => {});
+        }
+
+        const swiper = new Swiper(container, {
+            modules: [Autoplay, Pagination, Navigation, Keyboard, A11y],
+            slidesPerView: 1,
+            spaceBetween: 24,
+            loop: slideCount > columns,
+            keyboard: { enabled: true },
+            a11y: { enabled: true },
+            breakpoints: {
+                768: { slidesPerView: columns },
+            },
+            pagination: slideCount > 1 ? {
+                el: container.querySelector('.swiper-pagination'),
+                clickable: true,
+            } : false,
+            navigation: slideCount > 1 ? {
+                nextEl: container.querySelector('.swiper-button-next'),
+                prevEl: container.querySelector('.swiper-button-prev'),
+            } : false,
+            autoplay: autoplayEnabled ? {
+                delay,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+            } : false,
+            on: {
+                init: playActiveVideo,
+                slideChangeTransitionStart: playActiveVideo,
+            },
+        });
+
+        root.addEventListener('focusin', () => swiper.autoplay?.stop());
+        root.addEventListener('focusout', () => swiper.autoplay?.start());
+    });
+}
+
 function revealOnScroll() {
     const groups = document.querySelectorAll('[data-reveal-group]');
 
@@ -1119,6 +1169,7 @@ function eventsCalendar() {
 document.addEventListener('DOMContentLoaded', () => {
     heroSlideshow();
     horseGallerySlider();
+    promoSliders();
     revealOnScroll();
     horseCardTilt();
     animatedCounters();

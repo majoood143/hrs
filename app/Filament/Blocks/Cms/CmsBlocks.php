@@ -12,6 +12,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
+use App\Models\AdZone;
+use App\Models\VideoFolder;
 use Packstub\FormBuilder\Models\Form as FormBuilderForm;
 
 class CmsBlocks
@@ -34,10 +36,13 @@ class CmsBlocks
             static::richText(),
             static::image(),
             static::video(),
+            static::videoLibrary(),
+            static::adsArea(),
             static::columns(),
             static::htmlEmbed(),
             static::form(),
             static::divider(),
+            
         ];
     }
 
@@ -276,6 +281,78 @@ class CmsBlocks
                 TranslatableInput::grid(fn ($code, $meta) => TextInput::make("caption.{$code}")
                     ->label(__('cms.blocks.caption') . ' (' . $meta['native'] . ')')),
             ]);
+    }
+
+    public static function videoLibrary(): Block
+    {
+        return Block::make('video_library')
+            ->label(__('cms.blocks.video_library'))
+            ->icon('heroicon-o-play-circle')
+            ->schema([
+                static::headingField(required: false),
+                static::subheadingField(),
+                Select::make('folder_id')
+                    ->label(__('cms.blocks.video_library_folder'))
+                    ->helperText(__('cms.blocks.video_library_folder_helper'))
+                    ->options(fn () => VideoFolder::query()->active()->orderBy('order')->get()
+                        ->mapWithKeys(fn (VideoFolder $folder) => [$folder->id => $folder->name]))
+                    ->searchable()
+                    ->native(false)
+                    ->columnSpanFull(),
+                TextInput::make('count')
+                    ->label(__('cms.blocks.count'))
+                    ->numeric()
+                    ->default(6)
+                    ->minValue(1)
+                    ->maxValue(12),
+            ])
+            ->columns(2);
+    }
+
+    public static function adsArea(): Block
+    {
+        return Block::make('ads_area')
+            ->label(__('cms.blocks.ads_area'))
+            ->icon('heroicon-o-megaphone')
+            ->schema([
+                static::headingField(required: false),
+                static::subheadingField(),
+                Select::make('zone_id')
+                    ->label(__('cms.blocks.ads_area_zone'))
+                    ->helperText(__('cms.blocks.ads_area_zone_helper'))
+                    ->options(fn () => AdZone::query()->active()->orderBy('order')->get()
+                        ->mapWithKeys(fn (AdZone $zone) => [$zone->id => $zone->name]))
+                    ->searchable()
+                    ->native(false)
+                    ->required()
+                    ->columnSpanFull(),
+                Select::make('columns')
+                    ->label(__('cms.blocks.ads_area_columns'))
+                    ->options([
+                        '1' => __('cms.blocks.ads_area_columns_full'),
+                        '2' => '2',
+                        '3' => '3',
+                    ])
+                    ->default('1')
+                    ->native(false),
+                TextInput::make('count')
+                    ->label(__('cms.blocks.count'))
+                    ->numeric()
+                    ->default(8)
+                    ->minValue(1)
+                    ->maxValue(20),
+                Toggle::make('autoplay')
+                    ->label(__('cms.blocks.autoplay'))
+                    ->default(true),
+                TextInput::make('autoplay_delay')
+                    ->label(__('cms.blocks.autoplay_delay'))
+                    ->helperText(__('cms.blocks.autoplay_delay_helper'))
+                    ->numeric()
+                    ->default(5000)
+                    ->minValue(2000)
+                    ->suffix('ms'),
+            ])
+            ->columns(2);
     }
 
     /**

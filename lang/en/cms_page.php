@@ -77,6 +77,7 @@ return [
     ],
     'actions' => [
         'create_first' => 'Create your first page',
+        'view' => 'View',
     ],
     'empty_state' => [
         'heading' => 'No pages yet',

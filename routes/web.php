@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Site\AdClickController;
 use App\Http\Controllers\Site\CenterController;
 use App\Http\Controllers\Site\ClinicController;
 use App\Http\Controllers\Site\EventController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\Site\ShopController;
 use App\Http\Controllers\Site\StableController;
 use App\Http\Controllers\Site\ToolSaleController;
 use App\Http\Controllers\Site\TransferBoardController;
+use App\Http\Controllers\Site\VideoLibraryController;
 use App\Models\CmsRedirect;
 use Illuminate\Support\Facades\Route;
 
@@ -59,8 +61,13 @@ Route::get('/tools-for-sale/{toolSalePost}', [ToolSaleController::class, 'show']
 
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
 
+Route::get('/video-library', [VideoLibraryController::class, 'index'])->name('video-library.index');
+Route::get('/video-library/{slug}', [VideoLibraryController::class, 'show'])->name('video-library.show');
+
+Route::get('/promo/{ad}/go', [AdClickController::class, 'redirect'])->name('promo.click');
+
 Route::get('/{slug}', [PageController::class, 'show'])
-    ->where('slug', '^(?!admin|transportation|blog|transfer-board|horses-for-sale|stables|clinics|centers|shops|farriers|tools-for-sale|events).*$')
+    ->where('slug', '^(?!admin|transportation|blog|transfer-board|horses-for-sale|stables|clinics|centers|shops|farriers|tools-for-sale|events|video-library).*$')
     ->name('page.show');
 
 Route::fallback(function () {

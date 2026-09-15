@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bcc73754242a05fbae62e48a724c6505",
+    "content-hash": "cea3aafc4d6ded4860929382e3913e04",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -5681,17 +5681,11 @@
         },
         {
             "name": "packstub/filament-form-builder",
-            "version": "v1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/packstub/filament-form-builder.git",
-                "reference": "83fa72eb7b72d5815d6a9a91ad74fec3131a411c"
-            },
+            "version": "1.0.0",
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/packstub/filament-form-builder/zipball/83fa72eb7b72d5815d6a9a91ad74fec3131a411c",
-                "reference": "83fa72eb7b72d5815d6a9a91ad74fec3131a411c",
-                "shasum": ""
+                "type": "path",
+                "url": "packages/packstub/filament-form-builder",
+                "reference": "f8925d1faf5b464aa46f25fa89511b6f7c3c51cd"
             },
             "require": {
                 "filament/filament": "^4.0 || ^5.0",
@@ -5709,12 +5703,12 @@
             "type": "library",
             "extra": {
                 "laravel": {
-                    "aliases": {
-                        "FormBuilder": "Packstub\\FormBuilder\\Facades\\FormBuilder"
-                    },
                     "providers": [
                         "Packstub\\FormBuilder\\FormBuilderServiceProvider"
-                    ]
+                    ],
+                    "aliases": {
+                        "FormBuilder": "Packstub\\FormBuilder\\Facades\\FormBuilder"
+                    }
                 }
             },
             "autoload": {
@@ -5722,7 +5716,25 @@
                     "Packstub\\FormBuilder\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Packstub\\FormBuilder\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "pest"
+                ],
+                "test:filter": [
+                    "pest --filter"
+                ],
+                "lint": [
+                    "vendor/bin/pint"
+                ],
+                "lint:test": [
+                    "vendor/bin/pint --test"
+                ]
+            },
             "license": [
                 "MIT"
             ],
@@ -5738,33 +5750,36 @@
                     "homepage": "https://packstub.dev"
                 }
             ],
-            "description": "Form builder for Filament panels: build forms in the admin, render them with Blade, Livewire or JSON, collect and export submissions.",
+            "description": "Form builder for Filament panels: build forms in the admin, render them with Blade, Livewire or JSON, collect and export submissions. Forked in-repo (packages/packstub/filament-form-builder) for bilingual EN/AR support, brand styling and a file-upload field type — see CHANGELOG.md.",
             "homepage": "https://github.com/packstub/filament-form-builder",
             "keywords": [
-                "Forms",
                 "contact-form",
                 "filament",
                 "filament-form-builder",
                 "filament-plugin",
                 "filament-v5",
                 "form-builder",
+                "forms",
                 "laravel",
                 "no-code",
                 "packstub",
                 "submissions"
             ],
             "support": {
-                "docs": "https://packstub.dev/docs/filament-form-builder",
                 "issues": "https://github.com/packstub/filament-form-builder/issues",
-                "source": "https://github.com/packstub/filament-form-builder"
+                "source": "https://github.com/packstub/filament-form-builder",
+                "docs": "https://packstub.dev/docs/filament-form-builder"
             },
             "funding": [
                 {
-                    "url": "https://github.com/sponsors/icaliman",
-                    "type": "github"
+                    "type": "github",
+                    "url": "https://github.com/sponsors/icaliman"
                 }
             ],
-            "time": "2026-09-09T13:08:00+00:00"
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "paragonie/constant_time_encoding",

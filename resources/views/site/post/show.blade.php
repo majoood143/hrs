@@ -29,6 +29,10 @@
 
         @include('cms.render-blocks', ['blocks' => $post->content ?? []])
 
+        <div class="mx-auto max-w-3xl px-6 pb-10">
+            <x-share-buttons :url="url()->current()" :title="$post->getTranslation('title', app()->getLocale())" />
+        </div>
+
         @if($post->tags->isNotEmpty())
             <div class="mx-auto max-w-3xl px-6 pb-16">
                 <div class="flex flex-wrap gap-2">

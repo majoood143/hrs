@@ -7,6 +7,7 @@ use App\Filament\Resources\CmsPageResource\Pages\CreateCmsPage;
 use App\Filament\Resources\CmsPageResource\Pages\EditCmsPage;
 use App\Filament\Resources\CmsPageResource\Pages\ListCmsPages;
 use App\Models\CmsPage;
+use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -341,6 +342,11 @@ class CmsPageResource extends Resource
             ])
             ->recordActions([
                 ActionGroup::make([
+                    Action::make('view')
+                        ->label(__('cms_page.actions.view'))
+                        ->icon('heroicon-o-eye')
+                        ->url(fn (CmsPage $record) => static::getPageUrl($record))
+                        ->openUrlInNewTab(),
                     EditAction::make(),
                     DeleteAction::make()
                         ->before(fn (CmsPage $record) => static::guardDelete($record)),
@@ -357,6 +363,13 @@ class CmsPageResource extends Resource
             ])
             ->emptyStateHeading(__('cms_page.empty_state.heading'))
             ->emptyStateDescription(__('cms_page.empty_state.description'));
+    }
+
+    public static function getPageUrl(CmsPage $record): string
+    {
+        return $record->is_homepage
+            ? route('home')
+            : route('page.show', $record->slug);
     }
 
     public static function guardDelete(CmsPage $record): bool
