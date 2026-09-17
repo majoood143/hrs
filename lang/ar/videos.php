@@ -32,7 +32,7 @@ return [
         'no_results_title' => 'لا توجد فيديوهات بعد',
         'no_results_body' => 'تابعنا قريباً لمشاهدة فيديوهات جديدة.',
         'view_all' => 'مشاهدة جميع الفيديوهات',
-        'videos_count' => 'فيديو واحد|:count فيديو',
+        'videos_count' => 'لا توجد فيديوهات|فيديو واحد|فيديوهان|:count فيديوهات|:count فيديو|:count فيديو',
         'no_folder_results_title' => 'لا يوجد شيء هنا بعد',
         'no_folder_results_body' => 'هذا المجلد فارغ حالياً.',
     ],

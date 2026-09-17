@@ -6,11 +6,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
 
-class VideoFolder extends Model
+class VideoFolder extends Model implements HasMedia
 {
     use HasTranslations;
+    use InteractsWithMedia;
 
     protected $fillable = ['parent_id', 'name', 'slug', 'order', 'is_active'];
 
@@ -23,6 +26,16 @@ class VideoFolder extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('card_image')->singleFile();
+    }
+
+    public function cardImageUrl(): ?string
+    {
+        return $this->getFirstMediaUrl('card_image') ?: null;
     }
 
     public function parent(): BelongsTo

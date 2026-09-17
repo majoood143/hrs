@@ -198,6 +198,14 @@ class HorseWebsiteSeeder extends Seeder
                     'ar' => 'تصفح الفعاليات القادمة والاجتماعات والمواعيد المهمة.',
                 ],
             ],
+            [
+                'slug' => 'video-library',
+                'title' => ['en' => 'Video Library', 'ar' => 'مكتبة الفيديو'],
+                'meta_description' => [
+                    'en' => 'Watch curated horse and equestrian videos organized by folder.',
+                    'ar' => 'شاهد مقاطع فيديو مختارة عن الخيول والفروسية منظمة حسب المجلدات.',
+                ],
+            ],
         ];
 
         foreach ($pages as $data) {

@@ -68,6 +68,8 @@ return [
     'post_page_title' => 'أضف إعلان بيع أداة',
     'post_page_subtitle' => 'تواصل مع مشترين جادين — الأمر يستغرق بضع دقائق.',
     'select_city' => 'اختر مدينة',
+    'select_country' => 'اختر الدولة',
+    'select_region' => 'اختر المنطقة',
     'select_option' => 'اختر خيارًا',
     'step_of' => 'الخطوة :current من :total',
     'form_errors_title' => 'يرجى تصحيح ما يلي قبل نشر الإعلان:',

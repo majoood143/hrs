@@ -86,20 +86,26 @@
             {{-- Step 2: Location --}}
             <div data-step class="hidden">
                 <h2 class="font-display text-xl font-semibold text-warm-900">{{ __('tools-for-sale.step_location') }}</h2>
-                <div class="mt-5">
-                    <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('tools-for-sale.city') }}</label>
-                    <select name="city_id" required class="w-full rounded-xl border border-warm-200 bg-warm-50 px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
-                        <option value="">{{ __('tools-for-sale.select_city') }}</option>
-                        @foreach($countries as $country)
-                            @php($cities = $country->region->flatMap->city)
-                            @continue($cities->isEmpty())
-                            <optgroup label="{{ $country->name }}">
-                                @foreach($cities as $city)
-                                    <option value="{{ $city->id }}" @selected((string) old('city_id') === (string) $city->id)>{{ $city->name }}</option>
-                                @endforeach
-                            </optgroup>
-                        @endforeach
-                    </select>
+                <script type="application/json" data-location-tree>{!! json_encode($locationTree, JSON_UNESCAPED_UNICODE) !!}</script>
+                <div class="mt-5 space-y-3" data-location-group>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('tools-for-sale.country') }}</label>
+                        <select data-location-country class="w-full rounded-xl border border-warm-200 bg-warm-50 px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                            <option value="">{{ __('tools-for-sale.select_country') }}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('tools-for-sale.region') }}</label>
+                        <select data-location-region required disabled class="w-full rounded-xl border border-warm-200 bg-warm-50 px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300 disabled:cursor-not-allowed disabled:opacity-50">
+                            <option value="">{{ __('tools-for-sale.select_region') }}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('tools-for-sale.city') }}</label>
+                        <select name="city_id" data-location-city data-old-value="{{ old('city_id') }}" required disabled class="w-full rounded-xl border border-warm-200 bg-warm-50 px-4 py-3 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300 disabled:cursor-not-allowed disabled:opacity-50">
+                            <option value="">{{ __('tools-for-sale.select_city') }}</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 

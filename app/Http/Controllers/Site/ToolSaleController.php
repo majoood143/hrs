@@ -48,8 +48,30 @@ class ToolSaleController extends Controller
         return view('site.tools-for-sale.create', [
             'seoTitle' => __('tools-for-sale.post_page_title') . ' — ' . SiteSetting::siteName(),
             'categories' => ToolSalePost::CATEGORIES,
-            'countries' => Country::query()->public()->with('region.city')->orderBy('en_name')->get(),
+            'locationTree' => $this->locationTree(),
         ]);
+    }
+
+    private function locationTree(): array
+    {
+        return Country::query()->public()->with('region.city')->orderBy('en_name')->get()
+            ->map(fn (Country $country) => [
+                'id' => $country->id,
+                'name' => $country->name,
+                'regions' => $country->region
+                    ->map(fn (\App\Models\Region $region) => [
+                        'id' => $region->id,
+                        'name' => $region->name,
+                        'cities' => $region->city
+                            ->map(fn (City $city) => ['id' => $city->id, 'name' => $city->name])
+                            ->values(),
+                    ])
+                    ->filter(fn (array $region) => $region['cities']->isNotEmpty())
+                    ->values(),
+            ])
+            ->filter(fn (array $country) => $country['regions']->isNotEmpty())
+            ->values()
+            ->toArray();
     }
 
     public function store(Request $request): RedirectResponse

@@ -68,6 +68,8 @@ return [
     'post_page_title' => 'List a Tool for Sale',
     'post_page_subtitle' => 'Reach serious buyers — it takes a couple of minutes.',
     'select_city' => 'Select a city',
+    'select_country' => 'Select a country',
+    'select_region' => 'Select a region',
     'select_option' => 'Select an option',
     'step_of' => 'Step :current of :total',
     'form_errors_title' => 'Please fix the following before we can post this:',

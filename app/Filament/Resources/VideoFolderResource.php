@@ -13,12 +13,14 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
@@ -70,6 +72,13 @@ class VideoFolderResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
 
+                SpatieMediaLibraryFileUpload::make('card_image')
+                    ->label(__('video_folders.fields.card_image'))
+                    ->helperText(__('video_folders.fields.card_image_helper'))
+                    ->collection('card_image')
+                    ->disk('public')
+                    ->image(),
+
                 Select::make('parent_id')
                     ->label(__('video_folders.fields.parent'))
                     ->helperText(__('video_folders.fields.parent_helper'))
@@ -102,6 +111,11 @@ class VideoFolderResource extends Resource
     {
         return $table
             ->columns([
+                SpatieMediaLibraryImageColumn::make('card_image')
+                    ->label(__('video_folders.fields.card_image'))
+                    ->collection('card_image')
+                    ->square(),
+
                 TextColumn::make('name')
                     ->label(__('video_folders.fields.name'))
                     ->getStateUsing(fn (VideoFolder $record) => $record->getTranslation('name', app()->getLocale()))

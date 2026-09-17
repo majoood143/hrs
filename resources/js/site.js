@@ -912,6 +912,8 @@ function toolSaleWizard() {
         if (img) img.src = img.dataset.src + '?t=' + Date.now();
     });
 
+    initLocationCascades(wizard);
+
     const errorStep = parseInt(wizard.dataset.errorStep ?? '0', 10);
     show(Number.isNaN(errorStep) ? 0 : errorStep);
 }
