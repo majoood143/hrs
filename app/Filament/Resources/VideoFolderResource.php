@@ -61,7 +61,7 @@ class VideoFolderResource extends Resource
                     ->maxLength(255)
                     ->live(onBlur: true)
                     ->afterStateUpdated(function ($state, $set) use ($code) {
-                        if ($code === TranslatableInput::defaultLocale()) {
+                        if ($code === 'en') {
                             $set('slug', Str::slug($state));
                         }
                     })),
