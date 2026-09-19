@@ -54,14 +54,29 @@ class VideoResource extends Resource
         return __('videos.navigation.plural');
     }
 
+    /**
+     * Every folder keyed by id with its breadcrumb label. Built in PHP rather
+     * than via relationship('folder', 'id') because that variant only preloads
+     * the first 50 rows and searches the id column, not the translated name.
+     *
+     * @return \Illuminate\Support\Collection<int, string>
+     */
+    protected static function folderOptions(): \Illuminate\Support\Collection
+    {
+        return VideoFolder::query()
+            ->with('parent.parent.parent')
+            ->ordered()
+            ->get()
+            ->mapWithKeys(fn (VideoFolder $folder) => [$folder->id => $folder->path_label]);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Select::make('folder_id')
                     ->label(__('videos.fields.folder'))
-                    ->relationship('folder', 'id')
-                    ->getOptionLabelFromRecordUsing(fn (VideoFolder $record) => $record->path_label)
+                    ->options(fn () => static::folderOptions())
                     ->native(false)
                     ->searchable()
                     ->preload()
@@ -149,8 +164,7 @@ class VideoResource extends Resource
             ->filters([
                 SelectFilter::make('folder_id')
                     ->label(__('videos.filters.folder'))
-                    ->relationship('folder', 'id')
-                    ->getOptionLabelFromRecordUsing(fn (VideoFolder $record) => $record->path_label),
+                    ->options(fn () => static::folderOptions()),
             ])
             ->recordActions([
                 ActionGroup::make([
