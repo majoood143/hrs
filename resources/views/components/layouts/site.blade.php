@@ -131,7 +131,7 @@
                 width="0" style="display:none;visibility:hidden"></iframe></noscript>
     @endif
 
-    <header class="sticky top-0 z-50 border-b border-warm-200/60 bg-warm-50/90 backdrop-blur">
+    <header class="sticky top-0 z-50 border-b border-warm-200/60 bg-warm-50/90 backdrop-blur print:hidden">
         <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
             <a href="{{ url('/') }}"
                 class="flex min-w-0 items-center gap-2 font-display text-lg font-semibold text-warm-800 sm:text-xl">
@@ -238,7 +238,7 @@
         {{ $slot }}
     </main>
 
-    <footer class="mt-24 border-t border-warm-200/60 bg-warm-100/60">
+    <footer class="mt-24 border-t border-warm-200/60 bg-warm-100/60 print:hidden">
         <div class="mx-auto max-w-7xl px-6 py-14">
             <div class="grid gap-10 md:grid-cols-3">
                 <div>

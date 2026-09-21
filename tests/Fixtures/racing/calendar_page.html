@@ -1,0 +1,273 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    	
+
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <script type='text/javascript' src='js/jquery-1.7.2.min.js'></script>
+        <script type='text/javascript' src='js/jquery-ui.min.js'></script>
+
+        
+        	<script type='text/javascript' src='js/i18n/grid.locale-en.js'></script>
+        
+
+        <script type='text/javascript' src='js/jquery.jqGrid.min.js'></script>
+        <script type='text/javascript' src='js/jquery.colorbox-min.js'></script>
+        <script type='text/javascript' src='js/jquery.tools.min.js'></script>
+        <script type='text/javascript' src='js/jquery.printElement.min.js'></script>
+        <script type='text/javascript' src='js/script.js?ver=1.3'></script>
+        <script type='text/javascript' src='js/tablesorter.js'></script>
+        <script type='text/javascript' src='js/tablesortercustomparsers.js'></script>
+
+        <style type="text/css">
+		<!--
+		  @import url(css/Master.css);
+		  @import url(css/oman2-theme/jqueryUI_QREC.css);
+		  body {
+		  	font-size:12px;
+		  }
+		-->
+		</style>
+
+		<link rel='stylesheet' type='text/css' href='css/ui.jqgrid.css' />
+        <link rel='stylesheet' type='text/css' href='css/style.css?ver=1.2' />
+		
+
+        <title>Oman</title>
+
+    </head>
+
+    <body>
+    	<div style="min-width:200px;">
+    		
+
+<div class="raceCalendarWrapper">
+
+	<div class="headerWrapper">
+		
+			<h1 class="title" >Calendar</h1>
+
+			
+		    <form  id="frmRaceCalSeason" action="#" method="get" class="margin_top">
+		        <label for="season">Season:</label>       
+		        <select name="season">
+		            
+		                    <option value="26&#x2f;27"
+		                            
+		                    >26&#x2f;27</option>
+		                
+		                    <option value="25&#x2f;26"
+		                            
+		                    >25&#x2f;26</option>
+		                
+		                    <option value="24&#x2f;25"
+		                            
+		                    >24&#x2f;25</option>
+		                
+		                    <option value="23&#x2f;24"
+		                            
+		                    >23&#x2f;24</option>
+		                
+		                    <option value="22&#x2f;23"
+		                            
+		                    >22&#x2f;23</option>
+		                
+		                    <option value="21&#x2f;22"
+		                            
+		                    >21&#x2f;22</option>
+		                
+		                    <option value="20&#x2f;21"
+		                            
+		                    >20&#x2f;21</option>
+		                
+		                    <option value="19&#x2f;20"
+		                            
+		                    >19&#x2f;20</option>
+		                
+		                    <option value="18&#x2f;19"
+		                            
+		                    >18&#x2f;19</option>
+		                
+		                    <option value="17&#x2f;18"
+		                            
+		                    >17&#x2f;18</option>
+		                
+		                    <option value="16&#x2f;17"
+		                            
+		                    >16&#x2f;17</option>
+		                
+		                    <option value="15&#x2f;16"
+		                            
+		                    >15&#x2f;16</option>
+		                
+		                    <option value="14&#x2f;15"
+		                            
+		                    >14&#x2f;15</option>
+		                
+		                    <option value="13&#x2f;14"
+		                            
+		                    >13&#x2f;14</option>
+		                
+		                    <option value="12&#x2f;13"
+		                            
+		                    >12&#x2f;13</option>
+		                
+		                    <option value="11&#x2f;12"
+		                            
+		                    >11&#x2f;12</option>
+		                
+		        </select>
+		    </form>
+		
+
+	</div>
+
+
+	<div class="mainWrapper">
+
+		<div class="loaderMain">
+			<strong>Please Wait</strong><br>
+			<img class='margin_top' src='img/loading.gif'/>
+		</div>
+
+		<div class="calendarContainer hide">
+			<div class="datepicker"></div>
+			
+			
+		</div>
+
+	</div>
+
+	<div class="box_shadow"></div>
+
+</div>
+
+<style>
+	
+	.ui-datepicker-next,.ui-datepicker-prev{
+		display:none;
+	}
+</style>
+
+<script type="text/javascript">
+
+	//On Doc Ready
+	$(document).ready(function()
+	{ 
+		
+		//loadInlineRaceContent();
+
+		$('.js-mainIndex').button({
+			    icons: {
+				primary: "ui-button-icon-primary ui-icon ui-icon-home"
+			}
+		});
+
+		$('.js-mainIndex').bind('click',function(event){
+			event.preventDefault();
+			var pageLink = "http://185.64.25.43//index.cfm"
+			window.location = pageLink;
+		});
+
+		setTimeout(function() {
+			$('.loaderMain').hide();
+			$('.calendarContainer').show();
+			iframeWrapperResize();
+		}, 1500);
+
+
+		var frmObj = $("#frmRaceCalSeason");
+		
+		frmObj.find("[name='season']").bind('change',function(event){
+			event.preventDefault();
+			var startingMonth = "9";
+			var minYear = this.value.substring(0,2);
+			minYear = (minYear > 50) ? ('19' + minYear) : ('20' + minYear);
+
+			calendarChangeSeasonRange({
+										  calendarSelector:'.datepicker'
+										 ,minYear:minYear 
+										 ,month:startingMonth
+									 });
+		});
+
+		
+			$.datepicker.setDefaults($.datepicker.regional['en']);
+		
+			var startingDate  = new Date("2026", "9",1);
+		
+
+		////////////////////////
+		// OnLoad
+		///////////////////////
+		$('.datepicker').datepicker(
+		{
+			onSelect: function(dateText, inst)
+			{
+				var raceDate = inst.selectedYear + '-' + (inst.selectedMonth + 1) + '-' + inst.selectedDay;
+				var checkURL = 'components/race.cfc?method=getRaceLinkByDate&raceDate=' + raceDate;
+		
+				$.ajax(
+				{
+					type: "GET",
+					url: checkURL,
+					dataType: "json",
+					success: function(result)
+							{
+								var rootURL = "http://185.64.25.43/";
+								rootURL += result.PAGE;
+								window.location = rootURL;
+								return false;						
+							},
+					error: function(result)
+							{
+								
+							}
+				});
+
+			},
+			onChangeMonthYear: function(year, month) 
+			{
+				updateRaceDays(year,month,9,'');
+			},
+			beforeShowDay: function(date)
+			{
+				//Get Race Days
+				return highlightRaceDays(date);
+			},
+			numberOfMonths: [3, 4],
+			stepMonths: 9,
+			dateFormat: 'yyyy-mm-dd',
+			defaultDate:startingDate
+	
+		});
+		
+		
+
+		//Update Race Dates + Load Date Picker
+		
+			updateRaceDays(2026,10,9,'');
+		
+
+	});
+</script>  
+            <br />
+            <br />
+        </div>
+
+		<script type="text/javascript">
+            //On Doc Ready
+            $(document).ready(function()
+            {
+                ////////////////////////
+                // OnLoad
+                ///////////////////////
+
+            });
+        </script>
+
+    </body>
+
+</html>

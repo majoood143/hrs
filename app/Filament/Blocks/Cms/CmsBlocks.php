@@ -14,6 +14,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use App\Models\AdZone;
 use App\Models\VideoFolder;
+use App\Services\Racing\RacingSearchType;
 use Packstub\FormBuilder\Models\Form as FormBuilderForm;
 
 class CmsBlocks
@@ -26,6 +27,9 @@ class CmsBlocks
         return [
             static::hero(),
             static::searchPreview(),
+            static::horseSearch(),
+            static::raceCalendar(),
+            static::raceWidget(),
             static::transferBoard(),
             static::featuredHorses(),
             static::successStories(),
@@ -113,6 +117,45 @@ class CmsBlocks
             ->icon('heroicon-o-magnifying-glass')
             ->schema([
                 static::headingField(),
+                static::subheadingField(),
+            ]);
+    }
+
+    public static function horseSearch(): Block
+    {
+        return Block::make('horse_search')
+            ->label(__('cms.blocks.horse_search'))
+            ->icon('heroicon-o-magnifying-glass-circle')
+            ->schema([
+                static::headingField(required: false),
+                static::subheadingField(),
+                Select::make('default_type')
+                    ->label(__('cms.blocks.horse_search_default_type'))
+                    ->options(collect(RacingSearchType::cases())->mapWithKeys(fn (RacingSearchType $type) => [$type->value => $type->label()])->all())
+                    ->default(RacingSearchType::Horse->value)
+                    ->native(false)
+                    ->required(),
+            ]);
+    }
+
+    public static function raceCalendar(): Block
+    {
+        return Block::make('race_calendar')
+            ->label(__('cms.blocks.race_calendar'))
+            ->icon('heroicon-o-calendar-days')
+            ->schema([
+                static::headingField(required: false),
+                static::subheadingField(),
+            ]);
+    }
+
+    public static function raceWidget(): Block
+    {
+        return Block::make('race_widget')
+            ->label(__('cms.blocks.race_widget'))
+            ->icon('heroicon-o-flag')
+            ->schema([
+                static::headingField(required: false),
                 static::subheadingField(),
             ]);
     }

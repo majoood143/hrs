@@ -30,6 +30,8 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
         "marcogermani87/filament-captcha": "^2.3",
+        "mpdf/mpdf": "^8.3",
+        "mpdf/qrcode": "^1.2",
         "nunomaduro/termwind": "2.3.1",
         "packstub/filament-form-builder": "^1.0",
         "pxlrbt/filament-excel": "^3.0",

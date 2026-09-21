@@ -359,3 +359,64 @@ body {
 .promo-swiper .swiper-pagination-bullet-active {
     background: var(--color-warm-600);
 }
+
+/* Printing a racing page (profile / race day): just the content, all tabs, tables that fit the paper. */
+@page racing {
+    size: A4 landscape;
+    margin: 10mm;
+}
+
+@media print {
+    body {
+        background: #fff !important;
+    }
+
+    [data-racing-print] {
+        page: racing;
+        max-width: none !important;
+        padding: 0 !important;
+    }
+
+    [data-racing-print] a {
+        color: inherit !important;
+        text-decoration: none !important;
+    }
+
+    [data-racing-print] [data-racing-tabs] [role='tablist'] {
+        display: none !important;
+    }
+
+    /* every tab is printed, one after another, each under its own heading */
+    [data-racing-print] [data-racing-tabs] [role='tabpanel'][hidden] {
+        display: block !important;
+    }
+
+    [data-racing-print] .overflow-x-auto {
+        overflow: visible !important;
+    }
+
+    [data-racing-print] table {
+        font-size: 9px;
+    }
+
+    [data-racing-print] th,
+    [data-racing-print] td {
+        white-space: normal !important;
+        padding: 3px 5px !important;
+    }
+
+    [data-racing-print] thead {
+        display: table-header-group;
+    }
+
+    [data-racing-print] tr,
+    [data-racing-print] article {
+        break-inside: avoid;
+    }
+
+    [data-racing-print] .card-warm,
+    [data-racing-print] .shadow-sm {
+        box-shadow: none !important;
+    }
+}
+

@@ -7,6 +7,10 @@ return [
     'blocks' => [
         'hero' => 'Hero',
         'search_preview' => 'Search Preview',
+        'horse_search' => 'Racing Search',
+        'horse_search_default_type' => 'Default search type',
+        'race_calendar' => 'Race Calendar',
+        'race_widget' => 'Races Widget',
         'transfer_board' => 'Transfer Board',
         'featured_horses' => 'Featured Horses',
         'success_stories' => 'Success Stories',

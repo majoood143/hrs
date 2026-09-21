@@ -7,6 +7,10 @@ return [
     'blocks' => [
         'hero' => 'الواجهة الرئيسية',
         'search_preview' => 'معاينة البحث',
+        'horse_search' => 'بحث السباقات',
+        'horse_search_default_type' => 'نوع البحث الافتراضي',
+        'race_calendar' => 'تقويم السباقات',
+        'race_widget' => 'أداة السباقات',
         'transfer_board' => 'لوحة النقل',
         'featured_horses' => 'الخيول المميزة',
         'success_stories' => 'قصص النجاح',

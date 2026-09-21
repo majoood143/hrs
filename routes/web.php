@@ -8,6 +8,12 @@ use App\Http\Controllers\Site\FarrierController;
 use App\Http\Controllers\Site\HorseForSaleController;
 use App\Http\Controllers\Site\PageController;
 use App\Http\Controllers\Site\PostController;
+use App\Http\Controllers\Site\RacingCalendarController;
+use App\Http\Controllers\Site\RacingController;
+use App\Http\Controllers\Site\RacingHandicapController;
+use App\Http\Controllers\Site\RacingPdfController;
+use App\Http\Controllers\Site\RacingRaceController;
+use App\Http\Controllers\Site\RacingWidgetController;
 use App\Http\Controllers\Site\ShopController;
 use App\Http\Controllers\Site\StableController;
 use App\Http\Controllers\Site\ToolSaleController;
@@ -65,10 +71,36 @@ Route::get('/video-library', [VideoLibraryController::class, 'index'])->name('vi
 Route::get('/video-library/watch/{slug}', [VideoLibraryController::class, 'show'])->name('video-library.show');
 Route::get('/video-library/{slug}', [VideoLibraryController::class, 'folder'])->name('video-library.folder');
 
+Route::get('/racing/search', [RacingController::class, 'search'])->name('racing.search');
+Route::get('/racing/image', [RacingController::class, 'image'])->name('racing.image');
+Route::get('/racing/calendar', [RacingCalendarController::class, 'index'])->name('racing.calendar');
+Route::get('/racing/widget', RacingWidgetController::class)->middleware('throttle:120,1')->name('racing.widget');
+Route::get('/racing/calendar/{date}', [RacingCalendarController::class, 'day'])->where('date', '\d{4}-\d{2}-\d{2}')->name('racing.calendar.day');
+Route::get('/racing/handicap-ratings', [RacingHandicapController::class, 'index'])->name('racing.handicap');
+Route::get('/racing/{entity}/{id}/pdf', [RacingPdfController::class, 'profile'])
+    ->whereIn('entity', ['horse', 'owner', 'jockey', 'trainer'])
+    ->whereNumber('id')
+    ->middleware('throttle:30,1')
+    ->name('racing.profile.pdf');
+Route::get('/racing/{page}/{race}/pdf', [RacingPdfController::class, 'race'])
+    ->whereIn('page', ['results', 'entries', 'card', 'form-guide'])
+    ->whereNumber('race')
+    ->middleware('throttle:30,1')
+    ->name('racing.meeting.pdf');
+Route::get('/racing/race/{race}', [RacingRaceController::class, 'race'])->whereNumber('race')->name('racing.race');
+Route::get('/racing/{page}/{race?}', [RacingRaceController::class, 'show'])
+    ->whereIn('page', ['results', 'entries', 'card', 'form-guide'])
+    ->whereNumber('race')
+    ->name('racing.meeting');
+Route::get('/racing/{entity}/{id}', [RacingController::class, 'profile'])
+    ->whereIn('entity', ['horse', 'owner', 'jockey', 'trainer'])
+    ->whereNumber('id')
+    ->name('racing.profile');
+
 Route::get('/promo/{ad}/go', [AdClickController::class, 'redirect'])->name('promo.click');
 
 Route::get('/{slug}', [PageController::class, 'show'])
-    ->where('slug', '^(?!admin|transportation|blog|transfer-board|horses-for-sale|stables|clinics|centers|shops|farriers|tools-for-sale|events|video-library).*$')
+    ->where('slug', '^(?!admin|transportation|blog|transfer-board|horses-for-sale|stables|clinics|centers|shops|farriers|tools-for-sale|events|video-library|racing).*$')
     ->name('page.show');
 
 Route::fallback(function () {

@@ -1,0 +1,199 @@
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+
+        
+                <div class="pop">
+                
+                	<div class="left">
+   						<h1  class="title margin_bottom">
+                            Not in training
+                        </h1>
+                        
+                        
+
+                        
+                        
+
+                    </div>
+
+                    <div class="right">
+
+                    	
+                    	
+
+                        <img src="http&#x3a;&#x2f;&#x2f;185.64.25.43&#x2f;&#x2f;img&#x2f;trainerUnknown.png"
+                             class="photoBorder"
+                             alt="Not&#x20;in&#x20;training"
+                             title="Not&#x20;in&#x20;training"
+                             width="104"
+                             height="131">
+
+                    </div>
+
+                    <div class="clear_both"></div>
+
+                </div>
+
+                
+                
+    <div class="margin_top">
+    
+        <div id="tabsPopRaceInfo" class="tabsPopRaceInfo trainer">
+    
+            
+            <ul>
+            	
+
+                <li >
+                    <a id="tabPopRaceInfoHeader_1" href="#tabPopRaceInfo_1">
+                        <span class="left margin_left">Statistics</span>
+                        <span class="arrow left ui-icon ui-icon-triangle-1-e"></span>
+                    </a>
+                </li>
+                
+                <li >
+                    <a id="tabPopRaceInfoHeader_2" href="#tabPopRaceInfo_2">
+                        <span class="left margin_left">Recent Results</span>
+                        <span class="arrow left ui-icon ui-icon-triangle-1-e"></span>
+                    </a>
+                </li>
+                
+                <li >
+                    <a id="tabPopRaceInfoHeader_3" href="#tabPopRaceInfo_3">
+                        <span class="left margin_left">Upcoming Races</span>
+                        <span class="arrow left ui-icon ui-icon-triangle-1-e"></span>
+                    </a>
+                </li>
+                
+                <li >
+                    <a id="tabPopRaceInfoHeader_4" href="#tabPopRaceInfo_4">
+                        <span class="left margin_left">Graphs</span>
+                        <span class="arrow left ui-icon ui-icon-triangle-1-e"></span>
+                    </a>
+                </li>
+                                
+            </ul>
+        
+            
+    
+            
+            <div id="tabPopRaceInfo_1" class="popTab">
+            
+                
+                
+                    <p >There are no statistics available for this Trainer</p>
+                
+    
+            </div>
+            
+            
+            <div id="tabPopRaceInfo_2" class="popTab">
+              
+                
+                
+                    <p >There are no recent results available for this Trainer</p>
+                
+    
+            </div>
+            
+			
+            <div id="tabPopRaceInfo_3" class="popTab">
+            
+                
+                    <p >There are no declared runners for this Trainer</p>
+                
+
+            </div>
+            
+            
+            <div id="tabPopRaceInfo_4" class="popTab">
+            
+                
+                
+                    <p >Insufficient data to graph</p>
+                
+    
+            </div>
+
+			
+            
+
+        </div>
+
+    </div>
+
+
+<script type="text/javascript">
+
+	var statType 			= 'trainer';
+	//var $openRaceTab 		= $('#tabsRace').find('.js-raceTab').not('.ui-tabs-hide');
+	var $openRaceTab 		= $('.mainWrapper:visible');
+	var $raceTabsObj 		= $openRaceTab.find('.tabsPopRaceInfo.' + statType); //prevents conflict between owner + trainer tabs
+	var $altPopRaceObj 		= $openRaceTab.find('.altPopRace');
+	var $altPopHorseObj 	= $openRaceTab.find('.altPopHorse');
+
+
+	//On Doc Ready
+	$(document).ready(function()
+	{ 
+		////////////////////////
+		// OnLoad
+		///////////////////////
+	   
+		//Tabs
+		$(function()
+		{
+			$raceTabsObj.tabs(
+			{
+				show: function(event, ui)
+				{						
+					//Reset Arrow
+					var tabNo = ui.tab.hash.replace("#tabPopRaceInfo_", '')
+					var selectorTabs = $('#tabsPopRaceInfo');
+					selectorTabs.find('.ui-icon-triangle-1-s').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
+					$('#tabPopRaceInfoHeader_' + tabNo).find('.arrow').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');
+                    iframeWrapperResize();
+				}
+			});
+		});
+		
+		////////////////////////
+		// Events
+		///////////////////////
+		
+		//Race
+		$altPopRaceObj.bind('click',function()
+		{
+			// var req_url = 'pages/RaceResults.cfm?raceFile=' + $(this).attr('rel') + '&returnOption=true'
+
+			// $('body').load(req_url, {}, function (responseText, textStatus, XMLHttpRequest)
+			// {
+			// 	raceTabSelected(true);
+			// });
+
+			var pageLink = "http://185.64.25.43//?page=RaceResults&racefile=" + $(this).attr('rel') + '&returnOption=true'
+			window.location = pageLink;
+			return false;
+		});
+		
+		//Alt Pop Horse Info
+		$altPopHorseObj.bind('click',function(event)
+		{
+			event.stopImmediatePropagation();
+
+			popInfo(
+			{
+				title:            '',
+				page:              'Horse_GenWin',
+				miscParam:         'horseID=' + $(this).attr('rel'),
+				id:                 $(this).attr('rel'),
+				name:               $(this).text().trim(),
+				containerClass:     'js-horseDetails',
+				menuType:           'horse'
+			});
+		});	
+
+	});
+</script> 

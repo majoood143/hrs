@@ -6,6 +6,7 @@ import 'swiper/css';
 import 'swiper/css/effect-creative';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
+import { raceWidget } from './race-widget';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -443,6 +444,14 @@ function copyLink() {
                 }
             }, 2000);
         });
+    });
+}
+
+// The Print buttons are rendered hidden: without this script they could do nothing.
+function printButtons() {
+    document.querySelectorAll('[data-print]').forEach((button) => {
+        button.hidden = false;
+        button.addEventListener('click', () => window.print());
     });
 }
 
@@ -1181,9 +1190,11 @@ document.addEventListener('DOMContentLoaded', () => {
     contactReveal();
     passportReveal();
     copyLink();
+    printButtons();
     transferBoardWizard();
     horseSaleWizard();
     farrierWizard();
     toolSaleWizard();
     eventsCalendar();
+    raceWidget();
 });

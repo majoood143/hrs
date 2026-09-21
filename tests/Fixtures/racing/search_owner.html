@@ -1,0 +1,406 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    	
+
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <script type='text/javascript' src='js/jquery-1.7.2.min.js'></script>
+        <script type='text/javascript' src='js/jquery-ui.min.js'></script>
+
+        
+        	<script type='text/javascript' src='js/i18n/grid.locale-en.js'></script>
+        
+
+        <script type='text/javascript' src='js/jquery.jqGrid.min.js'></script>
+        <script type='text/javascript' src='js/jquery.colorbox-min.js'></script>
+        <script type='text/javascript' src='js/jquery.tools.min.js'></script>
+        <script type='text/javascript' src='js/jquery.printElement.min.js'></script>
+        <script type='text/javascript' src='js/script.js?ver=1.3'></script>
+        <script type='text/javascript' src='js/tablesorter.js'></script>
+        <script type='text/javascript' src='js/tablesortercustomparsers.js'></script>
+
+        <style type="text/css">
+		<!--
+		  @import url(css/Master.css);
+		  @import url(css/oman2-theme/jqueryUI_QREC.css);
+		  body {
+		  	font-size:12px;
+		  }
+		-->
+		</style>
+
+		<link rel='stylesheet' type='text/css' href='css/ui.jqgrid.css' />
+        <link rel='stylesheet' type='text/css' href='css/style.css?ver=1.2' />
+		
+
+        <title>Oman</title>
+
+    </head>
+
+    <body>
+    	<div style="min-width:200px;">
+    		
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+
+<div class="searchWrapper">
+
+	<div class="headerWrapper">
+		
+		
+			<h1 class="title" >Search</h1>
+		
+	</div>
+
+	<div class="loaderMain">
+		<strong>Please Wait</strong><br>
+		<img class='margin_top' src='img/loading.gif'/>
+	</div>
+
+	
+	
+
+
+	<div class="mainWrapper mainSearch hide">
+
+		<div class="loadingMessage"></div>
+
+		<div id="infoDetailsWrapper" class="infoDetailsWrapper" style="padding-left:0; padding-right:0">
+
+			<ul class="resultsBreadCrumbs margin_left">
+				
+					<li class="js-Return" data-menutype="default"><a href="##">Search</a></li>
+				
+			</ul>
+
+			<div class="margin_left margin_bottom">
+				<button class="js-btnReturn">Return</button>
+			</div>
+
+		    <div class="js-detailsWrapper">
+		    </div>
+		    
+		</div>
+
+
+		<div class="defaultWrapper padding_all">
+
+			<p class="margin_left margin_top margin_bottom">
+				Enter search terms below.
+			</p>
+
+			
+			<div class="searchBar ui-corner-all">
+
+				
+			        <form  id="frmSubmit" action="#" method="get">
+
+			            <input id="QRECsearch"
+			            	   name="QRECsearch"
+			                   type="text"
+			                   value="al&#x20;kasbi">
+
+			            <select name="type">
+			                <option value="0" >All</option>
+			                <option value="1" >Horse</option>
+			                <option value="2" selected="selected">Owner</option>
+			                <option value="3" >Jockey</option>
+			                <option value="4" >Trainer</option>
+			            </select>
+
+			            <button class="btnSearch" type="submit">Search</button>
+
+			        </form>
+			    
+			</div>
+
+			
+			
+			        <p >
+			           Results for: <strong>al kasbi</strong>
+			        </p>
+			    
+			                <div class="">
+			                
+			                    <h2 id="ownerResults" class="ui-state-default overflowAuto pointer resultsToggle ui-corner-all">
+			                        <span class="left">
+			                            <strong>Owners</strong>
+			                            <em>(6)</em>
+			                        </span>
+			    
+			                        <span class="ui-state-default ui-corner-all right">
+			                            <span class="ui-icon ui-icon-minusthick"></span>
+			                        </span>
+			    
+			                    </h2>
+			    
+			                    <div class="searchContainer">
+			                        <table id="tblownerResults" 
+			                        	   class="entriesTable horseResults ">
+			                                
+			                            <thead>
+
+			                                <tr class="text_left">
+			                                    <th>Name</th>
+			                                </tr>
+			                            </thead>
+			                            
+			                            <tbody>
+			        
+			                                                        
+			                                    <tr class="odd">
+			                                        <td>
+			                                        	<a href="#" class="popOwner" rel="961">
+															Abdul Rahman bin Mohammed Al Kasbi 
+			                                            </a>
+			                                       	</td>
+			                                    </tr>
+			                                                        
+			                                    <tr class="even">
+			                                        <td>
+			                                        	<a href="#" class="popOwner" rel="100">
+															Basil bin Mas&#x27;oud Al Kasbi 
+			                                            </a>
+			                                       	</td>
+			                                    </tr>
+			                                                        
+			                                    <tr class="odd">
+			                                        <td>
+			                                        	<a href="#" class="popOwner" rel="1230">
+															Khalifa bin Majid Al Kasbi 
+			                                            </a>
+			                                       	</td>
+			                                    </tr>
+			                                                        
+			                                    <tr class="even">
+			                                        <td>
+			                                        	<a href="#" class="popOwner" rel="768">
+															Mas&#x27;oud bin Saleh Al Kasbi 
+			                                            </a>
+			                                       	</td>
+			                                    </tr>
+			                                                        
+			                                    <tr class="odd">
+			                                        <td>
+			                                        	<a href="#" class="popOwner" rel="462">
+															Mohamed bin Said Al Kasbi 
+			                                            </a>
+			                                       	</td>
+			                                    </tr>
+			                                                        
+			                                    <tr class="even">
+			                                        <td>
+			                                        	<a href="#" class="popOwner" rel="691">
+															Saleh bin Masaaod Al Kasbi 
+			                                            </a>
+			                                       	</td>
+			                                    </tr>
+			                                
+			        
+			                            </tbody>
+			                        </table>
+			                    </div>
+			    
+			                </div>
+			            
+
+		</div>
+
+		
+
+	</div>
+
+	<div class="box_shadow"></div>
+
+
+</div>
+
+
+<script type="text/javascript">
+
+	//On Doc Ready
+	$(document).ready(function()
+	{ 
+		////////////////////////
+		// OnLoad
+		///////////////////////
+
+		loadInlineRaceContent();
+
+		$('.js-mainIndex').button({
+			    icons: {
+				primary: "ui-button-icon-primary ui-icon ui-icon-home"
+			}
+		});
+
+		$('.js-mainIndex').bind('click',function(event){
+			event.preventDefault();
+			var pageLink = "http://185.64.25.43//index.cfm"
+			window.location = pageLink;
+		});
+
+		$( ".js-btnReturn" ).button(
+		{
+		    icons: {
+		        		primary: "ui-icon-arrowreturnthick-1-w"
+					}
+		});
+
+		$( ".js-btnReturn" ).bind('click',function(event){
+			event.preventDefault();
+			var $currentLink =  $(".resultsBreadCrumbs").find(".js-Return:nth-last-child(2)" );
+			$currentLink.trigger('click');
+		});	
+
+		$('#q').focus();
+		
+		//Buttons
+		$('.btnSearch').button();
+		
+		$('#frmSubmit').bind('submit',function(){
+			var searchText = $(this).find("input[name='QRECsearch']").val();
+			var searchType = $(this).find("select[name='type']").val();
+			var searchURL = 'http://185.64.25.43/?page=Search&QRECsearch=' + encodeURIComponent(searchText) + '&type=' + encodeURIComponent(searchType) + '&showIndexLink=false';
+			window.location = searchURL;
+			iframeWrapperResize();
+			return false;
+		});
+		
+		////////////////////////
+		// Events
+		///////////////////////
+
+		//Breadcrumbs
+		$(".resultsBreadCrumbs").delegate(".js-Return", "click", function()
+		{
+			showResultsEntriesInfo({
+				menuObj 	: $(this),
+				menuType 	: $(this).attr('data-menutype')
+			});
+		});
+		
+		//Pop Horse Info
+		$('.popHorse').bind('click',function()
+		{			
+			popInfo(
+			{
+				 title: 			''
+				,page: 			   	'Horse_GenWin'
+				,miscParam: 		'horseID=' + $(this).attr('rel')
+				,id:                 $(this).attr('rel')
+				,name:               $(this).text().trim()
+				,containerClass:    'js-horseDetails'
+				,menuType:          'horse'
+				,racePageLink: 		'RaceResults'
+				,scope : 			 $('.mainWrapper')
+			});	
+		});
+		
+		//Pop Owner Info
+		$('.popOwner').bind('click',function(event)
+		{
+			event.stopImmediatePropagation();
+
+			popInfo(
+			{
+				title: 			    '',
+				page: 			    'Owner_GenWin',
+				miscParam: 		    'ownerID=' + $(this).attr('rel'),
+				id:                 $(this).attr('rel'),
+				name:               $(this).text().trim(),
+				containerClass:     'js-ownerDetails',
+				menuType:           'owner',
+				racePageLink: 		'RaceResults'
+			});
+		});
+
+		//Pop Trainer Info
+		$('.popTrainer').bind('click',function(event)
+		{
+			event.stopImmediatePropagation();
+
+			popInfo(
+			{
+				title: 			    '',
+				page: 			    'Trainer_GenWin',
+				miscParam: 		    'trainerID=' + $(this).attr('rel'),
+				id:                 $(this).attr('rel'),
+				name:               $(this).text().trim(),
+				containerClass:     'js-trainerDetails',
+				menuType:           'trainer',
+				racePageLink: 		'RaceResults'
+			});
+		})
+
+		//Pop Jockey Info
+		$('.popJockey').bind('click',function(event)
+		{
+			event.stopImmediatePropagation();
+
+			popInfo(
+			{
+				title: 			    '',
+				page: 			    'Jockey_GenWin',
+				miscParam: 		    'jockeyID=' + $(this).attr('rel'),
+				id:                 $(this).attr('rel'),
+				name:               $(this).text().trim(),
+				containerClass:     'js-jockeyDetails',
+				menuType:           'jockey',
+				racePageLink: 		'RaceResults'
+			});
+		});	
+		
+		//Result Toggle
+		$('.resultsToggle').bind('click',function()
+		{
+
+			var headerID = $(this).attr('id');
+			var tbl = $('#tbl' + headerID);
+
+			if(tbl.is(":visible"))
+			{
+				tbl.slideUp('slow',function()
+				{
+					var tableID = $(this).attr('id');
+					var headerID = tableID.replace('tbl','');
+					$('#' + headerID).find('.ui-icon-minusthick').addClass('ui-icon-plusthick').removeClass('ui-icon-minusthick');
+				});
+			}
+			else
+			{
+				tbl.slideDown('slow',function()
+				{
+					var tableID = $(this).attr('id');
+					var headerID = tableID.replace('tbl','');
+					$('#' + headerID).find('.ui-icon-plusthick').addClass('ui-icon-minusthick').removeClass('ui-icon-plusthick');
+					autoResize('cphInnerPage_equiSoftFrame');
+				});
+			}
+
+			iframeWrapperResize();
+
+		})
+
+	});
+</script>  
+            <br />
+            <br />
+        </div>
+
+		<script type="text/javascript">
+            //On Doc Ready
+            $(document).ready(function()
+            {
+                ////////////////////////
+                // OnLoad
+                ///////////////////////
+
+            });
+        </script>
+
+    </body>
+
+</html>

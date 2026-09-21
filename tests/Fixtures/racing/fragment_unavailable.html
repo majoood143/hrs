@@ -1,0 +1,182 @@
+
+
+        	<div class="raceRelatedPages text_center padding_all noprint">
+        		
+				
+
+                <a href="?page=HandicapRating"><button class="btnLink">Handicap Ratings</button></a>
+
+            </div>
+        
+			
+            	<div class="itemUnavailable">
+                	<h2>Entries Unavailable</h2>
+                </div>
+            
+        
+		<script type="text/javascript">
+            $(document).ready(function()
+            { 
+                ////////////////////////
+                // OnLoad
+                ///////////////////////
+				
+				$('.js-mainIndex').button({
+					    icons: {
+						primary: "ui-button-icon-primary ui-icon ui-icon-home"
+					}
+				});
+
+				$('.js-mainIndex').bind('click',function(event){
+					event.preventDefault();
+					var pageLink = "http://185.64.25.43//index.cfm"
+					window.location = pageLink;
+				});
+
+                //Buttons
+                $('.btnPrint_10005').button(
+                {
+                    icons: {
+                                primary: "printer"
+                            }
+                });
+        
+                //Tabs Race		
+                $("#tblEntry_10005").tablesorter(
+                {
+                    widgets: ['zebra'] 
+                }); 
+                        
+                ////////////////////////
+                // Events
+                ///////////////////////
+                
+				//Breadcrumbs
+				$(".resultsBreadCrumbs").delegate(".js-Return", "click", function()
+				{
+					showResultsEntriesInfo({
+						menuObj 	: $(this),
+						menuType 	: $(this).attr('data-menutype')
+					});
+				});
+
+				//Pop Horse Info
+				$('.popHorse').bind('click',function(event)
+				{	
+					event.stopImmediatePropagation();
+
+					popInfo(
+					{
+						title: 			  '',
+						page: 			   'Horse_GenWin',
+						miscParam: 		   'horseID=' + $(this).attr('rel'),
+						id:                 $(this).attr('rel'),
+						name:               $(this).text().trim(),
+						containerClass:     'js-horseDetails',
+						menuType:           'horse',
+						racePageLink: 			'RaceEntry'
+					});
+				})
+
+				//Pop Owner Info
+				$('.popOwner').bind('click',function(event)
+				{
+					event.stopImmediatePropagation();
+
+					popInfo(
+					{
+						title: 			    '',
+						page: 			    'Owner_GenWin',
+						miscParam: 		    'ownerID=' + $(this).attr('rel'),
+						id:                 $(this).attr('rel'),
+						name:               $(this).text().trim(),
+						containerClass:     'js-ownerDetails',
+						menuType:           'owner',
+						racePageLink: 			'RaceEntry'
+					});
+				});
+
+				//Pop Trainer Info
+				$('.popTrainer').bind('click',function(event)
+				{
+					event.stopImmediatePropagation();
+
+					popInfo(
+					{
+						title: 			    '',
+						page: 			    'Trainer_GenWin',
+						miscParam: 		    'trainerID=' + $(this).attr('rel'),
+						id:                 $(this).attr('rel'),
+						name:               $(this).text().trim(),
+						containerClass:     'js-trainerDetails',
+						menuType:           'trainer',
+						racePageLink: 			'RaceEntry'
+					});
+				})
+
+				//Pop Jockey Info
+				$('.popJockey').bind('click',function(event)
+				{
+					event.stopImmediatePropagation();
+
+					popInfo(
+					{
+						title: 			    '',
+						page: 			    'Jockey_GenWin',
+						miscParam: 		    'jockeyID=' + $(this).attr('rel'),
+						id:                 $(this).attr('rel'),
+						name:               $(this).text().trim(),
+						containerClass:     'js-jockeyDetails',
+						menuType:           'jockey',
+						racePageLink: 			'RaceEntry'
+					});
+				});	
+                
+                $('.btnLatest').button(
+                {
+                     icons: {
+                                primary: "ui-icon-home"
+                            }
+                    ,create: function( event, ui ) {
+                    			$(this).css('min-width','130px');
+                    		}
+                });
+                
+                var raceRelatedPagesObj = $('.raceRelatedPages').find('.btnLink');
+                raceRelatedPagesObj.button(
+                {
+                    icons: {
+                                primary: "link"
+                            }
+                    ,create: function( event, ui ) {
+                    			$(this).css('min-width','130px');
+                   			 }                            
+                });
+                
+                raceRelatedPagesObj.bind('click',function()
+                {
+                    var pageLink = "http://185.64.25.43/" + $(this).parent('a').attr('href');;
+                    window.location = pageLink;
+                    return false;
+                });
+				
+                $('.btnPrint_10005').bind('click',function()
+                {
+                    $('#tabRace_').printElement(
+                    {
+                        overrideElementCSS:['http://185.64.25.43//css/style.css','http://185.64.25.43//css/print.css'],
+						printMode:'popup',
+                        
+                        
+								pageTitle:""
+							
+        
+                    });
+        
+                });
+        
+            });
+        </script>
+        
+
+    

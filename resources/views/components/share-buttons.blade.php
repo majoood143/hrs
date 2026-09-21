@@ -1,9 +1,11 @@
-@props(['url', 'title'])
+@props(['url', 'title', 'heading' => null, 'bare' => false])
 
-<div class="card-warm p-5">
-    <h2 class="font-display text-base font-semibold text-warm-900">{{ __('listings.share_title') }}</h2>
+<div @class(['card-warm p-5' => ! $bare])>
+    @unless($bare)
+        <h2 class="font-display text-base font-semibold text-warm-900">{{ $heading ?? __('listings.share_title') }}</h2>
+    @endunless
 
-    <ul class="mt-3 flex flex-wrap items-center gap-2.5">
+    <ul @class(['flex flex-wrap items-center gap-2.5', 'mt-3' => ! $bare])>
         <li>
             <a href="https://wa.me/?text={{ urlencode($title . ' ' . $url) }}" target="_blank" rel="noopener noreferrer"
                 aria-label="{{ __('listings.share_whatsapp') }}"

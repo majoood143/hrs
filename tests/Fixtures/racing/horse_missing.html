@@ -1,0 +1,296 @@
+
+        	
+        	<div class="pop">
+
+            	
+            	<div class="left" style="width:40%; margin-left:10px">
+					
+					
+
+                    <h1  class="title"></h1>
+
+                    
+
+                    
+                    <p  class="margin_top_small">
+                        <span>&nbsp;yrs</span>
+
+						
+                            <span> </span>
+                            <span></span>
+                        
+                        <span class="text_sub margin_left cursor_help" title="Days since last race">()</span>
+                        
+                    </p>
+
+                    
+                    <p  class="text_sub">
+                    	 - 
+                    </p>
+
+                    
+                    <div class="margin_top left">
+
+                    	<table >
+                        	<thead></thead>
+                            <tbody>
+                            	<tr valign="top">
+                                	<td>Owner:</td>
+                                    <td class="text_sub">
+                                    	<a href="#" class="altPopOwner" rel="">
+											
+                                        </a>
+                            		</td>
+                                </tr>
+                            	<tr valign="top">
+                                	<td>Trainer:</td>
+                                    <td>
+                                    	<a href="#" class="altPopTrainer" rel="">
+											
+                                        </a>
+                                    </td>
+                                </tr>
+                            	<tr valign="top">
+
+                                	
+
+                                	<td></td>
+                                    <td class="text_sub"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                </div>
+
+                
+                <div class="left text_center" style="width:30%;margin:20px auto 0;">
+
+					
+
+                    
+                    <div class="isoBlock isoTurf left margin_left">
+                        <p>
+                            
+	                            <br />
+                            
+                        </p>
+                        <em>Rating</em>
+                    </div>
+
+                </div>
+
+                
+                <div class="left" style="width:30%;">
+
+                    
+
+                </div>
+
+                <div class="margin_bottom clear_fix"></div>
+
+            </div>
+
+            
+            <div class="margin_top">
+
+                <div id="tabsPopHorse" class="tabsPopHorse">
+
+                    
+                    <ul>
+                        <li >
+                            <a id="tabPopHorseHeader_1" href="#tabPopHorse_1">
+                                <span class="left margin_left">Results</span>
+                                <span class="arrow left ui-icon ui-icon-triangle-1-e"></span>
+                            </a>
+                        </li>
+
+                        <li  class="ui-helper-hidden">
+                            <a id="tabPopHorseHeader_2" href="#tabPopHorse_2">
+                                <span class="left margin_left">Intl. Results</span>
+                                <span class="arrow left ui-icon ui-icon-triangle-1-e"></span>
+                            </a>
+                        </li>
+
+                        <li >
+                            <a id="tabPopHorseHeader_3" href="#tabPopHorse_3">
+                                <span class="left margin_left">Entries</span>
+                                <span class="arrow left ui-icon ui-icon-triangle-1-e"></span>
+                            </a>
+                        </li>
+
+                        <li >
+                            <a id="tabPopHorseHeader_4" href="#tabPopHorse_4">
+                                <span class="left margin_left">Declarations</span>
+                                <span class="arrow left ui-icon ui-icon-triangle-1-e"></span>
+                            </a>
+                        </li>
+                    </ul>
+
+                    
+                    
+
+                		
+                        <div id="tabPopHorse_1">
+
+                            No matching records 
+
+                        </div>
+
+                		
+                        <div id="tabPopHorse_2">
+                           International Results Unavailable
+                        </div>
+
+                		
+                        <div id="tabPopHorse_3">
+
+							
+                            	<p >No upcoming entries</p>
+                            
+
+                        </div>
+
+                		
+                        <div id="tabPopHorse_4">
+
+							
+                            	<p >No upcoming declarations</p>
+                            
+
+                        </div>
+
+                    
+
+                </div>
+
+
+            </div>
+
+        
+
+
+		<script type="text/javascript">
+
+			var $horseTabsObj 		= $('.tabsPopHorse');
+			var $altOwnerObj   		= $('.altPopOwner');
+			var $altTrainerObj  	= $('.altPopTrainer');
+			var $altJockeyObj   	= $('.altPopJockey');
+			var $altPopRaceObj 		= $('.altPopRace');
+
+			//On Doc Ready
+			$(document).ready(function()
+			{
+				////////////////////////
+				// OnLoad
+				///////////////////////
+
+				$(".cphoto").click(function()
+				{
+					parent.$.fn.colorbox({
+											href:$(this).attr('href'),
+											transition:"elastic",
+											maxWidth:'100%',
+											maxHeight:'100%',
+											onOpen:function(){
+
+																parent.$('#colorbox').bind('click',function()
+																{
+																	parent.$.colorbox.close();
+																});
+															 }
+										 });
+					return false;
+				});
+
+				//Tabs
+				$(function()
+				{
+					$horseTabsObj.tabs(
+					{
+						show: function(event, ui)
+						{
+							//Reset Arrow
+							var tabNo = ui.tab.hash.replace("#tabPopHorse_", '')
+							var selectorTabs = $('#tabsPopHorse');
+							selectorTabs.find('.ui-icon-triangle-1-s').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
+							$('#tabPopHorseHeader_' + tabNo).find('.arrow').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');
+                            iframeWrapperResize();
+						}
+					});
+				});
+
+				////////////////////////
+				// Events
+				///////////////////////
+
+				$altPopRaceObj.bind('click',function()
+				{
+					// var req_url = 'pages/RaceResults.cfm?raceFile=' + $(this).attr('rel') + '&returnOption=true'
+
+					// $('body').load(req_url, {}, function (responseText, textStatus, XMLHttpRequest)
+					// {
+					// 	raceTabSelected(true);
+					// });	
+
+					var pageLink = "http://185.64.25.43//?page=RaceResults&racefile=" + $(this).attr('rel') + '&returnOption=true'
+					window.location = pageLink;
+					return false;
+				});
+
+				//Alt Pop Jockey Info
+				$altJockeyObj.bind('click',function(event)
+				{
+					event.stopImmediatePropagation();
+
+					popInfo(
+					{
+						title:              '',
+						page:               'Jockey_GenWin',
+						miscParam:          'jockeyID=' + $(this).attr('rel'),
+						id:                 $(this).attr('rel'),
+						name:               $(this).text().trim(),
+						containerClass:     'js-jockeyDetails',
+						menuType:           'jockey'
+					});
+				});
+
+				//Pop Owner Info
+				$altOwnerObj.bind('click',function(event)
+				{
+					event.stopImmediatePropagation();
+
+					popInfo(
+					{
+						title: 			    '',
+						page: 			    'Owner_GenWin',
+						miscParam: 		    'ownerID=' + $(this).attr('rel'),
+						id:                 $(this).attr('rel'),
+						name:               $(this).text().trim(),
+						containerClass:     'js-ownerDetails',
+						menuType:           'owner'
+					});
+				});
+
+				//Pop Trainer Info
+				$altTrainerObj.bind('click',function(event)
+				{
+					event.stopImmediatePropagation();
+
+					popInfo(
+					{
+						title: 			    '',
+						page: 			    'Trainer_GenWin',
+						miscParam: 		    'trainerID=' + $(this).attr('rel'),
+						id:                 $(this).attr('rel'),
+						name:               $(this).text().trim(),
+						containerClass:     'js-trainerDetails',
+						menuType:           'trainer'
+					});
+				})
+
+			});
+        </script>
+
+    
