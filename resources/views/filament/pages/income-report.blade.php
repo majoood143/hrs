@@ -1,10 +1,10 @@
 @php
     $statement = $this->statement();
     $t = $statement->totals();
-    $m = fn (int $baisa) => \App\Support\Money::format($baisa);
+    $m = fn (int $baisa) => \App\Support\Money::formatHtml($baisa);
     $cards = [
         ['label' => __('admin_income_report.cards.collected'), 'value' => $t['collected'], 'hint' => __('admin_income_report.cards.collected_hint', ['count' => $t['orders']])],
-        ['label' => __('admin_income_report.cards.due_to_us'), 'value' => $t['due_to_us'], 'hint' => __('admin_income_report.cards.due_hint', ['fee' => $m($t['fee']), 'vat' => $m($t['vat_on_fee']), 'commission' => $m(\App\Services\Reports\IncomeStatement::commissionWithVat($t))])],
+        ['label' => __('admin_income_report.cards.due_to_us'), 'value' => $t['due_to_us'], 'hint' => new \Illuminate\Support\HtmlString(__('admin_income_report.cards.due_hint', ['fee' => $m($t['fee']), 'vat' => $m($t['vat_on_fee']), 'commission' => $m(\App\Services\Reports\IncomeStatement::commissionWithVat($t))]))],
         ['label' => __('admin_income_report.cards.client_keeps'), 'value' => $t['client_keeps'], 'hint' => __('admin_income_report.cards.client_hint')],
         ['label' => __('admin_income_report.cards.refunded'), 'value' => $t['refunded'], 'hint' => __('admin_income_report.cards.refunded_hint')],
     ];

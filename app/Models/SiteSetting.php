@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 
 class SiteSetting extends Model
 {
@@ -130,6 +131,26 @@ class SiteSetting extends Model
     public static function formatCurrency(float|int|string $amount, int $decimals = 2): string
     {
         return static::currency()['symbol'].' '.number_format((float) $amount, $decimals);
+    }
+
+    /**
+     * Same as formatCurrency(), but as HTML: the amount next to the uploaded currency icon (SVG)
+     * instead of the symbol text, when one is uploaded. Returned as an HtmlString so Blade (`{{ }}`)
+     * and Filament (Stat/TextColumn) render it unescaped instead of printing the raw markup.
+     */
+    public static function formatCurrencyHtml(float|int|string $amount, int $decimals = 2): HtmlString
+    {
+        $currency = static::currency();
+        $formatted = number_format((float) $amount, $decimals);
+
+        if ($currency['icon_url']) {
+            return new HtmlString(
+                '<img src="'.e($currency['icon_url']).'" alt="'.e($currency['code']).'" class="inline-block h-3.5 w-3.5 object-contain align-middle">'
+                .' '.e($formatted)
+            );
+        }
+
+        return new HtmlString(e($currency['symbol']).' '.e($formatted));
     }
 
     /**

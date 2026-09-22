@@ -7,6 +7,7 @@ use App\Support\Money;
 use Carbon\CarbonImmutable;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\HtmlString;
 
 /** This month's income at a glance, with the last two weeks as a sparkline. */
 class IncomeOverview extends StatsOverviewWidget
@@ -41,24 +42,24 @@ class IncomeOverview extends StatsOverviewWidget
         $days = $recent->byDay();
 
         return [
-            Stat::make(__('admin_income_report.widgets.collected'), Money::format($totals['collected']))
-                ->description(__('admin_income_report.widgets.orders', ['count' => $totals['orders'], 'today' => Money::format($today['collected'])]))
+            Stat::make(__('admin_income_report.widgets.collected'), Money::formatHtml($totals['collected']))
+                ->description(new HtmlString(__('admin_income_report.widgets.orders', ['count' => $totals['orders'], 'today' => Money::formatHtml($today['collected'])])))
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->chart($days->pluck('collected')->map(fn (int $baisa) => $baisa / 1000)->values()->all())
                 ->color('primary'),
 
-            Stat::make(__('admin_income_report.widgets.due_to_us'), Money::format($totals['due_to_us']))
-                ->description(__('admin_income_report.widgets.due_hint', ['fee' => Money::format($totals['fee'] + $totals['vat_on_fee']), 'commission' => Money::format(IncomeStatement::commissionWithVat($totals))]))
+            Stat::make(__('admin_income_report.widgets.due_to_us'), Money::formatHtml($totals['due_to_us']))
+                ->description(new HtmlString(__('admin_income_report.widgets.due_hint', ['fee' => Money::formatHtml($totals['fee'] + $totals['vat_on_fee']), 'commission' => Money::formatHtml(IncomeStatement::commissionWithVat($totals))])))
                 ->descriptionIcon('heroicon-m-receipt-percent')
                 ->chart($days->pluck('due_to_us')->map(fn (int $baisa) => $baisa / 1000)->values()->all())
                 ->color('success'),
 
-            Stat::make(__('admin_income_report.widgets.client_keeps'), Money::format($totals['client_keeps']))
+            Stat::make(__('admin_income_report.widgets.client_keeps'), Money::formatHtml($totals['client_keeps']))
                 ->description(__('admin_income_report.widgets.client_hint'))
                 ->descriptionIcon('heroicon-m-building-library')
                 ->color('gray'),
 
-            Stat::make(__('admin_income_report.widgets.refunded'), Money::format($totals['refunded']))
+            Stat::make(__('admin_income_report.widgets.refunded'), Money::formatHtml($totals['refunded']))
                 ->description(__('admin_income_report.widgets.refunded_hint'))
                 ->descriptionIcon('heroicon-m-arrow-uturn-left')
                 ->color($totals['refunded'] > 0 ? 'warning' : 'gray'),

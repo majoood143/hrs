@@ -39,6 +39,7 @@ class StatementPdf
                 'gatewayName' => $statement->gateway ? (PaymentGateway::tryFrom($statement->gateway)?->label() ?? $statement->gateway) : null,
                 'lines' => app(StatementCsv::class)->summaryLines($statement->totals()),
                 'currency' => SiteSetting::currency()['code'],
+                'currencyIcon' => app(RacingPdf::class)->currencyIcon(),
                 'vatNumber' => (string) SiteSetting::get('vat.registration_number', ''),
                 'logo' => app(RacingPdf::class)->siteLogo(),
                 'siteName' => SiteSetting::siteName(),

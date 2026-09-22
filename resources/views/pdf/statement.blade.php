@@ -1,7 +1,7 @@
 @php
     $align = $rtl ? 'right' : 'left';
     $opposite = $rtl ? 'left' : 'right';
-    $m = fn (int $baisa) => \App\Support\Money::format($baisa, $currency);
+    $m = fn (int $baisa) => \App\Support\Money::formatPdfHtml($baisa, $currencyIcon ?? null, $currency);
     $strong = [__('statement.due_to_us'), __('statement.client_keeps')];
     $commissionLabel = $totals['vat_on_commission'] > 0 ? __('statement.commission_and_vat') : __('statement.commission');
 @endphp

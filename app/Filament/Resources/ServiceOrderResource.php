@@ -79,7 +79,7 @@ class ServiceOrderResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $money = fn ($state) => SiteSetting::formatCurrency($state, 3);
+        $money = fn ($state) => SiteSetting::formatCurrencyHtml($state, 3);
 
         return $table
             ->columns([

@@ -3,10 +3,10 @@
 namespace App\Services\Racing;
 
 use App\Models\SiteSetting;
-use App\Support\PdfText;
 use App\Services\Pdf\MpdfFactory;
-use Mpdf\Output\Destination;
+use App\Support\PdfText;
 use Illuminate\Support\Facades\Storage;
+use Mpdf\Output\Destination;
 use Throwable;
 
 /**
@@ -50,7 +50,7 @@ class RacingPdf
             'logo' => $this->siteLogo(),
             'url' => $url,
             // the QR code opens the page in the language the PDF was made in
-            'qrUrl' => $url . (str_contains($url, '?') ? '&' : '?') . 'lang=' . $locale,
+            'qrUrl' => $url.(str_contains($url, '?') ? '&' : '?').'lang='.$locale,
             'title' => $title,
             'd' => fn (?string $text) => PdfText::dir($text, $rtl),
         ];
@@ -102,6 +102,46 @@ class RacingPdf
         return ['src' => $image['src'], 'width' => round($height * $image['ratio'], 2), 'height' => round($height, 2)];
     }
 
+    /**
+     * The currency icon uploaded in General Settings, sized to sit inline next to an amount, or null
+     * to fall back to plain currency code text. SVG only (enforced on upload), read from disk (no
+     * HTTP request to ourselves), same as siteLogo() above.
+     *
+     * @return ?array{src: string, width: float, height: float} src is a data: URI, width / height are millimetres
+     */
+    public function currencyIcon(): ?array
+    {
+        $path = SiteSetting::get('currency_icon');
+
+        if (! is_string($path) || $path === '') {
+            return null;
+        }
+
+        try {
+            $disk = Storage::disk('public');
+            $bytes = $disk->exists($path) ? $disk->get($path) : null;
+
+            if ($bytes === null || $bytes === '') {
+                return null;
+            }
+
+            $image = $this->svgLogo($bytes);
+        } catch (Throwable $e) {
+            report($e);
+
+            return null;
+        }
+
+        if ($image === null || $image['ratio'] <= 0) {
+            return null;
+        }
+
+        // a 3.2 mm tall glyph, sized to sit inline with normal body text
+        $height = 3.2;
+
+        return ['src' => $image['src'], 'width' => round($height * $image['ratio'], 2), 'height' => $height];
+    }
+
     /** @return ?array{src: string, ratio: float} */
     private function rasterLogo(string $bytes): ?array
     {
@@ -122,7 +162,7 @@ class RacingPdf
         if (! function_exists('imagecreatefromstring') || ! ($source = @imagecreatefromstring($bytes))) {
             // no GD, or a format it cannot read: hand the file over as it is (mPDF reads png / jpg / gif)
             return in_array($info[2], [IMAGETYPE_PNG, IMAGETYPE_JPEG, IMAGETYPE_GIF], true)
-                ? ['src' => 'data:' . $info['mime'] . ';base64,' . base64_encode($bytes), 'ratio' => $width / $height]
+                ? ['src' => 'data:'.$info['mime'].';base64,'.base64_encode($bytes), 'ratio' => $width / $height]
                 : null;
         }
 
@@ -141,7 +181,7 @@ class RacingPdf
         imagepng($canvas);
         $png = (string) ob_get_clean();
 
-        return ['src' => 'data:image/png;base64,' . base64_encode($png), 'ratio' => $newWidth / $newHeight];
+        return ['src' => 'data:image/png;base64,'.base64_encode($png), 'ratio' => $newWidth / $newHeight];
     }
 
     /** @return ?array{src: string, ratio: float} */
@@ -160,7 +200,7 @@ class RacingPdf
             return null;
         }
 
-        return $width > 0 && $height > 0 ? ['src' => 'data:image/svg+xml;base64,' . base64_encode($svg), 'ratio' => $width / $height] : null;
+        return $width > 0 && $height > 0 ? ['src' => 'data:image/svg+xml;base64,'.base64_encode($svg), 'ratio' => $width / $height] : null;
     }
 
     /** Is there room for this many bytes on top of what is in use now (with a little slack for the PDF itself)? */
