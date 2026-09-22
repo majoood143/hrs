@@ -4,6 +4,7 @@
     @elseif ($error !== null)
         <div class="fb-closed" role="status">{{ $error }}</div>
     @else
+        {!! app(\Packstub\FormBuilder\FormBuilder::class)->beforeFormHtml($model) !!}
         <form wire:submit="submit">
             {{ $this->form }}
 

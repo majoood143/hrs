@@ -4,6 +4,7 @@ namespace Packstub\FormBuilder\Listeners;
 
 use Illuminate\Support\Facades\Mail;
 use Packstub\FormBuilder\Events\SubmissionReceived;
+use Packstub\FormBuilder\FormBuilder;
 use Packstub\FormBuilder\Mail\SubmissionNotification;
 
 class SendSubmissionNotifications
@@ -12,7 +13,7 @@ class SendSubmissionNotifications
     {
         $emails = $event->form->notificationEmails();
 
-        if ($emails === []) {
+        if ($emails === [] || app(FormBuilder::class)->notificationsHeld($event->form)) {
             return;
         }
 

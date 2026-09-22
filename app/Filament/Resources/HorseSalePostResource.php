@@ -2,15 +2,14 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\HorseSalePostResource\Pages\ListHorseSalePosts;
 use App\Filament\Resources\HorseSalePostResource\Pages\CreateHorseSalePost;
-use App\Filament\Resources\HorseSalePostResource\Pages\ViewHorseSalePost;
 use App\Filament\Resources\HorseSalePostResource\Pages\EditHorseSalePost;
-use App\Filament\Resources\HorseSalePostResource\Pages;
+use App\Filament\Resources\HorseSalePostResource\Pages\ListHorseSalePosts;
+use App\Filament\Resources\HorseSalePostResource\Pages\ViewHorseSalePost;
 use App\Models\City;
-use App\Models\Country;
 use App\Models\HorseSalePost;
 use App\Models\Region;
+use App\Models\SiteSetting;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -38,11 +37,11 @@ class HorseSalePostResource extends Resource
 {
     protected static ?string $model = HorseSalePost::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-tag';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-tag';
 
-    public static function getNavigationGroup(): string | \UnitEnum | null
+    public static function getNavigationGroup(): string|\UnitEnum|null
     {
-        return __('admin_navigation.horse_marketplace');
+        return __('admin_navigation.directory');
     }
 
     public static function getModelLabel(): string
@@ -153,7 +152,7 @@ class HorseSalePostResource extends Resource
                                 TextInput::make('price')
                                     ->numeric()
                                     ->minValue(0)
-                                    ->prefix(fn () => \App\Models\SiteSetting::currency()['symbol'])
+                                    ->prefix(fn () => SiteSetting::currency()['symbol'])
                                     ->required(),
                                 Select::make('status')
                                     ->options([
@@ -208,7 +207,7 @@ class HorseSalePostResource extends Resource
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('price')
-                    ->money(fn () => \App\Models\SiteSetting::currency()['code'])
+                    ->money(fn () => SiteSetting::currency()['code'])
                     ->sortable(),
                 TextColumn::make('city.en_name')
                     ->label('City')

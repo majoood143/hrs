@@ -12,6 +12,11 @@ Vendored into `packages/packstub/filament-form-builder` as a local Composer path
 - **File upload field type** (`Types\FileField`): accepted extensions and max size configurable per field in the builder; stores to a plain filesystem disk (`config('packstub-form-builder.uploads')`) from either the plain Blade POST or the Livewire renderer.
 - **Brand styling**: `resources/css/form-builder.css` retinted to the site's warm palette and fonts; RTL-safe logical properties; the hosted page layout now loads the site's own stylesheet and sets `dir` from the locale.
 
+- **Extension points for the host app**: `SubmissionReceived` can now steer what the visitor sees next (`redirectTo()`, `$message`, `$extra` merged into the JSON response, carried by `SubmissionResult`); `FormBuilder::registerFormTab()` adds a tab to the form editor; `FormBuilder::closedWhen()` closes a form for an app-specific reason; `FormBuilder::beforeForm()` renders markup above the fields in both the Blade and Livewire renderers. The app uses them to turn submissions of a form linked to a service into (paid) orders.
+- **`FormBuilder::holdNotificationsWhen()`** keeps the "new submission" email back for a form (the host app holds it for an unpaid order and sends its own once it is paid).
+- **Private file uploads**: uploads go to a private disk (`uploads.disk`, default `local`) and are reached through a signed download route (`form-files/{token}`) that also checks the `viewAny` gate on the form model, always served as an attachment and only inside the uploads directory. Earlier uploads on `uploads.legacy_disks` (`public`) are still served, and `php artisan form-builder:move-uploads-private` moves them.
+- **Default extension deny-list**: a file field with no `accepted_types` allow-list of its own now still rejects server-executable/script extensions (`uploads.blocked_extensions`: `.php`, `.phtml`, `.exe`, `.sh`, ...), on both the plain Blade path (`FileField::rules()`) and the Livewire path (`FileUpload::rules()`), so an unconfigured field never silently accepts any file type.
+
 ### Changed
 
 - `HasChoices` choices editor moved from a flat `KeyValue` to a `Repeater` of `{value, label: {en, ar}}` rows to support bilingual choice labels.

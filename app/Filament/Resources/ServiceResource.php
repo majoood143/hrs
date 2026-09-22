@@ -60,13 +60,27 @@ class ServiceResource extends Resource
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(__('admin_service.fields.name'))
                     ->required()
                     ->maxLength(255),
+                TextInput::make('ar_name')
+                    ->label(__('admin_service.fields.ar_name'))
+                    ->extraInputAttributes(['dir' => 'rtl'])
+                    ->maxLength(255),
                 RichEditor::make('description')
+                    ->label(__('admin_service.fields.description'))
+                    ->columnSpanFull(),
+                RichEditor::make('ar_description')
+                    ->label(__('admin_service.fields.ar_description'))
+                    ->extraInputAttributes(['dir' => 'rtl'])
                     ->columnSpanFull(),
                 TextInput::make('price')
+                    ->label(__('admin_service.fields.price'))
+                    ->helperText(__('admin_service.fields.price_helper'))
                     ->required()
                     ->numeric()
+                    ->minValue(0)
+                    ->step(0.001)
                     ->prefix(fn () => \App\Models\SiteSetting::currency()['symbol']),
                 Toggle::make('is_active')
                     ->required(),
@@ -78,9 +92,15 @@ class ServiceResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label(__('admin_service.fields.name'))
                     ->searchable(),
+                TextColumn::make('ar_name')
+                    ->label(__('admin_service.fields.ar_name'))
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('price')
-                    ->money(fn () => \App\Models\SiteSetting::currency()['code'])
+                    ->label(__('admin_service.fields.price'))
+                    ->formatStateUsing(fn ($state) => \App\Models\SiteSetting::formatCurrency($state, 3))
                     ->summarize([
                         Average::make(),
                         Range::make(),

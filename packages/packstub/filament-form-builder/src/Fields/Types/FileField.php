@@ -2,6 +2,7 @@
 
 namespace Packstub\FormBuilder\Fields\Types;
 
+use Closure;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
@@ -10,14 +11,29 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Packstub\FormBuilder\Fields\Field;
 use Packstub\FormBuilder\Fields\FieldType;
+use Packstub\FormBuilder\Support\UploadLinks;
 
 /**
- * A file the visitor uploads (a resume, a photo, a document...). Stored on
- * a plain Laravel filesystem disk — no dependency on the submission row
- * existing yet, so it works whether or not the form keeps submissions.
+ * A file the visitor uploads (a resume, a photo, a document...). Stored on a PRIVATE Laravel
+ * filesystem disk — no dependency on the submission row existing yet, so it works whether or
+ * not the form keeps submissions — and reached through a signed, permission-checked link.
  */
 class FileField extends FieldType
 {
+    /**
+     * Server-executable / script extensions rejected even when a field sets no
+     * "accepted_types" allow-list of its own — an admin leaving that field blank
+     * must not mean "any file, including a script", only "any ordinary document".
+     *
+     * @var array<int, string>
+     */
+    private const DEFAULT_BLOCKED_EXTENSIONS = [
+        'php', 'php3', 'php4', 'php5', 'php7', 'phtml', 'phar', 'pht', 'phps',
+        'exe', 'com', 'bat', 'cmd', 'scr', 'msi', 'dll', 'vbs', 'vbe', 'ws', 'wsf', 'wsh',
+        'sh', 'bash', 'cgi', 'pl', 'py', 'rb', 'jsp', 'jspx', 'asp', 'aspx', 'asa', 'cer',
+        'htaccess', 'htpasswd', 'jar', 'ps1', 'reg',
+    ];
+
     public static function id(): string
     {
         return 'file';
@@ -51,11 +67,31 @@ class FileField extends FieldType
 
         if ($extensions !== []) {
             $rules[] = 'mimes:'.implode(',', $extensions);
+        } else {
+            // No allow-list set on the field: fall back to a deny-list so "accept
+            // anything" never quietly means "accept a script too".
+            $rules[] = static::blockedExtensionRule();
         }
 
         $rules[] = 'max:'.static::maxSize($field);
 
         return $rules;
+    }
+
+    protected static function blockedExtensionRule(): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail): void {
+            if (! $value instanceof UploadedFile) {
+                return;
+            }
+
+            $extension = strtolower((string) ($value->getClientOriginalExtension() ?: $value->extension() ?: ''));
+            $blocked = (array) config('packstub-form-builder.uploads.blocked_extensions', self::DEFAULT_BLOCKED_EXTENSIONS);
+
+            if ($extension !== '' && in_array($extension, array_map('strtolower', $blocked), true)) {
+                $fail(__('packstub-form-builder::form-builder.editor.blocked_extension'));
+            }
+        };
     }
 
     /**
@@ -80,7 +116,7 @@ class FileField extends FieldType
             return '';
         }
 
-        return Storage::disk(static::disk())->url($value);
+        return UploadLinks::url($value);
     }
 
     public function view(): string
@@ -93,13 +129,18 @@ class FileField extends FieldType
         $upload = FileUpload::make($field->key)
             ->disk(static::disk())
             ->directory(static::directory())
-            ->visibility('public')
+            ->visibility('private')
             ->maxSize(static::maxSize($field));
 
         $extensions = static::extensions($field);
 
         if ($extensions !== []) {
             $upload->acceptedFileTypes(array_map(fn (string $extension): string => '.'.$extension, $extensions));
+        } else {
+            // Filament's own upload handling bypasses FieldType::rules() (the Livewire
+            // component validates and stores the file itself), so the deny-list needs
+            // to be attached here too.
+            $upload->rules([static::blockedExtensionRule()]);
         }
 
         return $this->configure($upload, $field);
@@ -135,7 +176,7 @@ class FileField extends FieldType
 
     protected static function disk(): string
     {
-        return (string) config('packstub-form-builder.uploads.disk', 'public');
+        return (string) config('packstub-form-builder.uploads.disk', 'local');
     }
 
     protected static function directory(): string

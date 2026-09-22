@@ -5,13 +5,15 @@ return [
 
     'sections' => [
         'active_gateway' => 'Enabled Payment Methods',
-        'active_gateway_desc' => 'Choose which payment methods customers can use at checkout.',
+        'active_gateway_desc' => 'Choose which payment methods customers can use when paying for a service.',
         'thawani' => 'Thawani',
         'thawani_desc' => 'Oman-based payment gateway supporting cards and Apple Pay.',
         'nbo' => 'NBO (National Bank of Oman)',
         'nbo_desc' => 'Hosted payment page via the National Bank of Oman.',
         'ccavenue' => 'CCAvenue (Bank Muscat)',
         'ccavenue_desc' => 'Hosted payment page via Bank Muscat / CCAvenue.',
+        'pricing' => 'Pricing',
+        'pricing_desc' => 'VAT is charged on the service price and on the service fee, and is shown on every receipt.',
     ],
 
     'options' => [
@@ -21,6 +23,8 @@ return [
         'thawani' => 'Thawani',
         'nbo' => 'NBO',
         'ccavenue' => 'CCAvenue',
+        'demo' => 'Demo (no real payment)',
+        'demo_desc' => 'For demonstrations only: customers approve or decline a pretend payment. Untick it before going live.',
     ],
 
     'fields' => [
@@ -44,6 +48,14 @@ return [
         'access_code' => 'Access Code',
         'working_key' => 'Working Key',
         'working_key_helper' => 'Used to encrypt/decrypt the transaction request.',
+        'webhook_url_helper' => 'Set this address as the webhook in your Thawani dashboard: :url',
+        'vat_enabled' => 'Charge VAT',
+        'vat_rate' => 'VAT rate',
+        'vat_on_commission' => 'Charge VAT on the commission',
+        'vat_on_commission_helper' => 'Off by default. If your accountant says VAT applies to the commission you charge the client, switch it on: it is then added to what the client owes you (never to what the customer pays). Applies to new orders only.',
+        'vat_registration_number' => 'VAT registration number',
+        'vat_registration_number_helper' => 'Printed on receipts.',
+        'vat_rate_helper' => 'Applied to new orders only; existing orders keep the rate they were created with.',
     ],
 
     'notifications' => [

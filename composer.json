@@ -30,6 +30,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10.1",
         "marcogermani87/filament-captcha": "^2.3",
+        "matomo/device-detector": "^6.5",
         "mpdf/mpdf": "^8.3",
         "mpdf/qrcode": "^1.2",
         "nunomaduro/termwind": "2.3.1",

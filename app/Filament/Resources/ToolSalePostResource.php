@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ToolSalePostResource\Pages\ListToolSalePosts;
 use App\Filament\Resources\ToolSalePostResource\Pages\CreateToolSalePost;
-use App\Filament\Resources\ToolSalePostResource\Pages\ViewToolSalePost;
 use App\Filament\Resources\ToolSalePostResource\Pages\EditToolSalePost;
-use App\Filament\Resources\ToolSalePostResource\Pages;
+use App\Filament\Resources\ToolSalePostResource\Pages\ListToolSalePosts;
+use App\Filament\Resources\ToolSalePostResource\Pages\ViewToolSalePost;
 use App\Models\City;
 use App\Models\Region;
+use App\Models\SiteSetting;
 use App\Models\ToolSalePost;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -36,11 +36,11 @@ class ToolSalePostResource extends Resource
 {
     protected static ?string $model = ToolSalePost::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-wrench';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-wrench';
 
-    public static function getNavigationGroup(): string | \UnitEnum | null
+    public static function getNavigationGroup(): string|\UnitEnum|null
     {
-        return __('admin_navigation.tool_marketplace');
+        return __('admin_navigation.directory');
     }
 
     public static function getModelLabel(): string
@@ -135,7 +135,7 @@ class ToolSalePostResource extends Resource
                                 TextInput::make('price')
                                     ->numeric()
                                     ->minValue(0)
-                                    ->prefix(fn () => \App\Models\SiteSetting::currency()['symbol'])
+                                    ->prefix(fn () => SiteSetting::currency()['symbol'])
                                     ->required(),
                                 Select::make('status')
                                     ->options([
@@ -184,7 +184,7 @@ class ToolSalePostResource extends Resource
                     ->color(fn (string $state): string => $state === 'new' ? 'success' : 'gray')
                     ->sortable(),
                 TextColumn::make('price')
-                    ->money(fn () => \App\Models\SiteSetting::currency()['code'])
+                    ->money(fn () => SiteSetting::currency()['code'])
                     ->sortable(),
                 TextColumn::make('city.en_name')
                     ->label('City')

@@ -57,9 +57,10 @@ class Submitter
             DB::transaction(fn () => $submission->save());
         }
 
-        $this->events->dispatch(new SubmissionReceived($form, $submission, $context));
+        $event = new SubmissionReceived($form, $submission, $context);
+        $this->events->dispatch($event);
 
-        return new SubmissionResult($form, $submission);
+        return new SubmissionResult($form, $submission, redirect: $event->redirectUrl, customMessage: $event->message, extra: $event->extra);
     }
 
     /**

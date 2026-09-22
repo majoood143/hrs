@@ -6,12 +6,18 @@ use App\Models\User;
 use Filament\Widgets\ChartWidget;
 use Flowframe\Trend\Trend;
 use Flowframe\Trend\TrendValue;
+use Illuminate\Contracts\Support\Htmlable;
 
 class UsersChart extends ChartWidget
 {
-    protected int | string | array $columnSpan = 2;
+    public static function canView(): bool
+    {
+        return auth()->user()?->can('ViewAny:User') ?? false;
+    }
 
-    public function getHeading(): string | \Illuminate\Contracts\Support\Htmlable | null
+    protected int|string|array $columnSpan = 2;
+
+    public function getHeading(): string|Htmlable|null
     {
         return __('admin_widgets.users_chart.heading');
     }
@@ -20,8 +26,8 @@ class UsersChart extends ChartWidget
     {
         $data = Trend::model(User::class)
             ->between(
-            start: now()->startOfYear(),
-            end: now()->endOfYear(),
+                start: now()->startOfYear(),
+                end: now()->endOfYear(),
             )
             ->perMonth()
             ->count();
@@ -30,10 +36,10 @@ class UsersChart extends ChartWidget
             'datasets' => [
                 [
                     'label' => __('admin_widgets.users_chart.dataset_label'),
-                    'data' => $data->map(fn(TrendValue $value) => $value->aggregate),
+                    'data' => $data->map(fn (TrendValue $value) => $value->aggregate),
                 ],
             ],
-            'labels' => $data->map(fn(TrendValue $value) => $value->date),
+            'labels' => $data->map(fn (TrendValue $value) => $value->date),
         ];
     }
 

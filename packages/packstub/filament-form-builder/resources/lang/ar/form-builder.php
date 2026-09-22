@@ -92,6 +92,7 @@ return [
         'accepted_types' => 'أنواع الملفات المقبولة',
         'accepted_types_hint' => 'امتدادات الملفات، مثل pdf, jpg, png, docx.',
         'max_size' => 'الحد الأقصى لحجم الملف (كيلوبايت)',
+        'blocked_extension' => 'هذا النوع من الملفات غير مسموح به.',
     ],
 
     'types' => [

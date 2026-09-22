@@ -19,6 +19,18 @@ return Application::configure(basePath: dirname(__DIR__))
             SetLocale::class,
         ]);
 
+        // Payment gateways POST back to these without a session or CSRF token; each one is
+        // authenticated by the gateway itself (signature, encryption key, or a matching amount).
+        $middleware->validateCsrfTokens(except: [
+            'payment/thawani/webhook',
+            'payment/nbo/callback',
+            'payment/ccavenue/callback',
+        ]);
+
+        // Only the customer pages use the plain "auth" middleware (the admin panels have their own);
+        // send a signed-out customer to the phone sign-in, and come back to the page they asked for.
+        $middleware->redirectGuestsTo(fn ($request) => $request->is('account/*') ? route('account.login') : url('/admin/login'));
+
         $middleware->replace(
             BasePreventRequestsDuringMaintenance::class,
             PreventRequestsDuringMaintenance::class,

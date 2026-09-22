@@ -11,7 +11,7 @@ use Illuminate\Auth\Access\HandlesAuthorization;
 class AdPolicy
 {
     use HandlesAuthorization;
-
+    
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Ad');

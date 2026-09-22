@@ -1,16 +1,27 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Swiper from 'swiper';
-import { Autoplay, EffectCreative, Pagination, Navigation, Keyboard, A11y } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/effect-creative';
-import 'swiper/css/pagination';
-import 'swiper/css/navigation';
 import { raceWidget } from './race-widget';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Swiper (+ its CSS and modules) is only needed by the three sliders below; loading it eagerly
+// on every page — checkout, order status, plain content pages — cost their parse/execute time
+// for nothing. Fetched once, on demand, the first time a page actually has a slider to build.
+let swiperPromise = null;
+function loadSwiper() {
+    swiperPromise ??= Promise.all([
+        import('swiper'),
+        import('swiper/modules'),
+        import('swiper/css'),
+        import('swiper/css/effect-creative'),
+        import('swiper/css/pagination'),
+        import('swiper/css/navigation'),
+    ]).then(([{ default: Swiper }, modules]) => ({ Swiper, ...modules }));
+
+    return swiperPromise;
+}
 
 function heroSlideshow() {
     const root = document.querySelector('[data-hero-slider]');
@@ -53,38 +64,40 @@ function heroSlideshow() {
         }
     }
 
-    const swiper = new Swiper(container, {
-        modules: [Autoplay, EffectCreative, Pagination, Keyboard, A11y],
-        effect: 'creative',
-        creativeEffect: {
-            prev: { shadow: true, translate: [0, 0, -300], opacity: 0.6 },
-            next: { translate: ['100%', 0, 0] },
-        },
-        speed: reduceMotion ? 0 : 900,
-        loop: slideCount > 1,
-        keyboard: { enabled: true },
-        a11y: { enabled: true },
-        pagination: slideCount > 1 ? {
-            el: root.querySelector('[data-hero-pagination]'),
-            clickable: true,
-        } : false,
-        autoplay: autoplayEnabled ? {
-            delay,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: true,
-        } : false,
-        on: {
-            init(sw) {
-                animateSlide(sw.slides[sw.activeIndex]);
+    loadSwiper().then(({ Swiper, Autoplay, EffectCreative, Pagination, Keyboard, A11y }) => {
+        const swiper = new Swiper(container, {
+            modules: [Autoplay, EffectCreative, Pagination, Keyboard, A11y],
+            effect: 'creative',
+            creativeEffect: {
+                prev: { shadow: true, translate: [0, 0, -300], opacity: 0.6 },
+                next: { translate: ['100%', 0, 0] },
             },
-            slideChangeTransitionStart(sw) {
-                animateSlide(sw.slides[sw.activeIndex]);
+            speed: reduceMotion ? 0 : 900,
+            loop: slideCount > 1,
+            keyboard: { enabled: true },
+            a11y: { enabled: true },
+            pagination: slideCount > 1 ? {
+                el: root.querySelector('[data-hero-pagination]'),
+                clickable: true,
+            } : false,
+            autoplay: autoplayEnabled ? {
+                delay,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+            } : false,
+            on: {
+                init(sw) {
+                    animateSlide(sw.slides[sw.activeIndex]);
+                },
+                slideChangeTransitionStart(sw) {
+                    animateSlide(sw.slides[sw.activeIndex]);
+                },
             },
-        },
-    });
+        });
 
-    root.addEventListener('focusin', () => swiper.autoplay?.stop());
-    root.addEventListener('focusout', () => swiper.autoplay?.start());
+        root.addEventListener('focusin', () => swiper.autoplay?.stop());
+        root.addEventListener('focusout', () => swiper.autoplay?.start());
+    });
 }
 
 function horseGallerySlider() {
@@ -96,16 +109,18 @@ function horseGallerySlider() {
 
     const slideCount = container.querySelectorAll('.swiper-slide').length;
 
-    new Swiper(container, {
-        modules: [Pagination, Navigation, Keyboard, A11y],
-        loop: slideCount > 1,
-        keyboard: { enabled: true },
-        a11y: { enabled: true },
-        pagination: { el: container.querySelector('.swiper-pagination'), clickable: true },
-        navigation: {
-            nextEl: container.querySelector('.swiper-button-next'),
-            prevEl: container.querySelector('.swiper-button-prev'),
-        },
+    loadSwiper().then(({ Swiper, Pagination, Navigation, Keyboard, A11y }) => {
+        new Swiper(container, {
+            modules: [Pagination, Navigation, Keyboard, A11y],
+            loop: slideCount > 1,
+            keyboard: { enabled: true },
+            a11y: { enabled: true },
+            pagination: { el: container.querySelector('.swiper-pagination'), clickable: true },
+            navigation: {
+                nextEl: container.querySelector('.swiper-button-next'),
+                prevEl: container.querySelector('.swiper-button-prev'),
+            },
+        });
     });
 }
 
@@ -125,37 +140,39 @@ function promoSliders() {
             if (activeVideo) activeVideo.play().catch(() => {});
         }
 
-        const swiper = new Swiper(container, {
-            modules: [Autoplay, Pagination, Navigation, Keyboard, A11y],
-            slidesPerView: 1,
-            spaceBetween: 24,
-            loop: slideCount > columns,
-            keyboard: { enabled: true },
-            a11y: { enabled: true },
-            breakpoints: {
-                768: { slidesPerView: columns },
-            },
-            pagination: slideCount > 1 ? {
-                el: container.querySelector('.swiper-pagination'),
-                clickable: true,
-            } : false,
-            navigation: slideCount > 1 ? {
-                nextEl: container.querySelector('.swiper-button-next'),
-                prevEl: container.querySelector('.swiper-button-prev'),
-            } : false,
-            autoplay: autoplayEnabled ? {
-                delay,
-                disableOnInteraction: false,
-                pauseOnMouseEnter: true,
-            } : false,
-            on: {
-                init: playActiveVideo,
-                slideChangeTransitionStart: playActiveVideo,
-            },
-        });
+        loadSwiper().then(({ Swiper, Autoplay, Pagination, Navigation, Keyboard, A11y }) => {
+            const swiper = new Swiper(container, {
+                modules: [Autoplay, Pagination, Navigation, Keyboard, A11y],
+                slidesPerView: 1,
+                spaceBetween: 24,
+                loop: slideCount > columns,
+                keyboard: { enabled: true },
+                a11y: { enabled: true },
+                breakpoints: {
+                    768: { slidesPerView: columns },
+                },
+                pagination: slideCount > 1 ? {
+                    el: container.querySelector('.swiper-pagination'),
+                    clickable: true,
+                } : false,
+                navigation: slideCount > 1 ? {
+                    nextEl: container.querySelector('.swiper-button-next'),
+                    prevEl: container.querySelector('.swiper-button-prev'),
+                } : false,
+                autoplay: autoplayEnabled ? {
+                    delay,
+                    disableOnInteraction: false,
+                    pauseOnMouseEnter: true,
+                } : false,
+                on: {
+                    init: playActiveVideo,
+                    slideChangeTransitionStart: playActiveVideo,
+                },
+            });
 
-        root.addEventListener('focusin', () => swiper.autoplay?.stop());
-        root.addEventListener('focusout', () => swiper.autoplay?.start());
+            root.addEventListener('focusin', () => swiper.autoplay?.stop());
+            root.addEventListener('focusout', () => swiper.autoplay?.start());
+        });
     });
 }
 

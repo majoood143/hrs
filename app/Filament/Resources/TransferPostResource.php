@@ -2,14 +2,13 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\TransferPostResource\Pages\ListTransferPosts;
 use App\Filament\Resources\TransferPostResource\Pages\CreateTransferPost;
-use App\Filament\Resources\TransferPostResource\Pages\ViewTransferPost;
 use App\Filament\Resources\TransferPostResource\Pages\EditTransferPost;
-use App\Filament\Resources\TransferPostResource\Pages;
+use App\Filament\Resources\TransferPostResource\Pages\ListTransferPosts;
+use App\Filament\Resources\TransferPostResource\Pages\ViewTransferPost;
 use App\Models\City;
-use App\Models\Country;
 use App\Models\Region;
+use App\Models\SiteSetting;
 use App\Models\TransferPost;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -37,11 +36,11 @@ class TransferPostResource extends Resource
 {
     protected static ?string $model = TransferPost::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-truck';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-truck';
 
-    public static function getNavigationGroup(): string | \UnitEnum | null
+    public static function getNavigationGroup(): string|\UnitEnum|null
     {
-        return __('admin_navigation.transportation_service');
+        return __('admin_navigation.directory');
     }
 
     public static function getModelLabel(): string
@@ -142,7 +141,7 @@ class TransferPostResource extends Resource
                 TextInput::make('price')
                     ->numeric()
                     ->minValue(0)
-                    ->prefix(fn () => \App\Models\SiteSetting::currency()['symbol'])
+                    ->prefix(fn () => SiteSetting::currency()['symbol'])
                     ->visible(fn (Get $get) => $get('type') === 'offer'),
                 TextInput::make('contact_number')
                     ->tel()
@@ -182,7 +181,7 @@ class TransferPostResource extends Resource
                     ->date()
                     ->sortable(),
                 TextColumn::make('price')
-                    ->money(fn () => \App\Models\SiteSetting::currency()['code'])
+                    ->money(fn () => SiteSetting::currency()['code'])
                     ->sortable(),
                 TextColumn::make('contact_number'),
                 TextColumn::make('status')

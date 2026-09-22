@@ -115,6 +115,7 @@ class FormResource extends Resource
                         Tab::make(__('packstub-form-builder::form-builder.tabs.settings'))
                             ->icon('heroicon-o-cog-6-tooth')
                             ->schema(static::settingsSchema()),
+                        ...app(FormBuilder::class)->formTabs(),
                         Tab::make(__('packstub-form-builder::form-builder.tabs.embed'))
                             ->icon('heroicon-o-code-bracket')
                             ->schema(static::embedSchema())

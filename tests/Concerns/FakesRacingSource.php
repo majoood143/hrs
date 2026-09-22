@@ -2,12 +2,11 @@
 
 namespace Tests\Concerns;
 
-use Illuminate\Database\Schema\Blueprint;
+use App\Models\SiteSetting;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Schema;
 
 /**
  * A stand-in for the racing source, answering from real captured responses in tests/Fixtures/racing.
@@ -17,25 +16,11 @@ use Illuminate\Support\Facades\Schema;
  */
 trait FakesRacingSource
 {
+    use PreparesSiteLayout;
+
     protected function prepareRacingSite(): void
     {
-        Cache::flush();
-        Cache::forever('site_settings.all', collect());
-
-        Schema::create('cms_menus', function (Blueprint $table) {
-            $table->id();
-            $table->string('location')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
-        });
-
-        Schema::create('cms_redirects', function (Blueprint $table) {
-            $table->id();
-            $table->string('from_path')->nullable();
-            $table->string('to_path')->nullable();
-            $table->unsignedInteger('hits')->default(0);
-            $table->timestamps();
-        });
+        $this->prepareSiteLayout();
 
         config(['racing.base_url' => 'http://racing.test']);
     }
@@ -132,11 +117,12 @@ trait FakesRacingSource
      */
     protected function replaceRacingFake(mixed $fake): void
     {
-        Http::swap(new Factory());
+        Http::swap(new Factory);
         Http::fake($fake);
 
         Cache::flush();
         Cache::forever('site_settings.all', collect());
+        SiteSetting::resetMemo();
     }
 
     /** How many requests hit the source's page/method with the given query fragment, e.g. "page=RaceResults". */

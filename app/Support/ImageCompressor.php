@@ -48,6 +48,21 @@ class ImageCompressor
             return;
         }
 
+        // getimagesize() reads just the header, not the pixel data, so this is cheap even for a
+        // small, highly-compressed file that declares huge dimensions (a decompression-bomb
+        // pattern): reject it before Image::decodePath() below would try to allocate a bitmap
+        // for it, rather than relying only on the memory_limit bump and the catch to contain it.
+        $dimensions = @getimagesize($absolutePath);
+        $maxDimension = (int) SiteSetting::get('image_compression_max_source_dimension', 8000);
+
+        if ($dimensions === false || $dimensions[0] > $maxDimension || $dimensions[1] > $maxDimension) {
+            if ($dimensions !== false) {
+                Log::warning("Image compression skipped for [{$absolutePath}]: {$dimensions[0]}x{$dimensions[1]} exceeds the {$maxDimension}px safety cap.");
+            }
+
+            return;
+        }
+
         // Decoding a large photo into an uncompressed bitmap can need far more
         // memory than the default PHP limit, well before any resizing happens.
         $previousMemoryLimit = ini_get('memory_limit');

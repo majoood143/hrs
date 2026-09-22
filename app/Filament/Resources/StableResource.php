@@ -2,11 +2,10 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\StableResource\Pages\ListStables;
 use App\Filament\Resources\StableResource\Pages\CreateStable;
-use App\Filament\Resources\StableResource\Pages\ViewStable;
 use App\Filament\Resources\StableResource\Pages\EditStable;
-use App\Filament\Resources\StableResource\Pages;
+use App\Filament\Resources\StableResource\Pages\ListStables;
+use App\Filament\Resources\StableResource\Pages\ViewStable;
 use App\Models\City;
 use App\Models\Region;
 use App\Models\Stable;
@@ -41,11 +40,11 @@ class StableResource extends Resource
 {
     protected static ?string $model = Stable::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-home-modern';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-home-modern';
 
-    public static function getNavigationGroup(): string | \UnitEnum | null
+    public static function getNavigationGroup(): string|\UnitEnum|null
     {
-        return __('admin_navigation.stables');
+        return __('admin_navigation.directory');
     }
 
     public static function getModelLabel(): string

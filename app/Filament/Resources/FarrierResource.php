@@ -2,14 +2,14 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\FarrierResource\Pages\ListFarriers;
 use App\Filament\Resources\FarrierResource\Pages\CreateFarrier;
-use App\Filament\Resources\FarrierResource\Pages\ViewFarrier;
 use App\Filament\Resources\FarrierResource\Pages\EditFarrier;
-use App\Filament\Resources\FarrierResource\Pages;
+use App\Filament\Resources\FarrierResource\Pages\ListFarriers;
+use App\Filament\Resources\FarrierResource\Pages\ViewFarrier;
 use App\Models\City;
 use App\Models\Farrier;
 use App\Models\Region;
+use App\Models\SiteSetting;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -36,11 +36,11 @@ class FarrierResource extends Resource
 {
     protected static ?string $model = Farrier::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-wrench-screwdriver';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-wrench-screwdriver';
 
-    public static function getNavigationGroup(): string | \UnitEnum | null
+    public static function getNavigationGroup(): string|\UnitEnum|null
     {
-        return __('admin_navigation.farrier_marketplace');
+        return __('admin_navigation.directory');
     }
 
     public static function getModelLabel(): string
@@ -117,7 +117,7 @@ class FarrierResource extends Resource
                                 TextInput::make('price')
                                     ->numeric()
                                     ->minValue(0)
-                                    ->prefix(fn () => \App\Models\SiteSetting::currency()['symbol'])
+                                    ->prefix(fn () => SiteSetting::currency()['symbol'])
                                     ->required(),
                                 Select::make('status')
                                     ->options([
@@ -163,7 +163,7 @@ class FarrierResource extends Resource
                     ->suffix(' yrs')
                     ->sortable(),
                 TextColumn::make('price')
-                    ->money(fn () => \App\Models\SiteSetting::currency()['code'])
+                    ->money(fn () => SiteSetting::currency()['code'])
                     ->sortable(),
                 TextColumn::make('city.en_name')
                     ->label('City')

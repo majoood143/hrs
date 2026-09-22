@@ -5,9 +5,10 @@ namespace Tests\Feature;
 use App\Models\SiteSetting;
 use App\Services\Racing\RacingPdf;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Blade;
+use Illuminate\Testing\TestResponse;
 use Tests\Concerns\FakesRacingSource;
 use Tests\TestCase;
 
@@ -23,7 +24,7 @@ class RacingExportTest extends TestCase
         $this->fakeRacingSource();
     }
 
-    private function assertPdf(\Illuminate\Testing\TestResponse $response, string $filename = null): void
+    private function assertPdf(TestResponse $response, ?string $filename = null): void
     {
         $response->assertOk()->assertHeader('Content-Type', 'application/pdf')->assertHeader('X-Robots-Tag', 'noindex');
 
@@ -43,17 +44,17 @@ class RacingExportTest extends TestCase
         $html = $this->get('/racing/horse/1205')->assertOk()->getContent();
 
         $this->assertStringContainsString('data-racing-tools', $html);
-        $this->assertStringContainsString('href="' . url('/racing/horse/1205/pdf') . '"', $html);
+        $this->assertStringContainsString('href="'.url('/racing/horse/1205/pdf').'"', $html);
 
         // Print is rendered hidden and only revealed by the script that makes it work
         $this->assertMatchesRegularExpression('#<button type="button" data-print hidden#', $html);
 
         // the existing share icons, pointing at this page in this language
-        $page = urlencode(url('/racing/horse/1205') . '?lang=en');
-        $this->assertStringContainsString('https://www.facebook.com/sharer/sharer.php?u=' . $page, $html);
-        $this->assertStringContainsString('https://t.me/share/url?url=' . $page, $html);
-        $this->assertStringContainsString('https://wa.me/?text=' . urlencode('Al Qous (OM) — Horse ' . url('/racing/horse/1205') . '?lang=en'), $html);
-        $this->assertStringContainsString('data-copy-link="' . url('/racing/horse/1205') . '?lang=en"', $html);
+        $page = urlencode(url('/racing/horse/1205').'?lang=en');
+        $this->assertStringContainsString('https://www.facebook.com/sharer/sharer.php?u='.$page, $html);
+        $this->assertStringContainsString('https://t.me/share/url?url='.$page, $html);
+        $this->assertStringContainsString('https://wa.me/?text='.urlencode('Al Qous (OM) — Horse '.url('/racing/horse/1205').'?lang=en'), $html);
+        $this->assertStringContainsString('data-copy-link="'.url('/racing/horse/1205').'?lang=en"', $html);
 
         // the listing-style card and heading are not used here
         $this->assertStringNotContainsString('Share this listing', $html);
@@ -66,14 +67,14 @@ class RacingExportTest extends TestCase
 
         preg_match('#/racing/results/(\d+)/pdf#', $html, $m);
         $this->assertNotEmpty($m, 'a PDF link for the race on screen');
-        $this->assertStringContainsString('data-copy-link="' . url("/racing/results/{$m[1]}") . '?lang=en"', $html);
+        $this->assertStringContainsString('data-copy-link="'.url("/racing/results/{$m[1]}").'?lang=en"', $html);
     }
 
     public function test_the_share_link_keeps_the_language(): void
     {
         $html = $this->get('/racing/horse/1205?lang=ar')->assertOk()->getContent();
 
-        $this->assertStringContainsString('data-copy-link="' . url('/racing/horse/1205') . '?lang=ar"', $html);
+        $this->assertStringContainsString('data-copy-link="'.url('/racing/horse/1205').'?lang=ar"', $html);
         $this->assertStringContainsString('مشاركة', $html);
         $this->assertStringContainsString('تنزيل بصيغة PDF', $html);
     }
@@ -136,7 +137,7 @@ class RacingExportTest extends TestCase
         $response = $this->get('/racing/horse/1205/pdf?lang=ar');
 
         $this->assertPdf($response);
-        $this->assertStringContainsString("filename*=utf-8''" . rawurlencode('القوس (عمان)') . '.pdf', $response->headers->get('Content-Disposition'));
+        $this->assertStringContainsString("filename*=utf-8''".rawurlencode('القوس (عمان)').'.pdf', $response->headers->get('Content-Disposition'));
         // and an ASCII name for clients that cannot read it
         $this->assertMatchesRegularExpression('#filename=[A-Za-z0-9._-]+\.pdf#', $response->headers->get('Content-Disposition'));
     }
@@ -186,7 +187,7 @@ class RacingExportTest extends TestCase
                 'qrUrl' => "https://site.test/racing/horse/1205?lang={$locale}",
             ])->render();
 
-            $this->assertStringContainsString('<barcode code="https://site.test/racing/horse/1205?lang=' . $locale . '" type="QR"', $html);
+            $this->assertStringContainsString('<barcode code="https://site.test/racing/horse/1205?lang='.$locale.'" type="QR"', $html);
         }
 
         // and it is a real, generated code: the PDF is built without the QR package missing
@@ -201,8 +202,8 @@ class RacingExportTest extends TestCase
             foreach ($m[1] as $hex) {
                 $hex = strlen($hex) === 3 ? preg_replace('/./', '$0$0', $hex) : $hex;
 
-                $this->assertSame(substr($hex, 0, 2), substr($hex, 2, 2), basename($file) . " has a coloured value #{$hex}");
-                $this->assertSame(substr($hex, 2, 2), substr($hex, 4, 2), basename($file) . " has a coloured value #{$hex}");
+                $this->assertSame(substr($hex, 0, 2), substr($hex, 2, 2), basename($file)." has a coloured value #{$hex}");
+                $this->assertSame(substr($hex, 2, 2), substr($hex, 4, 2), basename($file)." has a coloured value #{$hex}");
             }
         }
     }
@@ -221,6 +222,7 @@ class RacingExportTest extends TestCase
         Cache::forever('site_settings.all', collect($path === null ? [] : [
             'site_logo' => new SiteSetting(['key' => 'site_logo', 'type' => 'file', 'value' => $path]),
         ]));
+        SiteSetting::resetMemo();
     }
 
     private function png(int $width, int $height): string
@@ -301,7 +303,7 @@ class RacingExportTest extends TestCase
     {
         // a valid PNG header claiming 20000 x 20000 px (1.6 GB decoded); nothing behind it is ever read
         $ihdr = pack('NNCCCCC', 20000, 20000, 8, 2, 0, 0, 0);
-        $header = "\x89PNG\r\n\x1a\n" . pack('N', 13) . 'IHDR' . $ihdr . pack('N', crc32('IHDR' . $ihdr));
+        $header = "\x89PNG\r\n\x1a\n".pack('N', 13).'IHDR'.$ihdr.pack('N', crc32('IHDR'.$ihdr));
 
         $this->useLogo('branding/huge.png', $header);
 
@@ -376,5 +378,28 @@ class RacingExportTest extends TestCase
         $this->get('/racing/horse/1205/pdf')->assertOk();
 
         $this->assertSame(1, $this->sentCount('Horse_GenWin'));
+    }
+
+    public function test_repeat_downloads_of_the_same_pdf_skip_the_expensive_render(): void
+    {
+        // mPDF (Arabic shaping, the Cairo font) is the expensive step, distinct from the
+        // underlying data cache the test above covers: render() must run only once even though
+        // the PDF is downloaded (and, for the race page, requested in a second language) several times.
+        $this->partialMock(RacingPdf::class, fn ($mock) => $mock->shouldReceive('render')->once()->passthru());
+
+        $first = $this->get('/racing/horse/1205/pdf')->assertOk()->getContent();
+        $second = $this->get('/racing/horse/1205/pdf')->assertOk()->getContent();
+
+        $this->assertSame($first, $second);
+    }
+
+    public function test_a_different_language_renders_its_own_pdf_not_the_other_languages_cached_one(): void
+    {
+        $this->partialMock(RacingPdf::class, fn ($mock) => $mock->shouldReceive('render')->twice()->passthru());
+
+        $en = $this->get('/racing/horse/1205/pdf')->assertOk()->getContent();
+        $ar = $this->get('/racing/horse/1205/pdf?lang=ar')->assertOk()->getContent();
+
+        $this->assertNotSame($en, $ar);
     }
 }

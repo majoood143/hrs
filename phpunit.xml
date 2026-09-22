@@ -18,6 +18,9 @@
         </include>
     </source>
     <php>
+        <!-- every test boots an app and PHP's CLI default of 128M is used up by the whole suite; the
+             racing PDF logo guard (correctly) skips a big logo when memory is short -->
+        <ini name="memory_limit" value="512M"/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>

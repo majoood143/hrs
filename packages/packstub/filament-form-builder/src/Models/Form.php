@@ -262,7 +262,7 @@ class Form extends Model
             return __('packstub-form-builder::form-builder.frontend.closed');
         }
 
-        return null;
+        return app(FormBuilder::class)->closedReasonFor($this);
     }
 
     public function isAccepting(): bool

@@ -71,15 +71,34 @@ return [
     | File uploads
     |--------------------------------------------------------------------------
     |
-    | Where a "file" field's uploads are stored. "max_size" (KB) is the
-    | fallback when a field doesn't set its own in the builder.
+    | Where a "file" field's uploads are stored. They go on a PRIVATE disk and are
+    | reached only through a signed download route that checks the "download_ability"
+    | (a gate ability on the form model, "viewAny" by default). "max_size" (KB) is the
+    | fallback when a field doesn't set its own in the builder. "legacy_disks" are
+    | disks earlier uploads may still sit on; form-builder:move-uploads-private moves them.
+    | "blocked_extensions" is a deny-list applied to a field that sets no "accepted_types"
+    | allow-list of its own, so leaving that setting blank never means a script upload
+    | is accepted.
     |
     */
 
     'uploads' => [
-        'disk' => 'public',
+        'disk' => 'local',
         'directory' => 'form-uploads',
         'max_size' => 5120,
+        'legacy_disks' => ['public'],
+        'download_ability' => 'viewAny',
+        'blocked_extensions' => [
+            'php', 'php3', 'php4', 'php5', 'php7', 'phtml', 'phar', 'pht', 'phps',
+            'exe', 'com', 'bat', 'cmd', 'scr', 'msi', 'dll', 'vbs', 'vbe', 'ws', 'wsf', 'wsh',
+            'sh', 'bash', 'cgi', 'pl', 'py', 'rb', 'jsp', 'jspx', 'asp', 'aspx', 'asa', 'cer',
+            'htaccess', 'htpasswd', 'jar', 'ps1', 'reg',
+        ],
+        'route' => [
+            'enabled' => true,
+            'prefix' => 'form-files',
+            'middleware' => ['web'],
+        ],
     ],
 
     /*

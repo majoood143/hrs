@@ -2,22 +2,24 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Exception;
 use App\Mail\TestSmtpEmail;
-use Filament\Pages\Page;
 use App\Services\SettingsService;
-use Filament\Forms;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+use Exception;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
-use Illuminate\Support\Facades\Mail;
+use Filament\Pages\Page;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class SmtpSettings extends Page
 {
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
+    use HasPageShield;
+
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
     protected string $view = 'filament.pages.smtp-settings';
 
@@ -25,7 +27,7 @@ class SmtpSettings extends Page
 
     public ?array $data = [];
 
-    public static function getNavigationGroup(): string | \UnitEnum | null
+    public static function getNavigationGroup(): string|\UnitEnum|null
     {
         return __('admin_navigation.settings');
     }
@@ -98,7 +100,6 @@ class SmtpSettings extends Page
             ->statePath('data');
     }
 
-
     public function save(SettingsService $settings): void
     {
         $data = $this->form->getState();
@@ -120,7 +121,7 @@ class SmtpSettings extends Page
             if (empty($data['mail_host']) || empty($data['mail_username']) || empty($data['mail_from_address'])) {
                 throw new Exception('Required SMTP settings are missing.');
             }
-            if (!filter_var($data['mail_from_address'], FILTER_VALIDATE_EMAIL)) {
+            if (! filter_var($data['mail_from_address'], FILTER_VALIDATE_EMAIL)) {
                 throw new Exception('Invalid from email address.');
             }
 
@@ -135,19 +136,18 @@ class SmtpSettings extends Page
             ]);
 
             Mail::to($data['mail_from_address'], $data['mail_from_name'] ?? 'Test User')
-                ->send(new TestSmtpEmail());
+                ->send(new TestSmtpEmail);
 
             Notification::make()
                 ->title('SMTP connection test successful!')
                 ->success()
                 ->send();
         } catch (Exception $e) {
-            Log::error('SMTP test failed: ' . $e->getMessage());
+            Log::error('SMTP test failed: '.$e->getMessage());
             Notification::make()
-                ->title('SMTP connection failed. Please check your settings.' . $e->getMessage())
+                ->title('SMTP connection failed. Please check your settings.'.$e->getMessage())
                 ->danger()
                 ->send();
         }
     }
-
 }

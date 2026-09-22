@@ -8,12 +8,15 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Packstub\FormBuilder\Events\SubmissionReceived;
 use Packstub\FormBuilder\Fields\FieldTypeRegistry;
+use Packstub\FormBuilder\Console\MoveUploadsToPrivateDisk;
+use Packstub\FormBuilder\Http\Controllers\DownloadUploadController;
 use Packstub\FormBuilder\Http\Controllers\FormDefinitionController;
 use Packstub\FormBuilder\Http\Controllers\ShowFormController;
 use Packstub\FormBuilder\Http\Controllers\SubmitFormController;
 use Packstub\FormBuilder\Listeners\DispatchToSinks;
 use Packstub\FormBuilder\Listeners\SendSubmissionNotifications;
 use Packstub\FormBuilder\Livewire\FormBuilderForm;
+use Packstub\FormBuilder\Support\UploadLinks;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -30,6 +33,7 @@ class FormBuilderServiceProvider extends PackageServiceProvider
             ->hasViews(static::$name)
             ->hasTranslations()
             ->hasMigration('create_form_builder_tables')
+            ->hasCommand(MoveUploadsToPrivateDisk::class)
             ->hasInstallCommand(function (InstallCommand $command): void {
                 $command
                     ->publishConfigFile()
@@ -64,6 +68,20 @@ class FormBuilderServiceProvider extends PackageServiceProvider
         if (config('packstub-form-builder.routes.enabled', true)) {
             $this->registerRoutes();
         }
+
+        if (config('packstub-form-builder.uploads.route.enabled', true)) {
+            $this->registerUploadRoute();
+        }
+    }
+
+    /** Outside the forms prefix so a form whose slug is "files" can never collide with it. */
+    protected function registerUploadRoute(): void
+    {
+        $prefix = trim((string) config('packstub-form-builder.uploads.route.prefix', 'form-files'), '/');
+
+        Route::get($prefix.'/{token}', DownloadUploadController::class)
+            ->middleware([...(array) config('packstub-form-builder.uploads.route.middleware', ['web']), 'signed'])
+            ->name(UploadLinks::ROUTE);
     }
 
     protected function registerRoutes(): void

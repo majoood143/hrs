@@ -2,6 +2,7 @@
 
 namespace App\Services\Racing;
 
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Cache;
@@ -30,8 +31,7 @@ class RacingClient
         private readonly RacingMeetingParser $meetingParser,
         private readonly RacingHandicapParser $handicapParser,
         private readonly RacingCalendarParser $calendarParser,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array<string, array{headers: list<string>, rows: list<array{id: int, cells: list<string>}>}>
@@ -145,7 +145,7 @@ class RacingClient
 
         return Cache::remember($key, config('racing.cache_ttl'), fn () => $this->meetingParser->parseFragment(
             $page,
-            $this->get('/pages/' . self::RACE_PAGES[$page][1] . '.cfm', ['raceID' => $raceId, 'showIndexLink' => 'false', 'returnOption' => 'true'], $locale)
+            $this->get('/pages/'.self::RACE_PAGES[$page][1].'.cfm', ['raceID' => $raceId, 'showIndexLink' => 'false', 'returnOption' => 'true'], $locale)
         ));
     }
 
@@ -156,9 +156,33 @@ class RacingClient
      *
      * @throws RacingUnavailableException
      */
+    /**
+     * A cold cache means fetchHandicap() can take up to handicap_timeout (45s by default); with
+     * no lock, every visitor who lands during that window independently starts its own 45s
+     * upstream fetch, and enough concurrent ones can exhaust the PHP-FPM pool. The lock makes
+     * only one of them actually fetch; the rest wait for it and then read what it stored.
+     */
     public function handicap(string $breed, string $location, string $locale): array
     {
-        return Cache::remember($this->handicapKey($breed, $location, $locale), config('racing.handicap_ttl'), fn () => $this->fetchHandicap($breed, $location, $locale));
+        $key = $this->handicapKey($breed, $location, $locale);
+        $cached = Cache::get($key);
+
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $wait = (int) config('racing.handicap_timeout') + 5;
+
+        try {
+            return Cache::lock("{$key}:lock", $wait)->block(
+                $wait,
+                fn () => Cache::remember($key, config('racing.handicap_ttl'), fn () => $this->fetchHandicap($breed, $location, $locale)),
+            );
+        } catch (LockTimeoutException) {
+            // Something is stuck holding the lock well past a normal fetch: fetch directly
+            // rather than fail the visitor's request.
+            return $this->fetchHandicap($breed, $location, $locale);
+        }
     }
 
     /**
@@ -220,7 +244,7 @@ class RacingClient
         $yy = (int) substr($season, 0, 2);
         $year = $yy > 50 ? 1900 + $yy : 2000 + $yy;
 
-        return ['from' => "{$year}-10-01", 'to' => ($year + 1) . '-09-30'];
+        return ['from' => "{$year}-10-01", 'to' => ($year + 1).'-09-30'];
     }
 
     /** The season a date belongs to: October to December start it, January to September finish it. */
@@ -358,11 +382,11 @@ class RacingClient
         try {
             $response = $this->request($timeout)->get($path, $locale === null ? $query : $query + ['lang' => $this->lang($locale)]);
         } catch (ConnectionException $e) {
-            throw new RacingUnavailableException('Racing source unreachable: ' . $e->getMessage(), 0, $e);
+            throw new RacingUnavailableException('Racing source unreachable: '.$e->getMessage(), 0, $e);
         }
 
         if ($response->failed()) {
-            throw new RacingUnavailableException('Racing source responded with HTTP ' . $response->status());
+            throw new RacingUnavailableException('Racing source responded with HTTP '.$response->status());
         }
 
         return $response->body();

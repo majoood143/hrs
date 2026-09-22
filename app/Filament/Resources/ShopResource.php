@@ -2,14 +2,13 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ShopResource\Pages\ListShops;
 use App\Filament\Resources\ShopResource\Pages\CreateShop;
-use App\Filament\Resources\ShopResource\Pages\ViewShop;
 use App\Filament\Resources\ShopResource\Pages\EditShop;
-use App\Filament\Resources\ShopResource\Pages;
+use App\Filament\Resources\ShopResource\Pages\ListShops;
+use App\Filament\Resources\ShopResource\Pages\ViewShop;
 use App\Models\City;
-use App\Models\Shop;
 use App\Models\Region;
+use App\Models\Shop;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -43,11 +42,11 @@ class ShopResource extends Resource
 {
     protected static ?string $model = Shop::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-shopping-bag';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
 
-    public static function getNavigationGroup(): string | \UnitEnum | null
+    public static function getNavigationGroup(): string|\UnitEnum|null
     {
-        return __('admin_navigation.shops');
+        return __('admin_navigation.directory');
     }
 
     public static function getModelLabel(): string

@@ -177,7 +177,9 @@
                     <a href="{{ url('/') }}" class="whitespace-nowrap transition hover:text-warm-600">{{ __('Home') }}</a>
                     <a href="{{ url('/blog') }}" class="whitespace-nowrap transition hover:text-warm-600">{{ __('Stories') }}</a>
                 @endforelse
-                <x-language-switcher class="ms-auto" />
+                <a href="{{ \Illuminate\Support\Facades\Auth::guard('customer')->check() ? route('account.orders') : route('account.login') }}"
+                    class="ms-auto whitespace-nowrap transition hover:text-warm-600">{{ \Illuminate\Support\Facades\Auth::guard('customer')->check() ? __('account.my_orders') : __('account.login_link') }}</a>
+                <x-language-switcher />
             </nav>
 
             <div class="flex items-center gap-2 lg:hidden">
@@ -230,6 +232,8 @@
                     <a href="{{ url('/blog') }}"
                         class="rounded-xl px-3 py-3 text-base font-medium text-warm-800 transition hover:bg-warm-200/60">{{ __('Stories') }}</a>
                 @endforelse
+                <a href="{{ \Illuminate\Support\Facades\Auth::guard('customer')->check() ? route('account.orders') : route('account.login') }}"
+                    class="rounded-xl px-3 py-3 text-base font-medium text-warm-800 transition hover:bg-warm-200/60">{{ \Illuminate\Support\Facades\Auth::guard('customer')->check() ? __('account.my_orders') : __('account.login_link') }}</a>
             </nav>
         </div>
     </header>

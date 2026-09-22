@@ -1,0 +1,58 @@
+<?php
+
+return [
+    'guest' => 'Guest',
+    'service' => 'Service',
+    'service_fee' => 'Service fee',
+    'vat' => 'VAT (:rate%)',
+    'total' => 'Total',
+    'order_number' => 'Order number',
+    'receipt_number' => 'Receipt number',
+    'status_eyebrow' => 'Order status',
+    'status_title' => 'Order :number',
+    'status_heading' => 'Order status',
+    'payment_heading' => 'Payment',
+    'free_service' => 'Free',
+    'you_will_pay' => 'What you will pay',
+    'pay_after_submit' => 'After you submit the form you will be taken to a secure payment page.',
+    'service_unavailable' => 'This service is not available right now.',
+    'pay_now' => 'Pay now',
+    'timeline' => 'Progress',
+    'paid_but_cancelled' => 'Your payment was received, but this order is cancelled. Please contact us with your order number: do not pay again.',
+
+    'status' => [
+        'pending_payment' => 'Awaiting payment',
+        'new' => 'Received',
+        'in_review' => 'Under review',
+        'processing' => 'In progress',
+        'completed' => 'Completed',
+        'rejected' => 'Rejected',
+        'cancelled' => 'Cancelled',
+    ],
+
+    'payment_status' => [
+        'free' => 'No payment required',
+        'pending' => 'Awaiting payment',
+        'paid' => 'Paid',
+        'failed' => 'Payment failed',
+        'cancelled' => 'Cancelled',
+        'refunded' => 'Refunded',
+    ],
+
+    'events' => [
+        'created' => 'Order placed',
+        'paid' => 'Payment received',
+        'payment_failed' => 'Payment was not completed',
+        'cancelled' => 'Order cancelled',
+        'completed' => 'Your order was completed',
+        'review_started' => 'Your request is under review',
+        'approved' => 'Your request was approved and is being processed',
+        'rejected' => 'Your request could not be approved',
+        'refunded' => 'A refund was processed',
+        'document_added' => 'A document was added to your order',
+        'document_replaced' => 'A document was replaced',
+        'document_removed' => 'A document was removed',
+        'payment_started' => 'Payment started',
+        'stage_role_missing' => 'No one currently holds the role required for this review stage; a super admin can still approve or reject it.',
+    ],
+];

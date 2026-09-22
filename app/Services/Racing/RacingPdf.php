@@ -4,9 +4,7 @@ namespace App\Services\Racing;
 
 use App\Models\SiteSetting;
 use App\Support\PdfText;
-use Mpdf\Config\ConfigVariables;
-use Mpdf\Config\FontVariables;
-use Mpdf\Mpdf;
+use App\Services\Pdf\MpdfFactory;
 use Mpdf\Output\Destination;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
@@ -26,36 +24,17 @@ class RacingPdf
     {
         $rtl = $locale === 'ar';
         $siteName = SiteSetting::siteName();
-        $tempDir = storage_path('app/mpdf');
-
-        if (! is_dir($tempDir)) {
-            mkdir($tempDir, 0775, true);
-        }
 
         // mPDF parses the document with regular expressions and a horse with a long career is a big table
         @ini_set('pcre.backtrack_limit', '5000000');
 
-        // Cairo (the site's own font) covers Latin and Arabic, so one font serves both languages;
-        // useOTL / useKashida turn on proper Arabic shaping. mPDF cannot use variable fonts, hence static files.
-        $fontDirs = (new ConfigVariables())->getDefaults()['fontDir'];
-        $fontData = (new FontVariables())->getDefaults()['fontdata'];
-
-        $mpdf = new Mpdf([
-            'mode' => 'utf-8',
+        $mpdf = app(MpdfFactory::class)->make([
             'format' => 'A4-L',
-            'tempDir' => $tempDir,
-            'fontDir' => [...$fontDirs, resource_path('fonts/cairo')],
-            'fontdata' => $fontData + [
-                'cairo' => ['R' => 'Cairo-Regular.ttf', 'B' => 'Cairo-Bold.ttf', 'useOTL' => 0xFF, 'useKashida' => 75],
-            ],
-            'default_font' => 'cairo',
-            'default_font_size' => 9,
             'margin_left' => 10,
             'margin_right' => 10,
             'margin_top' => 12,
             'margin_bottom' => 16,
             'margin_footer' => 6,
-            'autoArabic' => true,
         ]);
 
         $mpdf->SetTitle($title);

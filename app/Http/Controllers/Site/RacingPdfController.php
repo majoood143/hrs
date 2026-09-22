@@ -8,6 +8,7 @@ use App\Services\Racing\RacingPdf;
 use App\Services\Racing\RacingUnavailableException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Throwable;
@@ -15,9 +16,7 @@ use Throwable;
 /** "Download PDF" for a profile (horse / owner / jockey / trainer) or a race page (results / entries / card / form guide). */
 class RacingPdfController extends Controller
 {
-    public function __construct(private readonly RacingClient $racing, private readonly RacingPdf $pdf)
-    {
-    }
+    public function __construct(private readonly RacingClient $racing, private readonly RacingPdf $pdf) {}
 
     public function profile(string $entity, int $id): Response|RedirectResponse
     {
@@ -34,17 +33,23 @@ class RacingPdfController extends Controller
 
         abort_if($profile === null, 404);
 
-        $title = $profile['title'] . ' — ' . __('racing.profile_types.' . $entity);
+        $title = $profile['title'].' — '.__('racing.profile_types.'.$entity);
+        $locale = app()->getLocale();
 
-        return $this->download(
-            $this->pdf->render('pdf.racing.profile', [
+        // mPDF's render (Arabic shaping, the Cairo font) is the expensive step; the underlying
+        // data is already cached, but the PDF bytes were not, so every "Download PDF" click for
+        // the same profile re-ran it from scratch. Cached the same length of time as that data.
+        $bytes = Cache::remember(
+            "racing:pdf:profile:{$entity}:{$id}:{$locale}",
+            config('racing.cache_ttl'),
+            fn () => $this->pdf->render('pdf.racing.profile', [
                 'entity' => $entity,
                 'profile' => $profile,
                 'image' => $this->image($profile['image'] ?? null),
-            ], $title, route('racing.profile', [$entity, $id]), app()->getLocale()),
-            $profile['title'],
-            "{$entity}-{$id}",
+            ], $title, route('racing.profile', [$entity, $id]), $locale),
         );
+
+        return $this->download($bytes, $profile['title'], "{$entity}-{$id}");
     }
 
     /**
@@ -74,18 +79,20 @@ class RacingPdfController extends Controller
         // nothing to export until the source has published this page for the race
         abort_unless($detail['available'] ?? false, 404);
 
-        $title = __('racing.pages.' . $page . '.title') . ' — ' . $selected['title'];
+        $title = __('racing.pages.'.$page.'.title').' — '.$selected['title'];
 
-        return $this->download(
-            $this->pdf->render('pdf.racing.race', [
+        $bytes = Cache::remember(
+            "racing:pdf:race:{$page}:{$race}:{$locale}",
+            config('racing.cache_ttl'),
+            fn () => $this->pdf->render('pdf.racing.race', [
                 'page' => $page,
                 'meeting' => $meeting,
                 'selected' => $selected,
                 'detail' => $detail,
             ], $title, route('racing.meeting', ['page' => $page, 'race' => $race]), $locale),
-            $title,
-            "race-{$race}-{$page}",
         );
+
+        return $this->download($bytes, $title, "race-{$race}-{$page}");
     }
 
     /** Owner silks come through our proxy path on the page; a PDF needs the bytes, and can live without them. */
@@ -103,7 +110,7 @@ class RacingPdfController extends Controller
             return null;
         }
 
-        return $image ? 'data:' . $image['type'] . ';base64,' . base64_encode($image['body']) : null;
+        return $image ? 'data:'.$image['type'].';base64,'.base64_encode($image['body']) : null;
     }
 
     private function download(string $bytes, string $name, string $fallback): Response
@@ -116,8 +123,8 @@ class RacingPdfController extends Controller
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => HeaderUtils::makeDisposition(
                 HeaderUtils::DISPOSITION_ATTACHMENT,
-                $clean . '.pdf',
-                (Str::slug($name) ?: $fallback) . '.pdf',
+                $clean.'.pdf',
+                (Str::slug($name) ?: $fallback).'.pdf',
             ),
             'Cache-Control' => 'private, max-age=300',
             'X-Robots-Tag' => 'noindex',

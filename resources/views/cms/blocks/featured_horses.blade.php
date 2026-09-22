@@ -1,5 +1,5 @@
 @php
-    $horses = \App\Models\Horse::featured()->latest('id')->take((int) ($data['count'] ?? 6))->get();
+    $horses = \App\Models\Horse::featured()->with(['type', 'city', 'country'])->latest('id')->take((int) ($data['count'] ?? 6))->get();
     $heading = \App\Support\Localized::value($data, 'heading') ?: __('Featured Horses');
     $subheading = \App\Support\Localized::value($data, 'subheading');
 @endphp

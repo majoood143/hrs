@@ -2,11 +2,10 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CenterResource\Pages\ListCenters;
 use App\Filament\Resources\CenterResource\Pages\CreateCenter;
-use App\Filament\Resources\CenterResource\Pages\ViewCenter;
 use App\Filament\Resources\CenterResource\Pages\EditCenter;
-use App\Filament\Resources\CenterResource\Pages;
+use App\Filament\Resources\CenterResource\Pages\ListCenters;
+use App\Filament\Resources\CenterResource\Pages\ViewCenter;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\Region;
@@ -42,11 +41,11 @@ class CenterResource extends Resource
 {
     protected static ?string $model = Center::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-building-office';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-building-office';
 
-    public static function getNavigationGroup(): string | \UnitEnum | null
+    public static function getNavigationGroup(): string|\UnitEnum|null
     {
-        return __('admin_navigation.centers');
+        return __('admin_navigation.directory');
     }
 
     public static function getModelLabel(): string

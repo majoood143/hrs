@@ -2,10 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\SiteSetting;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
@@ -20,6 +21,7 @@ class RacingSearchTest extends TestCase
         // site layout and the 404 fallback just what they read: empty site settings, menus and redirects.
         Cache::flush();
         Cache::forever('site_settings.all', collect());
+        SiteSetting::resetMemo();
         Schema::create('cms_menus', function (Blueprint $table) {
             $table->id();
             $table->string('location')->nullable();
@@ -211,12 +213,12 @@ class RacingSearchTest extends TestCase
     {
         $this->fakeSource();
 
-        $this->get('/racing/image?p=' . urlencode('/img/OwnerColours/basil masoud kasbi.jpg'))
+        $this->get('/racing/image?p='.urlencode('/img/OwnerColours/basil masoud kasbi.jpg'))
             ->assertOk()
             ->assertHeader('Content-Type', 'image/jpeg');
 
         foreach (['/pages/Horse_GenWin.cfm', '/img/../web.config', '//evil.test/img/a.jpg', '', '/img/x.php'] as $bad) {
-            $this->get('/racing/image?p=' . urlencode($bad))->assertNotFound();
+            $this->get('/racing/image?p='.urlencode($bad))->assertNotFound();
         }
     }
 

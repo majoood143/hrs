@@ -1,0 +1,58 @@
+<?php
+
+return [
+    'guest' => 'ضيف',
+    'service' => 'الخدمة',
+    'service_fee' => 'رسوم الخدمة',
+    'vat' => 'ضريبة القيمة المضافة (:rate%)',
+    'total' => 'الإجمالي',
+    'order_number' => 'رقم الطلب',
+    'receipt_number' => 'رقم الإيصال',
+    'status_eyebrow' => 'حالة الطلب',
+    'status_title' => 'الطلب :number',
+    'status_heading' => 'حالة الطلب',
+    'payment_heading' => 'الدفع',
+    'free_service' => 'مجاني',
+    'you_will_pay' => 'المبلغ الذي ستدفعه',
+    'pay_after_submit' => 'بعد إرسال النموذج سيتم تحويلك إلى صفحة دفع آمنة.',
+    'service_unavailable' => 'هذه الخدمة غير متاحة حالياً.',
+    'pay_now' => 'ادفع الآن',
+    'timeline' => 'مراحل الطلب',
+    'paid_but_cancelled' => 'تم استلام دفعتك، لكن هذا الطلب ملغى. يرجى التواصل معنا وذكر رقم الطلب، ولا تدفع مرة أخرى.',
+
+    'status' => [
+        'pending_payment' => 'بانتظار الدفع',
+        'new' => 'تم الاستلام',
+        'in_review' => 'قيد المراجعة',
+        'processing' => 'قيد التنفيذ',
+        'completed' => 'مكتمل',
+        'rejected' => 'مرفوض',
+        'cancelled' => 'ملغى',
+    ],
+
+    'payment_status' => [
+        'free' => 'لا يتطلب دفعاً',
+        'pending' => 'بانتظار الدفع',
+        'paid' => 'مدفوع',
+        'failed' => 'فشلت عملية الدفع',
+        'cancelled' => 'ملغى',
+        'refunded' => 'مسترد',
+    ],
+
+    'events' => [
+        'created' => 'تم إنشاء الطلب',
+        'paid' => 'تم استلام الدفع',
+        'payment_failed' => 'لم تكتمل عملية الدفع',
+        'cancelled' => 'تم إلغاء الطلب',
+        'completed' => 'تم إكمال طلبك',
+        'review_started' => 'طلبك قيد المراجعة',
+        'approved' => 'تمت الموافقة على طلبك وهو قيد التنفيذ',
+        'rejected' => 'تعذّرت الموافقة على طلبك',
+        'refunded' => 'تمت معالجة استرداد',
+        'document_added' => 'أُضيف مستند إلى طلبك',
+        'document_replaced' => 'تم استبدال مستند',
+        'document_removed' => 'تم حذف مستند',
+        'payment_started' => 'بدأت عملية الدفع',
+        'stage_role_missing' => 'لا يوجد حاليًا من يملك الدور المطلوب لهذه المرحلة من المراجعة؛ يمكن لمشرف عام (super admin) الموافقة أو الرفض رغم ذلك.',
+    ],
+];

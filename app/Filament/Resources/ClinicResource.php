@@ -2,11 +2,10 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ClinicResource\Pages\ListClinics;
 use App\Filament\Resources\ClinicResource\Pages\CreateClinic;
-use App\Filament\Resources\ClinicResource\Pages\ViewClinic;
 use App\Filament\Resources\ClinicResource\Pages\EditClinic;
-use App\Filament\Resources\ClinicResource\Pages;
+use App\Filament\Resources\ClinicResource\Pages\ListClinics;
+use App\Filament\Resources\ClinicResource\Pages\ViewClinic;
 use App\Models\City;
 use App\Models\Clinic;
 use App\Models\Region;
@@ -42,11 +41,11 @@ class ClinicResource extends Resource
 {
     protected static ?string $model = Clinic::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-plus-circle';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-plus-circle';
 
-    public static function getNavigationGroup(): string | \UnitEnum | null
+    public static function getNavigationGroup(): string|\UnitEnum|null
     {
-        return __('admin_navigation.clinics');
+        return __('admin_navigation.directory');
     }
 
     public static function getModelLabel(): string

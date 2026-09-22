@@ -3,15 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class SiteSetting extends Model
 {
     protected $fillable = ['key', 'type', 'value', 'description', 'managed_by'];
 
-    protected static function cached(): \Illuminate\Support\Collection
+    /**
+     * The whole table, read once per request. `get()` is called dozens of times rendering a
+     * single page (the site layout alone calls it ~20 times); without this, every one of those
+     * still round-trips to the cache *store* (Cache::rememberForever still calls the store's
+     * get() first, which is a real query with the database cache driver — the documented
+     * default) even though the value never changes within a request.
+     */
+    private static ?Collection $memo = null;
+
+    protected static function cached(): Collection
     {
-        return Cache::rememberForever('site_settings.all', fn () => static::query()->get()->keyBy('key'));
+        return static::$memo ??= Cache::rememberForever('site_settings.all', fn () => static::query()->get()->keyBy('key'));
     }
 
     public static function get(string $key, mixed $default = null): mixed
@@ -48,7 +59,19 @@ class SiteSetting extends Model
 
     public static function clearCache(): void
     {
+        static::$memo = null;
         Cache::forget('site_settings.all');
+    }
+
+    /**
+     * Drop only the in-process copy, leaving the shared cache store entry alone: called once per
+     * request/boot (AppServiceProvider) so a static property that would otherwise outlive a
+     * request under Octane, queue workers or the test suite never serves another request's or
+     * another test's settings.
+     */
+    public static function resetMemo(): void
+    {
+        static::$memo = null;
     }
 
     public static function siteName(): string
@@ -69,21 +92,21 @@ class SiteSetting extends Model
     {
         $path = static::get('site_logo');
 
-        return $path ? \Illuminate\Support\Facades\Storage::disk('public')->url($path) : null;
+        return $path ? Storage::disk('public')->url($path) : null;
     }
 
     public static function appLogoUrl(): ?string
     {
         $path = static::get('app_logo');
 
-        return $path ? \Illuminate\Support\Facades\Storage::disk('public')->url($path) : null;
+        return $path ? Storage::disk('public')->url($path) : null;
     }
 
     public static function faviconUrl(): ?string
     {
         $path = static::get('favicon');
 
-        return $path ? \Illuminate\Support\Facades\Storage::disk('public')->url($path) : null;
+        return $path ? Storage::disk('public')->url($path) : null;
     }
 
     /**
@@ -100,13 +123,13 @@ class SiteSetting extends Model
         return [
             'code' => $code,
             'symbol' => (string) static::get('currency_symbol', $code),
-            'icon_url' => $iconPath ? \Illuminate\Support\Facades\Storage::disk('public')->url($iconPath) : null,
+            'icon_url' => $iconPath ? Storage::disk('public')->url($iconPath) : null,
         ];
     }
 
     public static function formatCurrency(float|int|string $amount, int $decimals = 2): string
     {
-        return static::currency()['symbol'] . ' ' . number_format((float) $amount, $decimals);
+        return static::currency()['symbol'].' '.number_format((float) $amount, $decimals);
     }
 
     /**
