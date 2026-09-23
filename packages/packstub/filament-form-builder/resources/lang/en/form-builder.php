@@ -93,6 +93,12 @@ return [
         'accepted_types_hint' => 'File extensions, e.g. pdf, jpg, png, docx.',
         'max_size' => 'Maximum file size (KB)',
         'blocked_extension' => 'This file type is not allowed.',
+        'reveal_on' => 'Show the details box for',
+        'reveal_on_hint' => 'The answers that ask for more details, e.g. "Yes".',
+        'details_label' => 'Details label',
+        'details_placeholder' => 'Details placeholder',
+        'details_type' => 'Details box',
+        'details_required' => 'Details required when shown',
     ],
 
     'types' => [
@@ -103,7 +109,9 @@ return [
         'number' => 'Number',
         'textarea' => 'Long text',
         'select' => 'Dropdown',
+        'nationality' => 'Nationality',
         'radio' => 'Radio buttons',
+        'conditional_radio' => 'Radio buttons with details',
         'checkbox' => 'Checkbox',
         'checkboxes' => 'Checkbox list',
         'date' => 'Date',
@@ -159,6 +167,8 @@ return [
         'not_open_yet' => 'This form is not open yet.',
         'login_required' => 'Please sign in to use this form.',
         'select_placeholder' => 'Choose…',
+        'no_matches' => 'No matches found.',
+        'details' => 'Please give details',
         'honeypot_label' => 'Leave this field empty',
     ],
 

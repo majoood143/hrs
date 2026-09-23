@@ -93,7 +93,7 @@ class FieldBlocks
                 ->label(__('packstub-form-builder::form-builder.editor.placeholder').' ('.$meta['native'].')')
                 ->maxLength(255))
                 ->columnSpanFull()
-                ->hidden(fn (): bool => in_array($type::id(), ['checkbox', 'checkboxes', 'radio', 'date'], true));
+                ->hidden(fn (): bool => in_array($type::id(), ['checkbox', 'checkboxes', 'radio', 'conditional_radio', 'date'], true));
 
             $schema[] = TranslatableInput::grid(fn (string $locale, array $meta): TextInput => TextInput::make("hint.{$locale}")
                 ->label(__('packstub-form-builder::form-builder.editor.hint').' ('.$meta['native'].')')
@@ -128,7 +128,8 @@ class FieldBlocks
      */
     protected static function rulesSchema(FieldType $type): array
     {
-        if (! $type->isInput() || $type::id() === 'hidden') {
+        // A conditional radio's value is structured: its details have their own length setting instead.
+        if (! $type->isInput() || in_array($type::id(), ['hidden', 'conditional_radio'], true)) {
             return [];
         }
 

@@ -93,6 +93,12 @@ return [
         'accepted_types_hint' => 'امتدادات الملفات، مثل pdf, jpg, png, docx.',
         'max_size' => 'الحد الأقصى لحجم الملف (كيلوبايت)',
         'blocked_extension' => 'هذا النوع من الملفات غير مسموح به.',
+        'reveal_on' => 'إظهار خانة التفاصيل عند اختيار',
+        'reveal_on_hint' => 'الإجابات التي تتطلب تفاصيل إضافية، مثل "نعم".',
+        'details_label' => 'عنوان خانة التفاصيل',
+        'details_placeholder' => 'النص التوضيحي لخانة التفاصيل',
+        'details_type' => 'نوع خانة التفاصيل',
+        'details_required' => 'التفاصيل مطلوبة عند ظهورها',
     ],
 
     'types' => [
@@ -103,7 +109,9 @@ return [
         'number' => 'رقم',
         'textarea' => 'نص طويل',
         'select' => 'قائمة منسدلة',
+        'nationality' => 'الجنسية',
         'radio' => 'أزرار اختيار',
+        'conditional_radio' => 'أزرار اختيار مع تفاصيل',
         'checkbox' => 'مربع اختيار',
         'checkboxes' => 'قائمة مربعات اختيار',
         'date' => 'تاريخ',
@@ -159,6 +167,8 @@ return [
         'not_open_yet' => 'هذا النموذج غير متاح بعد.',
         'login_required' => 'يرجى تسجيل الدخول لاستخدام هذا النموذج.',
         'select_placeholder' => 'اختر…',
+        'no_matches' => 'لا توجد نتائج مطابقة.',
+        'details' => 'يرجى ذكر التفاصيل',
         'honeypot_label' => 'اترك هذا الحقل فارغًا',
     ],
 

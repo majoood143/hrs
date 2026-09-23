@@ -56,6 +56,18 @@ abstract class FieldType
     }
 
     /**
+     * A value => label list of choices the type supplies itself (queried
+     * from the app, not entered in the builder). Null means the field's
+     * own "choices" option, if any, is used instead.
+     *
+     * @return array<string, string>|null
+     */
+    public function fixedChoices(): ?array
+    {
+        return null;
+    }
+
+    /**
      * Whether the builder shows the placeholder, hint, default and required settings.
      */
     public function hasCommonSettings(): bool
@@ -89,6 +101,27 @@ abstract class FieldType
      * @return array<int, mixed>
      */
     public function elementRules(Field $field): array
+    {
+        return [];
+    }
+
+    /**
+     * Validation rules for parts of a structured value, keyed by the path
+     * under the field's key (["answer" => [...]] validates "key.answer").
+     *
+     * @return array<string, array<int, mixed>>
+     */
+    public function nestedRules(Field $field): array
+    {
+        return [];
+    }
+
+    /**
+     * Names for the parts in validation messages, keyed like nestedRules().
+     *
+     * @return array<string, string>
+     */
+    public function nestedAttributes(Field $field): array
     {
         return [];
     }

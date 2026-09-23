@@ -104,9 +104,23 @@ final class FormState
         return $this->errors !== [];
     }
 
+    /**
+     * The first error of a field, including errors on the parts of a
+     * structured value ("key.answer").
+     */
     public function error(string $key): ?string
     {
-        return $this->errors[$key][0] ?? null;
+        if (isset($this->errors[$key][0])) {
+            return $this->errors[$key][0];
+        }
+
+        foreach ($this->errors as $errorKey => $messages) {
+            if (str_starts_with((string) $errorKey, $key.'.') && isset($messages[0])) {
+                return $messages[0];
+            }
+        }
+
+        return null;
     }
 
     public function old(string $key, mixed $default = null): mixed

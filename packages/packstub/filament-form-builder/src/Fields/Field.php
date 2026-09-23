@@ -91,6 +91,12 @@ final class Field
      */
     public function choices(): array
     {
+        $fixed = $this->type->fixedChoices();
+
+        if ($fixed !== null) {
+            return $fixed;
+        }
+
         $choices = $this->options['choices'] ?? [];
 
         if (! is_array($choices)) {

@@ -16,6 +16,9 @@
 .fb-choices{display:flex;flex-direction:column;gap:.5rem}
 .fb-choice{display:flex;align-items:flex-start;gap:.5rem;cursor:pointer;line-height:1.4}
 .fb-choice input{margin:.2rem 0 0;accent-color:var(--_primary);flex:none;width:1rem;height:1rem}
+.fb-cond{display:flex;flex-direction:column;gap:.875rem}
+.fb-cond__details{display:flex;flex-direction:column;gap:.4375rem;padding-inline-start:.875rem;border-inline-start:2px solid color-mix(in srgb,var(--_primary) 35%,transparent)}
+.fb-cond:not(:has([data-fb-reveals]:checked)) .fb-cond__details,.fb-cond__details[hidden]{display:none}
 .fb-file{width:100%;font:inherit;color:inherit;background:var(--_surface);border:1px dashed var(--_border);border-radius:calc(var(--_radius) * .6);padding:.625rem .75rem;line-height:1.4}
 .fb-hint{margin:0;font-size:.875rem;color:var(--_muted)}
 .fb-error{margin:0;font-size:.875rem;color:var(--_danger)}
@@ -32,3 +35,12 @@
 .fb-success{border-radius:var(--_radius);padding:1.125rem 1.375rem;color:var(--_success);border:1px solid color-mix(in srgb,var(--_success) 35%,transparent);background:color-mix(in srgb,var(--_success) 8%,transparent);line-height:1.5}
 .fb-closed{border-radius:var(--_radius);padding:1rem 1.25rem;color:var(--_muted);border:1px solid var(--_border);background:var(--_surface);line-height:1.5}
 .fb-hp{position:absolute!important;inset-inline-start:-10000px!important;top:auto!important;width:1px!important;height:1px!important;overflow:hidden!important}
+.fb-combobox{position:relative}
+.fb-combobox--active .fb-combobox__select{position:absolute!important;inset-inline-start:0;top:0;width:1px!important;height:1px!important;padding:0!important;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.fb-combobox__input{padding-inline-end:2.25rem;cursor:text}
+.fb-combobox__arrow{position:absolute;inset-inline-end:.875rem;top:50%;width:.5rem;height:.5rem;margin-top:-.3125rem;pointer-events:none;border-inline-end:2px solid var(--_muted);border-block-end:2px solid var(--_muted);transform:rotate(45deg)}
+.fb-combobox__panel{position:absolute;inset-inline:0;top:calc(100% + .375rem);z-index:30;background:var(--_surface);border:1px solid var(--_border);border-radius:calc(var(--_radius) * .6);box-shadow:0 12px 32px -12px rgba(0,0,0,.28);max-height:min(60vh,320px);overflow-y:auto;overscroll-behavior:contain;padding:.375rem;-webkit-overflow-scrolling:touch}
+.fb-combobox__option{display:block;width:100%;text-align:start;background:none;border:0;border-radius:calc(var(--_radius) * .45);padding:.625rem .75rem;font:inherit;color:inherit;cursor:pointer;min-height:2.75rem;line-height:1.4}
+.fb-combobox__option:hover,.fb-combobox__option--active{background:color-mix(in srgb,var(--_primary) 10%,transparent)}
+.fb-combobox__option--selected{font-weight:600;color:var(--_primary)}
+.fb-combobox__empty{margin:0;padding:.625rem .75rem;color:var(--_muted);font-size:.9375rem}

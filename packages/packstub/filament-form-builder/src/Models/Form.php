@@ -143,6 +143,10 @@ class Form extends Model
             if ($field->type->acceptsMultiple() && ($elementRules = $field->type->elementRules($field)) !== []) {
                 $rules[$field->key.'.*'] = $elementRules;
             }
+
+            foreach ($field->type->nestedRules($field) as $path => $nested) {
+                $rules[$field->key.'.'.$path] = $nested;
+            }
         }
 
         return $rules;
@@ -153,7 +157,17 @@ class Form extends Model
      */
     public function validationAttributes(): array
     {
-        return $this->inputFields()->map(fn (Field $field): string => $field->label)->all();
+        $attributes = [];
+
+        foreach ($this->inputFields() as $field) {
+            $attributes[$field->key] = $field->label;
+
+            foreach ($field->type->nestedAttributes($field) as $path => $name) {
+                $attributes[$field->key.'.'.$path] = $name;
+            }
+        }
+
+        return $attributes;
     }
 
     /**
