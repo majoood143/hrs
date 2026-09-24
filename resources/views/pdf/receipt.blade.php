@@ -51,7 +51,7 @@
 
     <table class="facts">
         <tr><td class="label">{{ __('orders.receipt_number') }}</td><td><span dir="ltr">{{ $order->receipt_number }}</span></td></tr>
-        <tr><td class="label">{{ __('receipt.date') }}</td><td><span dir="ltr">{{ $order->paid_at?->locale($locale)->translatedFormat('j F Y, H:i') }}</span></td></tr>
+        <tr><td class="label">{{ __('receipt.date') }}</td><td>{{ $d($order->paid_at?->locale($locale)->translatedFormat('j F Y, H:i')) }}</td></tr>
         <tr><td class="label">{{ __('orders.order_number') }}</td><td><span dir="ltr">{{ $order->order_number }}</span></td></tr>
         <tr><td class="label">{{ __('receipt.customer') }}</td><td>{{ $d($order->customer_name) }}@if($order->customer_phone) <span dir="ltr" class="muted">&nbsp;·&nbsp;+{{ $order->customer_phone }}</span>@endif</td></tr>
         @if($order->payment_method)

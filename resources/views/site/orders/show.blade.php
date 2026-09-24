@@ -15,16 +15,7 @@
             </div>
         @endif
 
-        <div class="mt-6 grid gap-4 sm:grid-cols-2">
-            <div class="card-warm p-5">
-                <p class="text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('orders.status_heading') }}</p>
-                <p class="mt-1 font-display text-lg font-semibold text-warm-900">{{ $order->status->label() }}</p>
-            </div>
-            <div class="card-warm p-5">
-                <p class="text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('orders.payment_heading') }}</p>
-                <p class="mt-1 font-display text-lg font-semibold text-warm-900">{{ $order->payment_status->label() }}</p>
-            </div>
-        </div>
+        @include('site.orders._status-cards')
 
         @if($order->receipt_number)
             <p class="mt-4 text-sm text-warm-700">{{ __('orders.receipt_number') }}: <span class="font-semibold" dir="ltr">{{ $order->receipt_number }}</span></p>
@@ -41,19 +32,12 @@
         @endif
 
         @if($order->isPayable())
-            <a href="{{ route('payment.start', $order->order_number) }}" class="btn-warm mt-6">{{ __('orders.pay_now') }}</a>
+            <a href="{{ route('payment.start', $order->order_number) }}" class="btn-warm mt-6">
+                <x-heroicon-o-credit-card class="h-5 w-5" aria-hidden="true" />
+                {{ __('orders.pay_now') }}
+            </a>
         @endif
 
-        @if($events->isNotEmpty())
-            <h2 class="mt-10 font-display text-xl font-semibold text-warm-900">{{ __('orders.timeline') }}</h2>
-            <ol class="mt-4 space-y-3 border-warm-200 ps-4 text-sm" style="border-inline-start-width:2px">
-                @foreach($events as $event)
-                    <li>
-                        <p class="font-medium text-warm-900">{{ $event->message ?: __('orders.events.'.$event->type) }}</p>
-                        <p class="text-xs text-warm-700" dir="ltr">{{ $event->created_at->format('Y-m-d H:i') }}</p>
-                    </li>
-                @endforeach
-            </ol>
-        @endif
+        @include('site.orders._timeline')
     </div>
 </x-layouts.site>

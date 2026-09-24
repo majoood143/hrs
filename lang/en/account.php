@@ -34,6 +34,7 @@ return [
     'no_orders' => 'You have no orders yet.',
     'back_to_orders' => 'All my orders',
     'download_receipt' => 'Download receipt',
+    'download_details' => 'Download order details',
     'your_request' => 'Your request',
     'file_uploaded' => 'File uploaded',
     'rejected_heading' => 'We could not approve this request.',

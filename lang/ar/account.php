@@ -34,6 +34,7 @@ return [
     'no_orders' => 'ليس لديك طلبات بعد.',
     'back_to_orders' => 'كل طلباتي',
     'download_receipt' => 'تحميل الإيصال',
+    'download_details' => 'تحميل تفاصيل الطلب',
     'your_request' => 'طلبك',
     'file_uploaded' => 'تم رفع الملف',
     'rejected_heading' => 'تعذّرت الموافقة على هذا الطلب.',

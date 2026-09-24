@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Site;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\ServiceOrder;
+use App\Services\Orders\OrderDetailsPdf;
 use App\Services\Orders\OrderReceiptPdf;
 use App\Support\OrderAnswers;
 use Illuminate\Http\Request;
@@ -51,6 +52,19 @@ class AccountOrderController extends Controller
         return response($receipts->render($order, $request->query('lang')), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'attachment; filename="'.$receipts->filename($order).'"',
+            'X-Robots-Tag' => 'noindex',
+            'Cache-Control' => 'private, no-store',
+        ]);
+    }
+
+    /** The whole order page as a PDF, for any order (paid or not). */
+    public function details(Request $request, string $order, OrderDetailsPdf $details): Response
+    {
+        $order = $this->find($order);
+
+        return response($details->render($order, $request->query('lang')), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$details->filename($order).'"',
             'X-Robots-Tag' => 'noindex',
             'Cache-Control' => 'private, no-store',
         ]);

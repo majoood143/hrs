@@ -132,6 +132,7 @@ Route::prefix('account')->name('account.')->group(function () {
         Route::get('orders', [AccountOrderController::class, 'index'])->name('orders');
         Route::get('orders/{order}', [AccountOrderController::class, 'show'])->name('orders.show');
         Route::get('orders/{order}/receipt', [AccountOrderController::class, 'receipt'])->middleware('throttle:30,1')->name('orders.receipt');
+        Route::get('orders/{order}/details', [AccountOrderController::class, 'details'])->middleware('throttle:30,1')->name('orders.details');
         Route::get('orders/{order}/documents/{document}', [OrderDocumentController::class, 'customer'])->middleware('throttle:30,1')->whereNumber('document')->name('orders.document');
     });
 });
