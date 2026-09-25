@@ -6,6 +6,7 @@ use App\Filament\Resources\ClinicResource\Pages\CreateClinic;
 use App\Filament\Resources\ClinicResource\Pages\EditClinic;
 use App\Filament\Resources\ClinicResource\Pages\ListClinics;
 use App\Filament\Resources\ClinicResource\Pages\ViewClinic;
+use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
 use App\Models\Clinic;
 use App\Models\Region;
@@ -265,6 +266,10 @@ class ClinicResource extends Resource
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make(),
+                    ...WebsiteLinkActions::make(
+                        url: fn (Clinic $record): string => route('clinics.show', $record->slug),
+                        isPublic: fn (Clinic $record): bool => $record->is_active && filled($record->slug),
+                    ),
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),

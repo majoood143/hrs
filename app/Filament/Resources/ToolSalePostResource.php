@@ -6,6 +6,7 @@ use App\Filament\Resources\ToolSalePostResource\Pages\CreateToolSalePost;
 use App\Filament\Resources\ToolSalePostResource\Pages\EditToolSalePost;
 use App\Filament\Resources\ToolSalePostResource\Pages\ListToolSalePosts;
 use App\Filament\Resources\ToolSalePostResource\Pages\ViewToolSalePost;
+use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
 use App\Models\Region;
 use App\Models\SiteSetting;
@@ -233,6 +234,10 @@ class ToolSalePostResource extends Resource
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make(),
+                    ...WebsiteLinkActions::make(
+                        url: fn (ToolSalePost $record): string => route('tools-for-sale.show', $record->id),
+                        isPublic: fn (ToolSalePost $record): bool => $record->status === 'active',
+                    ),
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),

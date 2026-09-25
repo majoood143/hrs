@@ -6,6 +6,7 @@ use App\Filament\Resources\FarrierResource\Pages\CreateFarrier;
 use App\Filament\Resources\FarrierResource\Pages\EditFarrier;
 use App\Filament\Resources\FarrierResource\Pages\ListFarriers;
 use App\Filament\Resources\FarrierResource\Pages\ViewFarrier;
+use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
 use App\Models\Farrier;
 use App\Models\Region;
@@ -196,6 +197,10 @@ class FarrierResource extends Resource
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make(),
+                    ...WebsiteLinkActions::make(
+                        url: fn (Farrier $record): string => route('farriers.show', $record->id),
+                        isPublic: fn (Farrier $record): bool => $record->status === 'active',
+                    ),
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),

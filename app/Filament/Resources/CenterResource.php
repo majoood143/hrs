@@ -6,6 +6,7 @@ use App\Filament\Resources\CenterResource\Pages\CreateCenter;
 use App\Filament\Resources\CenterResource\Pages\EditCenter;
 use App\Filament\Resources\CenterResource\Pages\ListCenters;
 use App\Filament\Resources\CenterResource\Pages\ViewCenter;
+use App\Filament\Support\WebsiteLinkActions;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\Region;
@@ -265,6 +266,10 @@ class CenterResource extends Resource
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make(),
+                    ...WebsiteLinkActions::make(
+                        url: fn (Center $record): string => route('centers.show', $record->slug),
+                        isPublic: fn (Center $record): bool => $record->is_active && filled($record->slug),
+                    ),
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),

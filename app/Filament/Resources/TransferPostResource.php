@@ -6,6 +6,7 @@ use App\Filament\Resources\TransferPostResource\Pages\CreateTransferPost;
 use App\Filament\Resources\TransferPostResource\Pages\EditTransferPost;
 use App\Filament\Resources\TransferPostResource\Pages\ListTransferPosts;
 use App\Filament\Resources\TransferPostResource\Pages\ViewTransferPost;
+use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
 use App\Models\Region;
 use App\Models\SiteSetting;
@@ -229,6 +230,10 @@ class TransferPostResource extends Resource
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make(),
+                    ...WebsiteLinkActions::make(
+                        url: fn (TransferPost $record): string => route('transfer-board.show', $record->id),
+                        isPublic: fn (TransferPost $record): bool => $record->status === 'active' && $record->transfer_date?->gte(today()) === true,
+                    ),
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),

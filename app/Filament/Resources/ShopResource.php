@@ -6,6 +6,7 @@ use App\Filament\Resources\ShopResource\Pages\CreateShop;
 use App\Filament\Resources\ShopResource\Pages\EditShop;
 use App\Filament\Resources\ShopResource\Pages\ListShops;
 use App\Filament\Resources\ShopResource\Pages\ViewShop;
+use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
 use App\Models\Region;
 use App\Models\Shop;
@@ -293,6 +294,10 @@ class ShopResource extends Resource
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make(),
+                    ...WebsiteLinkActions::make(
+                        url: fn (Shop $record): string => route('shops.show', $record->slug),
+                        isPublic: fn (Shop $record): bool => $record->is_active && filled($record->slug),
+                    ),
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),

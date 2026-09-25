@@ -6,6 +6,7 @@ use App\Filament\Resources\HorseSalePostResource\Pages\CreateHorseSalePost;
 use App\Filament\Resources\HorseSalePostResource\Pages\EditHorseSalePost;
 use App\Filament\Resources\HorseSalePostResource\Pages\ListHorseSalePosts;
 use App\Filament\Resources\HorseSalePostResource\Pages\ViewHorseSalePost;
+use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
 use App\Models\HorseSalePost;
 use App\Models\Region;
@@ -252,6 +253,10 @@ class HorseSalePostResource extends Resource
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make(),
+                    ...WebsiteLinkActions::make(
+                        url: fn (HorseSalePost $record): string => route('horses-for-sale.show', $record->id),
+                        isPublic: fn (HorseSalePost $record): bool => $record->status === 'active',
+                    ),
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),

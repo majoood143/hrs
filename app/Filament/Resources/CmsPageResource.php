@@ -6,8 +6,8 @@ use App\Filament\Blocks\Cms\CmsBlocks;
 use App\Filament\Resources\CmsPageResource\Pages\CreateCmsPage;
 use App\Filament\Resources\CmsPageResource\Pages\EditCmsPage;
 use App\Filament\Resources\CmsPageResource\Pages\ListCmsPages;
+use App\Filament\Support\WebsiteLinkActions;
 use App\Models\CmsPage;
-use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -18,8 +18,8 @@ use Filament\Forms\Components\Builder;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -39,7 +39,9 @@ use Illuminate\Support\Str;
 class CmsPageResource extends Resource
 {
     protected static ?string $model = CmsPage::class;
+
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document';
+
     protected static ?int $navigationSort = 80;
 
     public static function getNavigationGroup(): ?string
@@ -342,11 +344,10 @@ class CmsPageResource extends Resource
             ])
             ->recordActions([
                 ActionGroup::make([
-                    Action::make('view')
-                        ->label(__('cms_page.actions.view'))
-                        ->icon('heroicon-o-eye')
-                        ->url(fn (CmsPage $record) => static::getPageUrl($record))
-                        ->openUrlInNewTab(),
+                    ...WebsiteLinkActions::make(
+                        url: fn (CmsPage $record): string => static::getPageUrl($record),
+                        isPublic: fn (CmsPage $record): bool => static::isOnWebsite($record),
+                    ),
                     EditAction::make(),
                     DeleteAction::make()
                         ->before(fn (CmsPage $record) => static::guardDelete($record)),
@@ -370,6 +371,18 @@ class CmsPageResource extends Resource
         return $record->is_homepage
             ? route('home')
             : route('page.show', $record->slug);
+    }
+
+    /** Mirrors PageController: the homepage always renders (drafts included), other pages once published. */
+    public static function isOnWebsite(CmsPage $record): bool
+    {
+        if ($record->is_homepage) {
+            return true;
+        }
+
+        return $record->status === 'published'
+            && filled($record->slug)
+            && ($record->published_at === null || $record->published_at->lte(now()));
     }
 
     public static function guardDelete(CmsPage $record): bool
