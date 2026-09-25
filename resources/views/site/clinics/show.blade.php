@@ -10,7 +10,7 @@
         </a>
 
         @if($clinic->cover_photo_url)
-            <img src="{{ $clinic->cover_photo_url }}" alt="{{ $clinic->name }}" class="mt-6 h-72 w-full rounded-3xl object-cover sm:h-96">
+            <x-zoomable-image :src="$clinic->cover_photo_url" alt="{{ $clinic->name }}" class="mt-6 h-72 w-full rounded-3xl sm:h-96" />
         @endif
 
         <div class="mt-8 grid gap-10 lg:grid-cols-3">
@@ -40,7 +40,7 @@
                         <h2 class="font-display text-xl font-semibold text-warm-900">{{ __('clinics.gallery') }}</h2>
                         <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
                             @foreach($clinic->gallery_urls as $image)
-                                <img src="{{ $image }}" alt="{{ $clinic->name }}" class="h-32 w-full rounded-xl object-cover">
+                                <x-zoomable-image :src="$image" :alt="$clinic->name" fit="cover" group="gallery" class="h-32 w-full rounded-xl" />
                             @endforeach
                         </div>
                     </div>

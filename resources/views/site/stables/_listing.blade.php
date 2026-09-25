@@ -162,7 +162,7 @@
             @foreach($stables as $stable)
                 <article data-reveal-item class="card-warm overflow-hidden p-0">
                     @if($stable->cover_photo_url)
-                        <img src="{{ $stable->cover_photo_url }}" alt="{{ $stable->name }}" class="h-48 w-full object-cover">
+                        <x-zoomable-image :src="$stable->cover_photo_url" alt="{{ $stable->name }}" class="h-48 w-full" />
                     @endif
 
                     <div class="p-5">

@@ -4,7 +4,7 @@
             &larr; {{ __('tools-for-sale.back_to_listing') }}
         </a>
 
-        <img src="{{ $tool->cover_photo_url }}" alt="{{ $tool->name }}" class="mt-6 h-72 w-full rounded-3xl object-cover sm:h-96">
+        <x-zoomable-image :src="$tool->cover_photo_url" alt="{{ $tool->name }}" class="mt-6 h-72 w-full rounded-3xl sm:h-96" />
 
         <div class="mt-8 grid gap-10 lg:grid-cols-3">
             <div class="lg:col-span-2">

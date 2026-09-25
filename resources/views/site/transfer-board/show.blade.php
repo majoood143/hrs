@@ -7,7 +7,7 @@
         <div class="mt-8 grid gap-10 lg:grid-cols-3">
             <div class="lg:col-span-2">
                 @if($post->cover_photo_url)
-                    <img src="{{ $post->cover_photo_url }}" alt="" class="h-72 w-full rounded-3xl object-cover sm:h-96">
+                    <x-zoomable-image :src="$post->cover_photo_url" alt="" class="h-72 w-full rounded-3xl sm:h-96" />
                 @endif
 
                 <span class="mt-6 inline-block rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide {{ $post->type === 'offer' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700' }}">

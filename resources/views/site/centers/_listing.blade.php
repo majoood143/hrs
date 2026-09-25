@@ -204,7 +204,7 @@
             @foreach($centers as $center)
                 <article data-reveal-item class="card-warm overflow-hidden p-0">
                     @if($center->cover_photo_url)
-                        <img src="{{ $center->cover_photo_url }}" alt="{{ $center->name }}" class="h-48 w-full object-cover">
+                        <x-zoomable-image :src="$center->cover_photo_url" alt="{{ $center->name }}" class="h-48 w-full" />
                     @endif
 
                     <div class="p-5">

@@ -117,7 +117,7 @@ class FarrierResource extends Resource
                                 TextInput::make('price')
                                     ->numeric()
                                     ->minValue(0)
-                                    ->prefix(fn () => SiteSetting::currency()['symbol'])
+                                    ->prefix(fn () => SiteSetting::currencyHtml())
                                     ->required(),
                                 Select::make('status')
                                     ->options([
@@ -163,7 +163,7 @@ class FarrierResource extends Resource
                     ->suffix(' yrs')
                     ->sortable(),
                 TextColumn::make('price')
-                    ->money(fn () => SiteSetting::currency()['code'])
+                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3))
                     ->sortable(),
                 TextColumn::make('city.en_name')
                     ->label('City')

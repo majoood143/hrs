@@ -204,7 +204,7 @@
             @foreach($shops as $shop)
                 <article data-reveal-item class="card-warm overflow-hidden p-0">
                     @if($shop->cover_photo_url)
-                        <img src="{{ $shop->cover_photo_url }}" alt="{{ $shop->name }}" class="h-48 w-full object-cover">
+                        <x-zoomable-image :src="$shop->cover_photo_url" alt="{{ $shop->name }}" class="h-48 w-full" />
                     @endif
 
                     <div class="p-5">

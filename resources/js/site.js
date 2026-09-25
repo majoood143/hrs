@@ -418,6 +418,75 @@ function contactReveal() {
     });
 }
 
+// Opens a listing photo (x-zoomable-image) at its original size in a <dialog>.
+// Links sharing a data-lightbox group can be browsed with the arrows / arrow keys.
+function lightbox() {
+    const links = Array.from(document.querySelectorAll('[data-lightbox]'));
+    if (!links.length || typeof HTMLDialogElement === 'undefined') return;
+
+    const labels = JSON.parse(links[0].dataset.lightboxLabels || '{}');
+    const button = 'absolute flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition hover:bg-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white';
+    const dialog = document.createElement('dialog');
+    dialog.className = 'lightbox m-0 h-full max-h-none w-full max-w-none bg-transparent p-0 backdrop:bg-black/90';
+    dialog.innerHTML = `
+        <div class="relative flex h-full w-full items-center justify-center p-4 sm:p-10" data-lightbox-stage>
+            <img class="max-h-full max-w-full rounded-lg object-contain shadow-2xl" alt="">
+            <button type="button" data-lightbox-close class="${button} top-4 end-4" aria-label="${labels.close ?? 'Close'}">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+            </button>
+            <button type="button" data-lightbox-prev class="${button} start-4 top-1/2 -translate-y-1/2" aria-label="${labels.prev ?? 'Previous'}">
+                <svg class="h-6 w-6 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+            </button>
+            <button type="button" data-lightbox-next class="${button} end-4 top-1/2 -translate-y-1/2" aria-label="${labels.next ?? 'Next'}">
+                <svg class="h-6 w-6 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
+            </button>
+        </div>`;
+    document.body.appendChild(dialog);
+
+    const img = dialog.querySelector('img');
+    const prev = dialog.querySelector('[data-lightbox-prev]');
+    const next = dialog.querySelector('[data-lightbox-next]');
+    let group = [];
+    let index = 0;
+
+    const show = (i) => {
+        index = (i + group.length) % group.length;
+        img.src = group[index].href;
+        img.alt = group[index].querySelector('img:not([aria-hidden])')?.alt ?? '';
+    };
+
+    links.forEach((link) => {
+        link.addEventListener('click', (event) => {
+            event.preventDefault();
+            group = link.dataset.lightbox
+                ? links.filter((other) => other.dataset.lightbox === link.dataset.lightbox)
+                : [link];
+            prev.hidden = next.hidden = group.length < 2;
+            show(group.indexOf(link));
+            dialog.showModal();
+            document.documentElement.style.overflow = 'hidden';
+        });
+    });
+
+    const rtl = () => document.documentElement.dir === 'rtl';
+    prev.addEventListener('click', () => show(index - 1));
+    next.addEventListener('click', () => show(index + 1));
+    dialog.querySelector('[data-lightbox-close]').addEventListener('click', () => dialog.close());
+    // A click on the dark area around the image closes it.
+    dialog.addEventListener('click', (event) => {
+        if (event.target === dialog || event.target.hasAttribute('data-lightbox-stage')) dialog.close();
+    });
+    dialog.addEventListener('keydown', (event) => {
+        if (group.length < 2) return;
+        if (event.key === 'ArrowLeft') show(index + (rtl() ? 1 : -1));
+        if (event.key === 'ArrowRight') show(index + (rtl() ? -1 : 1));
+    });
+    dialog.addEventListener('close', () => {
+        document.documentElement.style.overflow = '';
+        img.removeAttribute('src');
+    });
+}
+
 function passportReveal() {
     document.querySelectorAll('[data-reveal-passport]').forEach((button) => {
         button.addEventListener('click', () => {
@@ -1241,6 +1310,7 @@ document.addEventListener('DOMContentLoaded', () => {
     transferBoardFilters();
     mobileMenu();
     contactReveal();
+    lightbox();
     passportReveal();
     copyLink();
     printButtons();

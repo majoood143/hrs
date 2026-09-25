@@ -12,7 +12,7 @@
                     <div class="swiper-wrapper">
                         @foreach($galleryImages as $image)
                             <div class="swiper-slide">
-                                <img src="{{ $image }}" alt="{{ $post->name }}" class="h-72 w-full object-cover sm:h-96">
+                                <x-zoomable-image :src="$image" :alt="$post->name" group="gallery" class="h-72 w-full sm:h-96" />
                             </div>
                         @endforeach
                     </div>
@@ -22,7 +22,7 @@
                 </div>
             </div>
         @else
-            <img src="{{ $post->cover_photo_url }}" alt="{{ $post->name }}" class="mt-6 h-72 w-full rounded-3xl object-cover sm:h-96">
+            <x-zoomable-image :src="$post->cover_photo_url" alt="{{ $post->name }}" class="mt-6 h-72 w-full rounded-3xl sm:h-96" />
         @endif
 
         <div class="mt-8 grid gap-10 lg:grid-cols-3">

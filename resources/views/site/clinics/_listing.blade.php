@@ -204,7 +204,7 @@
             @foreach($clinics as $clinic)
                 <article data-reveal-item class="card-warm overflow-hidden p-0">
                     @if($clinic->cover_photo_url)
-                        <img src="{{ $clinic->cover_photo_url }}" alt="{{ $clinic->name }}" class="h-48 w-full object-cover">
+                        <x-zoomable-image :src="$clinic->cover_photo_url" alt="{{ $clinic->name }}" class="h-48 w-full" />
                     @endif
 
                     <div class="p-5">

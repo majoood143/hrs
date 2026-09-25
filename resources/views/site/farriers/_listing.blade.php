@@ -184,7 +184,7 @@
         <div data-reveal-group class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             @foreach($farriers as $farrier)
                 <article data-reveal-item class="card-warm overflow-hidden p-0">
-                    <img src="{{ $farrier->cover_photo_url }}" alt="{{ $farrier->name }}" class="h-48 w-full object-cover">
+                    <x-zoomable-image :src="$farrier->cover_photo_url" alt="{{ $farrier->name }}" class="h-48 w-full" />
 
                     <div class="p-5">
                         <div class="flex flex-wrap gap-1.5">

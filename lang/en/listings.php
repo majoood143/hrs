@@ -11,4 +11,8 @@ return [
     'share_copied' => 'Copied!',
     'posted_on' => 'Posted',
     'views' => '{0} No views yet|{1} 1 view|[2,*] :count views',
+    'view_full_image' => 'View full image',
+    'close_image' => 'Close',
+    'previous_image' => 'Previous image',
+    'next_image' => 'Next image',
 ];

@@ -235,7 +235,7 @@
             @foreach($posts as $post)
                 <article data-reveal-item class="card-warm overflow-hidden {{ $post->cover_photo_url ? 'p-0' : 'p-5' }}">
                     @if($post->cover_photo_url)
-                        <img src="{{ $post->cover_photo_url }}" alt="" class="h-40 w-full object-cover">
+                        <x-zoomable-image :src="$post->cover_photo_url" alt="" class="h-40 w-full" />
                     @endif
 
                     <div @class(['p-5' => $post->cover_photo_url])>
