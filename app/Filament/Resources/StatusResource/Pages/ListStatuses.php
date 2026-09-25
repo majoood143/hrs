@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\StatusResource\Pages;
 
+use App\Filament\Concerns\HasExportActions;
 use Filament\Actions\CreateAction;
 use App\Filament\Resources\StatusResource;
 use Filament\Actions;
@@ -9,6 +10,8 @@ use Filament\Resources\Pages\ListRecords;
 
 class ListStatuses extends ListRecords
 {
+    use HasExportActions;
+
     protected static string $resource = StatusResource::class;
 
     protected function getHeaderActions(): array

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\HorseResource\Pages;
 
+use App\Filament\Concerns\HasExportActions;
 use Filament\Actions\CreateAction;
 use App\Filament\Resources\HorseResource;
 use Filament\Actions;
@@ -13,6 +14,8 @@ use Filament\Resources\Components\Tab;
 
 class ListHorses extends ListRecords
 {
+    use HasExportActions;
+
     protected static string $resource = HorseResource::class;
 
     protected function getHeaderActions(): array

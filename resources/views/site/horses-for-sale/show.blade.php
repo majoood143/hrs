@@ -46,6 +46,7 @@
                     <p class="mt-1 text-warm-900/60">{{ $post->breed }}</p>
                 @endif
                 <p class="mt-2 text-sm text-warm-900/60">📍 {{ $post->city?->name }}, {{ $post->country?->name }}</p>
+                <x-listing-meta class="mt-3" :posted-at="$post->created_at" :views="$post->views_count" />
 
                 @if($post->dam || $post->sire || $post->birthCountry || $post->passport_number)
                     <div class="mt-8">
@@ -95,6 +96,12 @@
             <div class="space-y-6">
                 <div class="card-warm p-5">
                     <x-currency-price :amount="$post->price" class="font-display text-xl font-semibold text-warm-900" />
+                    @if($post->price_negotiable)
+                        <span class="mt-2 flex w-fit items-center gap-1 rounded-full bg-sky-100 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-sky-700">
+                            <x-heroicon-o-chat-bubble-left-right class="h-3.5 w-3.5" aria-hidden="true" />
+                            {{ __('horses-for-sale.price_negotiable') }}
+                        </span>
+                    @endif
                     <button type="button" data-reveal-contact="{{ $post->contact_number }}" class="js-reveal mt-4 flex w-full items-center justify-center rounded-full bg-warm-900 px-4 py-2.5 text-sm font-bold text-white">
                         {{ __('horses-for-sale.contact_reveal') }}
                     </button>

@@ -7,6 +7,7 @@
         <div class="mt-6">
             <p class="section-eyebrow">{{ $video->folder->name }}</p>
             <h1 class="mt-2 font-display text-3xl font-semibold text-warm-900 sm:text-4xl">{{ $video->title }}</h1>
+            <x-listing-meta class="mt-3" :views="$video->views_count" />
         </div>
 
         @if($video->embed_url)

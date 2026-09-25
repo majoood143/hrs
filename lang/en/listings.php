@@ -9,4 +9,6 @@ return [
     'share_email' => 'Share by email',
     'share_copy_link' => 'Copy link',
     'share_copied' => 'Copied!',
+    'posted_on' => 'Posted',
+    'views' => '{0} No views yet|{1} 1 view|[2,*] :count views',
 ];

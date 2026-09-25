@@ -2,38 +2,33 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
+use App\Filament\Resources\ServiceResource\Pages\CreateService;
+use App\Filament\Resources\ServiceResource\Pages\EditService;
+use App\Filament\Resources\ServiceResource\Pages\ListServices;
+use App\Filament\Resources\ServiceResource\Pages\ViewService;
+use App\Models\Service;
+use App\Models\SiteSetting;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\ServiceResource\Pages\ListServices;
-use App\Filament\Resources\ServiceResource\Pages\CreateService;
-use App\Filament\Resources\ServiceResource\Pages\ViewService;
-use App\Filament\Resources\ServiceResource\Pages\EditService;
-use App\Filament\Resources\ServiceResource\Pages;
-use App\Filament\Resources\ServiceResource\RelationManagers;
-use App\Models\Service;
-use Filament\Forms;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\Summarizers\Average;
 use Filament\Tables\Columns\Summarizers\Range;
-use Filament\Forms\Components\RichEditor;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 class ServiceResource extends Resource
 {
     protected static ?string $model = Service::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getModelLabel(): string
     {
@@ -81,7 +76,7 @@ class ServiceResource extends Resource
                     ->numeric()
                     ->minValue(0)
                     ->step(0.001)
-                    ->prefix(fn () => \App\Models\SiteSetting::currency()['symbol']),
+                    ->prefix(fn () => SiteSetting::currencyHtml()),
                 Toggle::make('is_active')
                     ->required(),
             ]);
@@ -100,10 +95,12 @@ class ServiceResource extends Resource
                     ->toggleable(),
                 TextColumn::make('price')
                     ->label(__('admin_service.fields.price'))
-                    ->formatStateUsing(fn ($state) => \App\Models\SiteSetting::formatCurrency($state, 3))
+                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3))
                     ->summarize([
-                        Average::make(),
-                        Range::make(),
+                        Average::make()
+                            ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state ?? 0, 3)),
+                        Range::make()
+                            ->formatStateUsing(fn (array $state) => array_map(fn ($value) => SiteSetting::formatCurrencyHtml($value ?? 0, 3), $state)),
                     ])
                     ->sortable(),
                 IconColumn::make('is_active')

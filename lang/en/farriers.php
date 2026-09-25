@@ -28,10 +28,12 @@ return [
     'submit' => 'Submit',
 
     'filter_specialty' => 'Specialty',
+    'filter_region' => 'Region',
     'filter_city' => 'City',
     'filter_country' => 'Country',
     'filter_price_max' => 'Max. rate',
     'any' => 'Any',
+    'any_region' => 'Any region',
     'any_city' => 'Any city',
     'filters_button' => 'Filters',
     'apply_filters' => 'Apply filters',

@@ -27,6 +27,7 @@ class HorseSalePost extends Model
         'region_id',
         'city_id',
         'price',
+        'price_negotiable',
         'cover_photo',
         'images',
         'description_en',
@@ -38,6 +39,7 @@ class HorseSalePost extends Model
     protected $casts = [
         'dob' => 'date',
         'price' => 'decimal:3',
+        'price_negotiable' => 'boolean',
         'images' => 'array',
     ];
 

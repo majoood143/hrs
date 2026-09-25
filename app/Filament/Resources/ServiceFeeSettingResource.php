@@ -8,6 +8,7 @@ use App\Filament\Resources\ServiceFeeSettingResource\Pages\EditServiceFeeSetting
 use App\Filament\Resources\ServiceFeeSettingResource\Pages\ListServiceFeeSettings;
 use App\Filament\Support\TranslatableInput;
 use App\Models\ServiceFeeSetting;
+use App\Models\SiteSetting;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -128,6 +129,9 @@ class ServiceFeeSettingResource extends Resource
                     ->label(__('admin_service_fee_setting.columns.scope')),
                 TextColumn::make('formatted_value')
                     ->label(__('admin_service_fee_setting.columns.rate'))
+                    ->formatStateUsing(fn ($state, ServiceFeeSetting $record) => $record->fee_type === FeeType::Fixed
+                        ? SiteSetting::formatCurrencyHtml($record->fee_value, 3)
+                        : $state)
                     ->badge(),
                 TextColumn::make('effective_from')
                     ->label(__('admin_service_fee_setting.fields.effective_from'))

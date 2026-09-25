@@ -141,7 +141,7 @@ class TransferPostResource extends Resource
                 TextInput::make('price')
                     ->numeric()
                     ->minValue(0)
-                    ->prefix(fn () => SiteSetting::currency()['symbol'])
+                    ->prefix(fn () => SiteSetting::currencyHtml())
                     ->visible(fn (Get $get) => $get('type') === 'offer'),
                 TextInput::make('contact_number')
                     ->tel()
@@ -181,7 +181,7 @@ class TransferPostResource extends Resource
                     ->date()
                     ->sortable(),
                 TextColumn::make('price')
-                    ->money(fn () => SiteSetting::currency()['code'])
+                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3))
                     ->sortable(),
                 TextColumn::make('contact_number'),
                 TextColumn::make('status')

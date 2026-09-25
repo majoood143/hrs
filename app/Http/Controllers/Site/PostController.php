@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Site;
 use App\Http\Controllers\Controller;
 use App\Models\CmsCategory;
 use App\Models\CmsPost;
+use App\Support\ViewCounter;
 use Illuminate\View\View;
 use Spatie\Tags\Tag;
 
@@ -20,6 +21,8 @@ class PostController extends Controller
     public function show(string $slug): View
     {
         $post = CmsPost::query()->where('slug', $slug)->published()->firstOrFail();
+
+        ViewCounter::record($post);
 
         return view('site.post.show', ['post' => $post]);
     }
@@ -43,7 +46,7 @@ class PostController extends Controller
     public function tag(string $slug): View
     {
         $tag = Tag::query()
-            ->where('slug->' . app()->getLocale(), $slug)
+            ->where('slug->'.app()->getLocale(), $slug)
             ->firstOrFail();
 
         $posts = CmsPost::query()
@@ -54,7 +57,7 @@ class PostController extends Controller
 
         return view('site.post.index', [
             'posts' => $posts,
-            'heading' => '#' . $tag->getTranslation('name', app()->getLocale()),
+            'heading' => '#'.$tag->getTranslation('name', app()->getLocale()),
         ]);
     }
 }

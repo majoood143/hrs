@@ -18,6 +18,7 @@
                 <span class="rounded-full bg-warm-900/5 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-warm-600">{{ $clinic->type_label }}</span>
                 <h1 class="mt-2 font-display text-3xl font-semibold text-warm-900 sm:text-4xl">{{ $clinic->name }}</h1>
                 <p class="mt-2 text-sm text-warm-900/60">📍 {{ $clinic->city?->name }}, {{ $clinic->country?->name }}</p>
+                <x-listing-meta class="mt-3" :posted-at="$clinic->created_at" :views="$clinic->views_count" />
 
                 @if($clinic->services->isNotEmpty())
                     <div class="mt-4 flex flex-wrap gap-1.5">

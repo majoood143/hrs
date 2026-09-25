@@ -31,6 +31,7 @@ class ToolSalePost extends Model
         'region_id',
         'city_id',
         'price',
+        'price_negotiable',
         'cover_photo',
         'description_en',
         'description_ar',
@@ -40,6 +41,7 @@ class ToolSalePost extends Model
 
     protected $casts = [
         'price' => 'decimal:3',
+        'price_negotiable' => 'boolean',
     ];
 
     public function country(): BelongsTo
@@ -79,11 +81,11 @@ class ToolSalePost extends Model
 
     public function getCategoryLabelAttribute(): string
     {
-        return __('tools-for-sale.categories.' . $this->category);
+        return __('tools-for-sale.categories.'.$this->category);
     }
 
     public function getConditionLabelAttribute(): string
     {
-        return __('tools-for-sale.conditions.' . $this->condition);
+        return __('tools-for-sale.conditions.'.$this->condition);
     }
 }

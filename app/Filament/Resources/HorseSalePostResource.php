@@ -21,6 +21,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -152,8 +153,11 @@ class HorseSalePostResource extends Resource
                                 TextInput::make('price')
                                     ->numeric()
                                     ->minValue(0)
-                                    ->prefix(fn () => SiteSetting::currency()['symbol'])
+                                    ->prefix(fn () => SiteSetting::currencyHtml())
                                     ->required(),
+                                Toggle::make('price_negotiable')
+                                    ->label('Negotiable')
+                                    ->inline(false),
                                 Select::make('status')
                                     ->options([
                                         'active' => 'Active',
@@ -207,7 +211,8 @@ class HorseSalePostResource extends Resource
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('price')
-                    ->money(fn () => SiteSetting::currency()['code'])
+                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3))
+                    ->description(fn ($record): ?string => $record->price_negotiable ? 'Negotiable' : null)
                     ->sortable(),
                 TextColumn::make('city.en_name')
                     ->label('City')

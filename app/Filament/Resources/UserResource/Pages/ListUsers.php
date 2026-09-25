@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
+use App\Filament\Concerns\HasExportActions;
 use Filament\Actions\CreateAction;
 use Exception;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\Mail;
 
 class ListUsers extends ListRecords
 {
+    use HasExportActions;
+
     protected static string $resource = UserResource::class;
 
     protected function getHeaderActions(): array

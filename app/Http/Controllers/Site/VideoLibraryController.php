@@ -7,6 +7,7 @@ use App\Models\SiteSetting;
 use App\Models\Video;
 use App\Models\VideoFolder;
 use App\Support\Seo;
+use App\Support\ViewCounter;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -22,7 +23,7 @@ class VideoLibraryController extends Controller
 
         return view('site.video-library.index', Seo::forSlug(
             'video-library',
-            __('videos.library.title') . ' — ' . SiteSetting::siteName(),
+            __('videos.library.title').' — '.SiteSetting::siteName(),
         ) + ['folders' => $folders]);
     }
 
@@ -40,7 +41,7 @@ class VideoLibraryController extends Controller
             'folder' => $folder,
             'children' => $children,
             'videos' => $videos,
-            'seoTitle' => $folder->name . ' — ' . SiteSetting::siteName(),
+            'seoTitle' => $folder->name.' — '.SiteSetting::siteName(),
             'seoDescription' => null,
             'seoImage' => $videos->first()?->thumbnail_url,
         ]);
@@ -53,9 +54,11 @@ class VideoLibraryController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
+        ViewCounter::record($video);
+
         return view('site.video-library.show', [
             'video' => $video,
-            'seoTitle' => $video->title . ' — ' . SiteSetting::siteName(),
+            'seoTitle' => $video->title.' — '.SiteSetting::siteName(),
             'seoDescription' => $video->description ? Str::limit($video->description, 160) : null,
             'seoImage' => $video->thumbnail_url,
         ]);

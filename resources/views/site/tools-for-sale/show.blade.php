@@ -18,6 +18,7 @@
                     <p class="mt-1 text-warm-900/60">{{ $tool->brand }}</p>
                 @endif
                 <p class="mt-2 text-sm text-warm-900/60">📍 {{ $tool->city?->name }}, {{ $tool->country?->name }}</p>
+                <x-listing-meta class="mt-3" :posted-at="$tool->created_at" :views="$tool->views_count" />
 
                 @if($tool->description)
                     <div class="mt-8">
@@ -30,6 +31,12 @@
             <div class="space-y-6">
                 <div class="card-warm p-5">
                     <x-currency-price :amount="$tool->price" class="font-display text-xl font-semibold text-warm-900" />
+                    @if($tool->price_negotiable)
+                        <span class="mt-2 flex w-fit items-center gap-1 rounded-full bg-sky-100 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-sky-700">
+                            <x-heroicon-o-chat-bubble-left-right class="h-3.5 w-3.5" aria-hidden="true" />
+                            {{ __('tools-for-sale.price_negotiable') }}
+                        </span>
+                    @endif
                     <button type="button" data-reveal-contact="{{ $tool->contact_number }}" class="js-reveal mt-4 flex w-full items-center justify-center rounded-full bg-warm-900 px-4 py-2.5 text-sm font-bold text-white">
                         {{ __('tools-for-sale.contact_reveal') }}
                     </button>

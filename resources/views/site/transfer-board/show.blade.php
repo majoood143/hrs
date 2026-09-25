@@ -19,7 +19,8 @@
                     {{ $post->fromCity?->name }}, {{ $post->fromCountry?->name }}
                     <span aria-hidden="true">{{ app()->getLocale() === 'ar' ? '←' : '→' }}</span>
                     {{ $post->toCity?->name }}, {{ $post->toCountry?->name }}
-                </p>
+                </h1>
+                <x-listing-meta class="mt-3" :posted-at="$post->created_at" :views="$post->views_count" />
 
                 <dl class="mt-8 grid gap-4 sm:grid-cols-2">
                     <div class="card-warm p-5">

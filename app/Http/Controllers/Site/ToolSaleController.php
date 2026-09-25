@@ -9,6 +9,7 @@ use App\Models\SiteSetting;
 use App\Models\ToolSalePost;
 use App\Support\ImageCompressor;
 use App\Support\Seo;
+use App\Support\ViewCounter;
 use Gregwar\Captcha\CaptchaBuilder;
 use Gregwar\Captcha\PhraseBuilder;
 use Illuminate\Http\RedirectResponse;
@@ -34,6 +35,8 @@ class ToolSaleController extends Controller
         $tool = ToolSalePost::visible()
             ->with(['city', 'country'])
             ->findOrFail($id);
+
+        ViewCounter::record($tool);
 
         return view('site.tools-for-sale.show', [
             'tool' => $tool,
@@ -84,6 +87,7 @@ class ToolSaleController extends Controller
             'brand' => ['nullable', 'string', 'max:255'],
             'city_id' => ['required', 'exists:cities,id'],
             'price' => ['required', 'numeric', 'min:0'],
+            'price_negotiable' => ['nullable', 'boolean'],
             'cover_photo' => ['required', 'image', 'max:4096'],
             'description_en' => ['nullable', 'string'],
             'description_ar' => ['nullable', 'string'],
@@ -97,6 +101,7 @@ class ToolSaleController extends Controller
             'brand' => __('tools-for-sale.brand'),
             'city_id' => __('tools-for-sale.city'),
             'price' => __('tools-for-sale.price'),
+            'price_negotiable' => __('tools-for-sale.price_negotiable'),
             'cover_photo' => __('tools-for-sale.cover_photo'),
             'contact_number' => __('tools-for-sale.contact_number'),
             'captcha' => __('tools-for-sale.captcha_label'),
@@ -118,6 +123,7 @@ class ToolSaleController extends Controller
             'region_id' => $city->region_id,
             'city_id' => $city->id,
             'price' => $validated['price'],
+            'price_negotiable' => $request->boolean('price_negotiable'),
             'cover_photo' => $coverPhotoPath,
             'description_en' => $validated['description_en'] ?? null,
             'description_ar' => $validated['description_ar'] ?? null,

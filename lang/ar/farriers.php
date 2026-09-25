@@ -28,10 +28,12 @@ return [
     'submit' => 'إرسال',
 
     'filter_specialty' => 'التخصص',
+    'filter_region' => 'المنطقة',
     'filter_city' => 'المدينة',
     'filter_country' => 'الدولة',
     'filter_price_max' => 'الحد الأقصى للسعر',
     'any' => 'أي',
+    'any_region' => 'أي منطقة',
     'any_city' => 'أي مدينة',
     'filters_button' => 'الفلاتر',
     'apply_filters' => 'تطبيق الفلاتر',

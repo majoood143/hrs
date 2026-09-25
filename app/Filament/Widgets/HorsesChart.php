@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Support\CachedWidgetCounts;
 use App\Models\Horse;
 use Filament\Widgets\ChartWidget;
 use Flowframe\Trend\Trend;
@@ -24,29 +25,39 @@ class HorsesChart extends ChartWidget
 
     protected static ?int $sort = 1;
 
-    protected static bool $isLazy = false; // Load the widget only when it is visible on the
+    // No 5s auto-refresh; the data is cached (see CachedWidgetCounts). Lazy (Filament's default),
+    // so the dashboard renders before this chart's query runs.
+    protected ?string $pollingInterval = null;
 
     protected string $color = 'success'; // Primary, secondary, tertiary, success, warning, danger, in
     // danger, info, gray, dark, black, white
 
     protected function getData(): array
     {
-        $data = Trend::model(Horse::class)
-            ->between(
-                start: now()->startOfYear(),
-                end: now()->endOfYear(),
-            )
-            ->perMonth()
-            ->count();
+        // Plain arrays are cached (not TrendValue objects); the key carries the year so it rolls over.
+        $data = CachedWidgetCounts::remember('HorsesChart.'.now()->year, function () {
+            $trend = Trend::model(Horse::class)
+                ->between(
+                    start: now()->startOfYear(),
+                    end: now()->endOfYear(),
+                )
+                ->perMonth()
+                ->count();
+
+            return [
+                'data' => $trend->map(fn (TrendValue $value) => $value->aggregate)->all(),
+                'labels' => $trend->map(fn (TrendValue $value) => $value->date)->all(),
+            ];
+        });
 
         return [
             'datasets' => [
                 [
                     'label' => __('admin_widgets.horses_chart.dataset_label'),
-                    'data' => $data->map(fn (TrendValue $value) => $value->aggregate),
+                    'data' => $data['data'],
                 ],
             ],
-            'labels' => $data->map(fn (TrendValue $value) => $value->date),
+            'labels' => $data['labels'],
         ];
     }
 

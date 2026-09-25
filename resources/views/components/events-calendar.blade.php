@@ -17,6 +17,9 @@
         'categoryColor' => $event->categoryColor(),
         'link' => $event->link,
         'isExternal' => $event->isExternalLink(),
+        'viewUrl' => route('events.view', $event),
+        'viewsLabel' => trans_choice('listings.views', (int) $event->views_count, ['count' => number_format((int) $event->views_count)]),
+        'postedLabel' => $event->created_at?->translatedFormat('j F Y'),
     ])->values();
 
     $categories = \App\Models\EventCategory::query()->orderBy('order')->get()->map(fn ($category) => [
@@ -31,6 +34,7 @@
 <div
     data-events-calendar
     data-locale="{{ app()->getLocale() }}"
+    data-csrf="{{ csrf_token() }}"
     {{ $attributes->class(['events-calendar']) }}
 >
     <div class="flex flex-wrap items-center justify-between gap-3">
@@ -82,6 +86,7 @@
         'noEventsDay' => __('events.calendar.no_events_day'),
         'more' => __('events.calendar.more'),
         'noLink' => __('events.calendar.no_link'),
+        'posted' => __('listings.posted_on'),
     ], JSON_UNESCAPED_UNICODE) !!}</script>
 </div>
 

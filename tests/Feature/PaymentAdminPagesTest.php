@@ -174,7 +174,19 @@ class PaymentAdminPagesTest extends TestCase
             ->assertSee(__('admin_service_fee_setting.scope.global'))
             ->assertSee('Vaccination')
             ->assertSee('5%')
-            ->assertSee('0.500 OMR');
+            ->assertSee('OMR 0.500');
+    }
+
+    public function test_the_fee_list_shows_the_uploaded_currency_icon(): void
+    {
+        $this->seedSiteSettings(['currency_icon' => 'branding/rial.svg']);
+        $fee = $this->makeFee('fixed', 0.5);
+
+        Livewire::test(ListServiceFeeSettings::class)
+            ->assertCanSeeTableRecords([$fee])
+            ->assertSeeHtml('branding/rial.svg')
+            ->assertSee('0.500')
+            ->assertDontSee('0.500 OMR');
     }
 
     public function test_a_service_is_saved_with_an_arabic_name_and_a_three_decimal_price(): void

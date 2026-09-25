@@ -1,12 +1,15 @@
 @php
     $selectedServiceId = request()->filled('service_id') ? (int) request('service_id') : null;
+    $selectedRegionId = request()->filled('region_id') ? (int) request('region_id') : null;
+    $selectedCityId = request()->filled('city_id') ? (int) request('city_id') : null;
 
     $sort = in_array(request('sort'), ['name', 'newest'], true) ? request('sort') : 'name';
 
     $query = \App\Models\Stable::query()
         ->active()
         ->with(['city', 'country', 'services'])
-        ->when(request('city_id'), fn ($q, $v) => $q->where('city_id', $v))
+        ->when($selectedRegionId, fn ($q, $v) => $q->where('region_id', $v))
+        ->when($selectedCityId, fn ($q, $v) => $q->where('city_id', $v))
         ->when(request('country_id'), fn ($q, $v) => $q->where('country_id', $v))
         ->when($selectedServiceId, fn ($q, $v) => $q->whereHas('services', fn ($q2) => $q2->where('stable_services.id', $v)));
 
@@ -18,12 +21,17 @@
     $stables = $query->paginate(9)->withQueryString();
 
     $countries = \App\Models\Country::query()->public()->with('region.city')->orderBy('en_name')->get();
+    $allRegions = $countries->flatMap->region;
+    $selectedRegion = $selectedRegionId ? $allRegions->firstWhere('id', $selectedRegionId) : null;
     $services = \App\Models\StableService::query()->orderBy('en_name')->get();
 
     $chips = [];
 
-    if ($cityId = request('city_id')) {
-        if ($city = \App\Models\City::find($cityId)) {
+    if ($selectedRegion) {
+        $chips[] = ['label' => __('stables.filter_region') . ': ' . $selectedRegion->name, 'keys' => ['region_id', 'city_id']];
+    }
+    if ($selectedCityId) {
+        if ($city = \App\Models\City::find($selectedCityId)) {
             $chips[] = ['label' => __('stables.filter_city') . ': ' . $city->name, 'keys' => ['city_id']];
         }
     }
@@ -61,18 +69,38 @@
             </div>
 
             <div class="md:col-span-1">
-                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('stables.filter_city') }}</label>
-                <select name="city_id" data-auto-submit class="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
-                    <option value="">{{ __('stables.any_city') }}</option>
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('stables.filter_region') }}</label>
+                <select name="region_id" data-auto-submit data-reset-on-change="city_id" class="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                    <option value="">{{ __('stables.any_region') }}</option>
                     @foreach($countries as $country)
-                        @php($cities = $country->region->flatMap->city)
-                        @continue($cities->isEmpty())
+                        @continue($country->region->isEmpty())
                         <optgroup label="{{ $country->name }}">
-                            @foreach($cities as $city)
-                                <option value="{{ $city->id }}" @selected(request('city_id') == $city->id)>{{ $city->name }}</option>
+                            @foreach($country->region as $region)
+                                <option value="{{ $region->id }}" @selected($selectedRegionId === $region->id)>{{ $region->name }}</option>
                             @endforeach
                         </optgroup>
                     @endforeach
+                </select>
+            </div>
+
+            <div class="md:col-span-1">
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('stables.filter_city') }}</label>
+                <select name="city_id" data-auto-submit class="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                    <option value="">{{ __('stables.any_city') }}</option>
+                    @if($selectedRegion)
+                        @foreach($selectedRegion->city as $city)
+                            <option value="{{ $city->id }}" @selected($selectedCityId === $city->id)>{{ $city->name }}</option>
+                        @endforeach
+                    @else
+                        @foreach($allRegions as $region)
+                            @continue($region->city->isEmpty())
+                            <optgroup label="{{ $region->name }}">
+                                @foreach($region->city as $city)
+                                    <option value="{{ $city->id }}" @selected($selectedCityId === $city->id)>{{ $city->name }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endforeach
+                    @endif
                 </select>
             </div>
 
@@ -86,8 +114,8 @@
                 </select>
             </div>
 
-            <div class="flex items-end md:col-span-2 md:justify-end">
-                <button type="submit" class="btn-warm w-full md:w-auto">{{ __('stables.apply_filters') }}</button>
+            <div class="flex items-end md:col-span-1 md:justify-end">
+                <button type="submit" class="btn-warm w-full">{{ __('stables.apply_filters') }}</button>
             </div>
         </div>
     </form>

@@ -140,17 +140,24 @@ class SiteSetting extends Model
      */
     public static function formatCurrencyHtml(float|int|string $amount, int $decimals = 2): HtmlString
     {
+        return new HtmlString(static::currencyHtml()->toHtml().' '.e(number_format((float) $amount, $decimals)));
+    }
+
+    /**
+     * The currency marker alone, as HTML: the uploaded icon (SVG) when there is one, else the symbol
+     * text. For Filament input prefixes and other places that show the currency without an amount.
+     */
+    public static function currencyHtml(): HtmlString
+    {
         $currency = static::currency();
-        $formatted = number_format((float) $amount, $decimals);
 
         if ($currency['icon_url']) {
             return new HtmlString(
                 '<img src="'.e($currency['icon_url']).'" alt="'.e($currency['code']).'" class="inline-block h-3.5 w-3.5 object-contain align-middle">'
-                .' '.e($formatted)
             );
         }
 
-        return new HtmlString(e($currency['symbol']).' '.e($formatted));
+        return new HtmlString(e($currency['symbol']));
     }
 
     /**

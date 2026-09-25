@@ -23,6 +23,7 @@ class UpdateToolSalePostRequest extends FormRequest
             'region_id' => 'sometimes',
             'city_id' => 'sometimes',
             'price' => 'sometimes|numeric',
+            'price_negotiable' => 'sometimes|boolean',
             'cover_photo' => 'sometimes',
             'description_en' => 'sometimes|string',
             'description_ar' => 'sometimes|string',

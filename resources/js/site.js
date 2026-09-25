@@ -752,6 +752,7 @@ function horseSaleWizard() {
         setReview('name', wizard.querySelector('[name="en_name"]')?.value);
         setReview('city', citySelect?.selectedOptions[0]?.textContent ?? '');
         setReview('price', priceInput?.value ?? '');
+        wizard.querySelector('[data-review-negotiable]')?.classList.toggle('hidden', !wizard.querySelector('[name="price_negotiable"]')?.checked);
         setReview('contact', wizard.querySelector('[name="contact_number"]')?.value);
 
         const hasPedigree = [
@@ -930,6 +931,7 @@ function toolSaleWizard() {
         setReview('name', wizard.querySelector('[name="en_name"]')?.value);
         setReview('city', citySelect?.selectedOptions[0]?.textContent ?? '');
         setReview('price', priceInput?.value ?? '');
+        wizard.querySelector('[data-review-negotiable]')?.classList.toggle('hidden', !wizard.querySelector('[name="price_negotiable"]')?.checked);
         setReview('contact', wizard.querySelector('[name="contact_number"]')?.value);
     }
 
@@ -951,16 +953,21 @@ function eventsCalendar() {
     const ICON_EXTERNAL = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 3h6v6"/><path stroke-linecap="round" stroke-linejoin="round" d="M10 14L21 3"/></svg>';
     const ICON_INTERNAL = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path stroke-linecap="round" stroke-linejoin="round" d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
 
+    const ICON_CALENDAR = '<svg class="h-3.5 w-3.5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>';
+    const ICON_EYE = '<svg class="h-3.5 w-3.5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>';
+
     const payloadEl = root.querySelector('[data-events-payload]');
     const i18nEl = root.querySelector('[data-events-i18n]');
 
     let events = [];
     try { events = JSON.parse(payloadEl?.textContent || '[]'); } catch { events = []; }
 
-    let i18n = { noEventsDay: 'No events on this day.', more: ':count more', noLink: 'No link attached.' };
+    let i18n = { noEventsDay: 'No events on this day.', more: ':count more', noLink: 'No link attached.', posted: 'Posted' };
     try { i18n = Object.assign(i18n, JSON.parse(i18nEl?.textContent || '{}')); } catch { /* keep defaults */ }
 
     const locale = root.dataset.locale === 'ar' ? 'ar' : 'en';
+    const csrf = root.dataset.csrf || '';
+    const viewed = new Set();
     const grid = root.querySelector('[data-events-grid]');
     const weekdaysEl = root.querySelector('[data-events-weekdays]');
     const monthLabel = root.querySelector('[data-events-month-label]');
@@ -1128,13 +1135,20 @@ function eventsCalendar() {
                 const desc = ev.description
                     ? `<div class="event-description mt-1 text-xs text-warm-700">${ev.description}</div>`
                     : '';
+                const posted = ev.postedLabel
+                    ? `<span class="inline-flex items-center gap-1">${ICON_CALENDAR}<span>${escapeHtml(i18n.posted)} ${escapeHtml(ev.postedLabel)}</span></span>`
+                    : '';
                 return `<div class="drawer-event cursor-pointer rounded-xl border border-warm-200 p-3" data-id="${ev.id}">
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2 text-sm font-semibold text-warm-900">${icon}<span>${escapeHtml(ev.title)}</span></div>
                         <span class="text-xs text-warm-600">${ev.startLabel} - ${ev.endLabel}</span>
                     </div>
                     ${desc}
-                    <span class="mt-2 inline-block rounded-full px-2 py-0.5 text-xs text-white" style="background:${ev.categoryColor}">${escapeHtml(ev.categoryLabel)}</span>
+                    <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-warm-600">
+                        <span class="inline-block rounded-full px-2 py-0.5 text-white" style="background:${ev.categoryColor}">${escapeHtml(ev.categoryLabel)}</span>
+                        ${posted}
+                        <span class="inline-flex items-center gap-1">${ICON_EYE}<span data-event-views>${escapeHtml(ev.viewsLabel)}</span></span>
+                    </div>
                 </div>`;
             }).join('');
 
@@ -1144,6 +1158,8 @@ function eventsCalendar() {
                     if (ev) handleOpen(ev);
                 });
             });
+
+            evs.forEach(recordView);
         }
 
         drawerBackdrop?.classList.remove('hidden');
@@ -1151,6 +1167,26 @@ function eventsCalendar() {
             drawerBackdrop?.classList.add('is-open');
             drawer.classList.add('is-open');
         });
+    }
+
+    // Counted once per page load here; the server also counts each visitor only once per session.
+    function recordView(ev) {
+        if (!ev.viewUrl || viewed.has(ev.id)) return;
+        viewed.add(ev.id);
+
+        fetch(ev.viewUrl, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrf, Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin',
+        })
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+                if (!data?.label) return;
+                ev.viewsLabel = data.label;
+                const el = drawerContent?.querySelector(`.drawer-event[data-id="${ev.id}"] [data-event-views]`);
+                if (el) el.textContent = data.label;
+            })
+            .catch(() => { /* a missed view is not worth bothering the visitor */ });
     }
 
     function closeDrawer() {

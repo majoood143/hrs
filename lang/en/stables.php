@@ -7,9 +7,11 @@ return [
     'view_stable' => 'View Stable',
 
     'filter_country' => 'Country',
+    'filter_region' => 'Region',
     'filter_city' => 'City',
     'filter_service' => 'Service',
     'any' => 'Any',
+    'any_region' => 'Any region',
     'any_city' => 'Any city',
     'filters_button' => 'Filters',
     'apply_filters' => 'Apply filters',

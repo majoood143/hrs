@@ -24,12 +24,16 @@
                     {{ $post->getTranslation('title', app()->getLocale()) }}
                 </h1>
                 <p class="mt-3 text-sm text-warm-900/50">{{ $post->published_at?->format('M d, Y') }}</p>
+                <x-listing-meta class="mt-3 justify-center" :views="$post->views_count ?? 0" />
             </div>
         @endif
 
         @include('cms.render-blocks', ['blocks' => $post->content ?? []])
 
         <div class="mx-auto max-w-3xl px-6 pb-10">
+            @unless($post->show_title)
+                <x-listing-meta class="mb-4" :views="$post->views_count ?? 0" />
+            @endunless
             <x-share-buttons :url="url()->current()" :title="$post->getTranslation('title', app()->getLocale())" />
         </div>
 

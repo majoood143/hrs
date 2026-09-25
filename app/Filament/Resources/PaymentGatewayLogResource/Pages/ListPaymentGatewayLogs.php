@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PaymentGatewayLogResource\Pages;
 
+use App\Filament\Concerns\HasExportActions;
 use App\Filament\Resources\PaymentGatewayLogResource;
 use App\Filament\Resources\PaymentGatewayLogResource\Widgets\PaymentGatewayLogStatsOverview;
 use App\Models\PaymentGatewayLog;
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ListPaymentGatewayLogs extends ListRecords
 {
+    use HasExportActions;
+
     protected static string $resource = PaymentGatewayLogResource::class;
 
     protected function getHeaderWidgets(): array

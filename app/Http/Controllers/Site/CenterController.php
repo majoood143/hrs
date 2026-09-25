@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Center;
 use App\Models\SiteSetting;
 use App\Support\Seo;
+use App\Support\ViewCounter;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -25,6 +26,8 @@ class CenterController extends Controller
             ->with(['country', 'region', 'city', 'services'])
             ->where('slug', $slug)
             ->firstOrFail();
+
+        ViewCounter::record($center);
 
         return view('site.centers.show', [
             'center' => $center,

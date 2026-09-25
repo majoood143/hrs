@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CountryResource\Pages;
 
+use App\Filament\Concerns\HasExportActions;
 use Filament\Actions\EditAction;
 use App\Filament\Resources\CountryResource;
 use Filament\Actions;
@@ -9,6 +10,8 @@ use Filament\Resources\Pages\ViewRecord;
 
 class ViewCountry extends ViewRecord
 {
+    use HasExportActions;
+
     protected static string $resource = CountryResource::class;
 
     protected function getHeaderActions(): array

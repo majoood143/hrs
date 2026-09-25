@@ -1,6 +1,8 @@
 @php
     $selectedCategory = in_array(request('category'), \App\Models\ToolSalePost::CATEGORIES, true) ? request('category') : null;
     $selectedCondition = in_array(request('condition'), \App\Models\ToolSalePost::CONDITIONS, true) ? request('condition') : null;
+    $selectedRegionId = request()->filled('region_id') ? (int) request('region_id') : null;
+    $selectedCityId = request()->filled('city_id') ? (int) request('city_id') : null;
 
     $sort = in_array(request('sort'), ['newest', 'price_asc', 'price_desc'], true)
         ? request('sort')
@@ -11,7 +13,8 @@
         ->with(['city', 'country'])
         ->when($selectedCategory, fn ($q, $v) => $q->where('category', $v))
         ->when($selectedCondition, fn ($q, $v) => $q->where('condition', $v))
-        ->when(request('city_id'), fn ($q, $v) => $q->where('city_id', $v))
+        ->when($selectedRegionId, fn ($q, $v) => $q->where('region_id', $v))
+        ->when($selectedCityId, fn ($q, $v) => $q->where('city_id', $v))
         ->when(request('country_id'), fn ($q, $v) => $q->where('country_id', $v))
         ->when(request()->filled('price_max'), fn ($q) => $q->where('price', '<=', (float) request('price_max')));
 
@@ -24,6 +27,8 @@
     $tools = $query->paginate(9)->withQueryString();
 
     $countries = \App\Models\Country::query()->public()->with('region.city')->orderBy('en_name')->get();
+    $allRegions = $countries->flatMap->region;
+    $selectedRegion = $selectedRegionId ? $allRegions->firstWhere('id', $selectedRegionId) : null;
 
     $chips = [];
 
@@ -33,8 +38,11 @@
     if ($selectedCondition) {
         $chips[] = ['label' => __('tools-for-sale.filter_condition') . ': ' . __('tools-for-sale.conditions.' . $selectedCondition), 'keys' => ['condition']];
     }
-    if ($cityId = request('city_id')) {
-        if ($city = \App\Models\City::find($cityId)) {
+    if ($selectedRegion) {
+        $chips[] = ['label' => __('tools-for-sale.filter_region') . ': ' . $selectedRegion->name, 'keys' => ['region_id', 'city_id']];
+    }
+    if ($selectedCityId) {
+        if ($city = \App\Models\City::find($selectedCityId)) {
             $chips[] = ['label' => __('tools-for-sale.filter_city') . ': ' . $city->name, 'keys' => ['city_id']];
         }
     }
@@ -102,18 +110,38 @@
             </div>
 
             <div class="md:col-span-1">
-                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('tools-for-sale.filter_city') }}</label>
-                <select name="city_id" data-auto-submit class="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
-                    <option value="">{{ __('tools-for-sale.any_city') }}</option>
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('tools-for-sale.filter_region') }}</label>
+                <select name="region_id" data-auto-submit data-reset-on-change="city_id" class="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                    <option value="">{{ __('tools-for-sale.any_region') }}</option>
                     @foreach($countries as $country)
-                        @php($cities = $country->region->flatMap->city)
-                        @continue($cities->isEmpty())
+                        @continue($country->region->isEmpty())
                         <optgroup label="{{ $country->name }}">
-                            @foreach($cities as $city)
-                                <option value="{{ $city->id }}" @selected(request('city_id') == $city->id)>{{ $city->name }}</option>
+                            @foreach($country->region as $region)
+                                <option value="{{ $region->id }}" @selected($selectedRegionId === $region->id)>{{ $region->name }}</option>
                             @endforeach
                         </optgroup>
                     @endforeach
+                </select>
+            </div>
+
+            <div class="md:col-span-1">
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('tools-for-sale.filter_city') }}</label>
+                <select name="city_id" data-auto-submit class="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                    <option value="">{{ __('tools-for-sale.any_city') }}</option>
+                    @if($selectedRegion)
+                        @foreach($selectedRegion->city as $city)
+                            <option value="{{ $city->id }}" @selected($selectedCityId === $city->id)>{{ $city->name }}</option>
+                        @endforeach
+                    @else
+                        @foreach($allRegions as $region)
+                            @continue($region->city->isEmpty())
+                            <optgroup label="{{ $region->name }}">
+                                @foreach($region->city as $city)
+                                    <option value="{{ $city->id }}" @selected($selectedCityId === $city->id)>{{ $city->name }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endforeach
+                    @endif
                 </select>
             </div>
 
@@ -122,7 +150,7 @@
                 <input type="number" min="0" name="price_max" value="{{ request('price_max') }}" placeholder="{{ __('tools-for-sale.any') }}" data-auto-submit class="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
             </div>
 
-            <div class="flex items-end md:col-span-2 md:justify-end">
+            <div class="flex items-end md:col-span-1 md:justify-end">
                 <button type="submit" class="btn-warm w-full">{{ __('tools-for-sale.apply_filters') }}</button>
             </div>
         </div>
@@ -194,7 +222,15 @@
                         <p class="mt-2 text-xs text-warm-900/60">📍 {{ $tool->city?->name }}, {{ $tool->country?->name }}</p>
 
                         <div class="mt-4 flex items-center justify-between border-t border-dashed border-warm-200 pt-4">
-                            <x-currency-price :amount="$tool->price" class="font-display text-sm font-semibold text-warm-900" />
+                            <div class="flex flex-col items-start gap-1">
+                                <x-currency-price :amount="$tool->price" class="font-display text-sm font-semibold text-warm-900" />
+                                @if($tool->price_negotiable)
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-sky-700">
+                                        <x-heroicon-o-chat-bubble-left-right class="h-3.5 w-3.5" aria-hidden="true" />
+                                        {{ __('tools-for-sale.price_negotiable') }}
+                                    </span>
+                                @endif
+                            </div>
                             <button type="button" data-reveal-contact="{{ $tool->contact_number }}" class="js-reveal rounded-full bg-warm-900 px-4 py-1.5 text-xs font-bold text-white">
                                 {{ __('tools-for-sale.contact_reveal') }}
                             </button>

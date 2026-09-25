@@ -12,6 +12,7 @@ use App\Models\SiteSetting;
 use App\Models\Type;
 use App\Support\ImageCompressor;
 use App\Support\Seo;
+use App\Support\ViewCounter;
 use Gregwar\Captcha\CaptchaBuilder;
 use Gregwar\Captcha\PhraseBuilder;
 use Illuminate\Http\RedirectResponse;
@@ -37,6 +38,8 @@ class HorseForSaleController extends Controller
         $post = HorseSalePost::visible()
             ->with(['type', 'gender', 'color', 'city', 'country'])
             ->findOrFail($id);
+
+        ViewCounter::record($post);
 
         return view('site.horses-for-sale.show', [
             'post' => $post,
@@ -74,6 +77,7 @@ class HorseForSaleController extends Controller
             'passport_document' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:4096'],
             'city_id' => ['required', 'exists:cities,id'],
             'price' => ['required', 'numeric', 'min:0'],
+            'price_negotiable' => ['nullable', 'boolean'],
             'cover_photo' => ['required', 'image', 'max:4096'],
             'images' => ['nullable', 'array', 'max:10'],
             'images.*' => ['image', 'max:4096'],
@@ -96,6 +100,7 @@ class HorseForSaleController extends Controller
             'passport_document' => __('horses-for-sale.passport_document'),
             'city_id' => __('horses-for-sale.city'),
             'price' => __('horses-for-sale.price'),
+            'price_negotiable' => __('horses-for-sale.price_negotiable'),
             'cover_photo' => __('horses-for-sale.cover_photo'),
             'images' => __('horses-for-sale.gallery_photos'),
             'contact_number' => __('horses-for-sale.contact_number'),
@@ -138,6 +143,7 @@ class HorseForSaleController extends Controller
             'region_id' => $city->region_id,
             'city_id' => $city->id,
             'price' => $validated['price'],
+            'price_negotiable' => $request->boolean('price_negotiable'),
             'cover_photo' => $coverPhotoPath,
             'images' => $galleryPaths,
             'description_en' => $validated['description_en'] ?? null,

@@ -127,6 +127,11 @@
                             <span class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm text-warm-900/50"><x-currency-symbol /></span>
                             <input type="number" name="price" min="0" step="0.01" required value="{{ old('price') }}" class="w-full rounded-xl border border-warm-200 bg-warm-50 py-3 pl-8 pr-4 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
                         </div>
+                        <label class="mt-2 flex cursor-pointer items-center gap-2 text-sm text-warm-800">
+                            <input type="checkbox" name="price_negotiable" value="1" @checked(old('price_negotiable')) class="h-4 w-4 rounded border-warm-300 text-warm-900 focus:ring-warm-300">
+                            <span class="font-semibold">{{ __('tools-for-sale.price_negotiable') }}</span>
+                            <span class="text-xs text-warm-900/50">{{ __('tools-for-sale.price_negotiable_hint') }}</span>
+                        </label>
                     </div>
                     <div>
                         <label class="mb-1 block text-sm font-semibold text-warm-800">{{ __('tools-for-sale.contact_number') }}</label>
@@ -160,6 +165,7 @@
                         <dd class="flex items-center gap-1 font-semibold text-warm-900">
                             <x-currency-symbol />
                             <span data-review="price"></span>
+                            <span data-review-negotiable class="hidden ms-1 rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-sky-700">{{ __('tools-for-sale.price_negotiable') }}</span>
                         </dd>
                     </div>
                     <div class="flex items-center justify-between px-5 py-3">

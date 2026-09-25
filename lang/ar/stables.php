@@ -7,9 +7,11 @@ return [
     'view_stable' => 'عرض الإسطبل',
 
     'filter_country' => 'الدولة',
+    'filter_region' => 'المنطقة',
     'filter_city' => 'المدينة',
     'filter_service' => 'الخدمة',
     'any' => 'أي',
+    'any_region' => 'أي منطقة',
     'any_city' => 'أي مدينة',
     'filters_button' => 'الفلاتر',
     'apply_filters' => 'تطبيق الفلاتر',

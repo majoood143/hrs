@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Support\CachedWidgetCounts;
 use App\Models\User;
 use Filament\Widgets\ChartWidget;
 use Flowframe\Trend\Trend;
@@ -17,6 +18,9 @@ class UsersChart extends ChartWidget
 
     protected int|string|array $columnSpan = 2;
 
+    // No 5s auto-refresh; the data is cached (see CachedWidgetCounts).
+    protected ?string $pollingInterval = null;
+
     public function getHeading(): string|Htmlable|null
     {
         return __('admin_widgets.users_chart.heading');
@@ -24,22 +28,30 @@ class UsersChart extends ChartWidget
 
     protected function getData(): array
     {
-        $data = Trend::model(User::class)
-            ->between(
-                start: now()->startOfYear(),
-                end: now()->endOfYear(),
-            )
-            ->perMonth()
-            ->count();
+        // Plain arrays are cached (not TrendValue objects); the key carries the year so it rolls over.
+        $data = CachedWidgetCounts::remember('UsersChart.'.now()->year, function () {
+            $trend = Trend::model(User::class)
+                ->between(
+                    start: now()->startOfYear(),
+                    end: now()->endOfYear(),
+                )
+                ->perMonth()
+                ->count();
+
+            return [
+                'data' => $trend->map(fn (TrendValue $value) => $value->aggregate)->all(),
+                'labels' => $trend->map(fn (TrendValue $value) => $value->date)->all(),
+            ];
+        });
 
         return [
             'datasets' => [
                 [
                     'label' => __('admin_widgets.users_chart.dataset_label'),
-                    'data' => $data->map(fn (TrendValue $value) => $value->aggregate),
+                    'data' => $data['data'],
                 ],
             ],
-            'labels' => $data->map(fn (TrendValue $value) => $value->date),
+            'labels' => $data['labels'],
         ];
     }
 

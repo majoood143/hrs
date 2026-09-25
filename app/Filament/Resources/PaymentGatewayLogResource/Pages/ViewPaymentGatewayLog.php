@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PaymentGatewayLogResource\Pages;
 
+use App\Filament\Concerns\HasExportActions;
 use App\Filament\Resources\PaymentGatewayLogResource;
 use App\Filament\Resources\ServiceOrderResource;
 use Filament\Infolists\Components\TextEntry;
@@ -13,6 +14,8 @@ use Illuminate\Support\Str;
 
 class ViewPaymentGatewayLog extends ViewRecord
 {
+    use HasExportActions;
+
     protected static string $resource = PaymentGatewayLogResource::class;
 
     public function infolist(Schema $schema): Schema

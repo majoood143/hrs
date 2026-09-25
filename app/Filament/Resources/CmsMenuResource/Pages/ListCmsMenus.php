@@ -2,12 +2,15 @@
 
 namespace App\Filament\Resources\CmsMenuResource\Pages;
 
+use App\Filament\Concerns\HasExportActions;
 use App\Filament\Resources\CmsMenuResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListCmsMenus extends ListRecords
 {
+    use HasExportActions;
+
     protected static string $resource = CmsMenuResource::class;
 
     protected function getHeaderActions(): array

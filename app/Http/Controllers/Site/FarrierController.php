@@ -9,6 +9,7 @@ use App\Models\Farrier;
 use App\Models\SiteSetting;
 use App\Support\ImageCompressor;
 use App\Support\Seo;
+use App\Support\ViewCounter;
 use Gregwar\Captcha\CaptchaBuilder;
 use Gregwar\Captcha\PhraseBuilder;
 use Illuminate\Http\RedirectResponse;
@@ -34,6 +35,8 @@ class FarrierController extends Controller
         $farrier = Farrier::visible()
             ->with(['city', 'country'])
             ->findOrFail($id);
+
+        ViewCounter::record($farrier);
 
         return view('site.farriers.show', [
             'farrier' => $farrier,

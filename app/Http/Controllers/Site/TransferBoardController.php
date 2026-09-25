@@ -9,6 +9,7 @@ use App\Models\SiteSetting;
 use App\Models\TransferPost;
 use App\Support\ImageCompressor;
 use App\Support\Seo;
+use App\Support\ViewCounter;
 use Gregwar\Captcha\CaptchaBuilder;
 use Gregwar\Captcha\PhraseBuilder;
 use Illuminate\Http\RedirectResponse;
@@ -35,6 +36,8 @@ class TransferBoardController extends Controller
             ->findOrFail($id);
 
         $title = $post->fromCity?->name . ' → ' . $post->toCity?->name . ' — ' . SiteSetting::siteName();
+
+        ViewCounter::record($post);
 
         return view('site.transfer-board.show', [
             'post' => $post,

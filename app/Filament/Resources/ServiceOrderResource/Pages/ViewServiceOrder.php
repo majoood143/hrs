@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ServiceOrderResource\Pages;
 
+use App\Filament\Concerns\HasExportActions;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentGateway;
 use App\Enums\PaymentStatus;
@@ -34,6 +35,8 @@ use Rmsramos\Activitylog\Actions\ActivityLogTimelineTableAction;
 
 class ViewServiceOrder extends ViewRecord
 {
+    use HasExportActions;
+
     protected static string $resource = ServiceOrderResource::class;
 
     protected function getHeaderActions(): array

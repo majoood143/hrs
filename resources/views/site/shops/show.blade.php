@@ -23,6 +23,7 @@
                 </div>
                 <h1 class="mt-2 font-display text-3xl font-semibold text-warm-900 sm:text-4xl">{{ $shop->name }}</h1>
                 <p class="mt-2 text-sm text-warm-900/60">📍 {{ $shop->city?->name }}, {{ $shop->country?->name }}</p>
+                <x-listing-meta class="mt-3" :posted-at="$shop->created_at" :views="$shop->views_count" />
 
                 @if($shop->services->isNotEmpty())
                     <div class="mt-4 flex flex-wrap gap-1.5">

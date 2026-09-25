@@ -1,6 +1,8 @@
 @php
     $selectedTypeId = request()->filled('type_id') ? (int) request('type_id') : null;
     $selectedGenderId = request()->filled('gender_id') ? (int) request('gender_id') : null;
+    $selectedRegionId = request()->filled('region_id') ? (int) request('region_id') : null;
+    $selectedCityId = request()->filled('city_id') ? (int) request('city_id') : null;
 
     $sort = in_array(request('sort'), ['newest', 'price_asc', 'price_desc'], true)
         ? request('sort')
@@ -11,7 +13,8 @@
         ->with(['type', 'gender', 'city', 'country'])
         ->when($selectedTypeId, fn ($q, $v) => $q->where('type_id', $v))
         ->when($selectedGenderId, fn ($q, $v) => $q->where('gender_id', $v))
-        ->when(request('city_id'), fn ($q, $v) => $q->where('city_id', $v))
+        ->when($selectedRegionId, fn ($q, $v) => $q->where('region_id', $v))
+        ->when($selectedCityId, fn ($q, $v) => $q->where('city_id', $v))
         ->when(request('country_id'), fn ($q, $v) => $q->where('country_id', $v))
         ->when(request()->filled('breed'), fn ($q) => $q->where('breed', 'like', '%' . request('breed') . '%'))
         ->when(request()->filled('price_max'), fn ($q) => $q->where('price', '<=', (float) request('price_max')));
@@ -27,6 +30,8 @@
     $types = \App\Models\Type::query()->orderBy('en_name')->get();
     $genders = \App\Models\Gender::query()->orderBy('en_name')->get();
     $countries = \App\Models\Country::query()->public()->with('region.city')->orderBy('en_name')->get();
+    $allRegions = $countries->flatMap->region;
+    $selectedRegion = $selectedRegionId ? $allRegions->firstWhere('id', $selectedRegionId) : null;
 
     $chips = [];
 
@@ -36,8 +41,11 @@
     if ($selectedGenderId && $gender = $genders->firstWhere('id', $selectedGenderId)) {
         $chips[] = ['label' => __('horses-for-sale.filter_gender') . ': ' . $gender->name, 'keys' => ['gender_id']];
     }
-    if ($cityId = request('city_id')) {
-        if ($city = \App\Models\City::find($cityId)) {
+    if ($selectedRegion) {
+        $chips[] = ['label' => __('horses-for-sale.filter_region') . ': ' . $selectedRegion->name, 'keys' => ['region_id', 'city_id']];
+    }
+    if ($selectedCityId) {
+        if ($city = \App\Models\City::find($selectedCityId)) {
             $chips[] = ['label' => __('horses-for-sale.filter_city') . ': ' . $city->name, 'keys' => ['city_id']];
         }
     }
@@ -81,7 +89,7 @@
             </button>
         </div>
 
-        <div class="mt-6 grid grid-cols-1 gap-4 rounded-3xl border border-warm-200/70 bg-white p-5 shadow-sm shadow-warm-900/5 md:grid-cols-6" data-board-panel>
+        <div class="mt-6 grid grid-cols-1 gap-4 rounded-3xl border border-warm-200/70 bg-white p-5 shadow-sm shadow-warm-900/5 md:grid-cols-4 lg:grid-cols-7" data-board-panel>
             <div class="flex items-center justify-between md:hidden">
                 <p class="font-display text-base font-semibold text-warm-900">{{ __('horses-for-sale.filters_button') }}</p>
                 <button type="button" data-board-drawer-close class="text-sm font-semibold text-warm-600">{{ __('horses-for-sale.close') }}</button>
@@ -108,18 +116,38 @@
             </div>
 
             <div class="md:col-span-1">
-                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('horses-for-sale.filter_city') }}</label>
-                <select name="city_id" data-auto-submit class="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
-                    <option value="">{{ __('horses-for-sale.any_city') }}</option>
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('horses-for-sale.filter_region') }}</label>
+                <select name="region_id" data-auto-submit data-reset-on-change="city_id" class="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                    <option value="">{{ __('horses-for-sale.any_region') }}</option>
                     @foreach($countries as $country)
-                        @php($cities = $country->region->flatMap->city)
-                        @continue($cities->isEmpty())
+                        @continue($country->region->isEmpty())
                         <optgroup label="{{ $country->name }}">
-                            @foreach($cities as $city)
-                                <option value="{{ $city->id }}" @selected(request('city_id') == $city->id)>{{ $city->name }}</option>
+                            @foreach($country->region as $region)
+                                <option value="{{ $region->id }}" @selected($selectedRegionId === $region->id)>{{ $region->name }}</option>
                             @endforeach
                         </optgroup>
                     @endforeach
+                </select>
+            </div>
+
+            <div class="md:col-span-1">
+                <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('horses-for-sale.filter_city') }}</label>
+                <select name="city_id" data-auto-submit class="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none focus:ring-2 focus:ring-warm-300">
+                    <option value="">{{ __('horses-for-sale.any_city') }}</option>
+                    @if($selectedRegion)
+                        @foreach($selectedRegion->city as $city)
+                            <option value="{{ $city->id }}" @selected($selectedCityId === $city->id)>{{ $city->name }}</option>
+                        @endforeach
+                    @else
+                        @foreach($allRegions as $region)
+                            @continue($region->city->isEmpty())
+                            <optgroup label="{{ $region->name }}">
+                                @foreach($region->city as $city)
+                                    <option value="{{ $city->id }}" @selected($selectedCityId === $city->id)>{{ $city->name }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endforeach
+                    @endif
                 </select>
             </div>
 
@@ -214,7 +242,15 @@
                         <p class="mt-2 text-xs text-warm-900/60">📍 {{ $post->city?->name }}, {{ $post->country?->name }}</p>
 
                         <div class="mt-4 flex items-center justify-between border-t border-dashed border-warm-200 pt-4">
-                            <x-currency-price :amount="$post->price" class="font-display text-sm font-semibold text-warm-900" />
+                            <div class="flex flex-col items-start gap-1">
+                                <x-currency-price :amount="$post->price" class="font-display text-sm font-semibold text-warm-900" />
+                                @if($post->price_negotiable)
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-sky-700">
+                                        <x-heroicon-o-chat-bubble-left-right class="h-3.5 w-3.5" aria-hidden="true" />
+                                        {{ __('horses-for-sale.price_negotiable') }}
+                                    </span>
+                                @endif
+                            </div>
                             <button type="button" data-reveal-contact="{{ $post->contact_number }}" class="js-reveal rounded-full bg-warm-900 px-4 py-1.5 text-xs font-bold text-white">
                                 {{ __('horses-for-sale.contact_reveal') }}
                             </button>

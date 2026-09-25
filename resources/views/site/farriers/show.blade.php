@@ -19,6 +19,7 @@
 
                 <h1 class="mt-4 font-display text-3xl font-semibold text-warm-900 sm:text-4xl">{{ $farrier->name }}</h1>
                 <p class="mt-2 text-sm text-warm-900/60">📍 {{ $farrier->city?->name }}, {{ $farrier->country?->name }}</p>
+                <x-listing-meta class="mt-3" :posted-at="$farrier->created_at" :views="$farrier->views_count" />
 
                 @if($farrier->description)
                     <div class="mt-8">

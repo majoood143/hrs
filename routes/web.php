@@ -71,6 +71,7 @@ Route::get('/tools-for-sale/captcha', [ToolSaleController::class, 'captcha'])->n
 Route::get('/tools-for-sale/{toolSalePost}', [ToolSaleController::class, 'show'])->name('tools-for-sale.show');
 
 Route::get('/events', [EventController::class, 'index'])->name('events.index');
+Route::post('/events/{event}/view', [EventController::class, 'recordView'])->middleware('throttle:60,1')->name('events.view');
 
 Route::get('/video-library', [VideoLibraryController::class, 'index'])->name('video-library.index');
 Route::get('/video-library/watch/{slug}', [VideoLibraryController::class, 'show'])->name('video-library.show');
