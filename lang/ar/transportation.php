@@ -54,7 +54,7 @@ return [
     'results_count' => ':count مسار يطابق بحثك|:count مسارات تطابق بحثك',
     'no_results_title' => 'لا توجد عمليات نقل تطابق بحثك',
     'no_results_body' => 'جرّب توسيع نطاق التواريخ أو إزالة أحد الفلاتر.',
-    'spaces_available' => 'مكان واحد|:count أماكن',
+    'spaces_available' => '{0} لا توجد أماكن|{1} مكان واحد|{2} مكانان|[3,10] :count أماكن|[11,*] :count مكانًا',
     'budget_open' => 'الميزانية: مفتوحة',
     'contact_reveal' => 'التواصل',
     'view_details' => 'عرض التفاصيل',

@@ -49,7 +49,7 @@ return [
     'contact_reveal' => 'التواصل مع البيطار',
     'view_details' => 'عرض التفاصيل',
     'back_to_listing' => 'العودة إلى البياطرة',
-    'years_experience_badge' => 'سنة خبرة واحدة|:count سنوات خبرة',
+    'years_experience_badge' => '{0} بدون خبرة|{1} خبرة سنة واحدة|{2} خبرة سنتين|[3,10] خبرة :count سنوات|[11,*] خبرة :count سنة',
 
     'post_page_title' => 'أضف خدماتك كبيطار',
     'post_page_subtitle' => 'تواصل مع أصحاب الخيول القريبين منك — الأمر يستغرق بضع دقائق.',
