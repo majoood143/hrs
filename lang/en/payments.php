@@ -23,4 +23,16 @@ return [
     'demo_notice' => 'This is a demonstration gateway: no real payment is made. Approve to see the order confirmed, or decline to see a failed payment.',
     'demo_approve' => 'Approve payment',
     'demo_decline' => 'Decline payment',
+
+    // checking a stable's own gateway keys (stable owner panel and the admin's review)
+    'test' => [
+        'incomplete' => 'Fill in every key first.',
+        'unreachable' => 'The gateway could not be reached: :error',
+        'rejected' => 'The gateway refused the key. Check it and whether test mode matches the key.',
+        'gateway_error' => 'The gateway answered with an error (:status). Try again later.',
+        'refused' => 'The gateway refused the details: :error',
+        'thawani_ok' => 'Thawani accepted the secret key.',
+        'nbo_ok' => 'NBO accepted the Tranportal ID, password and resource key.',
+        'ccavenue_ok' => 'The keys are filled in and the working key is valid. CCAvenue confirms them on the first payment.',
+    ],
 ];

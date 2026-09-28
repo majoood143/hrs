@@ -3,9 +3,14 @@
 namespace App\Filament\Pages\Settings;
 
 use App\Models\SiteSetting;
+use App\Services\WhatsApp\WhatsAppNotifier;
+use App\Support\PhoneNumber;
+use App\Support\WhatsAppSettings;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+use Filament\Actions\Action;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -15,17 +20,20 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Text;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use WallaceMartinss\FilamentEvolution\Models\WhatsappInstance;
 
 class GeneralSettings extends Page implements HasForms
 {
-    use InteractsWithForms;
     use HasPageShield;
+    use InteractsWithForms;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
@@ -134,6 +142,8 @@ class GeneralSettings extends Page implements HasForms
             'image_compression_quality' => (string) SiteSetting::get('image_compression_quality', 75),
             'image_compression_max_width' => (string) SiteSetting::get('image_compression_max_width', 2000),
             'image_compression_max_height' => (string) SiteSetting::get('image_compression_max_height', 2000),
+
+            'whatsapp' => WhatsAppSettings::formState(),
         ]);
     }
 
@@ -700,10 +710,110 @@ class GeneralSettings extends Page implements HasForms
                                             ->columnSpanFull(),
                                     ]),
                             ]),
+
+                        $this->whatsAppTab(),
                     ])
                     ->columnSpanFull(),
             ])
             ->statePath('data');
+    }
+
+    private function whatsAppTab(): Tab
+    {
+        return Tab::make(__('admin_whatsapp.tab'))
+            ->icon('heroicon-o-chat-bubble-left-right')
+            ->schema([
+                Section::make(__('admin_whatsapp.sections.alerts'))
+                    ->description(__('admin_whatsapp.sections.alerts_desc'))
+                    ->columns(2)
+                    ->schema([
+                        Text::make(fn (): string => filled(config('filament-evolution.api.base_url')) && filled(config('filament-evolution.api.api_key'))
+                            ? __('admin_whatsapp.api.configured', ['url' => parse_url((string) config('filament-evolution.api.base_url'), PHP_URL_HOST) ?: config('filament-evolution.api.base_url')])
+                            : __('admin_whatsapp.api.missing'))
+                            ->columnSpanFull(),
+
+                        Toggle::make('whatsapp.enabled')
+                            ->label(__('admin_whatsapp.fields.enabled'))
+                            ->columnSpanFull(),
+
+                        Select::make('whatsapp.instance_id')
+                            ->label(__('admin_whatsapp.fields.instance'))
+                            ->helperText(__('admin_whatsapp.fields.instance_helper'))
+                            ->placeholder(__('admin_whatsapp.fields.instance_placeholder'))
+                            ->options(fn (): array => WhatsappInstance::query()->orderBy('name')->get()
+                                ->mapWithKeys(fn (WhatsappInstance $instance) => [
+                                    $instance->id => trim($instance->name.' ('.$instance->number.') · '.($instance->status?->getLabel() ?? '')),
+                                ])->all())
+                            ->columnSpanFull(),
+
+                        Actions::make([
+                            Action::make('sendWhatsAppTest')
+                                ->label(__('admin_whatsapp.actions.test'))
+                                ->icon('heroicon-o-paper-airplane')
+                                ->color('gray')
+                                ->modalHeading(__('admin_whatsapp.actions.test'))
+                                ->modalDescription(__('admin_whatsapp.actions.test_desc'))
+                                ->schema([
+                                    TextInput::make('phone')
+                                        ->label(__('admin_whatsapp.fields.test_phone'))
+                                        ->tel()
+                                        ->required()
+                                        ->default(fn (): ?string => WhatsAppSettings::recipients()[0] ?? null),
+                                ])
+                                ->action(function (array $data): void {
+                                    if (! PhoneNumber::normalize($data['phone'] ?? null)) {
+                                        Notification::make()->title(__('admin_whatsapp.notifications.bad_phone'))->danger()->send();
+
+                                        return;
+                                    }
+
+                                    $log = app(WhatsAppNotifier::class)->send(
+                                        $data['phone'],
+                                        __('whatsapp.test', ['site' => SiteSetting::siteName()]),
+                                        'test',
+                                    );
+
+                                    $log->status === 'sent'
+                                        ? Notification::make()->title(__('admin_whatsapp.notifications.test_sent'))->success()->send()
+                                        : Notification::make()->title(__('admin_whatsapp.notifications.test_failed'))->body((string) $log->error)->danger()->persistent()->send();
+                                }),
+                        ])->key('whatsappTestActions')->columnSpanFull(),
+                    ]),
+
+                Section::make(__('admin_whatsapp.sections.recipients'))
+                    ->description(__('admin_whatsapp.sections.recipients_desc'))
+                    ->schema([
+                        Repeater::make('whatsapp.recipients')
+                            ->hiddenLabel()
+                            ->schema([
+                                TextInput::make('name')
+                                    ->label(__('admin_whatsapp.fields.recipient_name'))
+                                    ->maxLength(100),
+                                TextInput::make('phone')
+                                    ->label(__('admin_whatsapp.fields.recipient_phone'))
+                                    ->helperText(__('admin_whatsapp.fields.recipient_phone_helper'))
+                                    ->tel()
+                                    ->required()
+                                    ->maxLength(20)
+                                    ->rule(fn () => function (string $attribute, mixed $value, \Closure $fail): void {
+                                        if (strlen((string) PhoneNumber::normalize($value)) < 8) {
+                                            $fail(__('admin_whatsapp.notifications.bad_phone'));
+                                        }
+                                    })
+                                    ->extraInputAttributes(['dir' => 'ltr']),
+                            ])
+                            ->columns(2)
+                            ->defaultItems(0)
+                            ->addActionLabel(__('admin_whatsapp.fields.add_recipient'))
+                            ->reorderable(false),
+                    ]),
+
+                Section::make(__('admin_whatsapp.sections.types'))
+                    ->columns(2)
+                    ->schema(collect(WhatsAppSettings::ALERTS)
+                        ->map(fn (string $type) => Toggle::make('whatsapp.alerts.'.$type)->label(__('whatsapp.post_types.'.$type)))
+                        ->all()),
+            ]);
     }
 
     public function save(): void
@@ -790,8 +900,10 @@ class GeneralSettings extends Page implements HasForms
         ];
 
         foreach ($booleans as $key) {
-            SiteSetting::set($key, !empty($state[$key]), 'boolean', null, 'general_settings');
+            SiteSetting::set($key, ! empty($state[$key]), 'boolean', null, 'general_settings');
         }
+
+        WhatsAppSettings::save($state['whatsapp'] ?? []);
 
         SiteSetting::clearCache();
 

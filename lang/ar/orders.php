@@ -37,6 +37,7 @@ return [
         'failed' => 'فشلت عملية الدفع',
         'cancelled' => 'ملغى',
         'refunded' => 'مسترد',
+        'on_site' => 'الدفع في الإسطبل',
     ],
 
     'events' => [
@@ -53,6 +54,10 @@ return [
         'document_replaced' => 'تم استبدال مستند',
         'document_removed' => 'تم حذف مستند',
         'payment_started' => 'بدأت عملية الدفع',
+        'booking_cancelled' => 'أُلغي الحجز',
+        'booking_attended' => 'تم حضور الموعد',
+        'booking_no_show' => 'سُجّل عدم الحضور',
+        'booking_overbooked' => 'دُفع بعد انتهاء مهلة الدفع: قد يتجاوز الموعد عدد أماكنه',
         'stage_role_missing' => 'لا يوجد حاليًا من يملك الدور المطلوب لهذه المرحلة من المراجعة؛ يمكن لمشرف عام (super admin) الموافقة أو الرفض رغم ذلك.',
     ],
 ];

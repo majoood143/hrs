@@ -18,6 +18,11 @@ class NotifyOnOrderReceived
     {
         $order = $event->order;
 
+        // a stable booking has its own messages (date, time, stable): SendStableBookingNotifications
+        if ($order->isStableBooking()) {
+            return;
+        }
+
         // Nothing here may break the payment or order that triggered it.
         try {
             $this->notifier->notify($order, OrderNotifier::RECEIVED);

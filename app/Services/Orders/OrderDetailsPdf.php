@@ -37,7 +37,7 @@ class OrderDetailsPdf
 
             return view('pdf.order-details', [
                 'order' => $order,
-                'serviceName' => $order->service?->localizedName() ?? __('orders.service'),
+                'serviceName' => $order->serviceName(),
                 'answers' => OrderAnswers::for($order),
                 'events' => $order->events()->where('is_public', true)->get(),
                 'locale' => $locale,

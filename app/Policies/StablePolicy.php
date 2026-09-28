@@ -4,14 +4,21 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
 use App\Models\Stable;
+use App\Models\User;
+use App\Policies\Concerns\ChecksStableMembership;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
+/**
+ * Admins by their Shield permissions. A stable owner may see and edit their own stables, and add another.
+ * Hand-edited: regenerate Shield policies with --ignore-existing-policies, or this is overwritten.
+ */
 class StablePolicy
 {
+    use ChecksStableMembership;
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:Stable');
@@ -19,17 +26,17 @@ class StablePolicy
 
     public function view(AuthUser $authUser, Stable $stable): bool
     {
-        return $authUser->can('View:Stable');
+        return $this->isStableMember($authUser, $stable) || $authUser->can('View:Stable');
     }
 
     public function create(AuthUser $authUser): bool
     {
-        return $authUser->can('Create:Stable');
+        return ($authUser instanceof User && $authUser->isStableOwner()) || $authUser->can('Create:Stable');
     }
 
     public function update(AuthUser $authUser, Stable $stable): bool
     {
-        return $authUser->can('Update:Stable');
+        return $this->isStableMember($authUser, $stable) || $authUser->can('Update:Stable');
     }
 
     public function delete(AuthUser $authUser, Stable $stable): bool
@@ -71,5 +78,4 @@ class StablePolicy
     {
         return $authUser->can('Reorder:Stable');
     }
-
 }

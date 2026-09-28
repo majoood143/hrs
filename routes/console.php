@@ -12,6 +12,10 @@ Artisan::command('inspire', function () {
 Schedule::command('transfer-posts:expire')->dailyAt('00:05');
 Schedule::command('horse-sale-posts:expire')->dailyAt('00:10');
 
+// Stable bookings: weekly schedules become dated slots up to each stable's booking window.
+Schedule::command('stables:generate-slots')->dailyAt('00:20')->withoutOverlapping();
+Schedule::command('stables:send-reminders')->hourly()->withoutOverlapping();
+
 // Unpaid service orders are cancelled after config('payments.pending_ttl_minutes'); a Thawani
 // session can still be paid for 24 hours afterwards, so recently cancelled ones are re-checked.
 Schedule::command('orders:expire-pending')->everyFiveMinutes()->withoutOverlapping();
@@ -25,3 +29,7 @@ Schedule::command('model:prune', ['--model' => [CustomerOtp::class]])->daily();
 // a visitor essentially never hits a cold cache (RacingClient::handicap() still holds a lock
 // around a cold fetch as a safety net, e.g. right after a deploy).
 Schedule::command('racing:warm')->everyThirtyMinutes()->withoutOverlapping();
+
+// WhatsApp (Evolution API plugin): drop old webhook events and message history
+// (config/filament-evolution.php → cleanup; the admin alerts' own log is notification_logs).
+Schedule::command('evolution:cleanup')->dailyAt('03:30');

@@ -4,6 +4,7 @@ namespace App\Services\Payments\Gateways;
 
 use App\Enums\PaymentGateway;
 use App\Models\ServiceOrder;
+use App\Services\Payments\Concerns\UsesPaymentAccount;
 use App\Services\Payments\Contracts\Gateway;
 use App\Services\Payments\PaymentRedirect;
 
@@ -15,6 +16,8 @@ use App\Services\Payments\PaymentRedirect;
  */
 class DemoGateway implements Gateway
 {
+    use UsesPaymentAccount;
+
     public function gateway(): PaymentGateway
     {
         return PaymentGateway::Demo;

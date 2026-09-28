@@ -15,7 +15,7 @@ class OrderMessages
         $data = [
             'site' => SiteSetting::siteName(),
             'number' => $order->order_number,
-            'service' => $order->service?->localizedName() ?? __('orders.service'),
+            'service' => $order->serviceName(),
             'url' => route('orders.show', $order->order_number),
         ];
 

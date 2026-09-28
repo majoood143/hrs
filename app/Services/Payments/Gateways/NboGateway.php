@@ -7,9 +7,9 @@ use App\Models\PaymentGatewayLog;
 use App\Models\PaymentGatewaySession;
 use App\Models\ServiceOrder;
 use App\Models\SiteSetting;
+use App\Services\Payments\Concerns\UsesPaymentAccount;
 use App\Services\Payments\Contracts\Gateway;
 use App\Services\Payments\PaymentRedirect;
-use App\Support\SecretSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -22,6 +22,8 @@ use RuntimeException;
  */
 class NboGateway implements Gateway
 {
+    use UsesPaymentAccount;
+
     private const IV = 'PGKEYENCDECIVSPC';
 
     private const SANDBOX_URL = 'https://unifiedpg.nbo.om/OLTPSTG/payment/hosted.htm';
@@ -44,27 +46,27 @@ class NboGateway implements Gateway
 
     public function isTestMode(): bool
     {
-        return (bool) SiteSetting::get('nbo.test_mode', true);
+        return (bool) $this->setting('test_mode', true);
     }
 
     private function tranportalId(): string
     {
-        return (string) SiteSetting::get('nbo.tranportal_id', '');
+        return (string) $this->setting('tranportal_id', '');
     }
 
     private function tranportalPassword(): string
     {
-        return SecretSetting::get('nbo.tranportal_password');
+        return $this->secret('tranportal_password');
     }
 
     private function resourceKey(): string
     {
-        return SecretSetting::get('nbo.resource_key');
+        return $this->secret('resource_key');
     }
 
     private function endpointUrl(): string
     {
-        $custom = (string) SiteSetting::get('nbo.endpoint_url', '');
+        $custom = (string) $this->setting('endpoint_url', '');
 
         return $custom ?: ($this->isTestMode() ? self::SANDBOX_URL : self::LIVE_URL);
     }
@@ -176,6 +178,50 @@ class NboGateway implements Gateway
         PaymentGatewaySession::record($order, 'nbo', $paymentId);
 
         return PaymentRedirect::get($paymentUrl.'?PaymentID='.$paymentId);
+    }
+
+    /**
+     * Asks NBO to open a 0.100 test payment page and drops it: a "1" answer means the id,
+     * password and resource key all work. Nothing is charged (the page is never opened).
+     *
+     * @return array{0: bool, 1: string}
+     */
+    public function testConnection(): array
+    {
+        if (! $this->isConfigured()) {
+            return [false, __('payments.test.incomplete')];
+        }
+
+        $responseUrl = route('payment.nbo.callback');
+        $plain = [
+            'id' => $this->tranportalId(),
+            'password' => $this->tranportalPassword(),
+            'action' => '1',
+            'amt' => '0.100',
+            'currencycode' => self::CURRENCY,
+            'langid' => 'en',
+            'trackId' => '9'.substr((string) round(microtime(true) * 1000), -9),
+            'responseURL' => $responseUrl,
+            'errorURL' => $responseUrl,
+        ];
+
+        try {
+            $response = Http::timeout(20)->asJson()->post($this->endpointUrl(), [[
+                'id' => $this->tranportalId(),
+                'trandata' => $this->encrypt($plain),
+                'responseURL' => $responseUrl,
+                'errorURL' => $responseUrl,
+            ]]);
+        } catch (\Throwable $e) {
+            return [false, __('payments.test.unreachable', ['error' => $e->getMessage()])];
+        }
+
+        $body = json_decode(trim($response->body()), true);
+        $payload = is_array($body) ? ($body[0] ?? $body) : [];
+
+        return ($payload['status'] ?? '') === '1'
+            ? [true, __('payments.test.nbo_ok')]
+            : [false, __('payments.test.refused', ['error' => (string) ($payload['errorText'] ?? $payload['error'] ?? $response->status())])];
     }
 
     // ── Callback ─────────────────────────────────────────────────────────────

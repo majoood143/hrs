@@ -15,12 +15,13 @@ class VideoFolder extends Model implements HasMedia
     use HasTranslations;
     use InteractsWithMedia;
 
-    protected $fillable = ['parent_id', 'name', 'slug', 'order', 'is_active'];
+    protected $fillable = ['parent_id', 'name', 'slug', 'date', 'order', 'is_active'];
 
     public array $translatable = ['name'];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'date' => 'date',
     ];
 
     public function getRouteKeyName(): string
@@ -103,7 +104,7 @@ class VideoFolder extends Model implements HasMedia
      */
     public function getPathLabelAttribute(): string
     {
-        return $this->parent ? $this->parent->path_label . ' - ' . $this->name : $this->name;
+        return $this->parent ? $this->parent->path_label.' - '.$this->name : $this->name;
     }
 
     /**

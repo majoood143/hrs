@@ -31,7 +31,7 @@ class OrderRejectedMail extends Mailable
 
         return new Content(markdown: 'emails.orders.rejected', with: [
             'order' => $this->order,
-            'serviceName' => $this->order->service?->localizedName() ?? __('orders.service'),
+            'serviceName' => $this->order->serviceName(),
             'rtl' => app()->getLocale() === 'ar',
             'reason' => $this->order->rejectionReason(),
             'refund' => $refundable > 0 ? $this->order->currency.' '.number_format($refundable, 3) : null,

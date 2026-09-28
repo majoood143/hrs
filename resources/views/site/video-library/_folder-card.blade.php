@@ -13,6 +13,12 @@
     </div>
     <div class="p-5">
         <h3 class="font-display text-lg font-semibold text-warm-900">{{ $folder->name }}</h3>
+        @if ($folder->date)
+            <p class="mt-1 flex items-center gap-1.5 text-sm text-warm-600">
+                <x-heroicon-o-calendar-days class="h-4 w-4 shrink-0 text-warm-500" aria-hidden="true" />
+                <time datetime="{{ $folder->date->toDateString() }}">{{ $folder->date->translatedFormat('j F Y') }}</time>
+            </p>
+        @endif
         <p class="mt-1 text-xs font-semibold uppercase tracking-wide text-warm-600">
             {{ trans_choice('videos.library.videos_count', $count, ['count' => $count]) }}
         </p>

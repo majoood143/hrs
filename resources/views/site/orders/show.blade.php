@@ -15,7 +15,16 @@
             </div>
         @endif
 
+        @if(session('status'))
+            <div class="mt-6 flex gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800" role="status">
+                <x-heroicon-o-check-circle class="h-5 w-5 shrink-0" aria-hidden="true" />
+                <p>{{ session('status') }}</p>
+            </div>
+        @endif
+
         @include('site.orders._status-cards')
+
+        @include('site.orders._booking', ['full' => false])
 
         @if($order->receipt_number)
             <p class="mt-4 text-sm text-warm-700">{{ __('orders.receipt_number') }}: <span class="font-semibold" dir="ltr">{{ $order->receipt_number }}</span></p>

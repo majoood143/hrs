@@ -32,7 +32,7 @@ class OrderCompletedMail extends Mailable
     {
         return new Content(markdown: 'emails.orders.completed', with: [
             'order' => $this->order,
-            'serviceName' => $this->order->service?->localizedName() ?? __('orders.service'),
+            'serviceName' => $this->order->serviceName(),
             'rtl' => app()->getLocale() === 'ar',
             'url' => route('orders.show', $this->order->order_number),
         ]);

@@ -37,6 +37,7 @@ return [
         'failed' => 'Payment failed',
         'cancelled' => 'Cancelled',
         'refunded' => 'Refunded',
+        'on_site' => 'Pay at the stable',
     ],
 
     'events' => [
@@ -53,6 +54,10 @@ return [
         'document_replaced' => 'A document was replaced',
         'document_removed' => 'A document was removed',
         'payment_started' => 'Payment started',
+        'booking_cancelled' => 'Booking cancelled',
+        'booking_attended' => 'Session attended',
+        'booking_no_show' => 'Marked as a no-show',
+        'booking_overbooked' => 'Paid after the checkout had expired: the slot may now be over its places',
         'stage_role_missing' => 'No one currently holds the role required for this review stage; a super admin can still approve or reject it.',
     ],
 ];

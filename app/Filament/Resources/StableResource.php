@@ -2,10 +2,16 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\StableApprovalStatus;
 use App\Filament\Resources\StableResource\Pages\CreateStable;
 use App\Filament\Resources\StableResource\Pages\EditStable;
 use App\Filament\Resources\StableResource\Pages\ListStables;
 use App\Filament\Resources\StableResource\Pages\ViewStable;
+use App\Filament\Resources\StableResource\RelationManagers\OfferingsRelationManager;
+use App\Filament\Resources\StableResource\RelationManagers\PaymentAccountsRelationManager;
+use App\Filament\Resources\StableResource\RelationManagers\ReviewsRelationManager;
+use App\Filament\Resources\StableResource\RelationManagers\SettlementsRelationManager;
+use App\Filament\Resources\StableResource\StableApprovalActions;
 use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
 use App\Models\Region;
@@ -22,6 +28,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Tabs;
@@ -63,9 +70,32 @@ class StableResource extends Resource
         return __('admin_stable.navigation.plural');
     }
 
+    /** Stables waiting for approval when there are any, else how many there are. */
     public static function getNavigationBadge(): ?string
     {
-        return static::$model::count();
+        $pending = static::$model::query()->pendingApproval()->count();
+
+        return (string) ($pending ?: static::$model::count());
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return static::$model::query()->pendingApproval()->exists() ? 'warning' : null;
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return static::$model::query()->pendingApproval()->exists() ? __('admin_stable.approval.pending_badge') : null;
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            OfferingsRelationManager::class,
+            PaymentAccountsRelationManager::class,
+            SettlementsRelationManager::class,
+            ReviewsRelationManager::class,
+        ];
     }
 
     protected static function dayLabels(): array
@@ -103,6 +133,14 @@ class StableResource extends Resource
                                     ->maxLength(255),
                                 Toggle::make('is_active')
                                     ->default(true),
+                                TextInput::make('phone')
+                                    ->label(__('stable_panel.fields.stable_phone'))
+                                    ->tel()
+                                    ->maxLength(32),
+                                TextInput::make('email')
+                                    ->label(__('stable_panel.fields.stable_email'))
+                                    ->email()
+                                    ->maxLength(255),
                             ])->icon('heroicon-o-information-circle')
                             ->columns(2),
                         Tab::make('Location')
@@ -179,6 +217,32 @@ class StableResource extends Resource
                                     ->columns(3)
                             )->values()->all())
                             ->icon('heroicon-o-clock'),
+                        Tab::make(__('admin_stable.tabs.owner'))
+                            ->icon('heroicon-o-check-badge')
+                            ->visibleOn(['view', 'edit'])
+                            ->columns(2)
+                            ->schema([
+                                TextEntry::make('approval_status')
+                                    ->label(__('admin_stable.fields.approval_status'))
+                                    ->badge()
+                                    ->formatStateUsing(fn (?StableApprovalStatus $state) => $state?->label())
+                                    ->color(fn (?StableApprovalStatus $state) => $state?->color()),
+                                TextEntry::make('formatted_commission')
+                                    ->label(__('admin_stable.fields.commission'))
+                                    ->placeholder(__('admin_stable.approval.no_commission')),
+                                TextEntry::make('owners')
+                                    ->label(__('admin_stable.fields.owners'))
+                                    ->state(fn (?Stable $record) => $record?->owners->map(fn ($owner) => $owner->name.' · '.$owner->email.' · '.$owner->phone)->all())
+                                    ->listWithLineBreaks()
+                                    ->placeholder(__('admin_stable.fields.no_owner')),
+                                TextEntry::make('rejection_reason')
+                                    ->label(__('admin_stable.fields.reason'))
+                                    ->placeholder('—'),
+                                TextEntry::make('approved_at')
+                                    ->label(__('admin_stable.fields.approved_at'))
+                                    ->dateTime()
+                                    ->placeholder('—'),
+                            ]),
                         Tab::make('Photos')
                             ->schema([
                                 FileUpload::make('cover_photo')
@@ -214,6 +278,22 @@ class StableResource extends Resource
                     ->label('Services')
                     ->badge()
                     ->separator(','),
+                TextColumn::make('approval_status')
+                    ->label(__('admin_stable.fields.approval_status'))
+                    ->badge()
+                    ->formatStateUsing(fn (?StableApprovalStatus $state) => $state?->label())
+                    ->color(fn (?StableApprovalStatus $state) => $state?->color())
+                    ->icon(fn (?StableApprovalStatus $state) => $state?->icon())
+                    ->sortable(),
+                TextColumn::make('owners.name')
+                    ->label(__('admin_stable.fields.owners'))
+                    ->listWithLineBreaks()
+                    ->placeholder('—')
+                    ->toggleable(),
+                TextColumn::make('formatted_commission')
+                    ->label(__('admin_stable.fields.commission'))
+                    ->placeholder('—')
+                    ->toggleable(),
                 IconColumn::make('is_active')
                     ->boolean()
                     ->sortable(),
@@ -234,13 +314,18 @@ class StableResource extends Resource
                     ->relationship('services', 'en_name'),
                 SelectFilter::make('is_active')
                     ->options([1 => 'Active', 0 => 'Inactive']),
+                SelectFilter::make('approval_status')
+                    ->label(__('admin_stable.fields.approval_status'))
+                    ->options(StableApprovalStatus::options()),
             ])
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make(),
+                    StableApprovalActions::openPanel(),
+                    ...StableApprovalActions::all(),
                     ...WebsiteLinkActions::make(
                         url: fn (Stable $record): string => route('stables.show', $record->slug),
-                        isPublic: fn (Stable $record): bool => $record->is_active && filled($record->slug),
+                        isPublic: fn (Stable $record): bool => $record->is_active && $record->isApproved() && filled($record->slug),
                     ),
                     EditAction::make(),
                     DeleteAction::make(),

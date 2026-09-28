@@ -12,6 +12,8 @@ return [
         'slug' => 'Slug',
         'card_image' => 'Card Image',
         'card_image_helper' => 'Optional — shown on the folder card in the video library. Falls back to a default icon when empty.',
+        'date' => 'Date',
+        'date_helper' => 'Optional — e.g. the event or season date. Shown on the folder card when set.',
         'parent' => 'Parent Folder',
         'parent_helper' => 'Optional — nest this folder inside another one (e.g. "Matches" inside "2026/2027 Season"). Leave empty for a top-level folder.',
         'order' => 'Order',

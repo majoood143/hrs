@@ -65,6 +65,9 @@ class IncomeStatement
         return $this->rows ??= ServiceOrder::query()
             ->whereIn('payment_status', [PaymentStatus::Paid->value, PaymentStatus::Refunded->value])
             ->whereBetween('paid_at', [$this->from, $this->to])
+            // money a stable took itself (its own gateway) never reached this account: phase 3's
+            // stable statements cover what those stables owe us
+            ->where(fn ($query) => $query->whereNull('collected_by')->orWhere('collected_by', '!=', 'stable'))
             ->when($this->serviceId, fn ($query, $id) => $query->where('service_id', $id))
             ->when($this->gateway, fn ($query, $gateway) => $query->where('payment_method', $gateway))
             ->orderBy('paid_at')

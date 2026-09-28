@@ -43,7 +43,8 @@
         "spatie/laravel-medialibrary": "^11.23",
         "spatie/laravel-tags": "^4.12",
         "spatie/laravel-translatable": "^6.14",
-        "symfony/console": "7.3.2"
+        "symfony/console": "7.3.2",
+        "wallacemartinss/filament-whatsapp-conector": "^1.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

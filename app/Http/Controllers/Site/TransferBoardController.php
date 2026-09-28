@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Site;
 
+use App\Events\PublicPostSubmitted;
 use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Country;
+use App\Models\Region;
 use App\Models\SiteSetting;
 use App\Models\TransferPost;
 use App\Support\ImageCompressor;
@@ -25,7 +27,7 @@ class TransferBoardController extends Controller
     {
         return view('site.transfer-board.index', Seo::forSlug(
             'transfer-board',
-            __('transportation.board_title') . ' — ' . SiteSetting::siteName(),
+            __('transportation.board_title').' — '.SiteSetting::siteName(),
         ));
     }
 
@@ -35,7 +37,7 @@ class TransferBoardController extends Controller
             ->with(['fromCity', 'fromCountry', 'toCity', 'toCountry'])
             ->findOrFail($id);
 
-        $title = $post->fromCity?->name . ' → ' . $post->toCity?->name . ' — ' . SiteSetting::siteName();
+        $title = $post->fromCity?->name.' → '.$post->toCity?->name.' — '.SiteSetting::siteName();
 
         ViewCounter::record($post);
 
@@ -48,7 +50,7 @@ class TransferBoardController extends Controller
     public function create(): View
     {
         return view('site.transfer-board.create', [
-            'seoTitle' => __('transportation.post_page_title') . ' — ' . SiteSetting::siteName(),
+            'seoTitle' => __('transportation.post_page_title').' — '.SiteSetting::siteName(),
             'locationTree' => $this->locationTree(),
         ]);
     }
@@ -60,7 +62,7 @@ class TransferBoardController extends Controller
                 'id' => $country->id,
                 'name' => $country->name,
                 'regions' => $country->region
-                    ->map(fn (\App\Models\Region $region) => [
+                    ->map(fn (Region $region) => [
                         'id' => $region->id,
                         'name' => $region->name,
                         'cities' => $region->city
@@ -110,7 +112,7 @@ class TransferBoardController extends Controller
             ImageCompressor::compress(Storage::disk('public')->path($coverPhotoPath));
         }
 
-        TransferPost::create([
+        $post = TransferPost::create([
             'type' => $validated['type'],
             'from_country_id' => $fromCity->region->country_id,
             'from_region_id' => $fromCity->region_id,
@@ -125,6 +127,8 @@ class TransferBoardController extends Controller
             'contact_number' => $validated['contact_number'],
             'status' => 'active',
         ]);
+
+        PublicPostSubmitted::dispatch($post);
 
         return redirect()
             ->route('transfer-board.index')
@@ -145,7 +149,7 @@ class TransferBoardController extends Controller
             ->build(config('filament-captcha.width', 180), config('filament-captcha.height', 50));
 
         return response($captcha->get(), 200, [
-            'Content-Type' => 'image/' . $captcha->getImageType(),
+            'Content-Type' => 'image/'.$captcha->getImageType(),
             'Cache-Control' => 'no-store, no-cache, must-revalidate',
         ]);
     }

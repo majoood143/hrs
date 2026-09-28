@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 use Packstub\FormBuilder\FormBuilder;
 use Spatie\Activitylog\LogOptions;
@@ -116,6 +117,56 @@ class ServiceOrder extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    /** The stable booking this order pays for, when it is one. */
+    public function stableBooking(): HasOne
+    {
+        return $this->hasOne(StableBooking::class, 'service_order_id');
+    }
+
+    public function stable(): BelongsTo
+    {
+        return $this->belongsTo(Stable::class);
+    }
+
+    /** The lesson package this order pays for, when it is one. */
+    public function packagePurchase(): HasOne
+    {
+        return $this->hasOne(StablePackagePurchase::class, 'service_order_id');
+    }
+
+    public function paymentAccount(): BelongsTo
+    {
+        return $this->belongsTo(StablePaymentAccount::class, 'stable_payment_account_id');
+    }
+
+    /** Whether the order belongs to a stable: a booking, or a lesson package. */
+    public function isStableBooking(): bool
+    {
+        return $this->stable_id !== null;
+    }
+
+    /**
+     * What the order is for, in the current language: the service, or for a stable booking the
+     * session and the stable ("Beginner lesson · Desert Riders").
+     */
+    public function serviceName(): string
+    {
+        // the relation, not service_id: the price notice builds an unsaved order around its service
+        if ($this->service) {
+            return $this->service->localizedName();
+        }
+
+        if ($this->isStableBooking() && ($booking = $this->stableBooking)) {
+            return trim(($booking->offering?->name ?? '').' · '.($booking->stable?->name ?? ''), ' ·');
+        }
+
+        if ($this->isStableBooking() && ($purchase = $this->packagePurchase)) {
+            return trim(($purchase->package?->name ?? $purchase->name).' · '.($purchase->stable?->name ?? ''), ' ·');
+        }
+
+        return __('orders.service');
     }
 
     public function assignee(): BelongsTo

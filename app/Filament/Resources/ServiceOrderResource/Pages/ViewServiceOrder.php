@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\ServiceOrderResource\Pages;
 
-use App\Filament\Concerns\HasExportActions;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentGateway;
 use App\Enums\PaymentStatus;
+use App\Enums\StableBookingStatus;
+use App\Filament\Concerns\HasExportActions;
 use App\Filament\Resources\ServiceOrderResource;
+use App\Filament\Resources\StableResource;
 use App\Models\OrderDocument;
 use App\Models\OrderStage;
 use App\Models\ServiceOrder;
@@ -326,6 +328,7 @@ class ViewServiceOrder extends ViewRecord
                             ->copyable(),
                         TextEntry::make('service.name')
                             ->label(__('admin_service_order.fields.service'))
+                            ->state(fn (ServiceOrder $record) => $record->serviceName())
                             ->placeholder('—'),
                         TextEntry::make('status')
                             ->label(__('admin_service_order.fields.status'))
@@ -346,6 +349,43 @@ class ViewServiceOrder extends ViewRecord
                             ->color('warning')
                             ->columnSpanFull()
                             ->visible(fn (ServiceOrder $record) => $this->completionHint($record) !== ''),
+                    ]),
+
+                Section::make(__('admin_service_order.sections.booking'))
+                    ->icon('heroicon-o-ticket')
+                    ->columns(4)
+                    ->visible(fn (ServiceOrder $record) => $record->isStableBooking() && $record->stableBooking !== null)
+                    ->schema([
+                        TextEntry::make('stableBooking.reference')
+                            ->label(__('stable_bookings.fields.reference'))
+                            ->copyable(),
+                        TextEntry::make('stableBooking.status')
+                            ->label(__('admin_service_order.fields.status'))
+                            ->badge()
+                            ->formatStateUsing(fn (StableBookingStatus $state) => $state->label())
+                            ->color(fn (StableBookingStatus $state) => $state->color()),
+                        TextEntry::make('stable.en_name')
+                            ->label(__('stable_bookings.fields.stable'))
+                            ->url(fn (ServiceOrder $record) => $record->stable ? StableResource::getUrl('view', ['record' => $record->stable]) : null),
+                        TextEntry::make('collected_by')
+                            ->label(__('admin_service_order.fields.collected_by'))
+                            ->formatStateUsing(fn (?string $state, ServiceOrder $record) => match ($state) {
+                                'stable' => $record->stable_payment_account_id ? __('admin_service_order.collected.stable_gateway') : __('admin_service_order.collected.at_stable'),
+                                'platform' => __('admin_service_order.collected.platform'),
+                                default => '—',
+                            }),
+                        TextEntry::make('stableBooking.slot.date')
+                            ->label(__('stable_bookings.fields.date'))
+                            ->date('l, Y-m-d'),
+                        TextEntry::make('booking_time')
+                            ->label(__('stable_bookings.fields.time'))
+                            ->state(fn (ServiceOrder $record) => $record->stableBooking?->slot?->timeRange()),
+                        TextEntry::make('stableBooking.riders')
+                            ->label(__('stable_bookings.fields.riders'))
+                            ->formatStateUsing(fn ($state, ServiceOrder $record) => $state.' · '.$record->stableBooking?->riderNames()),
+                        TextEntry::make('stableBooking.cancellation_reason')
+                            ->label(__('stable_bookings.fields.reason'))
+                            ->visible(fn (ServiceOrder $record) => filled($record->stableBooking?->cancellation_reason)),
                     ]),
 
                 Section::make(__('admin_service_order.sections.customer'))

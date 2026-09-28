@@ -10,6 +10,8 @@ enum PaymentStatus: string
     case Failed = 'failed';
     case Cancelled = 'cancelled';
     case Refunded = 'refunded';
+    // a stable booking the customer pays for at the stable: nothing is collected online
+    case OnSite = 'on_site';
 
     public function label(): string
     {
@@ -24,6 +26,7 @@ enum PaymentStatus: string
             self::Pending => 'warning',
             self::Failed, self::Cancelled => 'danger',
             self::Refunded => 'info',
+            self::OnSite => 'info',
         };
     }
 }

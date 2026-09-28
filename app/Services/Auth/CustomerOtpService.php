@@ -92,11 +92,24 @@ class CustomerOtpService
      */
     public function verify(?string $rawPhone, ?string $rawCode): array
     {
+        $status = $this->check($rawPhone, $rawCode);
+
+        return [$status, $status === self::VERIFIED ? $this->customerFor((string) $this->normalize($rawPhone)) : null];
+    }
+
+    /**
+     * Check a code and use it up when it is right, without signing anyone in: for other phone
+     * checks (a stable owner's sign-up and sign-in use the same codes and limits).
+     *
+     * @return string VERIFIED|WRONG|EXPIRED
+     */
+    public function check(?string $rawPhone, ?string $rawCode): string
+    {
         $phone = $this->normalize($rawPhone);
         $code = preg_replace('/\D+/', '', (string) $rawCode);
 
         if ($phone === null || $code === '') {
-            return [self::WRONG, null];
+            return self::WRONG;
         }
 
         $otp = CustomerOtp::query()
@@ -106,19 +119,19 @@ class CustomerOtpService
             ->first();
 
         if (! $otp || $otp->expires_at->isPast() || $otp->attempts >= self::MAX_ATTEMPTS) {
-            return [self::EXPIRED, null];
+            return self::EXPIRED;
         }
 
         // count the try before looking at it, so a guess is spent even if the request dies
         $otp->increment('attempts');
 
         if (! hash_equals($otp->code_hash, $this->hash($phone, $code))) {
-            return [self::WRONG, null];
+            return self::WRONG;
         }
 
         $otp->forceFill(['consumed_at' => now()])->save();
 
-        return [self::VERIFIED, $this->customerFor($phone)];
+        return self::VERIFIED;
     }
 
     /**

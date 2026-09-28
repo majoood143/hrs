@@ -79,6 +79,18 @@ class ServiceFeeSetting extends Model
             ->first();
     }
 
+    /** The site-wide rule (no form, no service): what stable bookings pay. */
+    public static function resolveGlobal(?CarbonInterface $on = null): ?self
+    {
+        return static::query()
+            ->active()
+            ->effectiveOn($on ?? now())
+            ->whereNull('form_id')
+            ->whereNull('service_id')
+            ->orderByDesc('id')
+            ->first();
+    }
+
     /** The fee in baisa for a price in baisa. */
     public function calculateBaisa(int $priceBaisa): int
     {

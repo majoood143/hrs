@@ -6,11 +6,11 @@ use App\Enums\PaymentGateway;
 use App\Models\PaymentGatewayLog;
 use App\Models\PaymentGatewaySession;
 use App\Models\ServiceOrder;
-use App\Models\SiteSetting;
+use App\Services\Payments\Concerns\UsesPaymentAccount;
 use App\Services\Payments\Contracts\Gateway;
 use App\Services\Payments\OrderPaymentService;
 use App\Services\Payments\PaymentRedirect;
-use App\Support\SecretSetting;
+use App\Support\Locale;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -23,6 +23,8 @@ use RuntimeException;
  */
 class ThawaniGateway implements Gateway
 {
+    use UsesPaymentAccount;
+
     public function __construct(private readonly OrderPaymentService $payments) {}
 
     public function gateway(): PaymentGateway
@@ -37,22 +39,22 @@ class ThawaniGateway implements Gateway
 
     public function isTestMode(): bool
     {
-        return (bool) SiteSetting::get('thawani.test_mode', true);
+        return (bool) $this->setting('test_mode', true);
     }
 
     private function secretKey(): string
     {
-        return SecretSetting::get('thawani.secret_key');
+        return $this->secret('secret_key');
     }
 
     private function publishableKey(): string
     {
-        return (string) SiteSetting::get('thawani.publishable_key', '');
+        return (string) $this->setting('publishable_key', '');
     }
 
     private function baseUrl(): string
     {
-        $override = rtrim((string) SiteSetting::get('thawani.base_url', ''), '/');
+        $override = rtrim((string) $this->setting('base_url', ''), '/');
 
         return $override !== '' ? $override : ($this->isTestMode()
             ? 'https://uatcheckout.thawani.om/api/v1'
@@ -63,7 +65,7 @@ class ThawaniGateway implements Gateway
     {
         // Thawani charges the sum of the product lines, so one line carries the whole total
         // (price, fee and VAT); the breakdown is on our own receipt. Product names are short.
-        $name = Str::limit((string) ($order->service?->name ?? 'Service'), 28, '')." {$order->order_number}";
+        $name = Str::limit(Locale::within('en', fn () => $order->serviceName()), 28, '')." {$order->order_number}";
 
         $response = $this->createSession([
             'client_reference_id' => $order->order_number,
@@ -128,6 +130,32 @@ class ThawaniGateway implements Gateway
         return $response->json();
     }
 
+    /**
+     * Whether Thawani accepts the secret key, without making a payment: asking for a session that
+     * does not exist is answered "not found" with a good key and "unauthorised" with a bad one.
+     *
+     * @return array{0: bool, 1: string}
+     */
+    public function testConnection(): array
+    {
+        if (! $this->isConfigured()) {
+            return [false, __('payments.test.incomplete')];
+        }
+
+        try {
+            $response = Http::timeout(15)->withHeaders(['thawani-api-key' => $this->secretKey()])
+                ->get("{$this->baseUrl()}/checkout/session/connection_test_".now()->timestamp);
+        } catch (\Throwable $e) {
+            return [false, __('payments.test.unreachable', ['error' => $e->getMessage()])];
+        }
+
+        return match (true) {
+            in_array($response->status(), [401, 403], true) => [false, __('payments.test.rejected')],
+            $response->status() >= 500 => [false, __('payments.test.gateway_error', ['status' => $response->status()])],
+            default => [true, __('payments.test.thawani_ok')],
+        };
+    }
+
     /** The hosted pay page lives on the bare checkout host, not under /api/v1. */
     public function checkoutUrl(string $sessionId): string
     {
@@ -189,7 +217,7 @@ class ThawaniGateway implements Gateway
      */
     public function verifyWebhookSignature(string $payload, string $signature): bool
     {
-        $secret = SecretSetting::get('thawani.webhook_secret');
+        $secret = $this->secret('webhook_secret');
 
         if ($secret === '') {
             return true;

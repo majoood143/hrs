@@ -23,7 +23,7 @@ class ReviewerOrderMail extends Mailable
     {
         return new Envelope(subject: __('notifications.mail.reviewer.subject', [
             'number' => $this->order->order_number,
-            'service' => $this->order->service?->localizedName() ?? __('orders.service'),
+            'service' => $this->order->serviceName(),
         ]));
     }
 
@@ -31,7 +31,7 @@ class ReviewerOrderMail extends Mailable
     {
         return new Content(markdown: 'emails.orders.reviewer', with: [
             'order' => $this->order,
-            'serviceName' => $this->order->service?->localizedName() ?? __('orders.service'),
+            'serviceName' => $this->order->serviceName(),
             'rows' => $this->order->submission?->formatted() ?? [],
             'adminUrl' => ServiceOrderResource::getUrl('view', ['record' => $this->order->getKey()]),
             'total' => $this->order->currency.' '.number_format((float) $this->order->total, 3),

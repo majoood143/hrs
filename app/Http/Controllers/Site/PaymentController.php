@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PaymentGatewayLog;
 use App\Models\PaymentGatewaySession;
 use App\Models\ServiceOrder;
+use App\Models\StablePaymentAccount;
 use App\Services\Payments\Gateways\CcAvenueGateway;
 use App\Services\Payments\Gateways\NboGateway;
 use App\Services\Payments\Gateways\ThawaniGateway;
@@ -45,7 +46,7 @@ class PaymentController extends Controller
 
         return view('site.payments.checkout', [
             'order' => $order->loadMissing('service'),
-            'gateways' => $this->gateways->available(),
+            'gateways' => $this->gateways->forOrder($order),
             'seoTitle' => __('payments.checkout_title'),
             'noindex' => true,
         ]);
@@ -59,7 +60,7 @@ class PaymentController extends Controller
             return redirect()->route('orders.show', $order->order_number);
         }
 
-        $gateway = $this->gateways->find((string) $request->input('gateway'));
+        $gateway = $this->gateways->findForOrder($order, (string) $request->input('gateway'));
 
         if (! $gateway) {
             return back()->with('error', __('payments.choose_gateway'));
@@ -117,6 +118,8 @@ class PaymentController extends Controller
             return $this->toOrder($order);
         }
 
+        $thawani = $this->gateways->bind($thawani, $order);
+
         try {
             $status = $thawani->reconcile($order);
         } catch (Throwable $e) {
@@ -156,6 +159,8 @@ class PaymentController extends Controller
 
         PaymentGatewayLog::log($order, 'thawani', 'cancel', ['session_id' => $order->payment_session_id], ['reason' => 'user_cancelled']);
 
+        $thawani = $this->gateways->bind($thawani, $order);
+
         // Reaching the cancel URL is only a redirect, and the hosted session stays payable: ask
         // Thawani before giving up. If it turns out to be paid, reconcile() settles the order.
         try {
@@ -177,23 +182,27 @@ class PaymentController extends Controller
     public function thawaniWebhook(Request $request, ThawaniGateway $thawani): JsonResponse
     {
         $payload = $request->getContent();
-
-        if (! $thawani->verifyWebhookSignature($payload, (string) $request->header('thawani-signature', ''))) {
-            Log::warning('Thawani webhook: invalid signature');
-
-            return response()->json(['message' => 'Invalid signature'], 401);
-        }
-
         $data = json_decode($payload, true) ?: [];
         $sessionId = $data['data']['session_id'] ?? null;
 
         // The order's *current* payment_session_id may since have moved on to a newer session
         // (see PaymentController::begin()); a late webhook for a superseded one is still found
         // through the full history so its payment is never silently lost.
-        $order = $sessionId
+        $order = is_string($sessionId) && $sessionId !== ''
             ? ServiceOrder::query()->where('payment_session_id', $sessionId)->first()
                 ?? PaymentGatewaySession::findOrder('thawani', $sessionId)
             : null;
+
+        // a stable's own Thawani account signs with its own webhook secret
+        if ($order) {
+            $thawani = $this->gateways->bind($thawani, $order);
+        }
+
+        if (! $thawani->verifyWebhookSignature($payload, (string) $request->header('thawani-signature', ''))) {
+            Log::warning('Thawani webhook: invalid signature');
+
+            return response()->json(['message' => 'Invalid signature'], 401);
+        }
 
         PaymentGatewayLog::log($order, 'thawani', 'webhook', $data, ['event_type' => $data['event_type'] ?? null, 'session_id' => $sessionId]);
 
@@ -253,6 +262,8 @@ class PaymentController extends Controller
             return redirect('/')->with('error', __('payments.order_not_found'));
         }
 
+        $nbo = $this->gateways->bind($nbo, $order);
+
         try {
             $data = $nbo->resolveTranData($input);
         } catch (Throwable $e) {
@@ -308,6 +319,17 @@ class PaymentController extends Controller
             return redirect('/')->with('error', __('payments.verify_failed'));
         }
 
+        // a stable's own account encrypts with its key: the callback URL names the account
+        $account = $request->filled('account') ? StablePaymentAccount::query()->find((int) $request->query('account')) : null;
+
+        if ($request->filled('account') && ! $account) {
+            Log::warning('CCAvenue callback: unknown account', ['account' => $request->query('account')]);
+
+            return redirect('/')->with('error', __('payments.verify_failed'));
+        }
+
+        $ccavenue = $ccavenue->forAccount($account);
+
         try {
             parse_str($ccavenue->decrypt($encResp), $data);
         } catch (Throwable $e) {
@@ -330,6 +352,13 @@ class PaymentController extends Controller
             Log::warning('CCAvenue callback: no order for order_id', ['order_id' => $orderId]);
 
             return redirect('/')->with('error', __('payments.order_not_found'));
+        }
+
+        // an answer read with one account's key must be about an order paid into that account
+        if ((int) $order->stable_payment_account_id !== (int) $account?->getKey()) {
+            Log::warning('CCAvenue callback: account does not match the order', ['order' => $order->order_number, 'account' => $account?->getKey()]);
+
+            return $this->toPayment($order, __('payments.verify_failed'));
         }
 
         if ($order->isPaid()) {

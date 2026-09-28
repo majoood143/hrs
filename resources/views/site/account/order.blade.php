@@ -9,7 +9,7 @@
         <h1 class="mt-2 font-display text-3xl font-semibold text-warm-900" dir="ltr">{{ $order->order_number }}</h1>
         <p class="mt-1 flex flex-wrap items-center gap-x-2 text-sm text-warm-700">
             <x-heroicon-o-clipboard-document-list class="h-4 w-4" aria-hidden="true" />
-            {{ $order->service?->localizedName() ?? __('orders.service') }} · <span dir="ltr">{{ $order->created_at->format('Y-m-d H:i') }}</span>
+            {{ $order->serviceName() }} · <span dir="ltr">{{ $order->created_at->format('Y-m-d H:i') }}</span>
         </p>
 
         @if($order->isPaid() && $order->status === \App\Enums\OrderStatus::Cancelled)
@@ -31,7 +31,22 @@
             </div>
         @endif
 
+        @if(session('status'))
+            <div class="mt-6 flex gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800" role="status">
+                <x-heroicon-o-check-circle class="h-5 w-5 shrink-0" aria-hidden="true" />
+                <p>{{ session('status') }}</p>
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="mt-6 flex gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800" role="alert">
+                <x-heroicon-o-exclamation-triangle class="h-5 w-5 shrink-0" aria-hidden="true" />
+                <p>{{ session('error') }}</p>
+            </div>
+        @endif
+
         @include('site.orders._status-cards')
+
+        @include('site.orders._booking', ['full' => true])
 
         <div class="mt-6 flex flex-wrap items-center gap-3">
             @if($order->isPayable())

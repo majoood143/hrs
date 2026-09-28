@@ -33,7 +33,7 @@ class StageReviewMail extends Mailable
         return new Content(markdown: 'emails.orders.stage-review', with: [
             'order' => $this->order,
             'stage' => $this->stage->name,
-            'serviceName' => $this->order->service?->localizedName() ?? __('orders.service'),
+            'serviceName' => $this->order->serviceName(),
             'rows' => $this->order->submission?->formatted() ?? [],
             'adminUrl' => ServiceOrderResource::getUrl('view', ['record' => $this->order->getKey()]),
         ]);

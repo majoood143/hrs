@@ -9,6 +9,9 @@ use App\Policies\ActivityPolicy;
 use App\Policies\FormPolicy;
 use App\Policies\TagPolicy;
 use App\Policies\TokenPolicy;
+use App\Policies\WhatsappInstancePolicy;
+use App\Policies\WhatsappMessagePolicy;
+use App\Policies\WhatsappWebhookPolicy;
 use App\Services\SettingsService;
 use App\Support\FormOrderSettings;
 use App\Support\ImageCompressor;
@@ -35,6 +38,9 @@ use Spatie\Health\Checks\Checks\UsedDiskSpaceCheck;
 use Spatie\Health\Facades\Health;
 use Spatie\MediaLibrary\MediaCollections\Events\MediaHasBeenAddedEvent;
 use Spatie\Tags\Tag;
+use WallaceMartinss\FilamentEvolution\Models\WhatsappInstance;
+use WallaceMartinss\FilamentEvolution\Models\WhatsappMessage;
+use WallaceMartinss\FilamentEvolution\Models\WhatsappWebhook;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -76,6 +82,11 @@ class AppServiceProvider extends ServiceProvider
         // super_admin and no role can be granted control over them.
         Gate::policy(Tag::class, TagPolicy::class);
         Gate::policy(Activity::class, ActivityPolicy::class);
+
+        // Same for the WhatsApp plugin's models (Evolution API instances, messages, webhooks).
+        Gate::policy(WhatsappInstance::class, WhatsappInstancePolicy::class);
+        Gate::policy(WhatsappMessage::class, WhatsappMessagePolicy::class);
+        Gate::policy(WhatsappWebhook::class, WhatsappWebhookPolicy::class);
 
         // Forms linked to a service turn their submissions into (paid) orders.
         FormBuilder::registerFormTab(fn () => FormPaymentTab::make());

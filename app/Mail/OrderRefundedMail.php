@@ -31,7 +31,7 @@ class OrderRefundedMail extends Mailable
 
         return new Content(markdown: 'emails.orders.refunded', with: [
             'order' => $this->order,
-            'serviceName' => $this->order->service?->localizedName() ?? __('orders.service'),
+            'serviceName' => $this->order->serviceName(),
             'rtl' => app()->getLocale() === 'ar',
             'amount' => $this->order->currency.' '.number_format((float) ($refund?->amount ?? 0), 3),
             'keptFee' => (float) $this->order->fee_amount > 0 ? $this->order->currency.' '.number_format($this->order->feeShare(), 3) : null,

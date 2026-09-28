@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Site;
 
+use App\Events\PublicPostSubmitted;
 use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Country;
@@ -26,7 +27,7 @@ class FarrierController extends Controller
     {
         return view('site.farriers.index', Seo::forSlug(
             'farriers',
-            __('farriers.board_title') . ' — ' . SiteSetting::siteName(),
+            __('farriers.board_title').' — '.SiteSetting::siteName(),
         ));
     }
 
@@ -40,7 +41,7 @@ class FarrierController extends Controller
 
         return view('site.farriers.show', [
             'farrier' => $farrier,
-            'seoTitle' => $farrier->name . ' — ' . SiteSetting::siteName(),
+            'seoTitle' => $farrier->name.' — '.SiteSetting::siteName(),
             'seoDescription' => $farrier->description ? Str::limit($farrier->description, 160) : null,
             'seoImage' => $farrier->cover_photo_url,
         ]);
@@ -49,7 +50,7 @@ class FarrierController extends Controller
     public function create(): View
     {
         return view('site.farriers.create', [
-            'seoTitle' => __('farriers.post_page_title') . ' — ' . SiteSetting::siteName(),
+            'seoTitle' => __('farriers.post_page_title').' — '.SiteSetting::siteName(),
             'countries' => Country::query()->public()->with('region.city')->orderBy('en_name')->get(),
         ]);
     }
@@ -86,7 +87,7 @@ class FarrierController extends Controller
 
         ImageCompressor::compress(Storage::disk('public')->path($coverPhotoPath));
 
-        Farrier::create([
+        $post = Farrier::create([
             'en_name' => $validated['en_name'],
             'ar_name' => $validated['ar_name'],
             'specialty' => $validated['specialty'] ?? null,
@@ -101,6 +102,8 @@ class FarrierController extends Controller
             'contact_number' => $validated['contact_number'],
             'status' => 'active',
         ]);
+
+        PublicPostSubmitted::dispatch($post);
 
         return redirect()
             ->route('farriers.index')
@@ -121,7 +124,7 @@ class FarrierController extends Controller
             ->build(config('filament-captcha.width', 180), config('filament-captcha.height', 50));
 
         return response($captcha->get(), 200, [
-            'Content-Type' => 'image/' . $captcha->getImageType(),
+            'Content-Type' => 'image/'.$captcha->getImageType(),
             'Cache-Control' => 'no-store, no-cache, must-revalidate',
         ]);
     }

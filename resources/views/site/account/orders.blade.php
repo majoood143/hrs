@@ -6,10 +6,15 @@
                 <h1 class="mt-2 font-display text-3xl font-semibold text-warm-900">{{ __('account.orders_heading') }}</h1>
                 <p class="mt-1 text-sm text-warm-700" dir="ltr">{{ $customer->displayName() }}</p>
             </div>
-            <form method="POST" action="{{ route('account.logout') }}">
-                @csrf
-                <button type="submit" class="btn-warm-outline">{{ __('account.logout') }}</button>
-            </form>
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('account.packages') }}" class="btn-warm-outline">
+                    <x-heroicon-o-rectangle-stack class="h-5 w-5" aria-hidden="true" />{{ __('stable_packages.account.title') }}
+                </a>
+                <form method="POST" action="{{ route('account.logout') }}">
+                    @csrf
+                    <button type="submit" class="btn-warm-outline">{{ __('account.logout') }}</button>
+                </form>
+            </div>
         </div>
 
         @if($orders->isEmpty())
@@ -21,7 +26,7 @@
                         <a href="{{ route('account.orders.show', $order->order_number) }}" class="card-warm flex flex-wrap items-center justify-between gap-3 p-5 transition hover:shadow-md">
                             <div>
                                 <p class="font-display text-lg font-semibold text-warm-900" dir="ltr">{{ $order->order_number }}</p>
-                                <p class="text-sm text-warm-700">{{ $order->service?->localizedName() ?? __('orders.service') }} · <span dir="ltr">{{ $order->created_at->format('Y-m-d') }}</span></p>
+                                <p class="text-sm text-warm-700">{{ $order->serviceName() }} · <span dir="ltr">{{ $order->created_at->format('Y-m-d') }}</span></p>
                             </div>
                             <div class="text-end">
                                 <p class="font-semibold text-warm-900" dir="ltr">{{ \App\Models\SiteSetting::currency()['code'] }} {{ number_format((float) $order->total, 3) }}</p>

@@ -8,6 +8,8 @@ use App\Enums\PaymentStatus;
 use App\Events\ServiceOrderReceived;
 use App\Models\PaymentGatewayLog;
 use App\Models\ServiceOrder;
+use App\Services\Stables\StableBookingActions;
+use App\Services\Stables\StablePackages;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -150,6 +152,12 @@ class OrderPaymentService
 
         if ($affected) {
             $order->refresh()->recordEvent('cancelled', __('orders.events.cancelled'), ['source' => $source]);
+
+            // a stable booking's unpaid checkout gives its places back; a package's is dropped
+            if ($order->isStableBooking()) {
+                app(StableBookingActions::class)->orderCancelled($order, $source);
+                app(StablePackages::class)->orderCancelled($order);
+            }
         }
 
         return (bool) $affected;

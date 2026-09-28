@@ -6,7 +6,14 @@ return [
         'plural' => 'Service Orders',
     ],
 
+    'collected' => [
+        'platform' => 'Us (our merchant account)',
+        'stable_gateway' => 'The stable (its own gateway account)',
+        'at_stable' => 'The stable (paid at the stable)',
+    ],
+
     'sections' => [
+        'booking' => 'Stable booking',
         'review' => 'Review',
         'documents' => 'Documents',
         'refunds' => 'Refunds',
@@ -19,6 +26,7 @@ return [
     ],
 
     'fields' => [
+        'collected_by' => 'Money collected by',
         'refund_due' => 'Refund due: :amount (the service price and its VAT). Record it once it has been made.',
         'order_number' => 'Order number',
         'receipt_number' => 'Receipt number',

@@ -5,7 +5,7 @@
 
 <dl class="divide-y divide-warm-200 text-sm">
     <div class="flex items-center justify-between gap-4 py-3">
-        <dt class="text-warm-700">{{ $order->service?->localizedName() ?? __('orders.service') }}</dt>
+        <dt class="text-warm-700">{{ $order->serviceName() }}</dt>
         <dd class="font-semibold text-warm-900" dir="ltr">{{ $money($order->price) }}</dd>
     </div>
     @if((float) $order->fee_amount > 0)

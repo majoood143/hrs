@@ -53,6 +53,7 @@ trait PreparesOrderSite
             '2026_09_28_000003_add_requires_document_to_service_orders',
             '2026_09_29_000001_add_outcome_to_payment_gateway_logs',
             '2026_09_29_000002_add_status_created_at_index_to_service_orders',
+            '2026_09_30_100004_add_stable_columns_to_service_orders',
         ] as $migration) {
             (require database_path("migrations/{$migration}.php"))->up();
         }

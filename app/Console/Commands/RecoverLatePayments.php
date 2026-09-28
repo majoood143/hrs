@@ -7,6 +7,7 @@ use App\Enums\PaymentGateway;
 use App\Enums\PaymentStatus;
 use App\Models\ServiceOrder;
 use App\Services\Payments\Gateways\ThawaniGateway;
+use App\Services\Payments\PaymentGateways;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -23,12 +24,8 @@ class RecoverLatePayments extends Command
     // still on the hosted page); older ones only once an hour, to keep Thawani API calls down.
     private const HOT_WINDOW_MINUTES = 120;
 
-    public function handle(ThawaniGateway $thawani): int
+    public function handle(ThawaniGateway $thawani, PaymentGateways $gateways): int
     {
-        if (! $thawani->isConfigured()) {
-            return self::SUCCESS;
-        }
-
         $hours = max(1, (int) ($this->option('hours') ?: config('payments.late_payment_window_hours', 24)));
         $hourlyRun = now()->minute < 5 || $this->option('full');
 
@@ -47,12 +44,15 @@ class RecoverLatePayments extends Command
         foreach ($ids as $id) {
             $order = ServiceOrder::find($id);
 
-            if (! $order) {
+            // with the keys the session was made with: ours, or a stable's own account
+            $bound = $order ? $gateways->bind($thawani, $order) : null;
+
+            if (! $order || ! $bound->isConfigured()) {
                 continue;
             }
 
             try {
-                $thawani->reconcile($order);
+                $bound->reconcile($order);
             } catch (Throwable $e) {
                 Log::warning('orders:recover-late-payments: Thawani session check failed', ['order' => $order->order_number, 'error' => $e->getMessage()]);
 

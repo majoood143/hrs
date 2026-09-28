@@ -46,7 +46,7 @@ class OrderReceiptPdf
 
             return view('pdf.receipt', [
                 'order' => $order->loadMissing('service'),
-                'serviceName' => $order->service?->localizedName() ?? __('orders.service'),
+                'serviceName' => $order->serviceName(),
                 'locale' => $locale,
                 'rtl' => $rtl,
                 'siteName' => SiteSetting::siteName(),

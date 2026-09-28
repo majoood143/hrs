@@ -8,6 +8,7 @@ use App\Enums\PaymentStatus;
 use App\Models\ServiceOrder;
 use App\Services\Payments\Gateways\ThawaniGateway;
 use App\Services\Payments\OrderPaymentService;
+use App\Services\Payments\PaymentGateways;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -18,7 +19,7 @@ class ExpirePendingOrders extends Command
 
     protected $description = 'Cancel service orders that were never paid, after checking their gateway session one last time.';
 
-    public function handle(ThawaniGateway $thawani, OrderPaymentService $payments): int
+    public function handle(ThawaniGateway $thawani, OrderPaymentService $payments, PaymentGateways $gateways): int
     {
         $cutoff = now()->subMinutes(max(1, (int) config('payments.pending_ttl_minutes', 30)));
 
@@ -32,10 +33,13 @@ class ExpirePendingOrders extends Command
         $settled = 0;
 
         foreach ($orders as $order) {
-            // A Thawani session outlives our hold, so a customer may still be paying: ask first.
-            if ($order->payment_method === PaymentGateway::Thawani && $order->payment_session_id && $thawani->isConfigured()) {
+            // A Thawani session outlives our hold, so a customer may still be paying: ask first
+            // (with the keys it was started with: ours, or a stable's own account).
+            $bound = $gateways->bind($thawani, $order);
+
+            if ($order->payment_method === PaymentGateway::Thawani && $order->payment_session_id && $bound->isConfigured()) {
                 try {
-                    $thawani->reconcile($order);
+                    $bound->reconcile($order);
                 } catch (Throwable $e) {
                     // Cannot tell whether it was paid: leave it for the next run rather than cancel a paid order.
                     Log::warning('orders:expire-pending: Thawani session check failed', ['order' => $order->order_number, 'error' => $e->getMessage()]);

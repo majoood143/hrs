@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Site;
 
+use App\Events\PublicPostSubmitted;
 use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Country;
+use App\Models\Region;
 use App\Models\SiteSetting;
 use App\Models\ToolSalePost;
 use App\Support\ImageCompressor;
@@ -26,7 +28,7 @@ class ToolSaleController extends Controller
     {
         return view('site.tools-for-sale.index', Seo::forSlug(
             'tools-for-sale',
-            __('tools-for-sale.board_title') . ' — ' . SiteSetting::siteName(),
+            __('tools-for-sale.board_title').' — '.SiteSetting::siteName(),
         ));
     }
 
@@ -40,7 +42,7 @@ class ToolSaleController extends Controller
 
         return view('site.tools-for-sale.show', [
             'tool' => $tool,
-            'seoTitle' => $tool->name . ' — ' . SiteSetting::siteName(),
+            'seoTitle' => $tool->name.' — '.SiteSetting::siteName(),
             'seoDescription' => $tool->description ? Str::limit($tool->description, 160) : null,
             'seoImage' => $tool->cover_photo_url,
         ]);
@@ -49,7 +51,7 @@ class ToolSaleController extends Controller
     public function create(): View
     {
         return view('site.tools-for-sale.create', [
-            'seoTitle' => __('tools-for-sale.post_page_title') . ' — ' . SiteSetting::siteName(),
+            'seoTitle' => __('tools-for-sale.post_page_title').' — '.SiteSetting::siteName(),
             'categories' => ToolSalePost::CATEGORIES,
             'locationTree' => $this->locationTree(),
         ]);
@@ -62,7 +64,7 @@ class ToolSaleController extends Controller
                 'id' => $country->id,
                 'name' => $country->name,
                 'regions' => $country->region
-                    ->map(fn (\App\Models\Region $region) => [
+                    ->map(fn (Region $region) => [
                         'id' => $region->id,
                         'name' => $region->name,
                         'cities' => $region->city
@@ -82,8 +84,8 @@ class ToolSaleController extends Controller
         $validated = $request->validate([
             'en_name' => ['required', 'string', 'max:255'],
             'ar_name' => ['required', 'string', 'max:255'],
-            'category' => ['required', 'in:' . implode(',', ToolSalePost::CATEGORIES)],
-            'condition' => ['required', 'in:' . implode(',', ToolSalePost::CONDITIONS)],
+            'category' => ['required', 'in:'.implode(',', ToolSalePost::CATEGORIES)],
+            'condition' => ['required', 'in:'.implode(',', ToolSalePost::CONDITIONS)],
             'brand' => ['nullable', 'string', 'max:255'],
             'city_id' => ['required', 'exists:cities,id'],
             'price' => ['required', 'numeric', 'min:0'],
@@ -113,7 +115,7 @@ class ToolSaleController extends Controller
 
         ImageCompressor::compress(Storage::disk('public')->path($coverPhotoPath));
 
-        ToolSalePost::create([
+        $post = ToolSalePost::create([
             'en_name' => $validated['en_name'],
             'ar_name' => $validated['ar_name'],
             'category' => $validated['category'],
@@ -130,6 +132,8 @@ class ToolSaleController extends Controller
             'contact_number' => $validated['contact_number'],
             'status' => 'active',
         ]);
+
+        PublicPostSubmitted::dispatch($post);
 
         return redirect()
             ->route('tools-for-sale.index')
@@ -150,7 +154,7 @@ class ToolSaleController extends Controller
             ->build(config('filament-captcha.width', 180), config('filament-captcha.height', 50));
 
         return response($captcha->get(), 200, [
-            'Content-Type' => 'image/' . $captcha->getImageType(),
+            'Content-Type' => 'image/'.$captcha->getImageType(),
             'Cache-Control' => 'no-store, no-cache, must-revalidate',
         ]);
     }

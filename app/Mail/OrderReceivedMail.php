@@ -35,7 +35,7 @@ class OrderReceivedMail extends Mailable
     {
         return new Content(markdown: 'emails.orders.received', with: [
             'order' => $this->order,
-            'serviceName' => $this->order->service?->localizedName() ?? __('orders.service'),
+            'serviceName' => $this->order->serviceName(),
             'rtl' => app()->getLocale() === 'ar',
             'url' => route('orders.show', $this->order->order_number),
             'money' => fn ($amount) => $this->order->currency.' '.number_format((float) $amount, 3),

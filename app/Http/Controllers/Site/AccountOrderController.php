@@ -7,7 +7,11 @@ use App\Models\Customer;
 use App\Models\ServiceOrder;
 use App\Services\Orders\OrderDetailsPdf;
 use App\Services\Orders\OrderReceiptPdf;
+use App\Services\Stables\BookingUnavailable;
+use App\Services\Stables\StableBookingActions;
+use App\Services\Stables\StableReviews;
 use App\Support\OrderAnswers;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -41,6 +45,41 @@ class AccountOrderController extends Controller
             'seoTitle' => __('orders.status_title', ['number' => $order->order_number]),
             'noindex' => true,
         ]);
+    }
+
+    /** The customer calls off their own booking, within the stable's cancellation window. */
+    public function cancelBooking(string $order, StableBookingActions $actions): RedirectResponse
+    {
+        $booking = $this->find($order)->stableBooking;
+        abort_unless($booking, 404);
+
+        try {
+            $actions->cancelByCustomer($booking);
+        } catch (BookingUnavailable $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('status', __('stable_bookings.card.cancelled'));
+    }
+
+    /** The customer rates a session they attended. */
+    public function review(Request $request, string $order, StableReviews $reviews): RedirectResponse
+    {
+        $booking = $this->find($order)->stableBooking;
+        abort_unless($booking, 404);
+
+        $data = $request->validate([
+            'rating' => ['required', 'integer', 'min:1', 'max:5'],
+            'comment' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        try {
+            $reviews->submit($booking, $this->customer(), (int) $data['rating'], $data['comment'] ?? null);
+        } catch (BookingUnavailable $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('status', __('stable_reviews.thanks'));
     }
 
     public function receipt(Request $request, string $order, OrderReceiptPdf $receipts): Response

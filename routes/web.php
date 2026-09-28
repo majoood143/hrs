@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Site\AccountAuthController;
 use App\Http\Controllers\Site\AccountOrderController;
+use App\Http\Controllers\Site\AccountPackageController;
 use App\Http\Controllers\Site\AdClickController;
 use App\Http\Controllers\Site\CenterController;
 use App\Http\Controllers\Site\ClinicController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Site\RacingPdfController;
 use App\Http\Controllers\Site\RacingRaceController;
 use App\Http\Controllers\Site\RacingWidgetController;
 use App\Http\Controllers\Site\ShopController;
+use App\Http\Controllers\Site\StableBookingController;
 use App\Http\Controllers\Site\StableController;
 use App\Http\Controllers\Site\ToolSaleController;
 use App\Http\Controllers\Site\TransferBoardController;
@@ -119,6 +121,16 @@ Route::prefix('payment')->name('payment.')->group(function () {
     Route::post('demo/{order}', [PaymentController::class, 'demoDecide'])->name('demo.decide');
 });
 
+// Stable bookings: search open slots, pick a time on a service's page, book. Every path has two or
+// more segments, so none is shadowed by the /{slug} CMS page route below (and "bookings" stays
+// usable as a CMS slug for a landing page).
+Route::prefix('bookings')->name('bookings.')->group(function () {
+    Route::get('search', [StableBookingController::class, 'search'])->middleware('throttle:120,1')->name('search');
+    Route::get('slots/{slot}', [StableBookingController::class, 'create'])->whereNumber('slot')->name('create');
+    Route::post('slots/{slot}', [StableBookingController::class, 'store'])->whereNumber('slot')->middleware('throttle:10,1')->name('store');
+    Route::get('{stable}/{offering}', [StableBookingController::class, 'offering'])->whereNumber('offering')->name('offering');
+});
+
 // Customers sign in with their phone and an SMS code. There is deliberately no single-segment
 // /account route: the /{slug} CMS page route below would compete with it, so every path has two segments.
 Route::prefix('account')->name('account.')->group(function () {
@@ -134,6 +146,11 @@ Route::prefix('account')->name('account.')->group(function () {
         Route::get('orders/{order}', [AccountOrderController::class, 'show'])->name('orders.show');
         Route::get('orders/{order}/receipt', [AccountOrderController::class, 'receipt'])->middleware('throttle:30,1')->name('orders.receipt');
         Route::get('orders/{order}/details', [AccountOrderController::class, 'details'])->middleware('throttle:30,1')->name('orders.details');
+        Route::post('orders/{order}/cancel-booking', [AccountOrderController::class, 'cancelBooking'])->middleware('throttle:10,1')->name('orders.cancel-booking');
+        Route::post('orders/{order}/review', [AccountOrderController::class, 'review'])->middleware('throttle:10,1')->name('orders.review');
+        Route::get('packages', [AccountPackageController::class, 'index'])->name('packages');
+        Route::get('packages/buy/{package}', [AccountPackageController::class, 'buy'])->whereNumber('package')->name('packages.buy');
+        Route::post('packages/buy/{package}', [AccountPackageController::class, 'purchase'])->whereNumber('package')->middleware('throttle:10,1')->name('packages.purchase');
         Route::get('orders/{order}/documents/{document}', [OrderDocumentController::class, 'customer'])->middleware('throttle:30,1')->whereNumber('document')->name('orders.document');
     });
 });

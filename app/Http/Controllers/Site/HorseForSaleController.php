@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Site;
 
+use App\Events\PublicPostSubmitted;
 use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Color;
@@ -29,7 +30,7 @@ class HorseForSaleController extends Controller
     {
         return view('site.horses-for-sale.index', Seo::forSlug(
             'horses-for-sale',
-            __('horses-for-sale.board_title') . ' — ' . SiteSetting::siteName(),
+            __('horses-for-sale.board_title').' — '.SiteSetting::siteName(),
         ));
     }
 
@@ -43,7 +44,7 @@ class HorseForSaleController extends Controller
 
         return view('site.horses-for-sale.show', [
             'post' => $post,
-            'seoTitle' => $post->name . ' — ' . SiteSetting::siteName(),
+            'seoTitle' => $post->name.' — '.SiteSetting::siteName(),
             'seoDescription' => $post->description ? Str::limit($post->description, 160) : null,
             'seoImage' => $post->cover_photo_url,
         ]);
@@ -52,7 +53,7 @@ class HorseForSaleController extends Controller
     public function create(): View
     {
         return view('site.horses-for-sale.create', [
-            'seoTitle' => __('horses-for-sale.post_page_title') . ' — ' . SiteSetting::siteName(),
+            'seoTitle' => __('horses-for-sale.post_page_title').' — '.SiteSetting::siteName(),
             'types' => Type::query()->orderBy('en_name')->get(),
             'genders' => Gender::query()->orderBy('en_name')->get(),
             'colors' => Color::query()->orderBy('en_name')->get(),
@@ -126,7 +127,7 @@ class HorseForSaleController extends Controller
             ImageCompressor::compress(Storage::disk('public')->path($passportDocumentPath));
         }
 
-        HorseSalePost::create([
+        $post = HorseSalePost::create([
             'en_name' => $validated['en_name'],
             'ar_name' => $validated['ar_name'],
             'type_id' => $validated['type_id'],
@@ -152,6 +153,8 @@ class HorseForSaleController extends Controller
             'status' => 'active',
         ]);
 
+        PublicPostSubmitted::dispatch($post);
+
         return redirect()
             ->route('horses-for-sale.index')
             ->with('status', __('horses-for-sale.posted_success_title'));
@@ -171,7 +174,7 @@ class HorseForSaleController extends Controller
             ->build(config('filament-captcha.width', 180), config('filament-captcha.height', 50));
 
         return response($captcha->get(), 200, [
-            'Content-Type' => 'image/' . $captcha->getImageType(),
+            'Content-Type' => 'image/'.$captcha->getImageType(),
             'Cache-Control' => 'no-store, no-cache, must-revalidate',
         ]);
     }

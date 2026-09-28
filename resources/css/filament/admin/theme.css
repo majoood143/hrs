@@ -3,3 +3,5 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 @source '../../../../vendor/ardavan/filament-file-explorer/resources/views/**/*.blade.php';
+@source '../../../../vendor/wallacemartinss/filament-whatsapp-conector/resources/views/**/*';
+@source '../../../../vendor/wallacemartinss/filament-whatsapp-conector/src/**/*';

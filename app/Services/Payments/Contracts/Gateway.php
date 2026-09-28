@@ -4,6 +4,7 @@ namespace App\Services\Payments\Contracts;
 
 use App\Enums\PaymentGateway;
 use App\Models\ServiceOrder;
+use App\Models\StablePaymentAccount;
 use App\Services\Payments\PaymentRedirect;
 use RuntimeException;
 
@@ -21,4 +22,9 @@ interface Gateway
      * @throws RuntimeException when the gateway refuses or cannot be reached
      */
     public function initiate(ServiceOrder $order): PaymentRedirect;
+
+    /** A copy that uses a stable's own account (null: the site's keys, as set in Payment Gateways). */
+    public function forAccount(?StablePaymentAccount $account): static;
+
+    public function account(): ?StablePaymentAccount;
 }

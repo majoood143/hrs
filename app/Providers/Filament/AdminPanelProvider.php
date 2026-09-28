@@ -29,6 +29,7 @@ use Rmsramos\Activitylog\ActivitylogPlugin;
 use Rupadana\ApiService\ApiServicePlugin;
 use ShuvroRoy\FilamentSpatieLaravelBackup\FilamentSpatieLaravelBackupPlugin;
 use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
+use WallaceMartinss\FilamentEvolution\FilamentEvolutionPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -88,6 +89,12 @@ class AdminPanelProvider extends PanelProvider
                 FilamentCaptcha::make(),
                 FilamentFileExplorerPlugin::make(),
                 FormBuilderPlugin::make()->navigationGroup(__('cms.navigation.group')),
+                // WhatsApp through Evolution API: instances (QR connect), sent messages, webhook log.
+                // Admin alerts use it via App\Services\WhatsApp\WhatsAppNotifier.
+                FilamentEvolutionPlugin::make()
+                    ->whatsappInstanceResource()
+                    ->viewMessageHistory()
+                    ->viewWebhookLogs(),
             ])
             ->authMiddleware([
                 Authenticate::class,

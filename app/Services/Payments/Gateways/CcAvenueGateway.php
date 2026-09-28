@@ -7,9 +7,9 @@ use App\Models\PaymentGatewayLog;
 use App\Models\PaymentGatewaySession;
 use App\Models\ServiceOrder;
 use App\Models\SiteSetting;
+use App\Services\Payments\Concerns\UsesPaymentAccount;
 use App\Services\Payments\Contracts\Gateway;
 use App\Services\Payments\PaymentRedirect;
-use App\Support\SecretSetting;
 use RuntimeException;
 
 /**
@@ -20,6 +20,8 @@ use RuntimeException;
  */
 class CcAvenueGateway implements Gateway
 {
+    use UsesPaymentAccount;
+
     private const SANDBOX_URL = 'https://mti.bankmuscat.com:6443/transaction.do?command=initiateTransaction';
 
     private const LIVE_URL = 'https://smartpaytrns.bankmuscat.com/transaction.do?command=initiateTransaction';
@@ -40,29 +42,50 @@ class CcAvenueGateway implements Gateway
 
     public function isTestMode(): bool
     {
-        return (bool) SiteSetting::get('ccavenue.test_mode', true);
+        return (bool) $this->setting('test_mode', true);
     }
 
     private function merchantId(): string
     {
-        return (string) SiteSetting::get('ccavenue.merchant_id', '');
+        return (string) $this->setting('merchant_id', '');
     }
 
     private function accessCode(): string
     {
-        return (string) SiteSetting::get('ccavenue.access_code', '');
+        return (string) $this->setting('access_code', '');
     }
 
     private function workingKey(): string
     {
-        return SecretSetting::get('ccavenue.working_key');
+        return $this->secret('working_key');
     }
 
     private function endpointUrl(): string
     {
-        $custom = (string) SiteSetting::get('ccavenue.endpoint_url', '');
+        $custom = (string) $this->setting('endpoint_url', '');
 
         return $custom ?: ($this->isTestMode() ? self::SANDBOX_URL : self::LIVE_URL);
+    }
+
+    /**
+     * CCAvenue has no call to check keys with before a first payment: this checks what can be
+     * checked here (every field filled in, and a working key that encrypts and decrypts).
+     *
+     * @return array{0: bool, 1: string}
+     */
+    public function testConnection(): array
+    {
+        if (! $this->isConfigured()) {
+            return [false, __('payments.test.incomplete')];
+        }
+
+        try {
+            $ok = $this->decrypt($this->encrypt('connection-test')) === 'connection-test';
+        } catch (\Throwable $e) {
+            return [false, __('payments.test.refused', ['error' => $e->getMessage()])];
+        }
+
+        return $ok ? [true, __('payments.test.ccavenue_ok')] : [false, __('payments.test.refused', ['error' => 'working key'])];
     }
 
     // ── Encryption ───────────────────────────────────────────────────────────
@@ -115,7 +138,8 @@ class CcAvenueGateway implements Gateway
      */
     public function initiate(ServiceOrder $order): PaymentRedirect
     {
-        $callback = route('payment.ccavenue.callback');
+        // a stable's own account: the answer is encrypted with its key, so the URL says whose it is
+        $callback = route('payment.ccavenue.callback', $this->accountQuery());
         $orderId = $order->compactNumber();
         $host = parse_url((string) config('app.url'), PHP_URL_HOST) ?: 'example.com';
 

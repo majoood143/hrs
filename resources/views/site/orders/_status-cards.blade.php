@@ -20,6 +20,7 @@
         \App\Enums\PaymentStatus::Free => 'heroicon-o-gift',
         \App\Enums\PaymentStatus::Refunded => 'heroicon-o-arrow-uturn-left',
         \App\Enums\PaymentStatus::Pending => 'heroicon-o-credit-card',
+        \App\Enums\PaymentStatus::OnSite => 'heroicon-o-building-storefront',
         default => 'heroicon-o-exclamation-triangle',
     };
 @endphp

@@ -12,6 +12,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
@@ -19,16 +20,18 @@ use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
 
 class VideoFolderResource extends Resource
 {
     protected static ?string $model = VideoFolder::class;
+
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-folder';
+
     protected static ?int $navigationSort = 91;
 
     public static function getNavigationGroup(): ?string
@@ -56,7 +59,7 @@ class VideoFolderResource extends Resource
         return $schema
             ->components([
                 TranslatableInput::grid(fn ($code, $meta) => TextInput::make("name.{$code}")
-                    ->label(__('video_folders.fields.name') . ' (' . $meta['native'] . ')')
+                    ->label(__('video_folders.fields.name').' ('.$meta['native'].')')
                     ->required($code === TranslatableInput::defaultLocale())
                     ->maxLength(255)
                     ->live(onBlur: true)
@@ -71,6 +74,11 @@ class VideoFolderResource extends Resource
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
+
+                DatePicker::make('date')
+                    ->label(__('video_folders.fields.date'))
+                    ->helperText(__('video_folders.fields.date_helper'))
+                    ->native(false),
 
                 SpatieMediaLibraryFileUpload::make('card_image')
                     ->label(__('video_folders.fields.card_image'))
@@ -129,13 +137,20 @@ class VideoFolderResource extends Resource
                     ->badge()
                     ->placeholder('—'),
 
+                TextColumn::make('date')
+                    ->label(__('video_folders.fields.date'))
+                    ->date()
+                    ->sortable()
+                    ->placeholder('—'),
+
                 TextColumn::make('order')
                     ->label(__('video_folders.fields.order'))
                     ->sortable(),
 
-                IconColumn::make('is_active')
+                ToggleColumn::make('is_active')
                     ->label(__('video_folders.fields.is_active'))
-                    ->boolean(),
+                    ->disabled(fn (VideoFolder $record) => ! static::canEdit($record))
+                    ->sortable(),
 
                 TextColumn::make('videos_count')
                     ->label(__('video_folders.navigation.videos'))

@@ -6,6 +6,7 @@ use App\Filament\Resources\VideoResource\Pages\CreateVideo;
 use App\Filament\Resources\VideoResource\Pages\EditVideo;
 use App\Filament\Resources\VideoResource\Pages\ListVideos;
 use App\Filament\Support\TranslatableInput;
+use App\Filament\Support\WebsiteLinkActions;
 use App\Models\Video;
 use App\Models\VideoFolder;
 use App\Support\YouTube;
@@ -21,9 +22,9 @@ use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
@@ -156,9 +157,10 @@ class VideoResource extends Resource
                     ->label(__('videos.fields.order'))
                     ->sortable(),
 
-                IconColumn::make('is_active')
+                ToggleColumn::make('is_active')
                     ->label(__('videos.fields.is_active'))
-                    ->boolean(),
+                    ->disabled(fn (Video $record) => ! static::canEdit($record))
+                    ->sortable(),
             ])
             ->defaultSort('order')
             ->filters([
@@ -168,6 +170,10 @@ class VideoResource extends Resource
             ])
             ->recordActions([
                 ActionGroup::make([
+                    ...WebsiteLinkActions::make(
+                        url: fn (Video $record): string => route('video-library.show', $record->slug),
+                        isPublic: fn (Video $record): bool => $record->is_active && filled($record->slug),
+                    ),
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),
