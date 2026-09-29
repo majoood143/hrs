@@ -420,3 +420,24 @@ body {
     }
 }
 
+
+/* Racing search: indeterminate progress bar while results load (resources/js/racing-search.js). */
+@keyframes racing-progress {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(300%); }
+}
+
+.racing-progress {
+    animation: racing-progress 1.4s ease-in-out infinite;
+}
+
+[dir="rtl"] .racing-progress {
+    animation-direction: reverse;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .racing-progress {
+        width: 100%;
+        animation: none;
+    }
+}

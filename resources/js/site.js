@@ -1,6 +1,7 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { raceWidget } from './race-widget';
+import { racingSearch } from './racing-search';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -1320,4 +1321,5 @@ document.addEventListener('DOMContentLoaded', () => {
     toolSaleWizard();
     eventsCalendar();
     raceWidget();
+    racingSearch();
 });

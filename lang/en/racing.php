@@ -10,6 +10,13 @@ return [
     'placeholder' => 'Enter a name…',
     'type_label' => 'Search in',
     'search' => 'Search',
+    'searching' => 'Searching…',
+    'loading_steps' => [
+        'Connecting to the racing database…',
+        'Looking up matching names…',
+        'Gathering the results, almost there…',
+    ],
+    'loading_label' => 'Loading results',
     'hint' => 'Search using the English spelling of the name (at least :min characters).',
     'min_chars' => 'Please enter at least :min characters.',
 
