@@ -33,7 +33,7 @@ class RacingPdf
             'margin_left' => 10,
             'margin_right' => 10,
             'margin_top' => 12,
-            'margin_bottom' => 16,
+            'margin_bottom' => 19,
             'margin_footer' => 6,
         ]);
 

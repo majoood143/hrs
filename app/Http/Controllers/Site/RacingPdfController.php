@@ -39,9 +39,8 @@ class RacingPdfController extends Controller
         // mPDF's render (Arabic shaping, the Cairo font) is the expensive step; the underlying
         // data is already cached, but the PDF bytes were not, so every "Download PDF" click for
         // the same profile re-ran it from scratch. Cached the same length of time as that data.
-        $bytes = Cache::remember(
+        $bytes = $this->cached(
             "racing:pdf:profile:{$entity}:{$id}:{$locale}",
-            config('racing.cache_ttl'),
             fn () => $this->pdf->render('pdf.racing.profile', [
                 'entity' => $entity,
                 'profile' => $profile,
@@ -81,9 +80,8 @@ class RacingPdfController extends Controller
 
         $title = __('racing.pages.'.$page.'.title').' — '.$selected['title'];
 
-        $bytes = Cache::remember(
+        $bytes = $this->cached(
             "racing:pdf:race:{$page}:{$race}:{$locale}",
-            config('racing.cache_ttl'),
             fn () => $this->pdf->render('pdf.racing.race', [
                 'page' => $page,
                 'meeting' => $meeting,
@@ -93,6 +91,18 @@ class RacingPdfController extends Controller
         );
 
         return $this->download($bytes, $title, "race-{$race}-{$page}");
+    }
+
+    /**
+     * PDF bytes are binary, and the database cache store keeps values in a utf8mb4 text column
+     * (MySQL refuses them: "1366 Incorrect string value"), so they are cached base64-encoded.
+     * The "b64:" key prefix keeps any raw entry cached by another store from being decoded.
+     */
+    private function cached(string $key, callable $render): string
+    {
+        $encoded = Cache::remember('b64:'.$key, config('racing.cache_ttl'), fn () => base64_encode($render()));
+
+        return base64_decode($encoded, true) ?: $render();
     }
 
     /** Owner silks come through our proxy path on the page; a PDF needs the bytes, and can live without them. */

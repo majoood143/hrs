@@ -15,6 +15,10 @@ return [
 
     'base_url' => env('RACING_BASE_URL', 'http://185.64.25.43'),
 
+    // Public website of the data's owner, credited on every racing page and PDF
+    // (the base_url above is only the address we fetch from, never shown).
+    'source_url' => env('RACING_SOURCE_URL', 'https://rhrc.om'),
+
     'timeout' => (int) env('RACING_TIMEOUT', 15),
 
     // Seconds parsed search results / profiles are cached for.

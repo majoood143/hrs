@@ -194,6 +194,22 @@ class RacingExportTest extends TestCase
         $this->assertPdf($this->get('/racing/results/9178/pdf'));
     }
 
+    public function test_every_pdf_footer_credits_the_official_source_in_its_language(): void
+    {
+        $texts = [
+            'en' => 'Data sourced from the official Royal Horse Racing Club website',
+            'ar' => 'مصدر البيانات: الموقع الرسمي لنادي سباق الخيل',
+        ];
+
+        foreach ($texts as $locale => $text) {
+            app()->setLocale($locale);
+            $html = view('pdf.racing._footer', ['locale' => $locale, 'rtl' => $locale === 'ar', 'url' => 'https://site.test/x'])->render();
+
+            $this->assertStringContainsString($text, $html);
+            $this->assertStringContainsString('<span dir="ltr">rhrc.om</span>', $html);
+        }
+    }
+
     public function test_the_pdf_views_are_black_white_and_gray_only(): void
     {
         foreach (glob(resource_path('views/pdf/racing/*.blade.php')) as $file) {

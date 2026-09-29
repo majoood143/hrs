@@ -14,4 +14,6 @@
 
         @include('site.racing._form', ['type' => $data['default_type'] ?? 1, 'q' => '', 'idSuffix' => 'block'])
     </div>
+
+    <x-racing.source-note short class="mt-4" />
 </section>

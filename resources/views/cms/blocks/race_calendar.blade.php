@@ -10,4 +10,6 @@
     </div>
 
     <x-racing.calendar />
+
+    <x-racing.source-note short class="mt-6" />
 </section>

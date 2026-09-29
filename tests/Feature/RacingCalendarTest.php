@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Blocks\Cms\CmsBlocks;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\View;
@@ -41,7 +42,7 @@ class RacingCalendarTest extends TestCase
 
         // race days are links (with the meeting name), the other days are not
         $this->assertSame(25, substr_count($html, '/racing/calendar/20'));
-        $this->assertStringContainsString('href="' . url('/racing/calendar/2026-10-17') . '"', $html);
+        $this->assertStringContainsString('href="'.url('/racing/calendar/2026-10-17').'"', $html);
         $this->assertStringContainsString('title="1st Meeting"', $html);
         $this->assertStringContainsString('title="Final Meeting"', $html);
     }
@@ -70,7 +71,7 @@ class RacingCalendarTest extends TestCase
     public function test_an_unknown_season_falls_back_and_never_sends_junk_dates_to_the_source(): void
     {
         foreach (['99/99', '../../x', "25/26'", 'abc', ''] as $season) {
-            $this->get('/racing/calendar?season=' . urlencode($season))->assertOk()->assertSee('<option value="26/27" selected>26/27</option>', false);
+            $this->get('/racing/calendar?season='.urlencode($season))->assertOk()->assertSee('<option value="26/27" selected>26/27</option>', false);
         }
 
         $this->get('/racing/calendar?season[]=25/26')->assertOk();
@@ -101,7 +102,7 @@ class RacingCalendarTest extends TestCase
 
     public function test_the_season_form_submits_back_to_the_page_it_is_on(): void
     {
-        $this->get('/racing/calendar')->assertSee('action="' . url('/racing/calendar') . '#race-calendar"', false);
+        $this->get('/racing/calendar')->assertSee('action="'.url('/racing/calendar').'#race-calendar"', false);
     }
 
     public function test_arabic_month_names_and_labels(): void
@@ -118,6 +119,18 @@ class RacingCalendarTest extends TestCase
     public function test_the_calendar_is_part_of_the_racing_nav(): void
     {
         $this->get('/racing/results/9178')->assertOk()->assertSee('/racing/calendar', false);
+    }
+
+    public function test_the_page_credits_the_official_source_in_the_visitors_language(): void
+    {
+        $this->get('/racing/calendar')->assertOk()
+            ->assertSee('Data sourced from the official Horse Racing Club website')
+            ->assertSee('href="https://rhrc.om"', false)
+            ->assertDontSee('185.64.25.43');
+
+        $this->get('/racing/calendar?lang=ar')->assertOk()
+            ->assertSee('مصدر البيانات: الموقع الرسمي لنادي سباق الخيل ')
+            ->assertDontSee('Data sourced from');
     }
 
     public function test_an_outage_is_a_friendly_message(): void
@@ -189,7 +202,7 @@ class RacingCalendarTest extends TestCase
 
     public function test_the_block_is_registered_in_the_page_builder(): void
     {
-        $names = array_map(fn ($block) => $block->getName(), \App\Filament\Blocks\Cms\CmsBlocks::all());
+        $names = array_map(fn ($block) => $block->getName(), CmsBlocks::all());
 
         $this->assertContains('race_calendar', $names);
     }

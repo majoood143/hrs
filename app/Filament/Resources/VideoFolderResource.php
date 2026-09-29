@@ -6,6 +6,7 @@ use App\Filament\Resources\VideoFolderResource\Pages\CreateVideoFolder;
 use App\Filament\Resources\VideoFolderResource\Pages\EditVideoFolder;
 use App\Filament\Resources\VideoFolderResource\Pages\ListVideoFolders;
 use App\Filament\Support\TranslatableInput;
+use App\Filament\Support\WebsiteLinkActions;
 use App\Models\VideoFolder;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -163,6 +164,10 @@ class VideoFolderResource extends Resource
             ->defaultSort('order')
             ->recordActions([
                 ActionGroup::make([
+                    ...WebsiteLinkActions::make(
+                        url: fn (VideoFolder $record): string => route('video-library.folder', $record->slug),
+                        isPublic: fn (VideoFolder $record): bool => $record->is_active && filled($record->slug),
+                    ),
                     EditAction::make(),
                     DeleteAction::make()
                         ->disabled(fn (VideoFolder $record) => $record->videos()->exists() || $record->children()->exists()),

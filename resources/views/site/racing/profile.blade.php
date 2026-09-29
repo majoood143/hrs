@@ -124,5 +124,7 @@
                 </script>
             @endif
         @endif
+
+        <x-racing.source-note class="mt-12 border-t border-warm-200 pt-6" />
     </div>
 </x-layouts.site>

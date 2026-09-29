@@ -137,4 +137,10 @@ return [
         'scan' => 'Scan to open online',
         'page' => 'Page',
     ],
+
+    // :site becomes a link to config('racing.source_url')
+    'source' => [
+        'full' => 'Data sourced from the official Horse Racing Club website (:site). In case of any difference, the official website prevails.',
+        'short' => 'Data sourced from the official Horse Racing Club website (:site).',
+    ],
 ];
