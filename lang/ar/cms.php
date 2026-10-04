@@ -11,6 +11,7 @@ return [
         'horse_search_default_type' => 'نوع البحث الافتراضي',
         'race_calendar' => 'تقويم السباقات',
         'race_widget' => 'أداة السباقات',
+        'silks_designer' => 'مصمم ألوان السباق',
         'transfer_board' => 'لوحة النقل',
         'featured_horses' => 'الخيول المميزة',
         'success_stories' => 'قصص النجاح',

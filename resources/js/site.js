@@ -2,6 +2,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { raceWidget } from './race-widget';
 import { racingSearch } from './racing-search';
+import { silksDesigner } from './silks-designer';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -1322,4 +1323,5 @@ document.addEventListener('DOMContentLoaded', () => {
     eventsCalendar();
     raceWidget();
     racingSearch();
+    silksDesigner();
 });

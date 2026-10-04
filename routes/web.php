@@ -20,6 +20,7 @@ use App\Http\Controllers\Site\RacingHandicapController;
 use App\Http\Controllers\Site\RacingPdfController;
 use App\Http\Controllers\Site\RacingRaceController;
 use App\Http\Controllers\Site\RacingWidgetController;
+use App\Http\Controllers\Site\SilksController;
 use App\Http\Controllers\Site\ShopController;
 use App\Http\Controllers\Site\StableBookingController;
 use App\Http\Controllers\Site\StableController;
@@ -83,6 +84,9 @@ Route::get('/racing/search', [RacingController::class, 'search'])->name('racing.
 Route::get('/racing/image', [RacingController::class, 'image'])->name('racing.image');
 Route::get('/racing/calendar', [RacingCalendarController::class, 'index'])->name('racing.calendar');
 Route::get('/racing/widget', RacingWidgetController::class)->middleware('throttle:120,1')->name('racing.widget');
+// the silks designer block's drawing as a file (two segments, so no clash with the /{slug} CMS route)
+Route::get('/silks/image', [SilksController::class, 'image'])->middleware('throttle:120,1')->name('silks.image');
+Route::post('/silks/pdf', [SilksController::class, 'pdf'])->middleware('throttle:20,1')->name('silks.pdf');
 Route::get('/racing/calendar/{date}', [RacingCalendarController::class, 'day'])->where('date', '\d{4}-\d{2}-\d{2}')->name('racing.calendar.day');
 Route::get('/racing/handicap-ratings', [RacingHandicapController::class, 'index'])->name('racing.handicap');
 Route::get('/racing/{entity}/{id}/pdf', [RacingPdfController::class, 'profile'])

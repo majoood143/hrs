@@ -30,6 +30,7 @@ class CmsBlocks
             static::horseSearch(),
             static::raceCalendar(),
             static::raceWidget(),
+            static::silksDesigner(),
             static::transferBoard(),
             static::featuredHorses(),
             static::successStories(),
@@ -154,6 +155,18 @@ class CmsBlocks
         return Block::make('race_widget')
             ->label(__('cms.blocks.race_widget'))
             ->icon('heroicon-o-flag')
+            ->schema([
+                static::headingField(required: false),
+                static::subheadingField(),
+            ]);
+    }
+
+    /** The racing silks designer; its colours and patterns are managed under CMS → Silk colours / Silk patterns. */
+    public static function silksDesigner(): Block
+    {
+        return Block::make('silks_designer')
+            ->label(__('cms.blocks.silks_designer'))
+            ->icon('heroicon-o-swatch')
             ->schema([
                 static::headingField(required: false),
                 static::subheadingField(),

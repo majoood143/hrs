@@ -11,6 +11,7 @@ return [
         'horse_search_default_type' => 'Default search type',
         'race_calendar' => 'Race Calendar',
         'race_widget' => 'Races Widget',
+        'silks_designer' => 'Racing Silks Designer',
         'transfer_board' => 'Transfer Board',
         'featured_horses' => 'Featured Horses',
         'success_stories' => 'Success Stories',
