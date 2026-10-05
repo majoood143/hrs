@@ -5,6 +5,7 @@ namespace Packstub\FormBuilder\Filament\Resources\FormResource\Pages;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Packstub\FormBuilder\FormBuilder;
 use Packstub\FormBuilder\FormBuilderPlugin;
 use Packstub\FormBuilder\Models\Form;
 
@@ -24,6 +25,7 @@ class EditForm extends EditRecord
                 ->color('gray')
                 ->url(fn (): ?string => $this->getRecord()->pageUrl(), shouldOpenInNewTab: true)
                 ->visible(fn (): bool => $this->getRecord() instanceof Form && $this->getRecord()->pageUrl() !== null),
+            ...app(FormBuilder::class)->recordActions(),
             DeleteAction::make(),
         ];
     }

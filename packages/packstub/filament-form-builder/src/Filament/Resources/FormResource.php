@@ -287,6 +287,7 @@ class FormResource extends Resource
             ])
             ->recordActions([
                 EditAction::make(),
+                ...app(FormBuilder::class)->recordActions(),
                 Action::make('open')
                     ->label(__('packstub-form-builder::form-builder.actions.open_page'))
                     ->icon('heroicon-o-arrow-top-right-on-square')
@@ -312,6 +313,9 @@ class FormResource extends Resource
             'index' => Pages\ListForms::route('/'),
             'create' => Pages\CreateForm::route('/create'),
             'edit' => Pages\EditForm::route('/{record}/edit'),
+            ...collect(app(FormBuilder::class)->resourcePages())
+                ->map(fn (array $page) => $page['page']::route($page['path']))
+                ->all(),
         ];
     }
 }

@@ -15,6 +15,10 @@ use Filament\Schemas\Components\Grid;
 use App\Models\AdZone;
 use App\Models\VideoFolder;
 use App\Services\Racing\RacingSearchType;
+use App\Support\FormChartBlock;
+use Filament\Forms\Components\DatePicker;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Packstub\FormBuilder\Models\Form as FormBuilderForm;
 
 class CmsBlocks
@@ -46,6 +50,7 @@ class CmsBlocks
             static::columns(),
             static::htmlEmbed(),
             static::form(),
+            static::formChart(),
             static::divider(),
             
         ];
@@ -570,6 +575,70 @@ class CmsBlocks
                     ])
                     ->default('boxed')
                     ->native(false),
+            ])
+            ->columns(2);
+    }
+
+    /**
+     * A chart of one field of a form's results (App\Support\FormChartBlock). Forms linked to a paid
+     * service are not offered, and only fields with a fixed set of answers can be picked.
+     */
+    public static function formChart(): Block
+    {
+        return Block::make('form_chart')
+            ->label(__('cms.blocks.form_chart'))
+            ->icon('heroicon-o-chart-pie')
+            ->schema([
+                static::headingField(required: false),
+                static::subheadingField(),
+                Select::make('form_id')
+                    ->label(__('cms.blocks.form_select'))
+                    ->helperText(__('cms.blocks.form_chart_form_helper'))
+                    ->options(fn () => FormChartBlock::formOptions())
+                    ->searchable()
+                    ->native(false)
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(fn (Set $set) => $set('field_key', null)),
+                Select::make('field_key')
+                    ->label(__('cms.blocks.form_chart_field'))
+                    ->helperText(__('cms.blocks.form_chart_field_helper'))
+                    ->options(fn (Get $get) => FormChartBlock::fieldOptions($get('form_id')))
+                    ->native(false)
+                    ->required(),
+                Select::make('style')
+                    ->label(__('cms.blocks.form_chart_style'))
+                    ->helperText(__('cms.blocks.form_chart_style_helper'))
+                    ->options(collect(FormChartBlock::STYLES)->mapWithKeys(fn (string $style) => [$style => __('cms.blocks.form_chart_styles.'.$style)])->all())
+                    ->default('auto')
+                    ->selectablePlaceholder(false)
+                    ->native(false),
+                Select::make('display')
+                    ->label(__('cms.blocks.form_chart_display'))
+                    ->options([
+                        'count' => __('cms.blocks.form_chart_display_count'),
+                        'percent' => __('cms.blocks.form_chart_display_percent'),
+                    ])
+                    ->default('count')
+                    ->selectablePlaceholder(false)
+                    ->native(false),
+                DatePicker::make('date_from')
+                    ->label(__('cms.blocks.form_chart_date_from'))
+                    ->helperText(__('cms.blocks.form_chart_dates_helper')),
+                DatePicker::make('date_to')
+                    ->label(__('cms.blocks.form_chart_date_to'))
+                    ->afterOrEqual('date_from'),
+                TextInput::make('min_answers')
+                    ->label(__('cms.blocks.form_chart_min_answers'))
+                    ->helperText(__('cms.blocks.form_chart_min_answers_helper', ['min' => FormChartBlock::MIN_ANSWERS, 'rare' => FormChartBlock::RARE]))
+                    ->numeric()
+                    ->integer()
+                    ->minValue(FormChartBlock::MIN_ANSWERS)
+                    ->default(FormChartBlock::MIN_ANSWERS),
+                Toggle::make('show_table')
+                    ->label(__('cms.blocks.form_chart_show_table'))
+                    ->default(true)
+                    ->inline(false),
             ])
             ->columns(2);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Filament\Forms\ViewFormInsights;
 use App\Filament\Support\FormPaymentTab;
 use App\Models\Setting;
 use App\Models\SiteSetting;
@@ -17,6 +18,7 @@ use App\Support\FormOrderSettings;
 use App\Support\ImageCompressor;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Exception;
+use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
@@ -53,6 +55,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(SettingsService::class, function () {
             return new SettingsService;
         });
+
+        // Each form's Insights page (charts of its submissions). Registered here, not in boot(): Filament
+        // loads its panel routes while the package providers boot, which is before this provider's boot().
+        FormBuilder::registerResourcePage('insights', ViewFormInsights::class, '/{record}/insights');
     }
 
     /**
@@ -97,6 +103,14 @@ class AppServiceProvider extends ServiceProvider
         });
         FormBuilder::beforeForm(fn (FormBuilderForm $form): string => FormOrderSettings::for($form)->priceNoticeHtml());
         FormBuilder::holdNotificationsWhen(fn (FormBuilderForm $form): bool => FormOrderSettings::for($form)->heldUntilPaid());
+
+        // The way to each form's Insights page (registered in register()), from the forms list and the editor.
+        FormBuilder::registerRecordAction(fn () => Action::make('insights')
+            ->label(__('admin_form_insights.action'))
+            ->icon('heroicon-o-chart-pie')
+            ->color('gray')
+            ->url(fn (FormBuilderForm $record): string => ViewFormInsights::getUrl(['record' => $record]))
+            ->visible(fn (FormBuilderForm $record): bool => ViewFormInsights::canAccess(['record' => $record])));
 
         // The listeners in app/Listeners (CreateOrderFromSubmission, NotifyOnOrderReceived, NotifyOnOrderCompleted)
         // are found by Laravel's own event discovery: registering them here as well would run each one twice.

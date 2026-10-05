@@ -30,6 +30,7 @@ class IncomeStatement
         public readonly CarbonImmutable $to,
         public readonly ?int $serviceId = null,
         public readonly ?string $gateway = null,
+        public readonly ?int $formId = null,
     ) {}
 
     /** The first and last day of a named period ("custom" takes the two dates given). */
@@ -70,6 +71,7 @@ class IncomeStatement
             ->where(fn ($query) => $query->whereNull('collected_by')->orWhere('collected_by', '!=', 'stable'))
             ->when($this->serviceId, fn ($query, $id) => $query->where('service_id', $id))
             ->when($this->gateway, fn ($query, $gateway) => $query->where('payment_method', $gateway))
+            ->when($this->formId, fn ($query, $id) => $query->where('form_id', $id))
             ->orderBy('paid_at')
             ->orderBy('id')
             ->get()

@@ -28,6 +28,12 @@ class FormBuilder
     /** @var array<int, \Closure(Form): bool> */
     protected array $holdNotifications = [];
 
+    /** @var array<string, array{page: class-string, path: string}> */
+    protected array $resourcePages = [];
+
+    /** @var array<int, \Closure(): mixed> */
+    protected array $recordActions = [];
+
     public function __construct(protected FieldTypeRegistry $types) {}
 
     /** @return class-string<Form> */
@@ -107,6 +113,7 @@ class FormBuilder
     public function forgetHooks(): static
     {
         $this->formTabs = $this->closedChecks = $this->beforeForm = $this->holdNotifications = [];
+        $this->resourcePages = $this->recordActions = [];
 
         return $this;
     }
@@ -135,6 +142,46 @@ class FormBuilder
     public function formTabs(): array
     {
         return array_map(fn (\Closure $factory) => $factory(), $this->formTabs);
+    }
+
+    /**
+     * Add a page of the app's own to the Forms resource (a report on one form...). The page is a
+     * Filament resource page; `$path` is its route under the resource, e.g. "/{record}/insights".
+     *
+     * @param  class-string  $page
+     */
+    public function registerResourcePage(string $name, string $page, string $path): static
+    {
+        $this->resourcePages[$name] = ['page' => $page, 'path' => $path];
+
+        return $this;
+    }
+
+    /**
+     * @return array<string, array{page: class-string, path: string}>
+     */
+    public function resourcePages(): array
+    {
+        return $this->resourcePages;
+    }
+
+    /**
+     * Add an action to each form: a row action of the forms table and a header action of the
+     * form editor. The closure returns a Filament Action; its record is the form.
+     *
+     * @param  \Closure(): mixed  $factory
+     */
+    public function registerRecordAction(\Closure $factory): static
+    {
+        $this->recordActions[] = $factory;
+
+        return $this;
+    }
+
+    /** @return array<int, mixed> */
+    public function recordActions(): array
+    {
+        return array_map(fn (\Closure $factory) => $factory(), $this->recordActions);
     }
 
     /**

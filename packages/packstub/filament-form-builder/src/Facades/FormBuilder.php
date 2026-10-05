@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static \Packstub\FormBuilder\Submissions\SubmissionResult submit(\Packstub\FormBuilder\Models\Form|string|int $form, array $data, ?\Packstub\FormBuilder\Submissions\SubmissionContext $context = null)
  * @method static string formModel()
  * @method static string submissionModel()
+ * @method static \Packstub\FormBuilder\FormBuilder registerResourcePage(string $name, string $page, string $path)
+ * @method static \Packstub\FormBuilder\FormBuilder registerRecordAction(\Closure $factory)
  *
  * @see \Packstub\FormBuilder\FormBuilder
  */
