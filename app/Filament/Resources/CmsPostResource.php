@@ -6,6 +6,7 @@ use App\Filament\Blocks\Cms\CmsBlocks;
 use App\Filament\Resources\CmsPostResource\Pages\CreateCmsPost;
 use App\Filament\Resources\CmsPostResource\Pages\EditCmsPost;
 use App\Filament\Resources\CmsPostResource\Pages\ListCmsPosts;
+use App\Filament\Support\WebsiteLinkActions;
 use App\Models\CmsCategory;
 use App\Models\CmsPost;
 use Filament\Actions\ActionGroup;
@@ -19,8 +20,8 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\SpatieTagsInput;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
@@ -38,7 +39,9 @@ use Illuminate\Support\Str;
 class CmsPostResource extends Resource
 {
     protected static ?string $model = CmsPost::class;
+
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-newspaper';
+
     protected static ?int $navigationSort = 81;
 
     public static function getNavigationGroup(): ?string
@@ -185,7 +188,7 @@ class CmsPostResource extends Resource
                                                 ->native(false)
                                                 ->required(),
 
-                                            \Filament\Forms\Components\Toggle::make('show_title')
+                                            Toggle::make('show_title')
                                                 ->label(__('cms_post.fields.show_title'))
                                                 ->helperText(__('cms_post.fields.show_title_helper'))
                                                 ->default(true)
@@ -310,6 +313,12 @@ class CmsPostResource extends Resource
             ])
             ->recordActions([
                 ActionGroup::make([
+                    ...WebsiteLinkActions::make(
+                        url: fn (CmsPost $record): string => route('blog.show', $record->slug),
+                        isPublic: fn (CmsPost $record): bool => filled($record->slug)
+                            && $record->status === 'published'
+                            && ($record->published_at === null || $record->published_at->lte(now())),
+                    ),
                     EditAction::make(),
                     DeleteAction::make(),
                 ]),
