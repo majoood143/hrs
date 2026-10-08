@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Seo;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -46,6 +47,17 @@ class CmsPost extends Model implements HasMedia
     public function featuredImageUrl(): ?string
     {
         return $this->getFirstMediaUrl('featured_image') ?: null;
+    }
+
+    /**
+     * The image shown when the post is shared: its own OG image, else the
+     * featured image, else the site-wide default.
+     */
+    public function ogImageUrl(): ?string
+    {
+        return $this->getFirstMediaUrl('og_image')
+            ?: $this->featuredImageUrl()
+            ?: Seo::defaultImage();
     }
 
     protected static function booted(): void

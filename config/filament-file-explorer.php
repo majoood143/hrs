@@ -1,5 +1,8 @@
 <?php
 
+use App\Support\MediaLibraryAuthorizer;
+use Ardavan\FilamentFileExplorer\Livewire\FileExplorer;
+
 return [
 
     /*
@@ -11,7 +14,8 @@ return [
     | or override this class name in config after publishing.
     |
     */
-    'authorizer' => Ardavan\FilamentFileExplorer\Authorizers\AllowAllAuthorizer::class,
+    // Ours: Shield permissions on the MediaLibrary (the plugin's AllowAllAuthorizer lets any signed-in user in).
+    'authorizer' => MediaLibraryAuthorizer::class,
 
     /*
     |--------------------------------------------------------------------------
@@ -62,6 +66,8 @@ return [
         'max_size_kb' => 51200,
         'allowed_extensions' => [
             'pdf', 'doc', 'docx', 'txt', 'png', 'jpg', 'jpeg', 'webp', 'zip', 'rar',
+            // added for the site's media: animations, spreadsheets, slides, video (never svg: served publicly it can carry scripts)
+            'gif', 'xls', 'xlsx', 'csv', 'ppt', 'pptx', 'mp4',
         ],
         'allowed_mime_types' => [
             'application/pdf',
@@ -75,6 +81,13 @@ return [
             'application/x-zip-compressed',
             'application/x-rar-compressed',
             'application/vnd.rar',
+            'image/gif',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'text/csv',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'video/mp4',
         ],
     ],
 
@@ -93,6 +106,6 @@ return [
     | Livewire component
     |--------------------------------------------------------------------------
     */
-    'livewire_component' => Ardavan\FilamentFileExplorer\Livewire\FileExplorer::class,
+    'livewire_component' => FileExplorer::class,
 
 ];

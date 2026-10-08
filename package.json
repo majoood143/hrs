@@ -4,10 +4,13 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "build:filament-plugins": "esbuild resources/js/filament/rich-editor/text-direction.js --bundle --format=esm --minify --outfile=resources/js/dist/filament/rich-editor/text-direction.js"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
+        "@tiptap/core": "^3.31.4",
+        "@tiptap/pm": "^3.31.4",
         "axios": "^1.11.0",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^2.0.0",

@@ -59,7 +59,7 @@ class VideoLibraryController extends Controller
         return view('site.video-library.show', [
             'video' => $video,
             'seoTitle' => $video->title.' — '.SiteSetting::siteName(),
-            'seoDescription' => $video->description ? Str::limit($video->description, 160) : null,
+            'seoDescription' => $video->descriptionText() ? Str::limit($video->descriptionText(), 160) : null,
             'seoImage' => $video->thumbnail_url,
         ]);
     }

@@ -23,9 +23,9 @@
             </div>
         @endif
 
-        @if($video->description)
-            <div class="mt-8">
-                <p class="whitespace-pre-line text-sm leading-relaxed text-warm-900/80">{{ $video->description }}</p>
+        @if($descriptionHtml = $video->descriptionHtml())
+            <div class="mt-8 space-y-3 text-sm leading-relaxed text-warm-900/80 [&_a]:text-warm-700 [&_a]:underline [&_a:hover]:text-warm-900 [&_blockquote]:border-s-4 [&_blockquote]:border-warm-200 [&_blockquote]:ps-4 [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-warm-900 [&_h3]:font-display [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-warm-900 [&_li]:ms-5 [&_ol]:list-decimal [&_ul]:list-disc">
+                {!! $descriptionHtml !!}
             </div>
         @endif
 

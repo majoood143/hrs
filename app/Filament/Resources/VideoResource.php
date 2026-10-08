@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\VideoResource\Pages\CreateVideo;
 use App\Filament\Resources\VideoResource\Pages\EditVideo;
 use App\Filament\Resources\VideoResource\Pages\ListVideos;
+use App\Filament\RichEditor\TextDirectionPlugin;
 use App\Filament\Support\TranslatableInput;
 use App\Filament\Support\WebsiteLinkActions;
 use App\Models\Video;
@@ -15,8 +16,8 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -27,12 +28,15 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class VideoResource extends Resource
 {
     protected static ?string $model = Video::class;
+
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-play-circle';
+
     protected static ?int $navigationSort = 92;
 
     public static function getNavigationGroup(): ?string
@@ -60,9 +64,9 @@ class VideoResource extends Resource
      * than via relationship('folder', 'id') because that variant only preloads
      * the first 50 rows and searches the id column, not the translated name.
      *
-     * @return \Illuminate\Support\Collection<int, string>
+     * @return Collection<int, string>
      */
-    protected static function folderOptions(): \Illuminate\Support\Collection
+    protected static function folderOptions(): Collection
     {
         return VideoFolder::query()
             ->with('parent.parent.parent')
@@ -84,7 +88,7 @@ class VideoResource extends Resource
                     ->required(),
 
                 TranslatableInput::grid(fn ($code, $meta) => TextInput::make("title.{$code}")
-                    ->label(__('videos.fields.title') . ' (' . $meta['native'] . ')')
+                    ->label(__('videos.fields.title').' ('.$meta['native'].')')
                     ->required($code === TranslatableInput::defaultLocale())
                     ->maxLength(255)
                     ->live(onBlur: true)
@@ -100,9 +104,11 @@ class VideoResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
 
-                TranslatableInput::grid(fn ($code, $meta) => Textarea::make("description.{$code}")
-                    ->label(__('videos.fields.description') . ' (' . $meta['native'] . ')')
-                    ->rows(4)),
+                TranslatableInput::grid(fn ($code, $meta) => RichEditor::make("description.{$code}")
+                    ->label(__('videos.fields.description').' ('.$meta['native'].')')
+                    ->plugins([TextDirectionPlugin::make()])
+                    ->toolbarButtons(TextDirectionPlugin::toolbar()))
+                    ->columnSpanFull(),
 
                 TextInput::make('youtube_url')
                     ->label(__('videos.fields.youtube_url'))

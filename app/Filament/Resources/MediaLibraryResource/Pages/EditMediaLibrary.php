@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\MediaLibraryResource\Pages;
 
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\MediaLibraryResource;
+use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditMediaLibrary extends EditRecord
@@ -13,7 +13,7 @@ class EditMediaLibrary extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            MediaLibraryResource::configureDelete(DeleteAction::make()),
         ];
     }
 

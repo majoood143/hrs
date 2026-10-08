@@ -13,9 +13,9 @@
     </div>
     <div class="p-5">
         <h3 class="font-display text-lg font-semibold text-warm-900">{{ $video->title }}</h3>
-        @if($video->description)
+        @if($video->descriptionText())
             <p class="mt-2 line-clamp-2 text-sm leading-relaxed text-warm-900/70">
-                {{ $video->description }}
+                {{ $video->descriptionText() }}
             </p>
         @endif
     </div>

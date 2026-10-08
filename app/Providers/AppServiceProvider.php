@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Filament\Forms\SubmissionPdfActions;
 use App\Filament\Forms\ViewFormInsights;
+use App\Filament\RichEditor\TextDirectionPlugin;
 use App\Filament\Support\FormPaymentTab;
 use App\Models\Setting;
 use App\Models\SiteSetting;
@@ -21,6 +22,8 @@ use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
+use Filament\Support\Assets\Js;
+use Filament\Support\Facades\FilamentAsset;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -72,6 +75,13 @@ class AppServiceProvider extends ServiceProvider
         // long-lived worker (Octane, queue, the test suite rebuilding the app per test) never
         // serves a previous request's settings.
         SiteSetting::resetMemo();
+
+        // The rich editor's text-direction extension (npm run build:filament-plugins,
+        // then php artisan filament:assets copies it to public/js/app).
+        FilamentAsset::register([
+            Js::make(TextDirectionPlugin::ASSET, resource_path('js/dist/filament/rich-editor/text-direction.js'))
+                ->loadedOnRequest(),
+        ]);
 
         Gate::define('viewApiDocs', function ($user) {
             return $user?->hasRole('super_admin') ?? false;

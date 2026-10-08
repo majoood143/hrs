@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Filament\RichEditor\TextDirectionPlugin;
 use App\Support\YouTube;
+use Filament\Forms\Components\RichEditor\RichContentRenderer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -33,6 +35,35 @@ class Video extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
+    }
+
+    /**
+     * The description as safe HTML (rich text from the admin editor, sanitized,
+     * keeping alignment, `dir` and links), or null when empty.
+     */
+    public function descriptionHtml(): ?string
+    {
+        $html = $this->description;
+
+        if (blank(strip_tags((string) $html))) {
+            return null;
+        }
+
+        return RichContentRenderer::make($html)
+            ->plugins([TextDirectionPlugin::make()])
+            ->toHtml();
+    }
+
+    /** The description as plain text, for cards and SEO. */
+    public function descriptionText(): ?string
+    {
+        $text = trim(preg_replace('/\s+/u', ' ', html_entity_decode(
+            strip_tags(preg_replace('/<\/(p|h[1-6]|li|blockquote)>|<br\s*\/?>/i', '$0 ', (string) $this->description)),
+            ENT_QUOTES | ENT_HTML5,
+            'UTF-8',
+        )));
+
+        return $text === '' ? null : $text;
     }
 
     public function getYoutubeIdAttribute(): ?string

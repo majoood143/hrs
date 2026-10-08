@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Livewire\MediaExplorer;
 use Ardavan\FilamentFileExplorer\FilamentFileExplorerServiceProvider as BaseServiceProvider;
 use Ardavan\FilamentFileExplorer\Livewire\FileExplorer;
 use Livewire\Livewire;
@@ -33,6 +34,9 @@ class FilamentFileExplorerServiceProvider extends BaseServiceProvider
 
         Livewire::component('filament-file-explorer::file-explorer', FileExplorer::class);
         Livewire::component('filament-file-explorer.file-explorer', FileExplorer::class);
+
+        // The Media Library's explorer: the plugin's component + the share bar (public link, copy, share).
+        Livewire::component('media-explorer', MediaExplorer::class);
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
