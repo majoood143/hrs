@@ -3,17 +3,16 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Concerns\HasExportActions;
-use Filament\Actions\CreateAction;
-use Exception;
-use Filament\Schemas\Components\Tabs\Tab;
 use App\Filament\Resources\UserResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
-
 use App\Mail\WelcomeEmail;
 use App\Services\SettingsService;
+use Exception;
 use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Mail;
 
 class ListUsers extends ListRecords
@@ -27,7 +26,9 @@ class ListUsers extends ListRecords
         return [
             CreateAction::make(),
             Action::make('sendWelcomeEmail')
-                ->label('Send Welcome Email')
+                ->label(__('admin_user.actions.send_welcome'))
+                ->icon('heroicon-o-envelope')
+                ->modalDescription(__('admin_user.actions.send_welcome_description'))
                 ->action(function (SettingsService $settings) {
                     $users = $this->getTable()->getRecords();
 
@@ -47,23 +48,24 @@ class ListUsers extends ListRecords
                         }
                     }
                 })
-                ->requiresConfirmation()
+                ->requiresConfirmation(),
         ];
     }
 
     public function getTabs(): array
     {
-        return [
-            null => Tab::make('All'),
-            'Admins' => Tab::make()->query(fn ($query) => $query->where('is_admin', true)),
-            'Stable owner' => Tab::make()->query(fn($query) => $query->where('type', 'stable_owner')),
-            'Owner' => Tab::make()->query(fn($query) => $query->where('type', 'owner')),
-            'Trainer' => Tab::make()->query(fn($query) => $query->where('type', 'trainer')),
-            'Veterinarian' => Tab::make()->query(fn($query) => $query->where('type', 'veterinarian')),
-            'Jockey' => Tab::make()->query(fn($query) => $query->where('type', 'jockey')),
-            'Groom' => Tab::make()->query(fn($query) => $query->where('type', 'groom')),
-            'Farrier' => Tab::make()->query(fn($query) => $query->where('type', 'farrier')),
-            'Trainer assistant' => Tab::make()->query(fn($query) => $query->where('type', 'trainer_assistant')),
+        $tabs = [
+            'all' => Tab::make(__('admin_user.tabs.all')),
+            // "staff" = anyone with a Shield role, i.e. who can actually do something in /admin
+            'staff' => Tab::make(__('admin_user.tabs.staff'))
+                ->icon('heroicon-o-shield-check')
+                ->query(fn (Builder $query) => $query->whereHas('roles')),
         ];
+
+        foreach (UserResource::typeOptions() as $type => $label) {
+            $tabs[$type] = Tab::make($label)->query(fn (Builder $query) => $query->where('type', $type));
+        }
+
+        return $tabs;
     }
 }

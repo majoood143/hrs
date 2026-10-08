@@ -2,6 +2,7 @@
 .fb-form *,.fb-form *::before,.fb-form *::after{box-sizing:inherit}
 .fb-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.125rem 1.25rem}
 .fb-field{grid-column:span 2;display:flex;flex-direction:column;gap:.4375rem;min-width:0}
+.fb-field[hidden]{display:none}
 @media (min-width:640px){.fb-field--half{grid-column:span 1}}
 .fb-label{font-weight:600;font-size:.9375rem;line-height:1.4}
 .fb-required{color:var(--_danger);margin-inline-start:.125rem}

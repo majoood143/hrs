@@ -4,8 +4,8 @@ namespace Packstub\FormBuilder\Fields\Types;
 
 use Closure;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
-use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -44,6 +44,11 @@ class FileField extends FieldType
         return 'heroicon-o-paper-clip';
     }
 
+    public function group(): string
+    {
+        return 'other';
+    }
+
     public function editorSchema(): array
     {
         return [
@@ -51,12 +56,38 @@ class FileField extends FieldType
                 ->label(__('packstub-form-builder::form-builder.editor.accepted_types'))
                 ->helperText(__('packstub-form-builder::form-builder.editor.accepted_types_hint'))
                 ->placeholder('pdf'),
-            TextInput::make('max_size')
+            // Still stored in KB (what the "max" rule takes); offered in MB.
+            Select::make('max_size')
                 ->label(__('packstub-form-builder::form-builder.editor.max_size'))
-                ->integer()
-                ->minValue(1)
-                ->default((int) config('packstub-form-builder.uploads.max_size', 5120)),
+                ->options(fn (mixed $state): array => static::maxSizeOptions($state))
+                ->default((int) config('packstub-form-builder.uploads.max_size', 5120))
+                ->selectablePlaceholder(false)
+                ->native(false),
         ];
+    }
+
+    /**
+     * KB => "5 MB". A size saved before the list existed (any number of KB) stays on offer.
+     *
+     * @return array<int, string>
+     */
+    public static function maxSizeOptions(mixed $current = null): array
+    {
+        $sizes = [1024, 2048, 5120, 10240, 20480, 51200];
+
+        if (is_numeric($current) && (int) $current > 0) {
+            $sizes[] = (int) $current;
+        }
+
+        $sizes[] = (int) config('packstub-form-builder.uploads.max_size', 5120);
+        $sizes = array_unique($sizes);
+        sort($sizes);
+
+        return collect($sizes)->mapWithKeys(fn (int $kb): array => [
+            $kb => __('packstub-form-builder::form-builder.editor.size_mb', [
+                'size' => rtrim(rtrim(number_format($kb / 1024, 2, '.', ''), '0'), '.'),
+            ]),
+        ])->all();
     }
 
     public function rules(Field $field): array

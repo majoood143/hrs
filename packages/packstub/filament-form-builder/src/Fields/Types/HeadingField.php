@@ -22,6 +22,11 @@ class HeadingField extends FieldType
         return 'heroicon-o-h2';
     }
 
+    public function group(): string
+    {
+        return 'layout';
+    }
+
     public function isInput(): bool
     {
         return false;

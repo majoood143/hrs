@@ -18,6 +18,11 @@ class PhoneField extends InputField
         return 'heroicon-o-phone';
     }
 
+    public function group(): string
+    {
+        return 'contact';
+    }
+
     public function inputType(): string
     {
         return 'tel';

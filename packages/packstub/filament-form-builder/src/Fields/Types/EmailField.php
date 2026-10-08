@@ -18,9 +18,22 @@ class EmailField extends InputField
         return 'heroicon-o-envelope';
     }
 
+    public function group(): string
+    {
+        return 'contact';
+    }
+
     public function inputType(): string
     {
         return 'email';
+    }
+
+    public function defaultInput(): Component
+    {
+        return TextInput::make('default')
+            ->label(__('packstub-form-builder::form-builder.editor.default'))
+            ->email()
+            ->maxLength(255);
     }
 
     public function rules(Field $field): array

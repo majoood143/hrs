@@ -20,6 +20,11 @@ class ParagraphField extends FieldType
         return 'heroicon-o-document-text';
     }
 
+    public function group(): string
+    {
+        return 'layout';
+    }
+
     public function isInput(): bool
     {
         return false;

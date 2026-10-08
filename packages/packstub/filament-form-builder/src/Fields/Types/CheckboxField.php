@@ -22,6 +22,11 @@ class CheckboxField extends FieldType
         return 'heroicon-o-check';
     }
 
+    public function group(): string
+    {
+        return 'choices';
+    }
+
     public function rules(Field $field): array
     {
         return $field->required ? ['accepted'] : [];

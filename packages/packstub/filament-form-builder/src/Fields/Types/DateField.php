@@ -18,6 +18,11 @@ class DateField extends InputField
         return 'heroicon-o-calendar';
     }
 
+    public function group(): string
+    {
+        return 'basic';
+    }
+
     public function inputType(): string
     {
         return 'date';
@@ -33,6 +38,13 @@ class DateField extends InputField
                 ->label(__('packstub-form-builder::form-builder.editor.max_date'))
                 ->native(),
         ];
+    }
+
+    public function defaultInput(): Component
+    {
+        return DatePicker::make('default')
+            ->label(__('packstub-form-builder::form-builder.editor.default'))
+            ->native();
     }
 
     public function rules(Field $field): array

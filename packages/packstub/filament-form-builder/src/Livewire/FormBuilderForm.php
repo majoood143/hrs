@@ -2,8 +2,10 @@
 
 namespace Packstub\FormBuilder\Livewire;
 
+use Filament\Forms\Components\Field as FilamentField;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Components\Component as SchemaComponent;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\View\View;
@@ -17,6 +19,7 @@ use Packstub\FormBuilder\Models\Form as FormModel;
 use Packstub\FormBuilder\Submissions\ProtectionToken;
 use Packstub\FormBuilder\Submissions\SubmissionContext;
 use Packstub\FormBuilder\Submissions\Submitter;
+use Packstub\FormBuilder\Support\FieldConditions;
 
 /**
  * <livewire:form-builder form="contact" />
@@ -62,12 +65,27 @@ class FormBuilderForm extends Component implements HasForms
     public function form(Schema $schema): Schema
     {
         $model = $this->getFormModel();
+        $sources = $model->fieldList()->map(fn (Field $field): ?string => $field->condition()['field'] ?? null)->filter()->all();
 
         return $schema
             ->components([
                 Grid::make(2)->schema(
                     $model->fieldList()
-                        ->map(fn (Field $field) => $field->type->formComponent($field))
+                        ->map(function (Field $field) use ($model, $sources): SchemaComponent {
+                            $component = $field->type->formComponent($field);
+
+                            // a field others depend on re-renders the form as it changes
+                            if (in_array($field->key, $sources, true) && $component instanceof FilamentField) {
+                                $component->live();
+                            }
+
+                            // hidden components are neither validated nor sent, as the server expects
+                            if ($field->condition() !== null) {
+                                $component->visible(fn (): bool => in_array($field->key, FieldConditions::visibleKeys($model, (array) $this->data), true));
+                            }
+
+                            return $component;
+                        })
                         ->all(),
                 ),
             ])

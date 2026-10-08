@@ -6,16 +6,18 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
+use Packstub\FormBuilder\Console\MoveUploadsToPrivateDisk;
 use Packstub\FormBuilder\Events\SubmissionReceived;
 use Packstub\FormBuilder\Fields\FieldTypeRegistry;
-use Packstub\FormBuilder\Console\MoveUploadsToPrivateDisk;
 use Packstub\FormBuilder\Http\Controllers\DownloadUploadController;
 use Packstub\FormBuilder\Http\Controllers\FormDefinitionController;
+use Packstub\FormBuilder\Http\Controllers\PreviewFormController;
 use Packstub\FormBuilder\Http\Controllers\ShowFormController;
 use Packstub\FormBuilder\Http\Controllers\SubmitFormController;
 use Packstub\FormBuilder\Listeners\DispatchToSinks;
 use Packstub\FormBuilder\Listeners\SendSubmissionNotifications;
 use Packstub\FormBuilder\Livewire\FormBuilderForm;
+use Packstub\FormBuilder\Support\FormPreview;
 use Packstub\FormBuilder\Support\UploadLinks;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
@@ -72,6 +74,16 @@ class FormBuilderServiceProvider extends PackageServiceProvider
         if (config('packstub-form-builder.uploads.route.enabled', true)) {
             $this->registerUploadRoute();
         }
+
+        $this->registerPreviewRoute();
+    }
+
+    /** The editor's preview; outside the forms prefix for the same reason as the uploads. */
+    protected function registerPreviewRoute(): void
+    {
+        Route::get('form-preview/{token}', PreviewFormController::class)
+            ->middleware(['web'])
+            ->name(FormPreview::ROUTE);
     }
 
     /** Outside the forms prefix so a form whose slug is "files" can never collide with it. */

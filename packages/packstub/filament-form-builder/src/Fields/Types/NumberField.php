@@ -18,6 +18,11 @@ class NumberField extends InputField
         return 'heroicon-o-hashtag';
     }
 
+    public function group(): string
+    {
+        return 'basic';
+    }
+
     public function inputType(): string
     {
         return 'number';
@@ -37,6 +42,13 @@ class NumberField extends InputField
                 ->numeric()
                 ->placeholder('1'),
         ];
+    }
+
+    public function defaultInput(): Component
+    {
+        return TextInput::make('default')
+            ->label(__('packstub-form-builder::form-builder.editor.default'))
+            ->numeric();
     }
 
     public function rules(Field $field): array

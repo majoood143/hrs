@@ -17,7 +17,7 @@ composer lint               # Pint
 - `src/Http/` `SubmitFormController` (HTML redirect back or JSON), `FormDefinitionController`, `ShowFormController` (hosted page), `FormState` (success / errors / old input from the session or the `fb_success` / `fb_state` query params).
 - `src/View/Components/Form.php` + `resources/views/components/form.blade.php` + `resources/views/fields/*` the Blade renderer; `resources/css/form-builder.css` and `resources/js/form-builder.js` are inlined once per page.
 - `src/Livewire/FormBuilderForm.php` the Livewire renderer (`<livewire:form-builder>`).
-- `src/Filament/` `FormResource` (Tabs: Fields / Settings / Embed), `FieldBlocks` (the Builder), `SubmissionsRelationManager`, `SubmissionsCsv`.
+- `src/Filament/` `FormResource` (Tabs: Fields / Settings / Embed), `FieldBlocks` (the Builder), `Pages\ManageSubmissions` (a form's submissions, a tab next to the editor), `SubmissionsCsv`.
 - `src/FormBuilder.php` (+ facade): field type registration, sinks, `find()`, `submit()` from code. `FormBuilderPlugin` registers types and the resource on a panel.
 - `config/packstub-form-builder.php`, `database/migrations/create_form_builder_tables.php.stub`, `resources/lang/en/form-builder.php` (every UI string).
 - `docs/` customer docs, synced to packstub.dev by CI.

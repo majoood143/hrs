@@ -13,6 +13,7 @@ use Packstub\FormBuilder\Fields\Field;
 use Packstub\FormBuilder\FormBuilder;
 use Packstub\FormBuilder\Models\Form;
 use Packstub\FormBuilder\Models\FormSubmission;
+use Packstub\FormBuilder\Support\FieldConditions;
 
 /**
  * The one path every submission takes, whatever the renderer: availability,
@@ -75,11 +76,20 @@ class Submitter
     {
         $input = array_diff_key($input, array_flip($this->spam->reservedKeys()));
 
-        $validated = Validator::make($input, $form->validationRules(), [], $form->validationAttributes())->validate();
+        $visible = FieldConditions::visibleKeys($form, $input);
+
+        $validated = Validator::make($input, $form->validationRules($visible), [], $form->validationAttributes())->validate();
 
         $data = [];
 
         foreach ($form->inputFields() as $field) {
+            // its "show only when" rule does not hold: whatever was sent is dropped
+            if (! in_array($field->key, $visible, true)) {
+                $data[$field->key] = null;
+
+                continue;
+            }
+
             $value = $validated[$field->key] ?? null;
 
             // Hidden fields fall back to their configured value.

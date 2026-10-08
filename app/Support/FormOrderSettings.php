@@ -171,7 +171,8 @@ class FormOrderSettings
 
         return collect($builderState ?? [])
             ->map(fn ($item) => is_array($item) ? Field::fromArray($item, $registry) : null)
-            ->filter(fn (?Field $field) => $field !== null && $field->isInput() && in_array($field->type::id(), $types, true))
+            // a conditional field may be hidden, and the order would then have no phone/email
+            ->filter(fn (?Field $field) => $field !== null && $field->isInput() && in_array($field->type::id(), $types, true) && $field->condition() === null)
             ->mapWithKeys(fn (Field $field) => [$field->key => $field->label.' ('.$field->key.')'])
             ->all();
     }

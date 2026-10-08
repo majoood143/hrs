@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static string submissionModel()
  * @method static \Packstub\FormBuilder\FormBuilder registerResourcePage(string $name, string $page, string $path)
  * @method static \Packstub\FormBuilder\FormBuilder registerRecordAction(\Closure $factory)
+ * @method static \Packstub\FormBuilder\FormBuilder registerSubmissionActions(\Closure $factory)
  *
  * @see \Packstub\FormBuilder\FormBuilder
  */

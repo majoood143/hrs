@@ -37,9 +37,17 @@ class ViewFormInsights extends Page implements HasForms
 
     private ?FormInsights $insights = null;
 
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-chart-pie';
+
     public static function getResource(): string
     {
         return FormBuilderPlugin::get()->getResource();
+    }
+
+    /** The form's Insights tab (next to the editor and its submissions). */
+    public static function getNavigationLabel(): string
+    {
+        return __('admin_form_insights.action');
     }
 
     /** @param  array<string, mixed>  $parameters */

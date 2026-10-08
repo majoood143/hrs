@@ -21,6 +21,9 @@ class User extends Authenticatable implements FilamentUser, HasTenants
 {
     public const TYPE_STABLE_OWNER = 'stable_owner';
 
+    /** The values of the `users.type` enum column, labelled by `admin_user.types.*`. */
+    public const TYPES = ['owner', 'stable_owner', 'trainer', 'trainer_assistant', 'veterinarian', 'farrier', 'jockey', 'groom', 'admin'];
+
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, HasRoles, Notifiable;
 

@@ -4,7 +4,6 @@ namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
 use App\Models\User;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateUser extends CreateRecord
@@ -13,7 +12,7 @@ class CreateUser extends CreateRecord
 
     protected function getRedirectUrl(): string
     { // Redirect to the list page after creation
-       return $this->getResource()::getUrl('index');   
+        return $this->getResource()::getUrl('index');
     }
 
     // public function mutateFormDataBeforeCreate(array $data): array

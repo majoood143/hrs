@@ -41,7 +41,7 @@
                         $error = $state->error($field->key);
                         $value = $state->old($field->key, $field->default);
                     @endphp
-                    <div @class(['fb-field', 'fb-field--half' => $field->width === 'half', 'fb-field--error' => $error !== null, 'fb-field--'.$field->type::id()]) data-fb-field="{{ $field->key }}">
+                    <div @class(['fb-field', 'fb-field--half' => $field->width === 'half', 'fb-field--error' => $error !== null, 'fb-field--'.$field->type::id()]) data-fb-field="{{ $field->key }}"@if ($field->condition()) data-fb-show-when="{{ json_encode($field->condition()) }}"@endif>
                         @include($field->type->view(), ['field' => $field, 'inputId' => $inputId, 'error' => $error, 'value' => $value])
                         @if ($field->isInput())
                             <p class="fb-error" data-fb-error-for="{{ $field->key }}" id="{{ $inputId }}-error" @if ($error === null) hidden @endif>{{ $error }}</p>

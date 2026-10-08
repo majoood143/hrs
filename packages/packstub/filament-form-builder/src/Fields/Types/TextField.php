@@ -13,4 +13,9 @@ class TextField extends InputField
     {
         return 'heroicon-o-minus';
     }
+
+    public function group(): string
+    {
+        return 'basic';
+    }
 }

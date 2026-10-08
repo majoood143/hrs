@@ -26,6 +26,36 @@ abstract class FieldType
         return $label === $key ? Str::headline(static::id()) : $label;
     }
 
+    /**
+     * One short line under the type's name in the builder's "Add field" menu.
+     */
+    public function description(): ?string
+    {
+        $key = 'packstub-form-builder::form-builder.type_descriptions.'.static::id();
+        $description = __($key);
+
+        return $description === $key ? null : $description;
+    }
+
+    /**
+     * Where the type sits in the "Add field" menu: basic, contact, choices, other or layout.
+     * Types of an unknown group come last.
+     */
+    public function group(): string
+    {
+        return 'other';
+    }
+
+    /**
+     * Whether the type's own settings (editorSchema) are fine-tuning that the builder
+     * folds under "More options" with the placeholder, default and rules, rather than
+     * something every field of the type needs (choices, a heading's level...).
+     */
+    public function hasAdvancedSettingsOnly(): bool
+    {
+        return false;
+    }
+
     public function icon(): string
     {
         return 'heroicon-o-pencil-square';
@@ -65,6 +95,17 @@ abstract class FieldType
     public function fixedChoices(): ?array
     {
         return null;
+    }
+
+    /**
+     * The builder's "Default value" input, typed for the field: a list of the choices,
+     * a date picker, a number... Stored under the field's "default" key either way.
+     */
+    public function defaultInput(): Component
+    {
+        return TextInput::make('default')
+            ->label(__('packstub-form-builder::form-builder.editor.default'))
+            ->maxLength(255);
     }
 
     /**

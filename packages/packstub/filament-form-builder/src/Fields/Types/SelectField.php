@@ -22,6 +22,11 @@ class SelectField extends FieldType
         return 'heroicon-o-chevron-up-down';
     }
 
+    public function group(): string
+    {
+        return 'choices';
+    }
+
     public function rules(Field $field): array
     {
         return $this->choiceRules($field);

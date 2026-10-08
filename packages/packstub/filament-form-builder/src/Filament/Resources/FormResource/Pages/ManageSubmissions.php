@@ -1,15 +1,17 @@
 <?php
 
-namespace Packstub\FormBuilder\Filament\Resources\FormResource\RelationManagers;
+namespace Packstub\FormBuilder\Filament\Resources\FormResource\Pages;
 
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Infolists\Components\KeyValueEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Navigation\NavigationItem;
+use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -18,38 +20,84 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 use Packstub\FormBuilder\Filament\SubmissionsCsv;
+use Packstub\FormBuilder\FormBuilder;
+use Packstub\FormBuilder\FormBuilderPlugin;
 use Packstub\FormBuilder\Models\Form;
 use Packstub\FormBuilder\Models\FormSubmission;
 
-class SubmissionsRelationManager extends RelationManager
+/**
+ * A form's submissions on a page of their own (`/forms/{record}/submissions`), one of the form's
+ * tabs next to the editor, so reading them never means opening the form builder. Whoever may view
+ * the form may open it. The host app can add actions to its menus (`FormBuilder::registerSubmissionActions()`).
+ */
+class ManageSubmissions extends ManageRelatedRecords
 {
     protected static string $relationship = 'submissions';
 
-    public static function getTitle(Model $ownerRecord, string $pageClass): string
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-inbox-stack';
+
+    public static function getResource(): string
+    {
+        return FormBuilderPlugin::get()->getResource();
+    }
+
+    /** @param  array<string, mixed>  $parameters */
+    public static function canAccess(array $parameters = []): bool
+    {
+        $resource = static::getResource();
+
+        return isset($parameters['record'])
+            ? $resource::canView($parameters['record'])
+            : $resource::canViewAny();
+    }
+
+    public static function getNavigationLabel(): string
     {
         return __('packstub-form-builder::form-builder.submissions.plural');
     }
 
-    public static function getBadge(Model $ownerRecord, string $pageClass): ?string
+    /**
+     * The form's tab carries its unread count.
+     *
+     * @param  array<string, mixed>  $urlParameters
+     * @return array<NavigationItem>
+     */
+    public static function getNavigationItems(array $urlParameters = []): array
     {
-        $unread = $ownerRecord->submissions()->whereNull('read_at')->count();
+        $items = parent::getNavigationItems($urlParameters);
+        $record = $urlParameters['record'] ?? null;
 
-        return $unread > 0 ? (string) $unread : null;
+        if ($record instanceof Form) {
+            $unread = $record->submissions()->whereNull('read_at')->count();
+
+            foreach ($items as $item) {
+                $item->badge($unread > 0 ? (string) $unread : null, 'warning');
+            }
+        }
+
+        return $items;
     }
 
-    public function isReadOnly(): bool
+    public function getTitle(): string|Htmlable
     {
-        return false;
+        return __('packstub-form-builder::form-builder.submissions.title', ['form' => $this->getRecordTitle()]);
+    }
+
+    public function getBreadcrumb(): string
+    {
+        return __('packstub-form-builder::form-builder.submissions.plural');
     }
 
     public function table(Table $table): Table
     {
         /** @var Form $form */
         $form = $this->getOwnerRecord();
+
+        $extra = app(FormBuilder::class)->submissionActions($form, $this);
 
         return $table
             ->modelLabel(__('packstub-form-builder::form-builder.submissions.label'))
@@ -99,29 +147,41 @@ class SubmissionsRelationManager extends RelationManager
             ])
             ->recordAction('view')
             ->recordActions([
-                Action::make('view')
-                    ->label(__('packstub-form-builder::form-builder.submissions.view'))
-                    ->icon('heroicon-o-eye')
-                    ->modalHeading(fn (FormSubmission $record): string => __('packstub-form-builder::form-builder.submissions.label').' #'.$record->getKey())
-                    ->modalSubmitAction(false)
-                    ->modalCancelActionLabel(__('filament::components/modal.actions.close.label'))
-                    ->slideOver()
-                    ->mountUsing(fn (FormSubmission $record) => $record->isRead() || $record->markRead())
-                    ->schema(fn (FormSubmission $record): array => $this->detailsSchema($record)),
-                Action::make('toggleRead')
-                    ->label(fn (FormSubmission $record): string => $record->isRead()
-                        ? __('packstub-form-builder::form-builder.submissions.mark_unread')
-                        : __('packstub-form-builder::form-builder.submissions.mark_read'))
-                    ->icon(fn (FormSubmission $record): string => $record->isRead() ? 'heroicon-o-envelope' : 'heroicon-o-envelope-open')
-                    ->action(fn (FormSubmission $record) => $record->markRead(! $record->isRead())),
-                DeleteAction::make(),
+                ActionGroup::make(array_values(array_filter([
+                    ActionGroup::make([
+                        Action::make('view')
+                            ->label(__('packstub-form-builder::form-builder.submissions.view'))
+                            ->icon('heroicon-o-eye')
+                            ->modalHeading(fn (FormSubmission $record): string => __('packstub-form-builder::form-builder.submissions.label').' #'.$record->getKey())
+                            ->modalSubmitAction(false)
+                            ->modalCancelActionLabel(__('filament::components/modal.actions.close.label'))
+                            ->slideOver()
+                            ->mountUsing(fn (FormSubmission $record) => $record->isRead() || $record->markRead())
+                            ->schema(fn (FormSubmission $record): array => $this->detailsSchema($record)),
+                        Action::make('toggleRead')
+                            ->label(fn (FormSubmission $record): string => $record->isRead()
+                                ? __('packstub-form-builder::form-builder.submissions.mark_unread')
+                                : __('packstub-form-builder::form-builder.submissions.mark_read'))
+                            ->icon(fn (FormSubmission $record): string => $record->isRead() ? 'heroicon-o-envelope' : 'heroicon-o-envelope-open')
+                            ->action(fn (FormSubmission $record) => $record->markRead(! $record->isRead())),
+                    ])->dropdown(false),
+                    $extra['record'] === [] ? null : ActionGroup::make($extra['record'])->dropdown(false),
+                    ActionGroup::make([DeleteAction::make()])->dropdown(false),
+                ]))),
             ])
             ->headerActions([
-                Action::make('export')
-                    ->label(__('packstub-form-builder::form-builder.submissions.export'))
+                ActionGroup::make([
+                    Action::make('export')
+                        ->label(__('packstub-form-builder::form-builder.submissions.export'))
+                        ->icon('heroicon-o-table-cells')
+                        ->action(fn () => SubmissionsCsv::download($form, $this->getFilteredTableQuery())),
+                    ...$extra['export'],
+                ])
+                    ->label(__('packstub-form-builder::form-builder.submissions.export_menu'))
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('gray')
-                    ->action(fn () => SubmissionsCsv::download($form, $this->getFilteredTableQuery())),
+                    ->button()
+                    ->dropdownPlacement('bottom-end'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
@@ -132,13 +192,16 @@ class SubmissionsRelationManager extends RelationManager
                         ->deselectRecordsAfterCompletion(),
                     BulkAction::make('exportSelected')
                         ->label(__('packstub-form-builder::form-builder.submissions.export'))
-                        ->icon('heroicon-o-arrow-down-tray')
+                        ->icon('heroicon-o-table-cells')
                         ->action(fn (Collection $records) => SubmissionsCsv::download($form, $records)),
+                    ...$extra['bulk'],
                     DeleteBulkAction::make(),
                 ]),
             ])
             ->emptyStateHeading(__('packstub-form-builder::form-builder.submissions.empty'))
             ->emptyStateDescription(__('packstub-form-builder::form-builder.submissions.empty_description'));
+
+        return $table;
     }
 
     /**

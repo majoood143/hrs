@@ -2,7 +2,6 @@
 
 namespace Packstub\FormBuilder\Fields\Types;
 
-use App\Filament\Support\TranslatableInput;
 use App\Support\Localized;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
@@ -16,6 +15,7 @@ use Illuminate\Validation\Rule;
 use Packstub\FormBuilder\Fields\Concerns\HasChoices;
 use Packstub\FormBuilder\Fields\Field;
 use Packstub\FormBuilder\Fields\FieldType;
+use Packstub\FormBuilder\Filament\EditorLanguages;
 
 /**
  * Radio buttons with a follow-up text box that only appears for some of the
@@ -37,6 +37,11 @@ class ConditionalRadioField extends FieldType
         return 'heroicon-o-arrow-turn-down-right';
     }
 
+    public function group(): string
+    {
+        return 'choices';
+    }
+
     public function editorSchema(): array
     {
         return [
@@ -52,11 +57,11 @@ class ConditionalRadioField extends FieldType
                 ->required()
                 ->native(false)
                 ->columnSpanFull(),
-            TranslatableInput::grid(fn (string $locale, array $meta): TextInput => TextInput::make("details_label.{$locale}")
+            EditorLanguages::grid(fn (string $locale, array $meta): TextInput => TextInput::make("details_label.{$locale}")
                 ->label(__('packstub-form-builder::form-builder.editor.details_label').' ('.$meta['native'].')')
-                ->required($locale === TranslatableInput::defaultLocale())
+                ->required($locale === 'en')
                 ->maxLength(255))->columnSpanFull(),
-            TranslatableInput::grid(fn (string $locale, array $meta): TextInput => TextInput::make("details_placeholder.{$locale}")
+            EditorLanguages::grid(fn (string $locale, array $meta): TextInput => TextInput::make("details_placeholder.{$locale}")
                 ->label(__('packstub-form-builder::form-builder.editor.details_placeholder').' ('.$meta['native'].')')
                 ->maxLength(255))->columnSpanFull(),
             Select::make('details_type')

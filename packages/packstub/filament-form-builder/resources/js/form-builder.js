@@ -272,9 +272,71 @@
         });
     }
 
+    // "Show this field only when ...": a field with data-fb-show-when is shown while its rule
+    // holds and hidden otherwise, its inputs disabled so they neither post a value nor block the
+    // browser's validation. Rules are worked out in page order, and a hidden field counts as
+    // unanswered for the fields that depend on it. The server applies the same rules
+    // (FieldConditions), so without this script every field is shown and the extra answers are
+    // simply ignored.
+    function answers(form, key) {
+        var field = form.querySelector('[data-fb-field="' + key + '"]');
+        if (!field || field.hidden) return [];
+        var radios = field.querySelectorAll('input[type="radio"]');
+        var boxes = field.querySelectorAll('input[type="checkbox"]');
+        var picked = radios.length ? radios : boxes;
+        var list = [];
+        if (picked.length) {
+            picked.forEach(function (input) { if (input.checked && !input.disabled) list.push(input.value); });
+            return list;
+        }
+        field.querySelectorAll('select, input, textarea').forEach(function (input) {
+            if (input.disabled) return;
+            if (input.tagName === 'SELECT') {
+                Array.prototype.forEach.call(input.selectedOptions || [], function (option) { if (option.value !== '') list.push(option.value); });
+            } else if (input.value.trim() !== '') {
+                list.push(input.value.trim());
+            }
+        });
+        return list;
+    }
+
+    function holds(rule, list) {
+        var value = String(rule.value === null || rule.value === undefined ? '' : rule.value);
+        if (rule.operator === 'is') return list.indexOf(value) !== -1;
+        if (rule.operator === 'is_not') return list.indexOf(value) === -1;
+        if (rule.operator === 'filled') return list.length > 0;
+        if (rule.operator === 'empty') return list.length === 0;
+        return true;
+    }
+
+    function initRules(form) {
+        var fields = form.querySelectorAll('[data-fb-show-when]');
+        if (!fields.length || form.__fbRules) return;
+        form.__fbRules = true;
+
+        function apply() {
+            fields.forEach(function (field) {
+                var rule;
+                try { rule = JSON.parse(field.getAttribute('data-fb-show-when')); } catch (e) { return; }
+                var shown = holds(rule, answers(form, rule.field));
+                if (field.hidden === !shown) return;
+                field.hidden = !shown;
+                field.querySelectorAll('input, select, textarea').forEach(function (input) {
+                    if (!shown && !input.disabled) { input.disabled = true; input.setAttribute('data-fb-rule-disabled', ''); }
+                    if (shown && input.hasAttribute('data-fb-rule-disabled')) { input.disabled = false; input.removeAttribute('data-fb-rule-disabled'); }
+                });
+            });
+        }
+
+        form.addEventListener('change', apply);
+        form.addEventListener('input', apply);
+        apply();
+    }
+
     function init(root) {
         initCombobox(root);
         initConditional(root);
+        (root || document).querySelectorAll('form.fb-form__form').forEach(initRules);
         (root || document).querySelectorAll('form[data-fb-enhance="true"]').forEach(function (form) {
             if (form.__fb) return;
             form.__fb = true;

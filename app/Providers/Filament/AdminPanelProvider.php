@@ -82,8 +82,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
-                FilamentSpatieLaravelHealthPlugin::make(),
-                FilamentSpatieLaravelBackupPlugin::make(),
+                // Both plugins let every panel user in unless told otherwise; gate them with
+                // the Shield page permissions (View:HealthCheckResults / View:Backups).
+                FilamentSpatieLaravelHealthPlugin::make()
+                    ->authorize(fn (): bool => (bool) auth()->user()?->can('View:HealthCheckResults')),
+                FilamentSpatieLaravelBackupPlugin::make()
+                    ->authorize(fn (): bool => (bool) auth()->user()?->can('View:Backups')),
                 ActivitylogPlugin::make(),
                 ApiServicePlugin::make(),
                 FilamentCaptcha::make(),

@@ -20,6 +20,16 @@ class TextareaField extends FieldType
         return 'heroicon-o-bars-3-bottom-left';
     }
 
+    public function group(): string
+    {
+        return 'basic';
+    }
+
+    public function hasAdvancedSettingsOnly(): bool
+    {
+        return true;
+    }
+
     public function editorSchema(): array
     {
         return [

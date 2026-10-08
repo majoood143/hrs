@@ -22,6 +22,11 @@ abstract class InputField extends FieldType
         return 'packstub-form-builder::fields.input';
     }
 
+    public function hasAdvancedSettingsOnly(): bool
+    {
+        return true;
+    }
+
     public function editorSchema(): array
     {
         return [

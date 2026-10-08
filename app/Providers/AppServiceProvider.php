@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Filament\Forms\SubmissionPdfActions;
 use App\Filament\Forms\ViewFormInsights;
 use App\Filament\Support\FormPaymentTab;
 use App\Models\Setting;
@@ -111,6 +112,9 @@ class AppServiceProvider extends ServiceProvider
             ->color('gray')
             ->url(fn (FormBuilderForm $record): string => ViewFormInsights::getUrl(['record' => $record]))
             ->visible(fn (FormBuilderForm $record): bool => ViewFormInsights::canAccess(['record' => $record])));
+
+        // "PDF" (per language) in each form's submissions menus: all as filtered, the selected ones, one.
+        FormBuilder::registerSubmissionActions(SubmissionPdfActions::for(...));
 
         // The listeners in app/Listeners (CreateOrderFromSubmission, NotifyOnOrderReceived, NotifyOnOrderCompleted)
         // are found by Laravel's own event discovery: registering them here as well would run each one twice.

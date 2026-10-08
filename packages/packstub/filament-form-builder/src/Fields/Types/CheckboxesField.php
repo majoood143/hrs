@@ -22,6 +22,11 @@ class CheckboxesField extends FieldType
         return 'heroicon-o-list-bullet';
     }
 
+    public function group(): string
+    {
+        return 'choices';
+    }
+
     public function acceptsMultiple(): bool
     {
         return true;

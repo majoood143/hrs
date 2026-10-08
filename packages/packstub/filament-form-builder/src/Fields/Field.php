@@ -4,6 +4,7 @@ namespace Packstub\FormBuilder\Fields;
 
 use App\Support\Localized;
 use Illuminate\Support\Str;
+use Packstub\FormBuilder\Support\FieldConditions;
 
 /**
  * One field of a form, as stored in the form's "fields" JSON and resolved
@@ -45,13 +46,13 @@ final class Field
 
         $data = is_array($item['data'] ?? null) ? $item['data'] : [];
         $label = trim((string) Localized::value($data, 'label'));
-        $key = self::normalizeKey((string) ($data['key'] ?? ''), $label, $type);
+        $key = self::normalizeKey((string) ($data['key'] ?? ''), self::keyLabel($data), $type);
 
         if ($key === '') {
             return null;
         }
 
-        $reserved = ['key', 'label', 'placeholder', 'hint', 'required', 'default', 'rules', 'width'];
+        $reserved = ['key', 'label', 'placeholder', 'hint', 'required', 'default', 'rules', 'width', 'condition'];
 
         return new self(
             key: $key,
@@ -66,6 +67,20 @@ final class Field
             width: in_array($data['width'] ?? null, ['full', 'half'], true) ? $data['width'] : 'full',
             data: $data,
         );
+    }
+
+    /**
+     * The label a blank key is made from: the English one, so the key is the same whatever
+     * language the admin works in (an Arabic label slugs to a transliteration, or nothing).
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public static function keyLabel(array $data): string
+    {
+        $label = $data['label'] ?? null;
+        $english = is_array($label) ? trim((string) ($label['en'] ?? '')) : '';
+
+        return $english !== '' ? $english : trim((string) Localized::value($data, 'label'));
     }
 
     public static function normalizeKey(string $key, string $label, FieldType $type): string
@@ -172,7 +187,18 @@ final class Field
             'multiple' => $this->type->acceptsMultiple(),
             'choices' => $this->type->hasChoices() ? $this->choices() : null,
             'options' => $this->options,
+            'condition' => $this->condition(),
         ];
+    }
+
+    /**
+     * "Show this field only when …", or null when the field is always shown.
+     *
+     * @return array{field: string, operator: string, value: ?string}|null
+     */
+    public function condition(): ?array
+    {
+        return FieldConditions::rule($this->data);
     }
 
     private static function nullableString(mixed $value): ?string

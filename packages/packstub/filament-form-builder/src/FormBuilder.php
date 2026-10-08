@@ -2,6 +2,7 @@
 
 namespace Packstub\FormBuilder;
 
+use Filament\Tables\Contracts\HasTable;
 use Packstub\FormBuilder\Contracts\SubmissionSink;
 use Packstub\FormBuilder\Fields\FieldType;
 use Packstub\FormBuilder\Fields\FieldTypeRegistry;
@@ -33,6 +34,9 @@ class FormBuilder
 
     /** @var array<int, \Closure(): mixed> */
     protected array $recordActions = [];
+
+    /** @var array<int, \Closure> */
+    protected array $submissionActions = [];
 
     public function __construct(protected FieldTypeRegistry $types) {}
 
@@ -113,7 +117,7 @@ class FormBuilder
     public function forgetHooks(): static
     {
         $this->formTabs = $this->closedChecks = $this->beforeForm = $this->holdNotifications = [];
-        $this->resourcePages = $this->recordActions = [];
+        $this->resourcePages = $this->recordActions = $this->submissionActions = [];
 
         return $this;
     }
@@ -182,6 +186,35 @@ class FormBuilder
     public function recordActions(): array
     {
         return array_map(fn (\Closure $factory) => $factory(), $this->recordActions);
+    }
+
+    /**
+     * Add actions to a form's submissions page, into its menus: `export` (the "Export" button
+     * above the table, next to the CSV), `record` (each row's menu) and `bulk` (the selected
+     * rows' menu, BulkActions). The closure gets the form and the page, and returns any of the
+     * three lists; the page groups them with its own.
+     *
+     * @param  \Closure(Form, HasTable): array{export?: array<int, mixed>, record?: array<int, mixed>, bulk?: array<int, mixed>}  $factory
+     */
+    public function registerSubmissionActions(\Closure $factory): static
+    {
+        $this->submissionActions[] = $factory;
+
+        return $this;
+    }
+
+    /** @return array{export: array<int, mixed>, record: array<int, mixed>, bulk: array<int, mixed>} */
+    public function submissionActions(Form $form, HasTable $page): array
+    {
+        $actions = ['export' => [], 'record' => [], 'bulk' => []];
+
+        foreach ($this->submissionActions as $factory) {
+            foreach ($factory($form, $page) as $slot => $list) {
+                array_push($actions[$slot], ...$list);
+            }
+        }
+
+        return $actions;
     }
 
     /**

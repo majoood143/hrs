@@ -2,7 +2,6 @@
 
 namespace Packstub\FormBuilder\Models;
 
-use App\Support\Localized;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
@@ -131,13 +130,19 @@ class Form extends Model
     }
 
     /**
+     * @param  array<int, string>|null  $only  The keys of the fields that apply (FieldConditions::visibleKeys()); null for all.
      * @return array<string, array<int, mixed>>
      */
-    public function validationRules(): array
+    public function validationRules(?array $only = null): array
     {
         $rules = [];
 
         foreach ($this->inputFields() as $field) {
+            // a field hidden by its "show only when" rule is not asked for
+            if ($only !== null && ! in_array($field->key, $only, true)) {
+                continue;
+            }
+
             $rules[$field->key] = $field->rules();
 
             if ($field->type->acceptsMultiple() && ($elementRules = $field->type->elementRules($field)) !== []) {
@@ -192,7 +197,7 @@ class Form extends Model
             }
 
             $data = $item['data'];
-            $key = Field::normalizeKey((string) ($data['key'] ?? ''), (string) Localized::value($data, 'label'), $type);
+            $key = Field::normalizeKey((string) ($data['key'] ?? ''), Field::keyLabel($data), $type);
 
             if ($key === '') {
                 $key = $type::id();

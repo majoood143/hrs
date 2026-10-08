@@ -18,6 +18,11 @@ class UrlField extends InputField
         return 'heroicon-o-link';
     }
 
+    public function group(): string
+    {
+        return 'contact';
+    }
+
     public function inputType(): string
     {
         return 'url';
@@ -26,6 +31,14 @@ class UrlField extends InputField
     public function editorSchema(): array
     {
         return [];
+    }
+
+    public function defaultInput(): Component
+    {
+        return TextInput::make('default')
+            ->label(__('packstub-form-builder::form-builder.editor.default'))
+            ->url()
+            ->maxLength(2048);
     }
 
     public function rules(Field $field): array

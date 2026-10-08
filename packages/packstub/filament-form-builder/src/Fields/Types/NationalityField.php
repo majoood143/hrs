@@ -26,6 +26,11 @@ class NationalityField extends FieldType
         return 'heroicon-o-flag';
     }
 
+    public function group(): string
+    {
+        return 'contact';
+    }
+
     public function hasChoices(): bool
     {
         return true;
@@ -34,6 +39,15 @@ class NationalityField extends FieldType
     public function fixedChoices(): ?array
     {
         return static::choices();
+    }
+
+    public function defaultInput(): Component
+    {
+        return Select::make('default')
+            ->label(__('packstub-form-builder::form-builder.editor.default'))
+            ->options(fn (): array => static::choices())
+            ->searchable()
+            ->native(false);
     }
 
     public function rules(Field $field): array
