@@ -79,6 +79,7 @@ class VideoResource extends Resource
     {
         return $schema
             ->components([
+                // this is a select rather than a relationship field because the latter
                 Select::make('folder_id')
                     ->label(__('videos.fields.folder'))
                     ->options(fn () => static::folderOptions())
