@@ -20,6 +20,16 @@ return [
         'order_helper' => 'Lower numbers appear first. Newly created folders sort before older ones by default.',
         'is_active' => 'Active',
     ],
+    'filters' => [
+        'parent' => 'Parent folder',
+        'level' => 'Level',
+        'level_all' => 'All folders',
+        'level_top' => 'Top-level only',
+        'level_sub' => 'Subfolders only',
+        'has_videos' => 'Has videos',
+        'date_from' => 'Date from',
+        'date_until' => 'Date until',
+    ],
     'empty_state' => [
         'heading' => 'No video folders yet',
         'description' => 'Create a folder (e.g. a season) to start adding videos to it.',

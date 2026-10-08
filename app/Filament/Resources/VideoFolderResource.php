@@ -24,8 +24,16 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+
+use function Filament\Support\generate_search_column_expression;
+use function Filament\Support\generate_search_term_expression;
 
 class VideoFolderResource extends Resource
 {
@@ -135,6 +143,7 @@ class VideoFolderResource extends Resource
                 TextColumn::make('parent.name')
                     ->label(__('video_folders.fields.parent'))
                     ->getStateUsing(fn (VideoFolder $record) => $record->parent?->name)
+                    ->searchable(query: fn (Builder $query, string $search): Builder => static::whereParentNameLike($query, $search))
                     ->badge()
                     ->placeholder('—'),
 
@@ -162,6 +171,67 @@ class VideoFolderResource extends Resource
                     ->counts('children'),
             ])
             ->defaultSort('order')
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('parent'))
+            ->filters([
+                SelectFilter::make('parent_id')
+                    ->label(__('video_folders.filters.parent'))
+                    ->options(fn () => VideoFolder::query()
+                        ->whereHas('children')
+                        ->with('parent.parent.parent')
+                        ->ordered()
+                        ->get()
+                        ->mapWithKeys(fn (VideoFolder $folder) => [$folder->id => $folder->path_label]))
+                    ->multiple()
+                    ->searchable(),
+
+                TernaryFilter::make('level')
+                    ->label(__('video_folders.filters.level'))
+                    ->placeholder(__('video_folders.filters.level_all'))
+                    ->trueLabel(__('video_folders.filters.level_top'))
+                    ->falseLabel(__('video_folders.filters.level_sub'))
+                    ->queries(
+                        true: fn (Builder $query) => $query->whereNull('parent_id'),
+                        false: fn (Builder $query) => $query->whereNotNull('parent_id'),
+                        blank: fn (Builder $query) => $query,
+                    ),
+
+                TernaryFilter::make('is_active')
+                    ->label(__('video_folders.fields.is_active')),
+
+                TernaryFilter::make('has_videos')
+                    ->label(__('video_folders.filters.has_videos'))
+                    ->queries(
+                        true: fn (Builder $query) => $query->whereHas('videos'),
+                        false: fn (Builder $query) => $query->whereDoesntHave('videos'),
+                        blank: fn (Builder $query) => $query,
+                    ),
+
+                Filter::make('date')
+                    ->schema([
+                        DatePicker::make('from')
+                            ->label(__('video_folders.filters.date_from'))
+                            ->native(false),
+                        DatePicker::make('until')
+                            ->label(__('video_folders.filters.date_until'))
+                            ->native(false),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query
+                        ->when($data['from'] ?? null, fn (Builder $query, $date) => $query->whereDate('date', '>=', $date))
+                        ->when($data['until'] ?? null, fn (Builder $query, $date) => $query->whereDate('date', '<=', $date)))
+                    ->indicateUsing(function (array $data): array {
+                        $indicators = [];
+
+                        if ($data['from'] ?? null) {
+                            $indicators[] = __('video_folders.filters.date_from').': '.Carbon::parse($data['from'])->toFormattedDateString();
+                        }
+
+                        if ($data['until'] ?? null) {
+                            $indicators[] = __('video_folders.filters.date_until').': '.Carbon::parse($data['until'])->toFormattedDateString();
+                        }
+
+                        return $indicators;
+                    }),
+            ])
             ->recordActions([
                 ActionGroup::make([
                     ...WebsiteLinkActions::make(
@@ -180,6 +250,19 @@ class VideoFolderResource extends Resource
             ])
             ->emptyStateHeading(__('video_folders.empty_state.heading'))
             ->emptyStateDescription(__('video_folders.empty_state.description'));
+    }
+
+    /**
+     * Folders whose parent's English or Arabic name contains the search term.
+     */
+    protected static function whereParentNameLike(Builder $query, string $search): Builder
+    {
+        $connection = $query->getConnection();
+        $term = '%'.generate_search_term_expression($search, null, $connection).'%';
+
+        return $query->whereHas('parent', fn (Builder $parent) => $parent
+            ->where(generate_search_column_expression('name->en', null, $connection), 'like', $term)
+            ->orWhere(generate_search_column_expression('name->ar', null, $connection), 'like', $term));
     }
 
     public static function getRelations(): array
