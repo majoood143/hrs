@@ -9,7 +9,7 @@
         $query->where('folder_id', $data['folder_id']);
     }
 
-    $videos = $query->orderBy('order')->latest('id')->take($count)->get();
+    $videos = $query->latest()->latest('id')->take($count)->get();
 @endphp
 
 @if($videos->isNotEmpty())

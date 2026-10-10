@@ -1,33 +1,15 @@
 @php
     $selectedType = in_array(request('type'), ['offer', 'request'], true) ? request('type') : null;
 
-    $sort = in_array(request('sort'), ['soonest', 'newest', 'price_asc', 'price_desc', 'capacity'], true)
+    $sort = in_array(request('sort'), \App\Models\TransferPost::SORTS, true)
         ? request('sort')
         : 'soonest';
 
     $query = \App\Models\TransferPost::query()
         ->visible()
         ->with(['fromCity', 'fromCountry', 'toCity', 'toCountry'])
-        ->when($selectedType, fn ($q, $type) => $q->where('type', $type))
-        ->when(request('from_city_id'), fn ($q, $v) => $q->where('from_city_id', $v))
-        ->when(request('to_city_id'), fn ($q, $v) => $q->where('to_city_id', $v))
-        ->when(request('from_country_id'), fn ($q, $v) => $q->where('from_country_id', $v))
-        ->when(request('to_country_id'), fn ($q, $v) => $q->where('to_country_id', $v))
-        ->when(request()->filled('date_from'), fn ($q) => $q->whereDate('transfer_date', '>=', request('date_from')))
-        ->when(request()->filled('date_to'), fn ($q) => $q->whereDate('transfer_date', '<=', request('date_to')))
-        ->when(request('capacity_min'), fn ($q, $v) => $q->where('capacity', '>=', (int) $v))
-        ->when(
-            request()->filled('price_max') && $selectedType !== 'request',
-            fn ($q) => $q->where('price', '<=', (float) request('price_max'))
-        );
-
-    match ($sort) {
-        'newest' => $query->latest('id'),
-        'price_asc' => $query->orderByRaw('price is null, price asc'),
-        'price_desc' => $query->orderByRaw('price is null, price desc'),
-        'capacity' => $query->orderByDesc('capacity'),
-        default => $query->orderBy('transfer_date'),
-    };
+        ->filteredBy(request()->only(['type', 'from_city_id', 'to_city_id', 'from_country_id', 'to_country_id', 'date_from', 'date_to', 'capacity_min', 'price_max']))
+        ->sortedBy($sort);
 
     $posts = $query->paginate(9)->withQueryString();
 

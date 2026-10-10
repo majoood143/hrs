@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers\Site;
 
-use App\Events\PublicPostSubmitted;
 use App\Http\Controllers\Controller;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Region;
 use App\Models\SiteSetting;
 use App\Models\ToolSalePost;
-use App\Support\ImageCompressor;
+use App\Services\PublicPosts\ToolSalePostCreator;
 use App\Support\Seo;
 use App\Support\ViewCounter;
 use Gregwar\Captcha\CaptchaBuilder;
@@ -17,7 +16,6 @@ use Gregwar\Captcha\PhraseBuilder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use MarcoGermani87\FilamentCaptcha\Rules\Captcha;
@@ -79,61 +77,17 @@ class ToolSaleController extends Controller
             ->toArray();
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, ToolSalePostCreator $creator): RedirectResponse
     {
-        $validated = $request->validate([
-            'en_name' => ['required', 'string', 'max:255'],
-            'ar_name' => ['required', 'string', 'max:255'],
-            'category' => ['required', 'in:'.implode(',', ToolSalePost::CATEGORIES)],
-            'condition' => ['required', 'in:'.implode(',', ToolSalePost::CONDITIONS)],
-            'brand' => ['nullable', 'string', 'max:255'],
-            'city_id' => ['required', 'exists:cities,id'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'price_negotiable' => ['nullable', 'boolean'],
-            'cover_photo' => ['required', 'image', 'max:4096'],
-            'description_en' => ['nullable', 'string'],
-            'description_ar' => ['nullable', 'string'],
+        $validated = $request->validate($creator->rules() + [
             'contact_number' => ['required', 'string', 'max:30'],
             'captcha' => ['required', new Captcha],
-        ], [], [
-            'en_name' => __('tools-for-sale.name_en'),
-            'ar_name' => __('tools-for-sale.name_ar'),
-            'category' => __('tools-for-sale.category'),
-            'condition' => __('tools-for-sale.condition'),
-            'brand' => __('tools-for-sale.brand'),
-            'city_id' => __('tools-for-sale.city'),
-            'price' => __('tools-for-sale.price'),
-            'price_negotiable' => __('tools-for-sale.price_negotiable'),
-            'cover_photo' => __('tools-for-sale.cover_photo'),
+        ], [], $creator->attributes() + [
             'contact_number' => __('tools-for-sale.contact_number'),
             'captcha' => __('tools-for-sale.captcha_label'),
         ]);
 
-        $city = City::with('region')->findOrFail($validated['city_id']);
-
-        $coverPhotoPath = $request->file('cover_photo')->store('tools-for-sale/covers', 'public');
-
-        ImageCompressor::compress(Storage::disk('public')->path($coverPhotoPath));
-
-        $post = ToolSalePost::create([
-            'en_name' => $validated['en_name'],
-            'ar_name' => $validated['ar_name'],
-            'category' => $validated['category'],
-            'condition' => $validated['condition'],
-            'brand' => $validated['brand'] ?? null,
-            'country_id' => $city->region->country_id,
-            'region_id' => $city->region_id,
-            'city_id' => $city->id,
-            'price' => $validated['price'],
-            'price_negotiable' => $request->boolean('price_negotiable'),
-            'cover_photo' => $coverPhotoPath,
-            'description_en' => $validated['description_en'] ?? null,
-            'description_ar' => $validated['description_ar'] ?? null,
-            'contact_number' => $validated['contact_number'],
-            'status' => 'active',
-        ]);
-
-        PublicPostSubmitted::dispatch($post);
+        $creator->create($validated, ['cover_photo' => $request->file('cover_photo')], $validated['contact_number']);
 
         return redirect()
             ->route('tools-for-sale.index')

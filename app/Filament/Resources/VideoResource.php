@@ -164,12 +164,17 @@ class VideoResource extends Resource
                     ->label(__('videos.fields.order'))
                     ->sortable(),
 
+                TextColumn::make('created_at')
+                    ->label(__('videos.fields.created_at'))
+                    ->dateTime()
+                    ->sortable(),
+
                 ToggleColumn::make('is_active')
                     ->label(__('videos.fields.is_active'))
                     ->disabled(fn (Video $record) => ! static::canEdit($record))
                     ->sortable(),
             ])
-            ->defaultSort('order')
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('folder_id')
                     ->label(__('videos.filters.folder'))

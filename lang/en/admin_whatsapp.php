@@ -8,6 +8,8 @@ return [
         'alerts_desc' => 'Send a WhatsApp message to the admin numbers below whenever a visitor publishes a new post, with a link to the post. Messages are in English and Arabic.',
         'recipients' => 'Admin numbers',
         'recipients_desc' => 'Every number here receives the alerts.',
+        'codes' => 'Verification codes on WhatsApp',
+        'codes_desc' => 'People posting from the mobile app confirm their phone with a 6-digit code. With this on, the code goes by WhatsApp from the number above, and by SMS whenever WhatsApp cannot send it. WhatsApp may restrict a number that messages many strangers: if that happens, switch this off and every code goes by SMS.',
         'types' => 'Which new posts send an alert',
     ],
 
@@ -20,6 +22,8 @@ return [
         'recipient_phone' => 'WhatsApp number',
         'recipient_phone_helper' => 'With country code; an 8-digit number is taken as Omani.',
         'add_recipient' => 'Add number',
+        'codes' => 'Send verification codes by WhatsApp (SMS as the backup)',
+        'codes_helper' => 'Needs a connected instance and the Evolution API set up; otherwise codes go by SMS.',
         'test_phone' => 'Send the test to',
     ],
 

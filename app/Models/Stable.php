@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\FeeType;
 use App\Enums\StableApprovalStatus;
+use App\Models\Concerns\FiltersDirectoryPlaces;
 use App\Models\Concerns\LogsStableActivity;
 use App\Support\PhoneNumber;
 use App\Support\StableBookingSettings;
@@ -26,6 +27,7 @@ use Illuminate\Support\Facades\Storage;
  */
 class Stable extends Model implements HasAvatar, HasName
 {
+    use FiltersDirectoryPlaces;
     use LogsStableActivity;
 
     public const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];

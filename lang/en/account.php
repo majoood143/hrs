@@ -46,5 +46,6 @@ return [
     'sign_in_for_receipt' => 'Sign in with your phone to see your receipt and full order details.',
 
     // the SMS text of a sign-in code
+    'otp_verify_sms' => ':site: your verification code is :code. It is valid for :minutes minutes. Do not share it with anyone.',
     'otp_sms' => ':site: your sign-in code is :code. It is valid for :minutes minutes. Do not share it with anyone.',
 ];

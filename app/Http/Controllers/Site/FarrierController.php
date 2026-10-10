@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers\Site;
 
-use App\Events\PublicPostSubmitted;
 use App\Http\Controllers\Controller;
-use App\Models\City;
 use App\Models\Country;
 use App\Models\Farrier;
 use App\Models\SiteSetting;
-use App\Support\ImageCompressor;
+use App\Services\PublicPosts\FarrierCreator;
 use App\Support\Seo;
 use App\Support\ViewCounter;
 use Gregwar\Captcha\CaptchaBuilder;
@@ -16,7 +14,6 @@ use Gregwar\Captcha\PhraseBuilder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use MarcoGermani87\FilamentCaptcha\Rules\Captcha;
@@ -55,55 +52,17 @@ class FarrierController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, FarrierCreator $creator): RedirectResponse
     {
-        $validated = $request->validate([
-            'en_name' => ['required', 'string', 'max:255'],
-            'ar_name' => ['required', 'string', 'max:255'],
-            'specialty' => ['nullable', 'string', 'max:255'],
-            'years_experience' => ['nullable', 'integer', 'min:0', 'max:80'],
-            'city_id' => ['required', 'exists:cities,id'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'cover_photo' => ['required', 'image', 'max:4096'],
-            'description_en' => ['nullable', 'string'],
-            'description_ar' => ['nullable', 'string'],
+        $validated = $request->validate($creator->rules() + [
             'contact_number' => ['required', 'string', 'max:30'],
             'captcha' => ['required', new Captcha],
-        ], [], [
-            'en_name' => __('farriers.name_en'),
-            'ar_name' => __('farriers.name_ar'),
-            'specialty' => __('farriers.specialty'),
-            'years_experience' => __('farriers.years_experience'),
-            'city_id' => __('farriers.city'),
-            'price' => __('farriers.price'),
-            'cover_photo' => __('farriers.cover_photo'),
+        ], [], $creator->attributes() + [
             'contact_number' => __('farriers.contact_number'),
             'captcha' => __('farriers.captcha_label'),
         ]);
 
-        $city = City::with('region')->findOrFail($validated['city_id']);
-
-        $coverPhotoPath = $request->file('cover_photo')->store('farriers/covers', 'public');
-
-        ImageCompressor::compress(Storage::disk('public')->path($coverPhotoPath));
-
-        $post = Farrier::create([
-            'en_name' => $validated['en_name'],
-            'ar_name' => $validated['ar_name'],
-            'specialty' => $validated['specialty'] ?? null,
-            'years_experience' => $validated['years_experience'] ?? null,
-            'country_id' => $city->region->country_id,
-            'region_id' => $city->region_id,
-            'city_id' => $city->id,
-            'price' => $validated['price'],
-            'cover_photo' => $coverPhotoPath,
-            'description_en' => $validated['description_en'] ?? null,
-            'description_ar' => $validated['description_ar'] ?? null,
-            'contact_number' => $validated['contact_number'],
-            'status' => 'active',
-        ]);
-
-        PublicPostSubmitted::dispatch($post);
+        $creator->create($validated, ['cover_photo' => $request->file('cover_photo')], $validated['contact_number']);
 
         return redirect()
             ->route('farriers.index')

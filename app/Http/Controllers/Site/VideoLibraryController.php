@@ -35,7 +35,7 @@ class VideoLibraryController extends Controller
             ->firstOrFail();
 
         $children = $folder->children()->active()->ordered()->with(['children.videos', 'videos'])->get();
-        $videos = $folder->videos()->active()->orderBy('order')->orderBy('id')->get();
+        $videos = $folder->videos()->active()->latest()->latest('id')->get();
 
         return view('site.video-library.folder', [
             'folder' => $folder,

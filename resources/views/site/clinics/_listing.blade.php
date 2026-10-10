@@ -5,21 +5,13 @@
     $selectedRegionId = request()->filled('region_id') ? (int) request('region_id') : null;
     $selectedCityId = request()->filled('city_id') ? (int) request('city_id') : null;
 
-    $sort = in_array(request('sort'), ['name', 'newest'], true) ? request('sort') : 'name';
+    $sort = in_array(request('sort'), \App\Models\Clinic::SORTS, true) ? request('sort') : 'name';
 
     $query = \App\Models\Clinic::query()
         ->active()
-        ->ofType($selectedType)
         ->with(['city', 'country', 'services'])
-        ->when($selectedCountryId, fn ($q, $v) => $q->where('country_id', $v))
-        ->when($selectedRegionId, fn ($q, $v) => $q->where('region_id', $v))
-        ->when($selectedCityId, fn ($q, $v) => $q->where('city_id', $v))
-        ->when($selectedServiceId, fn ($q, $v) => $q->whereHas('services', fn ($q2) => $q2->where('clinic_services.id', $v)));
-
-    match ($sort) {
-        'newest' => $query->latest('id'),
-        default => $query->orderBy('en_name'),
-    };
+        ->filteredBy(request()->only(['type', 'service_id', 'country_id', 'region_id', 'city_id']))
+        ->sortedBy($sort);
 
     $clinics = $query->paginate(9)->withQueryString();
 

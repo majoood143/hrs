@@ -1,5 +1,5 @@
 @php
-    $sort = in_array(request('sort'), ['newest', 'price_asc', 'price_desc'], true)
+    $sort = in_array(request('sort'), \App\Models\Farrier::SORTS, true)
         ? request('sort')
         : 'newest';
 
@@ -9,17 +9,8 @@
     $query = \App\Models\Farrier::query()
         ->visible()
         ->with(['city', 'country'])
-        ->when(request()->filled('specialty'), fn ($q) => $q->where('specialty', 'like', '%' . request('specialty') . '%'))
-        ->when($selectedRegionId, fn ($q, $v) => $q->where('region_id', $v))
-        ->when($selectedCityId, fn ($q, $v) => $q->where('city_id', $v))
-        ->when(request('country_id'), fn ($q, $v) => $q->where('country_id', $v))
-        ->when(request()->filled('price_max'), fn ($q) => $q->where('price', '<=', (float) request('price_max')));
-
-    match ($sort) {
-        'price_asc' => $query->orderBy('price'),
-        'price_desc' => $query->orderByDesc('price'),
-        default => $query->latest('id'),
-    };
+        ->filteredBy(request()->only(['specialty', 'region_id', 'city_id', 'country_id', 'price_max']))
+        ->sortedBy($sort);
 
     $farriers = $query->paginate(9)->withQueryString();
 

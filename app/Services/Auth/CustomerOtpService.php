@@ -7,10 +7,15 @@ use App\Models\CustomerOtp;
 use App\Models\ServiceOrder;
 use App\Models\SiteSetting;
 use App\Services\Sms\SmsManager;
+use App\Services\WhatsApp\BilingualMessage;
+use App\Services\WhatsApp\WhatsAppNotifier;
 use App\Support\PhoneNumber;
+use App\Support\WhatsAppSettings;
 
 /**
- * Phone + SMS code sign-in for customers.
+ * Phone + SMS code sign-in for customers, and the same codes for other phone checks (posting from
+ * the mobile app). A code goes by SMS, or by WhatsApp first when asked for (CHANNEL_WHATSAPP) and
+ * allowed (WhatsAppSettings::codesEnabled()), falling back to SMS when WhatsApp cannot send it.
  *
  * A code is six digits, lives five minutes, allows five wrong tries and works once. Only a keyed
  * hash of it is stored. Asking for codes is limited per phone (one a minute, five an hour) and per
@@ -34,7 +39,35 @@ class CustomerOtpService
 
     public const EXPIRED = 'expired';
 
+    public const CHANNEL_SMS = 'sms';
+
+    public const CHANNEL_WHATSAPP = 'whatsapp';
+
+    /** What the code is for: the text says "sign-in code" or "verification code". */
+    public const PURPOSE_SIGN_IN = 'sign_in';
+
+    public const PURPOSE_VERIFY = 'verify';
+
     public function __construct(private readonly SmsManager $sms) {}
+
+    /**
+     * Whether a code asked for on WhatsApp can go that way right now (else it goes by SMS). Any
+     * WhatsApp trouble (no Evolution set up, plugin tables missing) only means "use SMS".
+     */
+    public function whatsappAvailable(): bool
+    {
+        return WhatsAppSettings::codesEnabled()
+            && (bool) rescue(fn () => ($notifier = $this->whatsapp()) && $notifier->isConfigured() && $notifier->instance() !== null, false, false);
+    }
+
+    /**
+     * Built only when needed: the Evolution client cannot even be constructed without its .env
+     * settings, and SMS sign-in must keep working on a server that has none.
+     */
+    private function whatsapp(): ?WhatsAppNotifier
+    {
+        return rescue(fn () => app(WhatsAppNotifier::class), null, false);
+    }
 
     /** The phone in the one spelling we store, or null when it cannot be a real number. */
     public function normalize(?string $raw): ?string
@@ -44,7 +77,7 @@ class CustomerOtpService
         return $phone !== null && strlen($phone) >= 10 && strlen($phone) <= 15 ? $phone : null;
     }
 
-    public function request(?string $rawPhone, ?string $ip = null): OtpRequestResult
+    public function request(?string $rawPhone, ?string $ip = null, string $channel = self::CHANNEL_SMS, string $purpose = self::PURPOSE_SIGN_IN): OtpRequestResult
     {
         $phone = $this->normalize($rawPhone);
 
@@ -52,7 +85,9 @@ class CustomerOtpService
             return new OtpRequestResult(OtpRequestResult::INVALID_PHONE);
         }
 
-        if (! $this->sms->canSend()) {
+        $tryWhatsApp = $channel === self::CHANNEL_WHATSAPP && $this->whatsappAvailable();
+
+        if (! $tryWhatsApp && ! $this->sms->canSend()) {
             return new OtpRequestResult(OtpRequestResult::UNAVAILABLE);
         }
 
@@ -72,16 +107,29 @@ class CustomerOtpService
             'ip' => $ip,
         ]);
 
-        $result = $this->sms->send($phone, __('account.otp_sms', ['code' => $code, 'minutes' => self::TTL_MINUTES, 'site' => SiteSetting::siteName()]), 'otp', sensitive: true);
+        $text = fn () => __($purpose === self::PURPOSE_VERIFY ? 'account.otp_verify_sms' : 'account.otp_sms', [
+            'code' => $code,
+            'minutes' => self::TTL_MINUTES,
+            'site' => SiteSetting::siteName(),
+        ]);
 
-        if (! $result->ok) {
+        // WhatsApp messages are always English then Arabic (BilingualMessage); SMS is in the visitor's language.
+        if ($tryWhatsApp && $this->whatsapp()?->send($phone, BilingualMessage::make(fn () => $text()), 'otp', sensitive: true)->status === 'sent') {
+            return new OtpRequestResult(OtpRequestResult::SENT, self::RESEND_SECONDS, null, self::CHANNEL_WHATSAPP);
+        }
+
+        $result = $this->sms->canSend()
+            ? $this->sms->send($phone, $text(), 'otp', sensitive: true)
+            : null;
+
+        if (! $result?->ok) {
             // the customer cannot use a code they never got
             CustomerOtp::query()->where('phone', $phone)->whereNull('consumed_at')->update(['consumed_at' => now()]);
 
             return new OtpRequestResult(OtpRequestResult::UNAVAILABLE);
         }
 
-        return new OtpRequestResult(OtpRequestResult::SENT, self::RESEND_SECONDS, $this->sms->isDemo() ? $code : null);
+        return new OtpRequestResult(OtpRequestResult::SENT, self::RESEND_SECONDS, $this->sms->isDemo() ? $code : null, self::CHANNEL_SMS);
     }
 
     /**

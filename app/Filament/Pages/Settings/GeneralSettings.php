@@ -813,6 +813,14 @@ class GeneralSettings extends Page implements HasForms
                     ->schema(collect(WhatsAppSettings::ALERTS)
                         ->map(fn (string $type) => Toggle::make('whatsapp.alerts.'.$type)->label(__('whatsapp.post_types.'.$type)))
                         ->all()),
+
+                Section::make(__('admin_whatsapp.sections.codes'))
+                    ->description(__('admin_whatsapp.sections.codes_desc'))
+                    ->schema([
+                        Toggle::make('whatsapp.codes')
+                            ->label(__('admin_whatsapp.fields.codes'))
+                            ->helperText(__('admin_whatsapp.fields.codes_helper')),
+                    ]),
             ]);
     }
 

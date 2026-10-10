@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\FiltersDirectoryPlaces;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\Storage;
 
 class Shop extends Model
 {
+    use FiltersDirectoryPlaces;
+
     public const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
     public const TYPES = [
@@ -108,18 +111,18 @@ class Shop extends Model
 
     public function getTypeLabelAttribute(): string
     {
-        return __('shops.types.' . $this->type);
+        return __('shops.types.'.$this->type);
     }
 
     public function getDeliveryScopeLabelAttribute(): ?string
     {
-        return $this->delivery_scope ? __('shops.delivery_scopes.' . $this->delivery_scope) : null;
+        return $this->delivery_scope ? __('shops.delivery_scopes.'.$this->delivery_scope) : null;
     }
 
     public function getPaymentOptionLabelsAttribute(): array
     {
         return collect($this->payment_options ?? [])
-            ->map(fn (string $option) => __('shops.payment_options_list.' . $option))
+            ->map(fn (string $option) => __('shops.payment_options_list.'.$option))
             ->all();
     }
 

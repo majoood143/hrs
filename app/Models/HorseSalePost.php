@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Storage;
 
 class HorseSalePost extends Model
 {
+    /** The listing's sort options (website `?sort=` and the mobile API); the first is the default. */
+    public const SORTS = ['newest', 'price_asc', 'price_desc'];
+
     protected $fillable = [
         'en_name',
         'ar_name',
@@ -81,6 +84,32 @@ class HorseSalePost extends Model
     public function scopeVisible(Builder $query): Builder
     {
         return $query->where('status', 'active');
+    }
+
+    /**
+     * The listing filters, named like the website's query string (shared with the mobile API).
+     *
+     * @param  array<string, mixed>  $filters
+     */
+    public function scopeFilteredBy(Builder $query, array $filters): Builder
+    {
+        return $query
+            ->when((int) ($filters['type_id'] ?? 0), fn ($q, $v) => $q->where('type_id', $v))
+            ->when((int) ($filters['gender_id'] ?? 0), fn ($q, $v) => $q->where('gender_id', $v))
+            ->when((int) ($filters['region_id'] ?? 0), fn ($q, $v) => $q->where('region_id', $v))
+            ->when((int) ($filters['city_id'] ?? 0), fn ($q, $v) => $q->where('city_id', $v))
+            ->when($filters['country_id'] ?? null, fn ($q, $v) => $q->where('country_id', $v))
+            ->when(filled($filters['breed'] ?? null), fn ($q) => $q->where('breed', 'like', '%'.$filters['breed'].'%'))
+            ->when(filled($filters['price_max'] ?? null), fn ($q) => $q->where('price', '<=', (float) $filters['price_max']));
+    }
+
+    public function scopeSortedBy(Builder $query, ?string $sort): Builder
+    {
+        return match ($sort) {
+            'price_asc' => $query->orderBy('price'),
+            'price_desc' => $query->orderByDesc('price'),
+            default => $query->latest('id'),
+        };
     }
 
     public function getNameAttribute(): string

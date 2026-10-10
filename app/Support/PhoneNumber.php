@@ -11,7 +11,7 @@ class PhoneNumber
 {
     public static function normalize(?string $raw): ?string
     {
-        $digits = preg_replace('/\D+/', '', (string) $raw);
+        $digits = preg_replace('/\D+/', '', (string) self::toAscii($raw));
 
         if ($digits === '' || $digits === null) {
             return null;
@@ -26,5 +26,27 @@ class PhoneNumber
         }
 
         return $digits;
+    }
+
+    /**
+     * The number as typed, but in plain ASCII: Arabic-Indic and Persian digits (an Arabic keyboard)
+     * become 0-9, the invisible direction marks a pasted number from WhatsApp or the contacts app
+     * carries are dropped, and non-breaking spaces become spaces. Nothing else changes.
+     */
+    public static function toAscii(?string $raw): ?string
+    {
+        if ($raw === null) {
+            return null;
+        }
+
+        $raw = strtr($raw, [
+            '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+            '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+            '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
+            '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+            "\u{00A0}" => ' ', "\u{202F}" => ' ',
+        ]);
+
+        return trim(preg_replace('/[\x{200B}-\x{200F}\x{202A}-\x{202E}\x{2066}-\x{2069}\x{FEFF}]/u', '', $raw));
     }
 }

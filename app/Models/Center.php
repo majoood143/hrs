@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\FiltersDirectoryPlaces;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\Storage;
 
 class Center extends Model
 {
+    use FiltersDirectoryPlaces;
+
     public const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
     public const TYPES = [
@@ -83,7 +86,7 @@ class Center extends Model
 
     public function getTypeLabelAttribute(): string
     {
-        return __('centers.types.' . $this->type);
+        return __('centers.types.'.$this->type);
     }
 
     public function getNameAttribute(): string

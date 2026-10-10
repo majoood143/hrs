@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers\Site;
 
-use App\Events\PublicPostSubmitted;
 use App\Http\Controllers\Controller;
-use App\Models\City;
 use App\Models\Color;
 use App\Models\Country;
 use App\Models\Gender;
 use App\Models\HorseSalePost;
 use App\Models\SiteSetting;
 use App\Models\Type;
-use App\Support\ImageCompressor;
+use App\Services\PublicPosts\HorseSalePostCreator;
 use App\Support\Seo;
 use App\Support\ViewCounter;
 use Gregwar\Captcha\CaptchaBuilder;
@@ -19,7 +17,6 @@ use Gregwar\Captcha\PhraseBuilder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use MarcoGermani87\FilamentCaptcha\Rules\Captcha;
@@ -61,99 +58,17 @@ class HorseForSaleController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, HorseSalePostCreator $creator): RedirectResponse
     {
-        $validated = $request->validate([
-            'en_name' => ['required', 'string', 'max:255'],
-            'ar_name' => ['required', 'string', 'max:255'],
-            'type_id' => ['required', 'exists:types,id'],
-            'gender_id' => ['required', 'exists:genders,id'],
-            'color_id' => ['nullable', 'exists:colors,id'],
-            'breed' => ['nullable', 'string', 'max:255'],
-            'dob' => ['nullable', 'date', 'before:today'],
-            'dam' => ['nullable', 'string', 'max:255'],
-            'sire' => ['nullable', 'string', 'max:255'],
-            'birth_country_id' => ['nullable', 'exists:countries,id'],
-            'passport_number' => ['nullable', 'string', 'max:255'],
-            'passport_document' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:4096'],
-            'city_id' => ['required', 'exists:cities,id'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'price_negotiable' => ['nullable', 'boolean'],
-            'cover_photo' => ['required', 'image', 'max:4096'],
-            'images' => ['nullable', 'array', 'max:10'],
-            'images.*' => ['image', 'max:4096'],
-            'description_en' => ['nullable', 'string'],
-            'description_ar' => ['nullable', 'string'],
+        $validated = $request->validate($creator->rules() + [
             'contact_number' => ['required', 'string', 'max:30'],
             'captcha' => ['required', new Captcha],
-        ], [], [
-            'en_name' => __('horses-for-sale.name_en'),
-            'ar_name' => __('horses-for-sale.name_ar'),
-            'type_id' => __('horses-for-sale.type'),
-            'gender_id' => __('horses-for-sale.gender'),
-            'color_id' => __('horses-for-sale.color'),
-            'breed' => __('horses-for-sale.breed'),
-            'dob' => __('horses-for-sale.dob'),
-            'dam' => __('horses-for-sale.dam'),
-            'sire' => __('horses-for-sale.sire'),
-            'birth_country_id' => __('horses-for-sale.birth_country'),
-            'passport_number' => __('horses-for-sale.passport_number'),
-            'passport_document' => __('horses-for-sale.passport_document'),
-            'city_id' => __('horses-for-sale.city'),
-            'price' => __('horses-for-sale.price'),
-            'price_negotiable' => __('horses-for-sale.price_negotiable'),
-            'cover_photo' => __('horses-for-sale.cover_photo'),
-            'images' => __('horses-for-sale.gallery_photos'),
+        ], [], $creator->attributes() + [
             'contact_number' => __('horses-for-sale.contact_number'),
             'captcha' => __('horses-for-sale.captcha_label'),
         ]);
 
-        $city = City::with('region')->findOrFail($validated['city_id']);
-
-        $coverPhotoPath = $request->file('cover_photo')->store('horse-sale/covers', 'public');
-
-        ImageCompressor::compress(Storage::disk('public')->path($coverPhotoPath));
-
-        $galleryPaths = [];
-        foreach ($request->file('images', []) as $image) {
-            $path = $image->store('horse-sale/gallery', 'public');
-            ImageCompressor::compress(Storage::disk('public')->path($path));
-            $galleryPaths[] = $path;
-        }
-
-        $passportDocumentPath = null;
-        if ($request->hasFile('passport_document')) {
-            $passportDocumentPath = $request->file('passport_document')->store('horse-sale/passports', 'public');
-            ImageCompressor::compress(Storage::disk('public')->path($passportDocumentPath));
-        }
-
-        $post = HorseSalePost::create([
-            'en_name' => $validated['en_name'],
-            'ar_name' => $validated['ar_name'],
-            'type_id' => $validated['type_id'],
-            'gender_id' => $validated['gender_id'],
-            'color_id' => $validated['color_id'] ?? null,
-            'breed' => $validated['breed'] ?? null,
-            'dob' => $validated['dob'] ?? null,
-            'dam' => $validated['dam'] ?? null,
-            'sire' => $validated['sire'] ?? null,
-            'birth_country_id' => $validated['birth_country_id'] ?? null,
-            'passport_number' => $validated['passport_number'] ?? null,
-            'passport_document' => $passportDocumentPath,
-            'country_id' => $city->region->country_id,
-            'region_id' => $city->region_id,
-            'city_id' => $city->id,
-            'price' => $validated['price'],
-            'price_negotiable' => $request->boolean('price_negotiable'),
-            'cover_photo' => $coverPhotoPath,
-            'images' => $galleryPaths,
-            'description_en' => $validated['description_en'] ?? null,
-            'description_ar' => $validated['description_ar'] ?? null,
-            'contact_number' => $validated['contact_number'],
-            'status' => 'active',
-        ]);
-
-        PublicPostSubmitted::dispatch($post);
+        $creator->create($validated, ['cover_photo' => $request->file('cover_photo'), 'images' => $request->file('images', []), 'passport_document' => $request->file('passport_document')], $validated['contact_number']);
 
         return redirect()
             ->route('horses-for-sale.index')

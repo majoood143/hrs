@@ -13,6 +13,7 @@ return [
         'youtube_url' => 'رابط يوتيوب',
         'youtube_url_helper' => 'الصق رابط يوتيوب (مثل youtube.com/watch?v=... أو youtu.be/...).',
         'order' => 'الترتيب',
+        'created_at' => 'تاريخ الإنشاء',
         'is_active' => 'مفعّل',
     ],
     'filters' => [

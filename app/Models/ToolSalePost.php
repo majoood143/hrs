@@ -21,6 +21,9 @@ class ToolSalePost extends Model
 
     public const CONDITIONS = ['new', 'used'];
 
+    /** The listing's sort options (website `?sort=` and the mobile API); the first is the default. */
+    public const SORTS = ['newest', 'price_asc', 'price_desc'];
+
     protected $fillable = [
         'en_name',
         'ar_name',
@@ -62,6 +65,35 @@ class ToolSalePost extends Model
     public function scopeVisible(Builder $query): Builder
     {
         return $query->where('status', 'active');
+    }
+
+    /**
+     * The listing filters, named like the website's query string (shared with the mobile API).
+     * Unknown categories and conditions are ignored, as on the website.
+     *
+     * @param  array<string, mixed>  $filters
+     */
+    public function scopeFilteredBy(Builder $query, array $filters): Builder
+    {
+        $category = in_array($filters['category'] ?? null, self::CATEGORIES, true) ? $filters['category'] : null;
+        $condition = in_array($filters['condition'] ?? null, self::CONDITIONS, true) ? $filters['condition'] : null;
+
+        return $query
+            ->when($category, fn ($q, $v) => $q->where('category', $v))
+            ->when($condition, fn ($q, $v) => $q->where('condition', $v))
+            ->when((int) ($filters['region_id'] ?? 0), fn ($q, $v) => $q->where('region_id', $v))
+            ->when((int) ($filters['city_id'] ?? 0), fn ($q, $v) => $q->where('city_id', $v))
+            ->when($filters['country_id'] ?? null, fn ($q, $v) => $q->where('country_id', $v))
+            ->when(filled($filters['price_max'] ?? null), fn ($q) => $q->where('price', '<=', (float) $filters['price_max']));
+    }
+
+    public function scopeSortedBy(Builder $query, ?string $sort): Builder
+    {
+        return match ($sort) {
+            'price_asc' => $query->orderBy('price'),
+            'price_desc' => $query->orderByDesc('price'),
+            default => $query->latest('id'),
+        };
     }
 
     public function getNameAttribute(): string

@@ -41,6 +41,16 @@ final class WhatsAppSettings
         return array_values(array_unique(array_filter($phones)));
     }
 
+    /**
+     * Send one-time codes (posting from the app) by WhatsApp first, SMS as the backup. On until an
+     * admin switches it off; independent of the admin alerts switch. Codes still need a connected
+     * instance and the Evolution API set up, else they simply go by SMS.
+     */
+    public static function codesEnabled(): bool
+    {
+        return (bool) SiteSetting::get('whatsapp.codes', true);
+    }
+
     public static function alertEnabled(string $type): bool
     {
         return (bool) (self::json('whatsapp.alerts')[$type] ?? true);
@@ -60,6 +70,7 @@ final class WhatsAppSettings
             'instance_id' => self::instanceId(),
             'recipients' => self::recipientRows(),
             'alerts' => self::alerts(),
+            'codes' => self::codesEnabled(),
         ];
     }
 
@@ -80,6 +91,7 @@ final class WhatsAppSettings
         SiteSetting::set('whatsapp.instance_id', (string) ($state['instance_id'] ?? ''), 'text', null, 'whatsapp');
         SiteSetting::set('whatsapp.recipients', json_encode($recipients, JSON_UNESCAPED_UNICODE), 'text', null, 'whatsapp');
         SiteSetting::set('whatsapp.alerts', json_encode($alerts), 'text', null, 'whatsapp');
+        SiteSetting::set('whatsapp.codes', (bool) ($state['codes'] ?? false), 'boolean', null, 'whatsapp');
     }
 
     private static function json(string $key): array

@@ -37,5 +37,6 @@ return Application::configure(basePath: dirname(__DIR__))
         );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // The API answers errors (404, 422, 429…) as JSON whatever the client's Accept header says.
+        $exceptions->shouldRenderJsonWhen(fn ($request) => $request->is('api/*') || $request->expectsJson());
     })->create();

@@ -38,8 +38,9 @@ class WhatsAppNotifier
 
     /**
      * @param  string  $type  what the message is for (new_horse_sale_post, test, ...), for the log
+     * @param  bool  $sensitive  keep the text out of the log (one-time codes)
      */
-    public function send(string $to, string $message, string $type): NotificationLog
+    public function send(string $to, string $message, string $type, bool $sensitive = false): NotificationLog
     {
         $phone = PhoneNumber::normalize($to);
         $instance = null;
@@ -68,7 +69,7 @@ class WhatsAppNotifier
             'type' => $type,
             'recipient' => $phone ?? $to,
             'status' => $error === null ? 'sent' : 'failed',
-            'message' => $message,
+            'message' => $sensitive ? null : $message,
             'provider_reference' => $response['key']['id'] ?? null,
             'error' => $error,
             'response' => $response ?? ($instance ? ['instance' => $instance->name] : null),

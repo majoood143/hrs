@@ -18,6 +18,8 @@ final class OtpRequestResult
         public readonly int $retryAfter = 0,
         /** the code itself, only under the "demo" SMS driver */
         public readonly ?string $demoCode = null,
+        /** how the code went out: CustomerOtpService::CHANNEL_SMS or CHANNEL_WHATSAPP */
+        public readonly ?string $channel = null,
     ) {}
 
     public function sent(): bool

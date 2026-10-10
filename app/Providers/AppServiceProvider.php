@@ -18,15 +18,23 @@ use App\Policies\WhatsappWebhookPolicy;
 use App\Services\SettingsService;
 use App\Support\FormOrderSettings;
 use App\Support\ImageCompressor;
+use App\Support\PhoneNumber;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
+use Dedoc\Scramble\Scramble;
 use Exception;
 use Filament\Actions\Action;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\TextInput;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -87,6 +95,34 @@ class AppServiceProvider extends ServiceProvider
             return $user?->hasRole('super_admin') ?? false;
         });
 
+        // The mobile app's public API (/api/v1): per device IP, generous enough for scrolling lists.
+        RateLimiter::for('api-public', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
+
+        // Its own docs (/docs/v1, same access as /docs/api), so the app's types follow only its endpoints.
+        Scramble::registerApi('v1', [
+            'api_path' => 'api/v1',
+            'info' => [
+                'version' => '1',
+                'description' => 'The Muhra mobile app API: public and read-only. Send `Accept-Language: en|ar`; every text comes back in that language.',
+            ],
+        ])
+            // The group's catch-all only turns unknown paths into a JSON 404; it is not an endpoint.
+            ->routes(fn ($route) => str_starts_with($route->uri(), 'api/v1/') && $route->getName() !== 'api.v1.not-found')
+            ->expose(ui: 'docs/v1', document: 'docs/v1.json');
+
+        // The admin API (rupadana/filament-api-service) registers `api/{panel}/…` with any value
+        // allowed for {panel}, so `api/v1/farriers` would hit the admin route (401). {panel} only
+        // ever means a Filament panel id: say so once every route is registered.
+        $this->app->booted(function () {
+            $panels = implode('|', array_map(fn (string $id) => preg_quote($id, '/'), array_keys(Filament::getPanels())));
+
+            foreach (Route::getRoutes()->getRoutes() as $route) {
+                if ($panels !== '' && in_array('panel', $route->parameterNames(), true)) {
+                    $route->where('panel', $panels);
+                }
+            }
+        });
+
         Gate::policy(FormBuilderForm::class, FormPolicy::class);
 
         // Overrides the vendor policy, which checks Shield's default snake_case
@@ -138,6 +174,16 @@ class AppServiceProvider extends ServiceProvider
                 ])
                 ->visible(insidePanels: true, outsidePanels: true)
                 ->excludes(['public']);
+        });
+
+        // Phone fields (->tel()) accept what an Arabic keyboard or a pasted contact gives:
+        // Arabic-Indic digits and hidden direction marks failed Filament's ASCII-only phone regex.
+        TextInput::configureUsing(function (TextInput $input) {
+            $toAscii = fn (TextInput $component, $state) => $component->isTel() && is_string($state)
+                ? PhoneNumber::toAscii($state)
+                : $state;
+
+            $input->mutateStateForValidationUsing($toAscii)->mutateDehydratedStateUsing($toAscii);
         });
 
         FileUpload::configureUsing(function (FileUpload $fileUpload) {
