@@ -71,6 +71,8 @@ class AppConfigResource extends JsonResource
             ],
             /** Terms page in the request's language (falls back to the other language's link). */
             'terms_url' => self::text($ar ? 'terms_url_ar' : 'terms_url_en') ?? self::text($ar ? 'terms_url_en' : 'terms_url_ar'),
+            /** Privacy policy page in the request's language (falls back to the other language's link). */
+            'privacy_url' => self::text($ar ? 'privacy_url_ar' : 'privacy_url_en') ?? self::text($ar ? 'privacy_url_en' : 'privacy_url_ar'),
             /** How verification codes (for posting) can be sent right now; neither = posting is unavailable. */
             'verification' => [
                 'whatsapp' => (bool) rescue(fn () => app(CustomerOtpService::class)->whatsappAvailable(), false, false),

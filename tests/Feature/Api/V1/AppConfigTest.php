@@ -26,6 +26,7 @@ class AppConfigTest extends TestCase
             'social_instagram_url' => 'https://instagram.com/muhra',
             'terms_url_en' => 'https://example.com/terms',
             'terms_url_ar' => 'https://example.com/ar/terms',
+            'privacy_url_en' => 'https://example.com/privacy',
         ]);
     }
 
@@ -50,6 +51,7 @@ class AppConfigTest extends TestCase
             ->assertJsonPath('data.social.instagram_url', 'https://instagram.com/muhra')
             ->assertJsonPath('data.social.x_url', null)
             ->assertJsonPath('data.terms_url', 'https://example.com/terms')
+            ->assertJsonPath('data.privacy_url', 'https://example.com/privacy')
             ->assertJsonPath('data.locale', 'en')
             ->assertJsonPath('data.locales.1', ['code' => 'ar', 'name' => 'Arabic', 'native' => 'عربي', 'dir' => 'rtl']);
     }
@@ -61,6 +63,7 @@ class AppConfigTest extends TestCase
             ->assertHeader('Content-Language', 'ar')
             ->assertJsonPath('data.site_name', 'مهرة')
             ->assertJsonPath('data.terms_url', 'https://example.com/ar/terms')
+            ->assertJsonPath('data.privacy_url', 'https://example.com/privacy')
             ->assertJsonPath('data.locale', 'ar');
 
         // A language the site does not have falls through to the next one asked for, then the default.

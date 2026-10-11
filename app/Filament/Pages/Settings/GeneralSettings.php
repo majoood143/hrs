@@ -107,6 +107,8 @@ class GeneralSettings extends Page implements HasForms
             'terms_ar' => SiteSetting::get('terms_ar', ''),
             'terms_url_en' => SiteSetting::get('terms_url_en', ''),
             'terms_url_ar' => SiteSetting::get('terms_url_ar', ''),
+            'privacy_url_en' => SiteSetting::get('privacy_url_en', ''),
+            'privacy_url_ar' => SiteSetting::get('privacy_url_ar', ''),
 
             'module_kiosk_enabled' => (bool) SiteSetting::get('module_kiosk_enabled', true),
             'module_extra_services_enabled' => (bool) SiteSetting::get('module_extra_services_enabled', true),
@@ -519,6 +521,17 @@ class GeneralSettings extends Page implements HasForms
                                                 ->label(__('general_settings.fields.terms_url_ar'))
                                                 ->url()
                                                 ->maxLength(255),
+
+                                            TextInput::make('privacy_url_en')
+                                                ->label(__('general_settings.fields.privacy_url_en'))
+                                                ->helperText(__('general_settings.fields.privacy_url_helper'))
+                                                ->url()
+                                                ->maxLength(255),
+
+                                            TextInput::make('privacy_url_ar')
+                                                ->label(__('general_settings.fields.privacy_url_ar'))
+                                                ->url()
+                                                ->maxLength(255),
                                         ]),
                                     ]),
                             ]),
@@ -861,6 +874,8 @@ class GeneralSettings extends Page implements HasForms
             'terms_ar' => 'richtext',
             'terms_url_en' => 'text',
             'terms_url_ar' => 'text',
+            'privacy_url_en' => 'text',
+            'privacy_url_ar' => 'text',
             'social_facebook_url' => 'text',
             'social_instagram_url' => 'text',
             'social_x_url' => 'text',
