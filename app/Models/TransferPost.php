@@ -11,7 +11,7 @@ class TransferPost extends Model
 {
     public const TYPES = ['offer', 'request'];
 
-    public const STATUSES = ['active', 'expired', 'cancelled'];
+    public const STATUSES = ['active', 'expired', 'cancelled', 'pending'];
 
     /** @return array<string, string> the types in the current language */
     public static function typeOptions(): array

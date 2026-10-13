@@ -73,8 +73,9 @@ class TransferBoardController extends Controller
      * Post a transfer post
      *
      * Needs `posting_token` (from verification/verify); the post's contact number is the verified
-     * phone. Published at once, like the website. `cover_photo` (optional) is a file; send multipart/form-data. `price` is required for offers. 401 without a valid token, 429 past the
-     * daily limit (5 posts per phone).
+     * phone. Published at once like the website, or kept for an admin's approval when app posts are
+     * reviewed (`meta.pending_review`: the post is not visible yet, so do not open it). `cover_photo` (optional) is a file; send multipart/form-data. `price` is required for offers. 401 without a valid token, 429 past the
+     * daily limit (posts per phone in 24 h; 5 unless changed in admin → Mobile app → Posting).
      *
      * @unauthenticated
      */
@@ -82,6 +83,6 @@ class TransferBoardController extends Controller
     {
         $post = $this->createPublicPost($request, $creator, ['cover_photo']);
 
-        return (new TransferPostResource($post->load(self::RELATIONS)))->response()->setStatusCode(201);
+        return $this->postedResponse(new TransferPostResource($post->load(self::RELATIONS)), $post);
     }
 }

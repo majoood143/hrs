@@ -5,10 +5,12 @@
 return [
     'new_post' => [
         'heading' => '🆕 إعلان جديد على :site',
+        'heading_pending' => '⏳ إعلان جديد على :site بانتظار موافقتك',
         'type' => 'القسم: :type',
         'contact' => '📞 للتواصل: :contact',
         'view' => '🔗 على الموقع: :link',
         'admin' => '🛠 في لوحة التحكم: :link',
+        'approve' => '✅ للموافقة عليه من لوحة التحكم: :link',
     ],
 
     'new_stable' => [

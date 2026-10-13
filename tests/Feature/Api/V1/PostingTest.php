@@ -4,8 +4,10 @@ namespace Tests\Feature\Api\V1;
 
 use App\Events\PublicPostSubmitted;
 use App\Models\HorseSalePost;
+use App\Models\ToolSalePost;
 use App\Models\TransferPost;
 use App\Support\Api\PostingLimit;
+use App\Support\MobileApp\MobilePosting;
 use Illuminate\Http\Client\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -43,6 +45,8 @@ class PostingTest extends TestCase
             '2026_09_23_000001_create_customers_tables',
             '2026_09_23_000002_create_notification_logs_table',
             '2026_09_26_140451_create_whatsapp_instances_table',
+            // after the directory tables: it changes the farriers' and transfers' status too
+            '2026_10_13_000001_add_pending_status_to_public_posts',
         ] as $migration) {
             (require database_path("migrations/{$migration}.php"))->up();
         }
@@ -179,7 +183,8 @@ class PostingTest extends TestCase
             ->assertJsonPath('data.contact_number', '+96899887766')
             ->assertJsonPath('data.price_negotiable', true)
             ->assertJsonPath('data.region.name', 'Muscat')
-            ->assertJsonCount(3, 'data.image_urls');
+            ->assertJsonCount(3, 'data.image_urls')
+            ->assertJsonPath('meta.pending_review', false);
 
         $post = HorseSalePost::sole();
         $this->assertSame('active', $post->status);
@@ -244,7 +249,7 @@ class PostingTest extends TestCase
         $token = $this->postingToken();
         $fields = ['posting_token' => $token, 'type' => 'request', 'from_city_id' => $this->ids['seeb'], 'to_city_id' => $this->ids['bawshar'], 'capacity' => 1, 'transfer_date' => now()->addDay()->toDateString()];
 
-        foreach (range(1, PostingLimit::PER_DAY) as $ignored) {
+        foreach (range(1, PostingLimit::perDay()) as $ignored) {
             $this->postJson('/api/v1/transfer-board', $fields)->assertCreated();
         }
 
@@ -252,6 +257,59 @@ class PostingTest extends TestCase
 
         $this->travel(25)->hours();
         $this->postJson('/api/v1/transfer-board', ['posting_token' => $this->postingToken('91112222')] + $fields)->assertCreated();
+    }
+
+    public function test_while_app_posts_are_reviewed_a_post_waits_hidden_for_an_admin(): void
+    {
+        $this->settings(['mobile.posting' => json_encode(['review' => true, 'daily_limit' => 5])]);
+        $token = $this->postingToken();
+
+        $id = $this->post('/api/v1/tools-for-sale', [
+            'posting_token' => $token, 'en_name' => 'Saddle', 'ar_name' => 'سرج', 'category' => 'saddlery_tack', 'condition' => 'used',
+            'city_id' => $this->ids['seeb'], 'price' => '120', 'cover_photo' => UploadedFile::fake()->image('saddle.jpg'),
+        ], ['Accept' => 'application/json'])
+            ->assertCreated()
+            ->assertJsonPath('meta.pending_review', true)
+            ->json('data.id');
+
+        $this->postJson('/api/v1/transfer-board', [
+            'posting_token' => $token, 'type' => 'request', 'from_city_id' => $this->ids['seeb'], 'to_city_id' => $this->ids['bawshar'],
+            'capacity' => 2, 'transfer_date' => now()->addDays(3)->toDateString(),
+        ])->assertCreated()->assertJsonPath('meta.pending_review', true);
+
+        $this->assertSame('pending', ToolSalePost::sole()->status);
+        $this->assertSame('pending', TransferPost::sole()->status);
+        $this->getJson("/api/v1/tools-for-sale/{$id}")->assertNotFound();
+        $this->getJson('/api/v1/tools-for-sale')->assertOk()->assertJsonCount(0, 'data');
+        $this->getJson('/api/v1/transfer-board')->assertOk()->assertJsonCount(0, 'data');
+        Event::assertDispatchedTimes(PublicPostSubmitted::class, 2);
+
+        ToolSalePost::sole()->update(['status' => 'active']);
+        $this->getJson("/api/v1/tools-for-sale/{$id}")->assertOk();
+    }
+
+    public function test_the_daily_limit_comes_from_the_admin_and_counts_pending_posts(): void
+    {
+        $this->settings(['mobile.posting' => json_encode(['review' => true, 'daily_limit' => 2])]);
+        $fields = ['posting_token' => $this->postingToken(), 'type' => 'request', 'from_city_id' => $this->ids['seeb'], 'to_city_id' => $this->ids['bawshar'], 'capacity' => 1, 'transfer_date' => now()->addDay()->toDateString()];
+
+        $this->postJson('/api/v1/transfer-board', $fields)->assertCreated();
+        $this->postJson('/api/v1/transfer-board', $fields)->assertCreated();
+        $this->postJson('/api/v1/transfer-board', $fields)->assertStatus(429)->assertJsonPath('code', 'posting_limit');
+
+        $this->assertSame(2, PostingLimit::perDay());
+        $this->assertSame(2, TransferPost::where('status', 'pending')->count());
+    }
+
+    public function test_a_broken_or_missing_posting_setting_means_no_review_and_five_a_day(): void
+    {
+        $this->assertSame(['review' => false, 'daily_limit' => 5], MobilePosting::settings());
+
+        $this->settings(['mobile.posting' => json_encode(['review' => 'yes', 'daily_limit' => 500])]);
+        $this->assertSame(['review' => true, 'daily_limit' => 5], MobilePosting::settings());
+
+        $this->settings(['mobile.posting' => 'not json']);
+        $this->assertSame('active', MobilePosting::newPostStatus());
     }
 
     private function settings(array $overrides = []): void

@@ -114,6 +114,8 @@ class PlaceResource extends JsonResource
             /** @var int|null */
             'views_count' => $place->getAttribute('views_count'),
             'created_at' => $place->getAttribute('created_at')?->toIso8601String(),
+            /** The place's page on the website, for sharing. */
+            'share_url' => route($section.'.show', $place->getAttribute('slug')),
         ];
     }
 }

@@ -27,6 +27,7 @@ final class MobileScreens
         'post_tool' => 'post_tool',
         'post_farrier' => 'post_farrier',
         'post_transfer' => 'post_transfer',
+        'silks' => 'silks',
     ];
 
     /** @return list<string> */

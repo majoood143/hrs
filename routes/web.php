@@ -4,6 +4,7 @@ use App\Http\Controllers\Site\AccountAuthController;
 use App\Http\Controllers\Site\AccountOrderController;
 use App\Http\Controllers\Site\AccountPackageController;
 use App\Http\Controllers\Site\AdClickController;
+use App\Http\Controllers\Site\AppLinksController;
 use App\Http\Controllers\Site\CenterController;
 use App\Http\Controllers\Site\ClinicController;
 use App\Http\Controllers\Site\EventController;
@@ -31,6 +32,10 @@ use App\Models\CmsRedirect;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PageController::class, 'home'])->name('home');
+
+// Website links that open the Muhra app (universal links / App Links): see Support\MobileApp\AppLinks.
+Route::get('/.well-known/apple-app-site-association', [AppLinksController::class, 'apple'])->name('app-links.apple');
+Route::get('/.well-known/assetlinks.json', [AppLinksController::class, 'android'])->name('app-links.android');
 
 Route::get('/blog', [PostController::class, 'index'])->name('blog.index');
 Route::get('/blog/category/{slug}', [PostController::class, 'category'])->name('blog.category');

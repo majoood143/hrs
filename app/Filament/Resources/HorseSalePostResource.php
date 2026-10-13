@@ -6,6 +6,7 @@ use App\Filament\Resources\HorseSalePostResource\Pages\CreateHorseSalePost;
 use App\Filament\Resources\HorseSalePostResource\Pages\EditHorseSalePost;
 use App\Filament\Resources\HorseSalePostResource\Pages\ListHorseSalePosts;
 use App\Filament\Resources\HorseSalePostResource\Pages\ViewHorseSalePost;
+use App\Filament\Support\PendingPosts;
 use App\Filament\Support\PlaceFormFields;
 use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
@@ -67,7 +68,17 @@ class HorseSalePostResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return (string) static::$model::where('status', 'active')->count();
+        return PendingPosts::navigationBadge(static::$model);
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return PendingPosts::navigationBadgeColor(static::$model);
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return PendingPosts::navigationBadgeTooltip(static::$model);
     }
 
     /** `ar_name` in the Arabic admin, else `en_name` (lookups, locations, posts). */
@@ -246,6 +257,7 @@ class HorseSalePostResource extends Resource
                     ->formatStateUsing(fn (string $state): string => HorseSalePost::statusOptions()[$state] ?? $state)
                     ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
+                        PendingPosts::STATUS => 'warning',
                         'sold' => 'info',
                         'expired' => 'gray',
                         'cancelled' => 'danger',
@@ -278,6 +290,7 @@ class HorseSalePostResource extends Resource
                     ->preload(),
             ])
             ->recordActions([
+                PendingPosts::approveAction(),
                 ActionGroup::make([
                     ViewAction::make(),
                     ...WebsiteLinkActions::make(
@@ -290,6 +303,7 @@ class HorseSalePostResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    PendingPosts::approveBulkAction(),
                     DeleteBulkAction::make(),
                     ExportBulkAction::make(),
                 ]),

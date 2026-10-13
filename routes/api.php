@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\HomeController;
 use App\Http\Controllers\Api\V1\HorseForSaleController;
 use App\Http\Controllers\Api\V1\LookupController;
 use App\Http\Controllers\Api\V1\ShopController;
+use App\Http\Controllers\Api\V1\SilksController;
 use App\Http\Controllers\Api\V1\StableController;
 use App\Http\Controllers\Api\V1\ToolForSaleController;
 use App\Http\Controllers\Api\V1\TransferBoardController;
@@ -64,6 +65,8 @@ Route::prefix('v1')
         Route::get('videos/folders', [VideoLibraryController::class, 'folders'])->name('videos.folders');
         Route::get('videos/folders/{slug}', [VideoLibraryController::class, 'folder'])->name('videos.folder');
         Route::get('videos/{slug}', [VideoLibraryController::class, 'show'])->name('videos.show');
+
+        Route::get('silks', SilksController::class)->name('silks');
 
         // Posting from the app: a verified phone (code by WhatsApp, else SMS) instead of the site's captcha.
         Route::middleware('throttle:10,1')->group(function () {

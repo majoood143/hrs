@@ -2,9 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Resources\HorseSalePostResource;
 use App\Filament\Resources\HorseSalePostResource\Pages\EditHorseSalePost;
 use App\Filament\Resources\HorseSalePostResource\Pages\ListHorseSalePosts;
+use App\Filament\Resources\HorseSalePostResource\Pages\ViewHorseSalePost;
 use App\Models\HorseSalePost;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -29,6 +32,7 @@ class HorseSalePostAdminResourceTest extends TestCase
         parent::setUp();
 
         $this->prepareMobileApi();
+        (require database_path('migrations/2026_10_13_000001_add_pending_status_to_public_posts.php'))->up();
         $this->withoutVite();
         Storage::fake('public');
         Storage::disk('public')->put('horse-sale/covers/a.jpg', UploadedFile::fake()->image('a.jpg')->getContent());
@@ -86,5 +90,53 @@ class HorseSalePostAdminResourceTest extends TestCase
 
         $this->assertSame('Desert Wind II', $this->post->refresh()->en_name);
         $this->assertNotNull($this->post->passport_document);
+    }
+
+    public function test_a_post_waiting_for_approval_is_flagged_and_approved_from_the_list_or_its_page(): void
+    {
+        $this->assertSame('1', HorseSalePostResource::getNavigationBadge());
+        $this->assertNull(HorseSalePostResource::getNavigationBadgeColor());
+
+        $this->post->update(['status' => 'pending']);
+        $second = $this->post->replicate();
+        $second->save();
+        App::setLocale('ar');
+
+        $this->assertSame('2', HorseSalePostResource::getNavigationBadge());
+        $this->assertSame('warning', HorseSalePostResource::getNavigationBadgeColor());
+
+        Livewire::test(ListHorseSalePosts::class)
+            ->assertOk()
+            ->assertSee('بانتظار الموافقة')
+            ->assertActionVisible(TestAction::make('approvePost')->table($this->post))
+            ->callAction(TestAction::make('approvePost')->table($this->post));
+
+        $this->assertSame('active', $this->post->refresh()->status);
+
+        Livewire::test(ListHorseSalePosts::class)
+            ->assertActionHidden(TestAction::make('approvePost')->table($this->post));
+
+        Livewire::test(ViewHorseSalePost::class, ['record' => $second->getKey()])
+            ->assertActionVisible('approvePost')
+            ->callAction('approvePost');
+
+        $this->assertSame('active', $second->refresh()->status);
+        $this->assertSame('2', HorseSalePostResource::getNavigationBadge());
+        $this->assertNull(HorseSalePostResource::getNavigationBadgeColor());
+    }
+
+    public function test_approving_several_leaves_the_posts_that_were_not_waiting_alone(): void
+    {
+        $sold = $this->post->replicate()->forceFill(['status' => 'sold']);
+        $sold->save();
+        $pending = $this->post->replicate()->forceFill(['status' => 'pending']);
+        $pending->save();
+
+        Livewire::test(ListHorseSalePosts::class)
+            ->selectTableRecords([$sold->getKey(), $pending->getKey()])
+            ->callAction(TestAction::make('approvePosts')->table()->bulk());
+
+        $this->assertSame('sold', $sold->refresh()->status);
+        $this->assertSame('active', $pending->refresh()->status);
     }
 }

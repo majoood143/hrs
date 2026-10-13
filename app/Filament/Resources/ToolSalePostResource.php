@@ -6,6 +6,7 @@ use App\Filament\Resources\ToolSalePostResource\Pages\CreateToolSalePost;
 use App\Filament\Resources\ToolSalePostResource\Pages\EditToolSalePost;
 use App\Filament\Resources\ToolSalePostResource\Pages\ListToolSalePosts;
 use App\Filament\Resources\ToolSalePostResource\Pages\ViewToolSalePost;
+use App\Filament\Support\PendingPosts;
 use App\Filament\Support\PlaceFormFields;
 use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
@@ -65,7 +66,17 @@ class ToolSalePostResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return (string) static::$model::where('status', 'active')->count();
+        return PendingPosts::navigationBadge(static::$model);
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return PendingPosts::navigationBadgeColor(static::$model);
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return PendingPosts::navigationBadgeTooltip(static::$model);
     }
 
     /** `ar_name` in the Arabic admin, else `en_name` (locations, posts). */
@@ -214,6 +225,7 @@ class ToolSalePostResource extends Resource
                     ->formatStateUsing(fn (string $state): string => ToolSalePost::statusOptions()[$state] ?? $state)
                     ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
+                        PendingPosts::STATUS => 'warning',
                         'sold' => 'info',
                         'expired' => 'gray',
                         'cancelled' => 'danger',
@@ -244,6 +256,7 @@ class ToolSalePostResource extends Resource
                     ->preload(),
             ])
             ->recordActions([
+                PendingPosts::approveAction(),
                 ActionGroup::make([
                     ViewAction::make(),
                     ...WebsiteLinkActions::make(
@@ -256,6 +269,7 @@ class ToolSalePostResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    PendingPosts::approveBulkAction(),
                     DeleteBulkAction::make(),
                     ExportBulkAction::make(),
                 ]),

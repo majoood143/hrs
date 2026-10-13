@@ -31,6 +31,8 @@ class ToolForSaleResource extends JsonResource
             'contact_number' => (string) $this->contact_number,
             'views_count' => (int) $this->views_count,
             'created_at' => $this->created_at?->toIso8601String(),
+            /** The listing's page on the website, for sharing. */
+            'share_url' => route('tools-for-sale.show', $this->resource),
         ];
     }
 }

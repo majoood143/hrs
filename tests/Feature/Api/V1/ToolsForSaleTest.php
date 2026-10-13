@@ -72,7 +72,8 @@ class ToolsForSaleTest extends TestCase
             ->assertJsonPath('data.description', 'Barely used.')
             ->assertJsonPath('data.region.name', 'Muscat')
             ->assertJsonPath('data.cover_photo_url', url('/storage/tools-for-sale/covers/saddle.jpg'))
-            ->assertJsonPath('data.contact_number', '91234567');
+            ->assertJsonPath('data.contact_number', '91234567')
+            ->assertJsonPath('data.share_url', route('tools-for-sale.show', $tool->id));
 
         $this->getJson("/api/v1/tools-for-sale/{$tool->id}", ['Accept-Language' => 'ar'])->assertJsonPath('data.description', 'استخدام خفيف.');
 

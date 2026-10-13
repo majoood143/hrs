@@ -12,6 +12,8 @@ return [
         'features' => 'Features',
         'updates' => 'Updates',
         'maintenance' => 'Maintenance',
+        'posting' => 'Posting',
+        'links' => 'Website links',
     ],
 
     'groups' => [
@@ -19,6 +21,7 @@ return [
         'directory' => 'Directory',
         'transfer' => 'Transfer',
         'posting' => 'Posting from the app',
+        'racing' => 'Racing',
         'other' => 'Other',
     ],
 
@@ -62,6 +65,8 @@ return [
         'contact_whatsapp_help' => 'On listings with a phone number.',
         'language_switch' => 'Language switch',
         'language_switch_help' => 'Off: the switch is hidden in More; the app keeps the language it has.',
+        'silks' => 'Silks designer',
+        'silks_help' => 'The racing silks designer in Directory.',
     ],
 
     'updates' => [
@@ -69,6 +74,15 @@ return [
         'play_link' => 'Play Store link: :url',
         'messages' => 'Messages',
         'messages_help' => 'Leave empty to use the built-in text shown in grey.',
+    ],
+
+    'posting' => [
+        'help' => 'Posts from the app (horses and tools for sale, farriers, transfer board) by phones confirmed with a code. The website\'s own form is not affected.',
+    ],
+
+    'links' => [
+        'intro' => 'With these keys, links to the website (horses and tools for sale, the transfer board, farriers, stables, clinics, centers, shops, events, blog, videos) open in the app on phones that have it. Without them the links keep opening the website. Phones read the keys when the app is installed or updated, so a change can take a while to reach them.',
+        'file' => 'The file phones read: :url',
     ],
 
     'maintenance' => [
@@ -86,6 +100,14 @@ return [
     ],
 
     'fields' => [
+        'apple_team_id' => 'Apple Team ID',
+        'apple_team_id_help' => '10 letters and digits, from developer.apple.com → Membership details, for the account that publishes the app.',
+        'android_fingerprints' => 'App signing certificate SHA-256 fingerprints',
+        'android_fingerprints_help' => 'One per line. From Google Play Console → Test and release → App integrity → App signing (the app signing key), and for test builds from `eas credentials -p android`.',
+        'posting_review' => 'Review app posts before they go live',
+        'posting_review_help' => 'New posts wait as "Awaiting approval" (hidden on the website and in the app) until an admin approves them in their section. Off: they go live at once, like the website\'s.',
+        'posting_daily_limit' => 'Posts per phone in 24 hours',
+        'posting_daily_limit_help' => 'All kinds together, posts awaiting approval included. 1 to 50.',
         'platforms' => 'Platforms',
         'feature_min_version' => 'From app version',
         'when_off' => 'When off',
@@ -151,6 +173,7 @@ return [
         'post_tool' => 'Post a tool for sale',
         'post_farrier' => 'Add a farrier',
         'post_transfer' => 'Post a transfer',
+        'silks' => 'Silks designer',
     ],
 
     'frequency' => [
@@ -178,6 +201,7 @@ return [
     ],
 
     'validation' => [
+        'fingerprint' => ':value is not a SHA-256 fingerprint (32 pairs of hex digits, separated by colons).',
         'min_above_latest' => 'The minimum version cannot be above the latest version.',
         'max_below_min' => 'This cannot be below the "from" version.',
         'needs_button' => 'An announcement that cannot be closed needs a button.',

@@ -41,6 +41,8 @@ class TransferPostResource extends JsonResource
             'contact_number' => (string) $this->contact_number,
             'views_count' => (int) $this->views_count,
             'created_at' => $this->created_at?->toIso8601String(),
+            /** The post's page on the website, for sharing. */
+            'share_url' => route('transfer-board.show', $this->resource),
         ];
     }
 }

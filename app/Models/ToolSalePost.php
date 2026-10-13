@@ -24,7 +24,7 @@ class ToolSalePost extends Model
     /** The listing's sort options (website `?sort=` and the mobile API); the first is the default. */
     public const SORTS = ['newest', 'price_asc', 'price_desc'];
 
-    public const STATUSES = ['active', 'sold', 'expired', 'cancelled'];
+    public const STATUSES = ['active', 'sold', 'expired', 'cancelled', 'pending'];
 
     /** @return array<string, string> the categories in the current language */
     public static function categoryOptions(): array

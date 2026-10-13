@@ -31,5 +31,6 @@ return [
         'active' => 'Active',
         'expired' => 'Expired',
         'cancelled' => 'Cancelled',
+        'pending' => 'Awaiting approval',
     ],
 ];

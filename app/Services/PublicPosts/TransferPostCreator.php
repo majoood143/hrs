@@ -35,7 +35,7 @@ class TransferPostCreator extends PublicPostCreator
         ];
     }
 
-    public function create(array $data, array $files, string $contactNumber): Model
+    public function create(array $data, array $files, string $contactNumber, string $status = 'active'): Model
     {
         $fromCity = City::with('region')->findOrFail($data['from_city_id']);
         $toCity = City::with('region')->findOrFail($data['to_city_id']);
@@ -53,7 +53,7 @@ class TransferPostCreator extends PublicPostCreator
             'price' => $data['type'] === 'offer' ? $data['price'] : null,
             'cover_photo' => ($files['cover_photo'] ?? null) ? $this->store($files['cover_photo'], 'transfer-board/covers') : null,
             'contact_number' => $contactNumber,
-            'status' => 'active',
+            'status' => $status,
         ]);
 
         PublicPostSubmitted::dispatch($post);

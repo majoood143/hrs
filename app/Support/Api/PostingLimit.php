@@ -6,14 +6,19 @@ use App\Models\Farrier;
 use App\Models\HorseSalePost;
 use App\Models\ToolSalePost;
 use App\Models\TransferPost;
+use App\Support\MobileApp\MobilePosting;
 
 /**
- * How many posts one verified phone may publish from the app in 24 hours (all kinds together).
- * Counted from the posts themselves: the app stores the verified phone as their contact number.
+ * How many posts one verified phone may publish from the app in 24 hours (all kinds together;
+ * admin → Mobile app → Posting, 5 by default). Counted from the posts themselves, pending ones too:
+ * the app stores the verified phone as their contact number.
  */
 final class PostingLimit
 {
-    public const PER_DAY = 5;
+    public static function perDay(): int
+    {
+        return MobilePosting::dailyLimit();
+    }
 
     /** The contact number an app post carries: the verified phone, with its +. */
     public static function contactNumber(string $phone): string
@@ -29,6 +34,6 @@ final class PostingLimit
         $count = collect([HorseSalePost::class, ToolSalePost::class, Farrier::class, TransferPost::class])
             ->sum(fn (string $model) => $model::query()->where('contact_number', $contact)->where('created_at', '>=', $since)->count());
 
-        return $count >= self::PER_DAY;
+        return $count >= self::perDay();
     }
 }

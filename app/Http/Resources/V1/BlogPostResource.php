@@ -37,6 +37,8 @@ class BlogPostResource extends JsonResource
             'blocks' => PostBlocks::from($this->content),
             /** The post on the website, in this language. */
             'website_url' => route('blog.show', $this->slug).'?lang='.app()->getLocale(),
+            /** The post on the website without a language, for sharing (the reader's own language applies). */
+            'share_url' => route('blog.show', $this->slug),
         ];
     }
 }

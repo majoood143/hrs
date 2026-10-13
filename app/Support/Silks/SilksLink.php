@@ -2,6 +2,7 @@
 
 namespace App\Support\Silks;
 
+use App\Models\CmsPage;
 use Mpdf\QrCode\QrCode;
 use Throwable;
 
@@ -27,6 +28,25 @@ final class SilksLink
         $origin = $parts['scheme'].'://'.$parts['host'].(isset($parts['port']) ? ':'.$parts['port'] : '');
 
         return $origin.($parts['path'] ?? '/').'?'.http_build_query(['lang' => $locale ?? app()->getLocale(), 'silks' => $design->compact()], '', '&', PHP_QUERY_RFC3986);
+    }
+
+    /**
+     * The website page that holds the designer block (the first published one), without a query:
+     * the app shares designs as links to it. Null when no page has the block.
+     */
+    public static function designerPage(): ?string
+    {
+        $page = CmsPage::query()->published()
+            ->where('content', 'like', '%silks_designer%')
+            ->orderByDesc('is_homepage')->orderBy('id')
+            ->get(['id', 'slug', 'is_homepage', 'content'])
+            ->first(fn (CmsPage $page) => collect($page->content ?? [])->contains(fn ($block) => is_array($block) && ($block['type'] ?? null) === 'silks_designer'));
+
+        if (! $page) {
+            return null;
+        }
+
+        return $page->is_homepage ? url('/') : route('page.show', $page->slug);
     }
 
     /**

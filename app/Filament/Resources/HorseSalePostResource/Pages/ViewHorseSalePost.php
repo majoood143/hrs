@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\HorseSalePostResource\Pages;
 
 use App\Filament\Concerns\HasExportActions;
-use Filament\Actions\EditAction;
 use App\Filament\Resources\HorseSalePostResource;
-use Filament\Actions;
+use App\Filament\Support\PendingPosts;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewHorseSalePost extends ViewRecord
@@ -17,6 +17,7 @@ class ViewHorseSalePost extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            PendingPosts::approveAction(),
             EditAction::make(),
         ];
     }

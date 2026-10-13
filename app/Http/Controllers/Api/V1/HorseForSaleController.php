@@ -74,8 +74,9 @@ class HorseForSaleController extends Controller
      * Post a horse for sale
      *
      * Needs `posting_token` (from verification/verify); the post's contact number is the verified
-     * phone. Published at once, like the website. `cover_photo` (required), `images[]` (up to 10) and `passport_document` (image or PDF) are files; send multipart/form-data. 401 without a valid token, 429 past the
-     * daily limit (5 posts per phone).
+     * phone. Published at once like the website, or kept for an admin's approval when app posts are
+     * reviewed (`meta.pending_review`: the post is not visible yet, so do not open it). `cover_photo` (required), `images[]` (up to 10) and `passport_document` (image or PDF) are files; send multipart/form-data. 401 without a valid token, 429 past the
+     * daily limit (posts per phone in 24 h; 5 unless changed in admin → Mobile app → Posting).
      *
      * @unauthenticated
      */
@@ -83,6 +84,6 @@ class HorseForSaleController extends Controller
     {
         $post = $this->createPublicPost($request, $creator, ['cover_photo', 'images', 'passport_document']);
 
-        return (new HorseForSaleResource($post->load(['type', 'gender', 'color', 'country', 'region', 'city', 'birthCountry'])))->response()->setStatusCode(201);
+        return $this->postedResponse(new HorseForSaleResource($post->load(['type', 'gender', 'color', 'country', 'region', 'city', 'birthCountry'])), $post);
     }
 }

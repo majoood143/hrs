@@ -72,8 +72,9 @@ class ToolForSaleController extends Controller
      * Post a tool for sale
      *
      * Needs `posting_token` (from verification/verify); the post's contact number is the verified
-     * phone. Published at once, like the website. `cover_photo` (required) is a file; send multipart/form-data. 401 without a valid token, 429 past the
-     * daily limit (5 posts per phone).
+     * phone. Published at once like the website, or kept for an admin's approval when app posts are
+     * reviewed (`meta.pending_review`: the post is not visible yet, so do not open it). `cover_photo` (required) is a file; send multipart/form-data. 401 without a valid token, 429 past the
+     * daily limit (posts per phone in 24 h; 5 unless changed in admin → Mobile app → Posting).
      *
      * @unauthenticated
      */
@@ -81,6 +82,6 @@ class ToolForSaleController extends Controller
     {
         $post = $this->createPublicPost($request, $creator, ['cover_photo']);
 
-        return (new ToolForSaleResource($post->load(['country', 'region', 'city'])))->response()->setStatusCode(201);
+        return $this->postedResponse(new ToolForSaleResource($post->load(['country', 'region', 'city'])), $post);
     }
 }

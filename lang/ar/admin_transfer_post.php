@@ -31,5 +31,6 @@ return [
         'active' => 'نشط',
         'expired' => 'منتهي',
         'cancelled' => 'ملغى',
+        'pending' => 'بانتظار الموافقة',
     ],
 ];

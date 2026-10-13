@@ -154,6 +154,20 @@ class WhatsAppAdminAlertsTest extends TestCase
         $this->assertSame('ar', app()->getLocale());
     }
 
+    public function test_a_post_waiting_for_approval_says_so_and_has_no_public_link_yet(): void
+    {
+        $this->alertsOn();
+
+        $message = NewPostAlert::message($this->horsePost()->forceFill(['status' => 'pending']));
+        [$en, $ar] = explode(BilingualMessage::DIVIDER, $message);
+
+        $this->assertStringContainsString('waiting for your approval', $en);
+        $this->assertStringContainsString('Approve it in the admin', $en);
+        $this->assertStringContainsString('بانتظار موافقتك', $ar);
+        $this->assertStringContainsString('/admin/horse-sale-posts/7', $message);
+        $this->assertStringNotContainsString(route('horses-for-sale.show', 7), $message);
+    }
+
     public function test_a_transfer_post_names_its_cities_in_each_language(): void
     {
         $this->alertsOn();

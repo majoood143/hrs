@@ -58,7 +58,7 @@ class HorseSalePostCreator extends PublicPostCreator
         ];
     }
 
-    public function create(array $data, array $files, string $contactNumber): Model
+    public function create(array $data, array $files, string $contactNumber, string $status = 'active'): Model
     {
         $city = City::with('region')->findOrFail($data['city_id']);
 
@@ -85,7 +85,7 @@ class HorseSalePostCreator extends PublicPostCreator
             'description_en' => $data['description_en'] ?? null,
             'description_ar' => $data['description_ar'] ?? null,
             'contact_number' => $contactNumber,
-            'status' => 'active',
+            'status' => $status,
         ]);
 
         PublicPostSubmitted::dispatch($post);

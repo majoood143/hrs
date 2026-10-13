@@ -5,10 +5,12 @@
 return [
     'new_post' => [
         'heading' => '🆕 New post on :site',
+        'heading_pending' => '⏳ New post on :site, waiting for your approval',
         'type' => 'Section: :type',
         'contact' => '📞 Contact: :contact',
         'view' => '🔗 On the website: :link',
         'admin' => '🛠 In the admin: :link',
+        'approve' => '✅ Approve it in the admin: :link',
     ],
 
     'new_stable' => [

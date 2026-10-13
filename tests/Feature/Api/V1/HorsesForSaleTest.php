@@ -120,7 +120,8 @@ class HorsesForSaleTest extends TestCase
                 url('/storage/horse-sale/gallery/a.jpg'),
                 url('/storage/horse-sale/gallery/b.jpg'),
             ])
-            ->assertJsonPath('data.price.amount', '2000.000');
+            ->assertJsonPath('data.price.amount', '2000.000')
+            ->assertJsonPath('data.share_url', route('horses-for-sale.show', $post->id));
     }
 
     public function test_a_post_that_is_not_active_or_does_not_exist_is_a_json_404(): void

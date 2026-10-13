@@ -28,5 +28,6 @@ return [
         'sold' => 'Sold',
         'expired' => 'Expired',
         'cancelled' => 'Cancelled',
+        'pending' => 'Awaiting approval',
     ],
 ];

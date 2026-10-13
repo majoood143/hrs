@@ -24,5 +24,6 @@ return [
     'statuses' => [
         'active' => 'نشط',
         'inactive' => 'غير نشط',
+        'pending' => 'بانتظار الموافقة',
     ],
 ];

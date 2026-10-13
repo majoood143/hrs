@@ -12,7 +12,7 @@ class Farrier extends Model
     /** Sort options (website `?sort=` and the mobile API); the first is the default. */
     public const SORTS = ['newest', 'price_asc', 'price_desc'];
 
-    public const STATUSES = ['active', 'inactive'];
+    public const STATUSES = ['active', 'inactive', 'pending'];
 
     /** @return array<string, string> the statuses in the current language */
     public static function statusOptions(): array

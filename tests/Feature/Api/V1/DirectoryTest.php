@@ -45,7 +45,8 @@ class DirectoryTest extends TestCase
             ->assertJsonPath('data.name', 'علي')
             ->assertJsonPath('data.description', 'خبرة طويلة.')
             ->assertJsonPath('data.region.name', 'مسقط')
-            ->assertJsonPath('data.years_experience', 12);
+            ->assertJsonPath('data.years_experience', 12)
+            ->assertJsonPath('data.share_url', route('farriers.show', $cheap));
     }
 
     public function test_the_transfer_board_hides_past_dates_and_filters_like_the_website(): void
@@ -70,7 +71,9 @@ class DirectoryTest extends TestCase
         $this->assertSame([$request], $this->getJson('/api/v1/transfer-board?type=request&price_max=1')->json('data.*.id'));
         $this->assertSame([$later, $soon, $request], $this->getJson('/api/v1/transfer-board?sort=price_asc')->json('data.*.id'));
 
-        $this->getJson("/api/v1/transfer-board/{$soon}")->assertOk()->assertJsonPath('data.from.region.name', 'Muscat');
+        $this->getJson("/api/v1/transfer-board/{$soon}")->assertOk()
+            ->assertJsonPath('data.from.region.name', 'Muscat')
+            ->assertJsonPath('data.share_url', route('transfer-board.show', $soon));
         $this->getJson('/api/v1/transfer-board/'.($request + 1))->assertNotFound();
     }
 
@@ -120,7 +123,8 @@ class DirectoryTest extends TestCase
             ->assertJsonPath('data.delivery_scope.value', 'local')
             ->assertJsonPath('data.payment_options.1', ['value' => 'card', 'label' => __('shops.payment_options_list.card', [], 'ar')])
             ->assertJsonPath('data.rating', null)
-            ->assertJsonPath('data.views_count', 0);
+            ->assertJsonPath('data.views_count', 0)
+            ->assertJsonPath('data.share_url', route('shops.show', 'tack'));
 
         $this->assertCount(7, $response->json('data.opening_hours'));
     }
@@ -145,7 +149,8 @@ class DirectoryTest extends TestCase
             ->assertJsonCount(2, 'data.reviews')
             ->assertJsonPath('data.reviews.1.author', 'Aisha A.')
             ->assertJsonPath('data.reviews.1.reply', 'Thank you!')
-            ->assertJsonPath('data.views_count', null);
+            ->assertJsonPath('data.views_count', null)
+            ->assertJsonPath('data.share_url', route('stables.show', 'royal'));
     }
 
     public function test_lookups_carry_the_directory_choices(): void

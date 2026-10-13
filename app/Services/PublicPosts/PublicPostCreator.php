@@ -29,13 +29,14 @@ abstract class PublicPostCreator
     abstract public function attributes(): array;
 
     /**
-     * Creates the post (active at once, like the website) and announces it (PublicPostSubmitted:
-     * the admins' WhatsApp alert).
+     * Creates the post and announces it (PublicPostSubmitted: the admins' WhatsApp alert). Active
+     * at once (the website), or `pending` until an admin approves it (the app, when reviewed).
      *
      * @param  array<string, mixed>  $data  validated fields
      * @param  array<string, UploadedFile|array<int, UploadedFile>|null>  $files  the uploads by field
+     * @param  'active'|'pending'  $status
      */
-    abstract public function create(array $data, array $files, string $contactNumber): Model;
+    abstract public function create(array $data, array $files, string $contactNumber, string $status = 'active'): Model;
 
     /** Stores an upload on the public disk, compressed like every site image. */
     protected function store(UploadedFile $file, string $directory): string

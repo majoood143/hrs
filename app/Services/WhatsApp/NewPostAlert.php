@@ -16,7 +16,8 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * The admin WhatsApp alert for a post a visitor just published on the site: what kind of post,
- * a short summary, the poster's number, and links to the public page and the admin record.
+ * a short summary, the poster's number, and links to the public page and the admin record. A post
+ * waiting for approval (app posts while they are reviewed) says so and has no public link yet.
  */
 final class NewPostAlert
 {
@@ -47,19 +48,20 @@ final class NewPostAlert
     public static function message(Model $post): string
     {
         $type = self::typeOf($post);
-        $publicUrl = self::publicUrl($post);
+        $pending = $post->getAttribute('status') === 'pending';
+        $publicUrl = $pending ? null : self::publicUrl($post);
         $adminUrl = self::adminUrl($post);
         $phone = PhoneNumber::normalize($post->contact_number);
 
         return BilingualMessage::make(fn () => implode("\n", array_filter([
-            __('whatsapp.new_post.heading', ['site' => SiteSetting::siteName()]),
+            __($pending ? 'whatsapp.new_post.heading_pending' : 'whatsapp.new_post.heading', ['site' => SiteSetting::siteName()]),
             __('whatsapp.new_post.type', ['type' => __('whatsapp.post_types.'.$type)]),
             '',
             ...self::summary($post),
             __('whatsapp.new_post.contact', ['contact' => $post->contact_number]).($phone ? ' (wa.me/'.$phone.')' : ''),
             '',
-            __('whatsapp.new_post.view', ['link' => $publicUrl]),
-            __('whatsapp.new_post.admin', ['link' => $adminUrl]),
+            $publicUrl ? __('whatsapp.new_post.view', ['link' => $publicUrl]) : null,
+            __($pending ? 'whatsapp.new_post.approve' : 'whatsapp.new_post.admin', ['link' => $adminUrl]),
         ], fn ($line) => $line !== null)));
     }
 

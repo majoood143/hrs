@@ -8,8 +8,10 @@ use App\Filament\Resources\MobileAnnouncementResource\Pages\ListMobileAnnounceme
 use App\Models\MobileAnnouncement;
 use App\Models\SiteSetting;
 use App\Support\MobileApp\AppClient;
+use App\Support\MobileApp\AppLinks;
 use App\Support\MobileApp\MobileFeatures;
 use App\Support\MobileApp\MobileMaintenance;
+use App\Support\MobileApp\MobilePosting;
 use App\Support\MobileApp\MobileUpdates;
 use Filament\Facades\Filament;
 use Illuminate\Database\Schema\Blueprint;
@@ -20,7 +22,7 @@ use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
 use Tests\TestCase;
 
-/** Admin → Mobile app: the settings page (features, updates, maintenance) and the announcements. */
+/** Admin → Mobile app: the settings page (features, updates, maintenance, posting) and the announcements. */
 class MobileAppAdminTest extends TestCase
 {
     protected function setUp(): void
@@ -96,6 +98,41 @@ class MobileAppAdminTest extends TestCase
             ->assertHasFormErrors(['updates.android.min_version', 'features.blog.min_version']);
 
         $this->assertNull(SiteSetting::get('mobile.updates'));
+    }
+
+    public function test_the_posting_tab_turns_on_review_and_sets_the_daily_limit(): void
+    {
+        Livewire::test(MobileAppSettings::class)
+            ->assertFormSet(['posting.review' => false, 'posting.daily_limit' => 5])
+            ->fillForm(['posting.daily_limit' => 0])
+            ->call('save')
+            ->assertHasFormErrors(['posting.daily_limit'])
+            ->fillForm(['posting.review' => true, 'posting.daily_limit' => 3])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(['review' => true, 'daily_limit' => 3], MobilePosting::settings());
+        $this->assertSame('pending', MobilePosting::newPostStatus());
+
+        $log = DB::table('activity_log')->where('log_name', 'mobile_app')->sole();
+        $this->assertTrue(json_decode($log->properties, true)['attributes']['posting']['review']);
+    }
+
+    public function test_the_website_links_tab_stores_the_apple_team_and_android_fingerprints(): void
+    {
+        $fingerprint = '14:6D:E9:83:C5:73:06:50:D8:EE:B9:95:2F:34:FC:64:16:A0:83:42:E6:1D:BE:A8:8A:04:96:B2:3F:CF:44:E5';
+
+        Livewire::test(MobileAppSettings::class)
+            ->fillForm(['links.apple_team_id' => 'ABC', 'links.android_fingerprints' => 'nope'])
+            ->call('save')
+            ->assertHasFormErrors(['links.apple_team_id', 'links.android_fingerprints'])
+            ->fillForm(['links.apple_team_id' => ' abcde12345 ', 'links.android_fingerprints' => strtolower($fingerprint)])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(['apple_team_id' => 'ABCDE12345', 'android_fingerprints' => [$fingerprint]], AppLinks::settings());
+
+        Livewire::test(MobileAppSettings::class)->assertFormSet(['links.android_fingerprints' => $fingerprint]);
     }
 
     public function test_an_admin_can_create_an_announcement_and_one_that_cannot_be_closed_needs_a_button(): void

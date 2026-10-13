@@ -6,6 +6,7 @@ use App\Filament\Resources\FarrierResource\Pages\CreateFarrier;
 use App\Filament\Resources\FarrierResource\Pages\EditFarrier;
 use App\Filament\Resources\FarrierResource\Pages\ListFarriers;
 use App\Filament\Resources\FarrierResource\Pages\ViewFarrier;
+use App\Filament\Support\PendingPosts;
 use App\Filament\Support\PlaceFormFields;
 use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
@@ -64,7 +65,17 @@ class FarrierResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return (string) static::$model::where('status', 'active')->count();
+        return PendingPosts::navigationBadge(static::$model);
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return PendingPosts::navigationBadgeColor(static::$model);
+    }
+
+    public static function getNavigationBadgeTooltip(): ?string
+    {
+        return PendingPosts::navigationBadgeTooltip(static::$model);
     }
 
     /** `ar_name` in the Arabic admin, else `en_name` (locations, farriers). */
@@ -201,7 +212,11 @@ class FarrierResource extends Resource
                     ->label(__('farriers.status'))
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => Farrier::statusOptions()[$state] ?? $state)
-                    ->color(fn (string $state): string => $state === 'active' ? 'success' : 'gray')
+                    ->color(fn (string $state): string => match ($state) {
+                        'active' => 'success',
+                        PendingPosts::STATUS => 'warning',
+                        default => 'gray',
+                    })
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label(__('admin_farrier.fields.created_at'))
@@ -226,6 +241,7 @@ class FarrierResource extends Resource
                     ->preload(),
             ])
             ->recordActions([
+                PendingPosts::approveAction(),
                 ActionGroup::make([
                     ViewAction::make(),
                     ...WebsiteLinkActions::make(
@@ -238,6 +254,7 @@ class FarrierResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    PendingPosts::approveBulkAction(),
                     DeleteBulkAction::make(),
                     ExportBulkAction::make(),
                 ]),

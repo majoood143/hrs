@@ -93,6 +93,7 @@ class ContentTest extends TestCase
 
         $blocks = $this->getJson('/api/v1/blog/posts/guide')->assertOk()
             ->assertJsonPath('data.website_url', route('blog.show', 'guide').'?lang=en')
+            ->assertJsonPath('data.share_url', route('blog.show', 'guide'))
             ->json('data.blocks');
 
         $this->assertSame([
@@ -147,6 +148,7 @@ class ContentTest extends TestCase
         $this->getJson('/api/v1/videos/lunging')
             ->assertOk()
             ->assertJsonPath('data.youtube_url', 'https://www.youtube.com/watch?v=abcdefghijk')
+            ->assertJsonPath('data.share_url', route('video-library.show', 'lunging'))
             ->assertJsonPath('data.summary', 'Step one.')
             ->assertJsonPath('data.description', [['type' => 'paragraph', 'text' => 'Step one.']])
             ->assertJsonPath('data.folder', ['slug' => 'training', 'name' => 'Training']);

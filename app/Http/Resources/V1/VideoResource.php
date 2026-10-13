@@ -39,6 +39,8 @@ class VideoResource extends JsonResource
                 'name' => (string) $this->folder->getTranslation('name', app()->getLocale()),
             ]),
             'views_count' => (int) $this->views_count,
+            /** The video's page on the website, for sharing. */
+            'share_url' => route('video-library.show', $this->slug),
         ];
     }
 }

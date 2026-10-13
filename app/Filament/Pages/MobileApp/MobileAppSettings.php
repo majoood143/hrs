@@ -3,9 +3,11 @@
 namespace App\Filament\Pages\MobileApp;
 
 use App\Support\MobileApp\AppClient;
+use App\Support\MobileApp\AppLinks;
 use App\Support\MobileApp\AppVersion;
 use App\Support\MobileApp\MobileFeatures;
 use App\Support\MobileApp\MobileMaintenance;
+use App\Support\MobileApp\MobilePosting;
 use App\Support\MobileApp\MobileUpdates;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms\Components\CheckboxList;
@@ -26,7 +28,8 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 /**
- * What the Muhra app shows: feature switches, the versions that must / may update, and maintenance.
+ * What the Muhra app shows: feature switches, the versions that must / may update, maintenance, and
+ * how posting from the app is moderated, and the keys that let website links open the app.
  * Read by the app from GET /api/v1/app-status. Every save is written to the activity log
  * (log name `mobile_app`) with the values before and after.
  */
@@ -65,13 +68,15 @@ class MobileAppSettings extends Page implements HasForms
         $this->form->fill(self::currentState());
     }
 
-    /** @return array{features: array<string, mixed>, updates: array<string, mixed>, maintenance: array<string, mixed>} */
+    /** @return array{features: array<string, mixed>, updates: array<string, mixed>, maintenance: array<string, mixed>, posting: array<string, mixed>, links: array<string, mixed>} */
     private static function currentState(): array
     {
         return [
             'features' => MobileFeatures::rules(),
             'updates' => MobileUpdates::settings(),
             'maintenance' => MobileMaintenance::settings(),
+            'posting' => MobilePosting::settings(),
+            'links' => ['android_fingerprints' => implode("\n", AppLinks::settings()['android_fingerprints'])] + AppLinks::settings(),
         ];
     }
 
@@ -90,6 +95,12 @@ class MobileAppSettings extends Page implements HasForms
                     Tab::make(__('admin_mobile_app.tabs.maintenance'))
                         ->icon('heroicon-o-wrench-screwdriver')
                         ->schema($this->maintenanceSections()),
+                    Tab::make(__('admin_mobile_app.tabs.posting'))
+                        ->icon('heroicon-o-shield-check')
+                        ->schema($this->postingSections()),
+                    Tab::make(__('admin_mobile_app.tabs.links'))
+                        ->icon('heroicon-o-link')
+                        ->schema($this->linkSections()),
                 ]),
         ])->statePath('data');
     }
@@ -219,6 +230,65 @@ class MobileAppSettings extends Page implements HasForms
         ];
     }
 
+    /** @return list<Section> */
+    private function postingSections(): array
+    {
+        return [
+            Section::make(__('admin_mobile_app.tabs.posting'))
+                ->description(__('admin_mobile_app.posting.help'))
+                ->schema([
+                    Toggle::make('posting.review')
+                        ->label(__('admin_mobile_app.fields.posting_review'))
+                        ->helperText(__('admin_mobile_app.fields.posting_review_help')),
+                    TextInput::make('posting.daily_limit')
+                        ->label(__('admin_mobile_app.fields.posting_daily_limit'))
+                        ->helperText(__('admin_mobile_app.fields.posting_daily_limit_help'))
+                        ->integer()
+                        ->minValue(1)
+                        ->maxValue(MobilePosting::MAX_DAILY_LIMIT)
+                        ->required(),
+                ]),
+        ];
+    }
+
+    /** @return list<Section|Text> */
+    private function linkSections(): array
+    {
+        return [
+            Text::make(__('admin_mobile_app.links.intro')),
+            Section::make(__('admin_mobile_app.platforms.ios'))
+                ->icon('heroicon-o-device-phone-mobile')
+                ->schema([
+                    TextInput::make('links.apple_team_id')
+                        ->label(__('admin_mobile_app.fields.apple_team_id'))
+                        ->helperText(__('admin_mobile_app.fields.apple_team_id_help'))
+                        ->placeholder('ABCDE12345')
+                        ->dehydrateStateUsing(fn (?string $state) => strtoupper(trim((string) $state)))
+                        ->regex('/^\s*[A-Za-z0-9]{10}\s*$/'),
+                    Text::make(fn () => __('admin_mobile_app.links.file', ['url' => route('app-links.apple')])),
+                ]),
+            Section::make(__('admin_mobile_app.platforms.android'))
+                ->icon('heroicon-o-device-phone-mobile')
+                ->schema([
+                    Textarea::make('links.android_fingerprints')
+                        ->label(__('admin_mobile_app.fields.android_fingerprints'))
+                        ->helperText(__('admin_mobile_app.fields.android_fingerprints_help'))
+                        ->placeholder('14:6D:E9:83:C5:73:06:50:D8:EE:B9:95:2F:34:FC:64:16:A0:83:42:E6:1D:BE:A8:8A:04:96:B2:3F:CF:44:E5')
+                        ->rows(3)
+                        ->rule(fn () => function (string $attribute, mixed $value, \Closure $fail): void {
+                            foreach (preg_split('/[\s,]+/', (string) $value, -1, PREG_SPLIT_NO_EMPTY) as $fingerprint) {
+                                if (AppLinks::fingerprints($fingerprint) === []) {
+                                    $fail(__('admin_mobile_app.validation.fingerprint', ['value' => $fingerprint]));
+
+                                    return;
+                                }
+                            }
+                        }),
+                    Text::make(fn () => __('admin_mobile_app.links.file', ['url' => route('app-links.android')])),
+                ]),
+        ];
+    }
+
     /** @return array<string, string> */
     public static function platformOptions(): array
     {
@@ -233,6 +303,8 @@ class MobileAppSettings extends Page implements HasForms
         MobileFeatures::save((array) ($state['features'] ?? []));
         MobileUpdates::save((array) ($state['updates'] ?? []));
         MobileMaintenance::save((array) ($state['maintenance'] ?? []));
+        MobilePosting::save((array) ($state['posting'] ?? []));
+        AppLinks::save((array) ($state['links'] ?? []));
 
         $after = self::currentState();
 
