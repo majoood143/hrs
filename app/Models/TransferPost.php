@@ -11,6 +11,20 @@ class TransferPost extends Model
 {
     public const TYPES = ['offer', 'request'];
 
+    public const STATUSES = ['active', 'expired', 'cancelled'];
+
+    /** @return array<string, string> the types in the current language */
+    public static function typeOptions(): array
+    {
+        return collect(self::TYPES)->mapWithKeys(fn (string $type) => [$type => __('admin_transfer_post.types.'.$type)])->all();
+    }
+
+    /** @return array<string, string> */
+    public static function statusOptions(): array
+    {
+        return collect(self::STATUSES)->mapWithKeys(fn (string $status) => [$status => __('admin_transfer_post.statuses.'.$status)])->all();
+    }
+
     /** Sort options (website `?sort=` and the mobile API); the first is the default. */
     public const SORTS = ['soonest', 'newest', 'price_asc', 'price_desc', 'capacity'];
 

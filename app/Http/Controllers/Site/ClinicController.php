@@ -16,7 +16,7 @@ class ClinicController extends Controller
     {
         return view('site.clinics.index', Seo::forSlug(
             'clinics',
-            __('clinics.board_title') . ' — ' . SiteSetting::siteName(),
+            __('clinics.board_title').' — '.SiteSetting::siteName(),
         ));
     }
 
@@ -31,8 +31,8 @@ class ClinicController extends Controller
 
         return view('site.clinics.show', [
             'clinic' => $clinic,
-            'seoTitle' => $clinic->name . ' — ' . SiteSetting::siteName(),
-            'seoDescription' => $clinic->description ? Str::limit($clinic->description, 160) : null,
+            'seoTitle' => $clinic->name.' — '.SiteSetting::siteName(),
+            'seoDescription' => ($text = $clinic->descriptionText()) ? Str::limit(Str::squish($text), 160) : null,
             'seoImage' => $clinic->cover_photo_url,
         ]);
     }

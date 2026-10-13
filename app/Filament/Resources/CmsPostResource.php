@@ -284,6 +284,7 @@ class CmsPostResource extends Resource
                 TextColumn::make('status')
                     ->label(__('cms_post.columns.status'))
                     ->badge()
+                    ->formatStateUsing(fn (string $state) => __('cms_post.status.'.$state))
                     ->color(fn (string $state) => match ($state) {
                         'published' => 'success',
                         'scheduled' => 'warning',

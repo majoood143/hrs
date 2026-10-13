@@ -6,8 +6,10 @@ use App\Filament\Resources\TransferPostResource\Pages\CreateTransferPost;
 use App\Filament\Resources\TransferPostResource\Pages\EditTransferPost;
 use App\Filament\Resources\TransferPostResource\Pages\ListTransferPosts;
 use App\Filament\Resources\TransferPostResource\Pages\ViewTransferPost;
+use App\Filament\Support\PlaceFormFields;
 use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
+use App\Models\Country;
 use App\Models\Region;
 use App\Models\SiteSetting;
 use App\Models\TransferPost;
@@ -18,11 +20,12 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -61,7 +64,56 @@ class TransferPostResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::$model::where('status', 'active')->count();
+        return (string) static::$model::where('status', 'active')->count();
+    }
+
+    /** `ar_name` in the Arabic admin, else `en_name` (countries, regions, cities). */
+    private static function nameColumn(): string
+    {
+        return app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
+    }
+
+    /**
+     * Country → region → city for one end of the route (`from` / `to`), in the admin's language.
+     *
+     * @return array<int, Select>
+     */
+    private static function locationFields(string $prefix): array
+    {
+        return [
+            Select::make("{$prefix}_country_id")
+                ->label(__('transportation.country'))
+                ->options(fn () => Country::query()->orderBy(static::nameColumn())->pluck(static::nameColumn(), 'id'))
+                ->searchable()
+                ->live()
+                ->afterStateUpdated(function (Set $set) use ($prefix): void {
+                    $set("{$prefix}_region_id", null);
+                    $set("{$prefix}_city_id", null);
+                })
+                ->required(),
+            Select::make("{$prefix}_region_id")
+                ->label(__('transportation.region'))
+                ->options(fn (Get $get): Collection => Region::query()
+                    ->where('country_id', $get("{$prefix}_country_id"))
+                    ->orderBy(static::nameColumn())
+                    ->pluck(static::nameColumn(), 'id'))
+                ->searchable()
+                ->live()
+                ->afterStateUpdated(fn (Set $set) => $set("{$prefix}_city_id", null))
+                ->required(),
+            Select::make("{$prefix}_city_id")
+                ->label(__('transportation.city'))
+                ->options(fn (Get $get): Collection => City::query()
+                    ->where('region_id', $get("{$prefix}_region_id"))
+                    ->orderBy(static::nameColumn())
+                    ->pluck(static::nameColumn(), 'id'))
+                ->searchable()
+                // Same rule as the website/app form (TransferPostCreator): a route goes somewhere else.
+                ->when($prefix === 'to', fn (Select $field) => $field
+                    ->notIn(fn (Get $get): array => array_filter([$get('from_city_id')]))
+                    ->validationMessages(['not_in' => __('transportation.same_city')]))
+                ->required(),
+        ];
     }
 
     public static function form(Schema $schema): Schema
@@ -69,88 +121,51 @@ class TransferPostResource extends Resource
         return $schema
             ->components([
                 Select::make('type')
-                    ->options([
-                        'offer' => 'Offer',
-                        'request' => 'Request',
-                    ])
+                    ->label(__('admin_transfer_post.fields.type'))
+                    ->options(fn () => TransferPost::typeOptions())
                     ->live()
                     ->required(),
                 Select::make('status')
-                    ->options([
-                        'active' => 'Active',
-                        'expired' => 'Expired',
-                        'cancelled' => 'Cancelled',
+                    ->label(__('admin_transfer_post.fields.status'))
+                    ->options(fn () => TransferPost::statusOptions())
+                    ->required(),
+                Section::make(__('admin_transfer_post.sections.from'))
+                    ->icon('heroicon-o-map-pin')
+                    ->schema(static::locationFields('from'))
+                    ->columns(3)
+                    ->columnSpanFull(),
+                Section::make(__('admin_transfer_post.sections.to'))
+                    ->icon('heroicon-o-flag')
+                    ->schema(static::locationFields('to'))
+                    ->columns(3)
+                    ->columnSpanFull(),
+                Section::make(__('admin_transfer_post.sections.details'))
+                    ->icon('heroicon-o-truck')
+                    ->schema([
+                        TextInput::make('capacity')
+                            ->label(__('transportation.capacity'))
+                            ->integer()
+                            ->minValue(1)
+                            ->required(),
+                        DatePicker::make('transfer_date')
+                            ->label(__('transportation.transfer_date'))
+                            ->required(),
+                        TextInput::make('price')
+                            ->label(__('transportation.price'))
+                            ->numeric()
+                            ->minValue(0)
+                            ->prefix(fn () => SiteSetting::currencyHtml())
+                            ->visible(fn (Get $get) => $get('type') === 'offer')
+                            ->required(fn (Get $get) => $get('type') === 'offer'),
+                        TextInput::make('contact_number')
+                            ->label(__('transportation.contact_number'))
+                            ->tel()
+                            ->maxLength(32)
+                            ->required(),
+                        PlaceFormFields::coverPhoto('transfer-board/covers', __('transportation.cover_photo_optional'))
+                            ->columnSpanFull(),
                     ])
-                    ->required(),
-
-                Select::make('from_country_id')
-                    ->label('From Country')
-                    ->relationship(name: 'fromCountry', titleAttribute: 'en_name')
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->required(),
-                Select::make('from_region_id')
-                    ->label('From Region')
-                    ->options(fn (Get $get): Collection => Region::query()
-                        ->where('country_id', $get('from_country_id'))
-                        ->pluck('en_name', 'id'))
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->required(),
-                Select::make('from_city_id')
-                    ->label('From City')
-                    ->options(fn (Get $get): Collection => City::query()
-                        ->where('region_id', $get('from_region_id'))
-                        ->pluck('en_name', 'id'))
-                    ->searchable()
-                    ->preload()
-                    ->required(),
-
-                Select::make('to_country_id')
-                    ->label('To Country')
-                    ->relationship(name: 'toCountry', titleAttribute: 'en_name')
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->required(),
-                Select::make('to_region_id')
-                    ->label('To Region')
-                    ->options(fn (Get $get): Collection => Region::query()
-                        ->where('country_id', $get('to_country_id'))
-                        ->pluck('en_name', 'id'))
-                    ->searchable()
-                    ->preload()
-                    ->live()
-                    ->required(),
-                Select::make('to_city_id')
-                    ->label('To City')
-                    ->options(fn (Get $get): Collection => City::query()
-                        ->where('region_id', $get('to_region_id'))
-                        ->pluck('en_name', 'id'))
-                    ->searchable()
-                    ->preload()
-                    ->required(),
-
-                TextInput::make('capacity')
-                    ->numeric()
-                    ->minValue(1)
-                    ->required(),
-                DatePicker::make('transfer_date')
-                    ->required(),
-                TextInput::make('price')
-                    ->numeric()
-                    ->minValue(0)
-                    ->prefix(fn () => SiteSetting::currencyHtml())
-                    ->visible(fn (Get $get) => $get('type') === 'offer'),
-                TextInput::make('contact_number')
-                    ->tel()
-                    ->required(),
-                FileUpload::make('cover_photo')
-                    ->image()
-                    ->disk('public')
-                    ->directory('transfer-board/covers')
+                    ->columns(2)
                     ->columnSpanFull(),
             ])
             ->columns(2);
@@ -158,35 +173,49 @@ class TransferPostResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $name = static::nameColumn();
+
         return $table
+            // The city columns are eager loaded by Filament; the countries under them are not.
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['fromCountry', 'toCountry']))
             ->columns([
                 ImageColumn::make('cover_photo')
+                    ->label(__('transportation.cover_photo'))
                     ->disk('public')
                     ->square(),
                 TextColumn::make('type')
+                    ->label(__('admin_transfer_post.fields.type'))
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => TransferPost::typeOptions()[$state] ?? $state)
                     ->color(fn (string $state): string => $state === 'offer' ? 'success' : 'info')
                     ->sortable(),
-                TextColumn::make('fromCity.en_name')
-                    ->label('From')
-                    ->description(fn (TransferPost $record): string => $record->fromCountry?->en_name ?? '')
-                    ->searchable(),
-                TextColumn::make('toCity.en_name')
-                    ->label('To')
-                    ->description(fn (TransferPost $record): string => $record->toCountry?->en_name ?? '')
-                    ->searchable(),
+                TextColumn::make('fromCity.'.$name)
+                    ->label(__('admin_transfer_post.fields.from'))
+                    ->description(fn (TransferPost $record): string => (string) $record->fromCountry?->{$name})
+                    ->searchable(['en_name', 'ar_name']),
+                TextColumn::make('toCity.'.$name)
+                    ->label(__('admin_transfer_post.fields.to'))
+                    ->description(fn (TransferPost $record): string => (string) $record->toCountry?->{$name})
+                    ->searchable(['en_name', 'ar_name']),
                 TextColumn::make('capacity')
+                    ->label(__('transportation.capacity'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('transfer_date')
+                    ->label(__('transportation.transfer_date'))
                     ->date()
                     ->sortable(),
                 TextColumn::make('price')
+                    ->label(__('transportation.price'))
                     ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3))
+                    ->placeholder('—')
                     ->sortable(),
-                TextColumn::make('contact_number'),
+                TextColumn::make('contact_number')
+                    ->label(__('transportation.contact_number')),
                 TextColumn::make('status')
+                    ->label(__('admin_transfer_post.fields.status'))
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => TransferPost::statusOptions()[$state] ?? $state)
                     ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
                         'expired' => 'gray',
@@ -195,6 +224,7 @@ class TransferPostResource extends Resource
                     })
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(__('admin_transfer_post.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -202,26 +232,25 @@ class TransferPostResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('type')
-                    ->options([
-                        'offer' => 'Offer',
-                        'request' => 'Request',
-                    ]),
+                    ->label(__('admin_transfer_post.fields.type'))
+                    ->options(fn () => TransferPost::typeOptions()),
                 SelectFilter::make('status')
-                    ->options([
-                        'active' => 'Active',
-                        'expired' => 'Expired',
-                        'cancelled' => 'Cancelled',
-                    ]),
+                    ->label(__('admin_transfer_post.fields.status'))
+                    ->options(fn () => TransferPost::statusOptions()),
                 SelectFilter::make('from_country_id')
-                    ->label('From Country')
-                    ->relationship('fromCountry', 'en_name'),
+                    ->label(__('admin_transfer_post.fields.from_country'))
+                    ->relationship('fromCountry', $name)
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('to_country_id')
-                    ->label('To Country')
-                    ->relationship('toCountry', 'en_name'),
+                    ->label(__('admin_transfer_post.fields.to_country'))
+                    ->relationship('toCountry', $name)
+                    ->searchable()
+                    ->preload(),
                 Filter::make('transfer_date')
                     ->schema([
-                        DatePicker::make('date_from'),
-                        DatePicker::make('date_to'),
+                        DatePicker::make('date_from')->label(__('transportation.filter_date_from')),
+                        DatePicker::make('date_to')->label(__('transportation.filter_date_to')),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
                         ->when($data['date_from'] ?? null, fn (Builder $query, $date): Builder => $query->whereDate('transfer_date', '>=', $date))

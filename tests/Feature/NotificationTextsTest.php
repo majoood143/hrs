@@ -248,6 +248,9 @@ class NotificationTextsTest extends TestCase
                 'texts.mail__received__intro_paid.en' => NotificationText::defaultText('mail.received.intro_paid', 'en'),
             ])
             ->assertSee(__('admin_notification_texts.groups.sms'))
+            // the label keys contain dots: a plain __() lookup would print the raw key
+            ->assertSee('SMS: order completed')
+            ->assertDontSee('admin_notification_texts.labels')
             ->assertSee(__('admin_notification_texts.placeholders', ['names' => ':site, :number, :url']));
     }
 

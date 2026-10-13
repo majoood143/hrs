@@ -14,6 +14,7 @@ return [
     'confirm' => [
         'enable' => 'This will take the public website offline for all visitors except allowed IPs and the bypass link. Continue?',
         'disable' => 'This will bring the public website back online. Continue?',
+        'clear_logs' => 'This permanently empties every log file in storage/logs. Continue?',
     ],
 
     'actions' => [
@@ -49,6 +50,8 @@ return [
         'disabled' => 'Maintenance mode disabled — the site is live again.',
         'bypass_hint' => 'Bypass link: :url',
         'command_ran' => 'Ran `:command` successfully.',
+        'logs_cleared' => 'Log files cleared (:size freed).',
+        'logs_failed' => ':count file(s) could not be emptied (check file permissions).',
     ],
 
     'system' => [
@@ -106,6 +109,7 @@ return [
         'optimize' => 'Optimize App',
         'queue_restart' => 'Restart Queue Workers',
         'storage_link' => 'Create Storage Link',
+        'clear_logs' => 'Clear Log Files',
     ],
 
     'default_message_en' => "We're currently performing scheduled maintenance and will be back shortly. Thank you for your patience.",

@@ -6,8 +6,10 @@ use App\Filament\Resources\ToolSalePostResource\Pages\CreateToolSalePost;
 use App\Filament\Resources\ToolSalePostResource\Pages\EditToolSalePost;
 use App\Filament\Resources\ToolSalePostResource\Pages\ListToolSalePosts;
 use App\Filament\Resources\ToolSalePostResource\Pages\ViewToolSalePost;
+use App\Filament\Support\PlaceFormFields;
 use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
+use App\Models\Country;
 use App\Models\Region;
 use App\Models\SiteSetting;
 use App\Models\ToolSalePost;
@@ -17,7 +19,6 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -26,11 +27,13 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
@@ -62,20 +65,13 @@ class ToolSalePostResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::$model::where('status', 'active')->count();
+        return (string) static::$model::where('status', 'active')->count();
     }
 
-    protected static function categoryOptions(): array
+    /** `ar_name` in the Arabic admin, else `en_name` (locations, posts). */
+    private static function nameColumn(): string
     {
-        return [
-            'saddlery_tack' => 'Saddlery & Tack',
-            'grooming' => 'Grooming',
-            'farrier_tools' => 'Farrier Tools',
-            'feeding_stable' => 'Feeding & Stable',
-            'health_first_aid' => 'Health & First Aid',
-            'transport_equipment' => 'Transport Equipment',
-            'other' => 'Other',
-        ];
+        return app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
     }
 
     public static function form(Schema $schema): Schema
@@ -84,84 +80,90 @@ class ToolSalePostResource extends Resource
             ->components([
                 Tabs::make('Tool Sale Post')
                     ->tabs([
-                        Tab::make('Tool Info')
+                        Tab::make(__('admin_tool_sale_post.tabs.info'))
                             ->schema([
                                 TextInput::make('en_name')
+                                    ->label(__('tools-for-sale.name_en'))
                                     ->required()
                                     ->maxLength(255),
                                 TextInput::make('ar_name')
+                                    ->label(__('tools-for-sale.name_ar'))
                                     ->required()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->extraInputAttributes(['dir' => 'rtl']),
                                 Select::make('category')
-                                    ->options(static::categoryOptions())
+                                    ->label(__('tools-for-sale.category'))
+                                    ->options(fn () => ToolSalePost::categoryOptions())
                                     ->required(),
                                 Select::make('condition')
-                                    ->options([
-                                        'new' => 'New',
-                                        'used' => 'Used',
-                                    ])
+                                    ->label(__('tools-for-sale.condition'))
+                                    ->options(fn () => ToolSalePost::conditionOptions())
                                     ->required(),
                                 TextInput::make('brand')
+                                    ->label(__('tools-for-sale.brand'))
                                     ->maxLength(255),
                             ])->icon('heroicon-o-information-circle')
                             ->columns(2),
-                        Tab::make('Location')
+                        Tab::make(__('admin_tool_sale_post.tabs.location'))
                             ->schema([
                                 Select::make('country_id')
-                                    ->relationship(name: 'country', titleAttribute: 'en_name')
+                                    ->label(__('tools-for-sale.country'))
+                                    ->options(fn () => Country::query()->orderBy(static::nameColumn())->pluck(static::nameColumn(), 'id'))
                                     ->searchable()
-                                    ->preload()
                                     ->live()
+                                    ->afterStateUpdated(function (Set $set): void {
+                                        $set('region_id', null);
+                                        $set('city_id', null);
+                                    })
                                     ->required(),
                                 Select::make('region_id')
-                                    ->relationship(name: 'region', titleAttribute: 'en_name')
+                                    ->label(__('tools-for-sale.region'))
                                     ->options(fn (Get $get): Collection => Region::query()
                                         ->where('country_id', $get('country_id'))
-                                        ->pluck('en_name', 'id'))
+                                        ->orderBy(static::nameColumn())
+                                        ->pluck(static::nameColumn(), 'id'))
                                     ->searchable()
-                                    ->preload()
                                     ->live()
+                                    ->afterStateUpdated(fn (Set $set) => $set('city_id', null))
                                     ->required(),
                                 Select::make('city_id')
-                                    ->relationship(name: 'city', titleAttribute: 'en_name')
+                                    ->label(__('tools-for-sale.city'))
                                     ->options(fn (Get $get): Collection => City::query()
                                         ->where('region_id', $get('region_id'))
-                                        ->pluck('en_name', 'id'))
+                                        ->orderBy(static::nameColumn())
+                                        ->pluck(static::nameColumn(), 'id'))
                                     ->searchable()
-                                    ->preload()
                                     ->required(),
                             ])->icon('heroicon-o-map-pin')
                             ->columns(3),
-                        Tab::make('Listing')
+                        Tab::make(__('admin_tool_sale_post.tabs.listing'))
                             ->schema([
                                 TextInput::make('price')
+                                    ->label(__('tools-for-sale.price'))
                                     ->numeric()
                                     ->minValue(0)
                                     ->prefix(fn () => SiteSetting::currencyHtml())
                                     ->required(),
                                 Toggle::make('price_negotiable')
-                                    ->label('Negotiable')
+                                    ->label(__('tools-for-sale.price_negotiable'))
                                     ->inline(false),
                                 Select::make('status')
-                                    ->options([
-                                        'active' => 'Active',
-                                        'sold' => 'Sold',
-                                        'expired' => 'Expired',
-                                        'cancelled' => 'Cancelled',
-                                    ])
+                                    ->label(__('admin_tool_sale_post.fields.status'))
+                                    ->options(fn () => ToolSalePost::statusOptions())
                                     ->required(),
                                 TextInput::make('contact_number')
+                                    ->label(__('tools-for-sale.contact_number'))
                                     ->tel()
+                                    ->maxLength(32)
                                     ->required(),
-                                FileUpload::make('cover_photo')
-                                    ->image()
-                                    ->disk('public')
-                                    ->directory('tools-for-sale/covers')
+                                PlaceFormFields::coverPhoto('tools-for-sale/covers', __('tools-for-sale.cover_photo'))
                                     ->required()
                                     ->columnSpanFull(),
                                 Textarea::make('description_en')
+                                    ->label(__('admin_tool_sale_post.fields.description_en'))
                                     ->rows(3),
                                 Textarea::make('description_ar')
+                                    ->label(__('admin_tool_sale_post.fields.description_ar'))
                                     ->rows(3)
                                     ->extraInputAttributes(['dir' => 'rtl']),
                             ])->icon('heroicon-o-currency-dollar')
@@ -172,32 +174,44 @@ class ToolSalePostResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $name = static::nameColumn();
+
         return $table
+            // The city column is eager loaded by Filament; the country under it is not.
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('country'))
             ->columns([
                 ImageColumn::make('cover_photo')
+                    ->label(__('tools-for-sale.cover_photo'))
                     ->disk('public')
                     ->square(),
-                TextColumn::make('en_name')
-                    ->searchable()
+                TextColumn::make($name)
+                    ->label(__('admin_tool_sale_post.fields.name'))
+                    ->searchable(['en_name', 'ar_name'])
                     ->sortable(),
                 TextColumn::make('category')
-                    ->formatStateUsing(fn (string $state): string => static::categoryOptions()[$state] ?? $state)
+                    ->label(__('tools-for-sale.category'))
+                    ->formatStateUsing(fn (string $state): string => ToolSalePost::categoryOptions()[$state] ?? $state)
                     ->badge()
                     ->sortable(),
                 TextColumn::make('condition')
+                    ->label(__('tools-for-sale.condition'))
+                    ->formatStateUsing(fn (string $state): string => ToolSalePost::conditionOptions()[$state] ?? $state)
                     ->badge()
                     ->color(fn (string $state): string => $state === 'new' ? 'success' : 'gray')
                     ->sortable(),
                 TextColumn::make('price')
+                    ->label(__('tools-for-sale.price'))
                     ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3))
-                    ->description(fn ($record): ?string => $record->price_negotiable ? 'Negotiable' : null)
+                    ->description(fn (ToolSalePost $record): ?string => $record->price_negotiable ? __('tools-for-sale.price_negotiable') : null)
                     ->sortable(),
-                TextColumn::make('city.en_name')
-                    ->label('City')
-                    ->description(fn (ToolSalePost $record): string => $record->country?->en_name ?? '')
-                    ->searchable(),
+                TextColumn::make('city.'.$name)
+                    ->label(__('tools-for-sale.city'))
+                    ->description(fn (ToolSalePost $record): string => (string) $record->country?->{$name})
+                    ->searchable(['en_name', 'ar_name']),
                 TextColumn::make('status')
+                    ->label(__('admin_tool_sale_post.fields.status'))
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => ToolSalePost::statusOptions()[$state] ?? $state)
                     ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
                         'sold' => 'info',
@@ -207,6 +221,7 @@ class ToolSalePostResource extends Resource
                     })
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(__('admin_tool_sale_post.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -214,22 +229,19 @@ class ToolSalePostResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('status')
-                    ->options([
-                        'active' => 'Active',
-                        'sold' => 'Sold',
-                        'expired' => 'Expired',
-                        'cancelled' => 'Cancelled',
-                    ]),
+                    ->label(__('admin_tool_sale_post.fields.status'))
+                    ->options(fn () => ToolSalePost::statusOptions()),
                 SelectFilter::make('category')
-                    ->options(static::categoryOptions()),
+                    ->label(__('tools-for-sale.category'))
+                    ->options(fn () => ToolSalePost::categoryOptions()),
                 SelectFilter::make('condition')
-                    ->options([
-                        'new' => 'New',
-                        'used' => 'Used',
-                    ]),
+                    ->label(__('tools-for-sale.condition'))
+                    ->options(fn () => ToolSalePost::conditionOptions()),
                 SelectFilter::make('country_id')
-                    ->label('Country')
-                    ->relationship('country', 'en_name'),
+                    ->label(__('tools-for-sale.country'))
+                    ->relationship('country', $name)
+                    ->searchable()
+                    ->preload(),
             ])
             ->recordActions([
                 ActionGroup::make([

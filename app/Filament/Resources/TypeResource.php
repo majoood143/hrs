@@ -2,34 +2,21 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\TypeResource\Pages\ListTypes;
 use App\Filament\Resources\TypeResource\Pages\CreateType;
-use App\Filament\Resources\TypeResource\Pages\ViewType;
 use App\Filament\Resources\TypeResource\Pages\EditType;
-use App\Filament\Resources\TypeResource\Pages;
-use App\Filament\Resources\TypeResource\RelationManagers;
+use App\Filament\Resources\TypeResource\Pages\ListTypes;
+use App\Filament\Resources\TypeResource\Pages\ViewType;
+use App\Filament\Support\LookupSchema;
 use App\Models\Type;
-use Filament\Forms;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 class TypeResource extends Resource
 {
     protected static ?string $model = Type::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-bookmark';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-bookmark';
 
     public static function getModelLabel(): string
     {
@@ -46,56 +33,19 @@ class TypeResource extends Resource
         return __('admin_type.navigation.plural');
     }
 
-     public static function getNavigationBadge(): ?string
+    public static function getNavigationBadge(): ?string
     {
-        return static::$model::count();
+        return (string) static::$model::count();
     }
 
     public static function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                TextInput::make('en_name')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('ar_name')
-                    ->required()
-                    ->maxLength(255),
-            ]);
+        return LookupSchema::form($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->columns([
-                TextColumn::make('en_name')
-                    ->searchable(),
-                TextColumn::make('ar_name')
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                //
-            ])
-            ->recordActions([
-                ActionGroup::make([
-                ViewAction::make(),
-                EditAction::make(),
-                ])
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ExportBulkAction::make(),
-                ]),
-            ]);
+        return LookupSchema::table($table);
     }
 
     public static function getRelations(): array

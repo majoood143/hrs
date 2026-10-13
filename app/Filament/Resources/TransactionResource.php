@@ -2,52 +2,40 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Wizard;
-use Filament\Schemas\Components\Wizard\Step;
-use Filament\Schemas\Components\Section;
-use Filament\Forms\Components\Select;
+use App\Filament\Resources\TransactionResource\Pages\CreateTransaction;
+use App\Filament\Resources\TransactionResource\Pages\EditTransaction;
+use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
+use App\Filament\Resources\TransactionResource\Pages\ViewTransaction;
+use App\Filament\Support\AttachmentFields;
+use App\Models\Horse;
 use App\Models\Service;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
-use Filament\Schemas\Components\Group;
-use Filament\Forms\Components\Placeholder;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\FileUpload;
-use Illuminate\Support\Facades\DB;
-use Filament\Forms\Components\Toggle;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
+use App\Models\SiteSetting;
+use App\Models\Transaction;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
-use App\Filament\Resources\TransactionResource\Pages\CreateTransaction;
-use App\Filament\Resources\TransactionResource\Pages\ViewTransaction;
-use App\Filament\Resources\TransactionResource\Pages\EditTransaction;
-use App\Filament\Resources\TransactionResource\Pages;
-use App\Filament\Resources\TransactionResource\RelationManagers;
-use App\Models\Attachement;
-use App\Models\Transaction;
-use Filament\Forms;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Support\Enums\Alignment;
-use JaOcero\RadioDeck\Forms\Components\RadioDeck;
-use App\Filament\Resources\Model\attachments;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Repeater;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Illuminate\Database\Eloquent\Model;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Components\Wizard\Step;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\Alignment;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
-// Define the Transaction resource class
 class TransactionResource extends Resource
 {
-    // Specify the model associated with this resource
     protected static ?string $model = Transaction::class;
 
-    // Define the navigation icon for this resource
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getModelLabel(): string
     {
@@ -64,271 +52,176 @@ class TransactionResource extends Resource
         return __('admin_transaction.navigation.plural');
     }
 
-    // Get the navigation badge count
     public static function getNavigationBadge(): ?string
     {
-        return static::$model::count();
+        return (string) static::$model::count();
     }
 
-    // Define the form schema for creating or editing transactions
+    private static function label(string $key): string
+    {
+        return __("admin_transaction.fields.{$key}");
+    }
+
+    /** @return array<int, string> services by their name in the admin's language */
+    public static function serviceOptions(): array
+    {
+        // Once per request: the table formats every row's service with it.
+        return once(fn () => Service::query()->orderBy('id')->get()->mapWithKeys(fn (Service $service) => [$service->getKey() => $service->localizedName()])->all());
+    }
+
+    /** The transaction's own fields (also used on the horse page, where the horse is known). */
+    public static function detailFields(bool $withHorse = true): array
+    {
+        $name = app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
+
+        return array_values(array_filter([
+            $withHorse ? Select::make('horse_id')
+                ->label(static::label('horse'))
+                ->options(fn () => Horse::query()->orderBy($name)->pluck($name, 'id'))
+                ->searchable()
+                ->required() : null,
+            Select::make('service_id')
+                ->label(static::label('service'))
+                ->options(fn () => static::serviceOptions())
+                ->searchable()
+                ->live()
+                // The service's price is the starting amount; the admin can change it.
+                ->afterStateUpdated(fn (Set $set, $state) => $set('amount', $state ? Service::query()->whereKey($state)->value('price') : null))
+                ->required(),
+            TextInput::make('amount')
+                ->label(static::label('amount'))
+                ->prefix(fn () => SiteSetting::currencyHtml())
+                ->numeric()
+                ->minValue(0)
+                ->required(),
+            TextInput::make('currency')
+                ->label(static::label('currency'))
+                ->default(fn () => SiteSetting::currency()['code'])
+                ->length(3)
+                ->alpha()
+                ->required(),
+            Select::make('status')
+                ->label(static::label('status'))
+                ->options(fn () => Transaction::statusOptions())
+                ->default('pending')
+                ->required(),
+            Textarea::make('description')
+                ->label(static::label('description'))
+                ->rows(2)
+                ->maxLength(255)
+                ->columnSpanFull(),
+        ]));
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-
-                // Create a wizard form for transaction details
                 Wizard::make([
-                    // Define the first step of the wizard
-                    Step::make('Transaction Details')
+                    Step::make(__('admin_transaction.steps.details'))
+                        ->schema(static::detailFields())
+                        ->columns(3),
+                    Step::make(__('admin_transaction.steps.attachments'))
                         ->schema([
-                            // Create a section for transaction information
-                            Section::make('Transaction Information')
-                                ->schema([
-
-                        Select::make('service_id')
-                            ->relationship(name: 'service', titleAttribute: 'name')
-                            ->searchable()
-                            ->preload()
-                            ->afterStateUpdated(fn(callable $set, $state) => $set('amount', $state ? Service::find($state)->price : null))
-                            ->live()
-                            ->required(),
-                        TextInput::make('amount')
-                            ->prefix(fn () => \App\Models\SiteSetting::currency()['symbol'])
-                            //->required()
-                            //->disabled(),
-                            ->numeric(3),
-                        TextInput::make('currency')
-                            ->default(fn () => \App\Models\SiteSetting::currency()['code'])
-                            ->required()
-                            ->maxLength(3),
-                                    
-                                    // Input for transaction name
-                                    // Forms\Components\TextInput::make('name')
-                                    //     ->maxLength(255)
-                                    //     ->default(null),
-                                    // Input for reference number
-                                    TextInput::make('reference_number')
-                                        ->maxLength(255)
-                                        ->default(null),
-                                    // Date picker for transaction date
-                                    DatePicker::make('transaction_date')
-                                        ->default(now())
-                                        ->hidden()
-                                        ->required(),
+                            Repeater::make('attachement')
+                                ->label(static::label('attachments'))
+                                ->relationship()
+                                ->schema(AttachmentFields::form(withHorse: false))
+                                // Each paper belongs to the transaction's horse and to whoever uploads it.
+                                ->mutateRelationshipDataBeforeCreateUsing(fn (array $data, $livewire): array => [
+                                    ...$data,
+                                    'horse_id' => data_get($livewire, 'data.horse_id'),
+                                    'user_id' => auth()->id(),
                                 ])
-                                ->columns(3)
-                                ->columnSpanFull(),
-                        ]),
-                   
-                    // Additional steps can be added here
-                    Step::make('Additional Information')
-                        ->schema([
-                            Section::make('Additional Information')
-                                ->schema([
-
-                        Group::make()
-                            ->schema(function (callable $get) {
-                                $serviceId = $get('service_id');
-
-                                // Example logic — replace with your real service logic
-                                switch ($serviceId) {
-                                    case 1 : // e.g. Horse Registration
-                                        return [
-                                        TextInput::make('horse_name')
-                                                ->label('Horse Name')
-                                                ->required(),
-                                        DatePicker::make('birth_date')
-                                                ->label('Birth Date')
-                                                ->required(),
-                                        ];
-
-                                    case 2: // e.g. Ownership Transfer
-                                        return [
-                                        Select::make('horse_id')
-                                            ->label('Horse')
-                                            ->relationship(name: 'horse', titleAttribute: 'en_name')
-                                            ->searchable()
-                                            ->preload()
-                                            ->required(),
-                                        TextInput::make('previous_owner')
-                                                ->label('Previous Owner')
-                                                ->required(),
-                                        TextInput::make('new_owner')
-                                                ->label('New Owner')
-                                                ->required(),
-                                        ];
-
-                                    case 3: // e.g. Microchip Replacement
-                                        return [
-                                        TextInput::make('old_microchip')
-                                                ->label('Old Microchip ID')
-                                                ->required(),
-                                        TextInput::make('new_microchip')
-                                                ->label('New Microchip ID')
-                                                ->required(),
-                                        ];
-
-                                    default:
-                                        return [
-                                            Placeholder::make('no_service')
-                                                ->content('Please select a service to show its fields.'),
-                                        ];
-                                }
-                            })
-                            ->reactive(),
-                                    // Input for transaction description
-                                    RichEditor::make('description')
-                                        ->maxLength(255)
-                                        ->default(null),
-                                    
+                                ->mutateRelationshipDataBeforeSaveUsing(fn (array $data, $livewire): array => [
+                                    ...$data,
+                                    'horse_id' => data_get($livewire, 'data.horse_id'),
                                 ])
+                                ->defaultItems(0)
                                 ->columns(2)
+                                ->collapsible()
+                                ->reorderableWithButtons()
+                                ->addActionAlignment(Alignment::Start)
+                                ->addActionLabel(static::label('add_attachment'))
                                 ->columnSpanFull(),
                         ]),
-
-                // Additional steps can be added here
-                Step::make('Service Details')
-                    ->schema([
-                        Section::make('Service Information')
-                            ->schema([
-
-                                // Forms\Components\TextInput::make('service_date')
-                                //     ->label('Service Date')
-                                //     ->default(now())
-                                //     ->required(),
-                                // Forms\Components\TextInput::make('due_date')
-                                //     ->label('Due Date')
-                                //     ->default(null)
-                                //     ->required(),
-                                // Forms\Components\TextInput::make('payment_date')
-                                //     ->label('Payment Date')
-                                //     ->default(null),
-                            ])->columns(3)
-                            ->columnSpanFull(),
-                    ]),
-                    // ])
-                    //     ->columns(1)
-                    //     ->columnSpanFull(),
-                    // // Input for horse selection
-                    // Wizard::make([
-                    Step::make('Horse & Service')
-                        ->schema([
-                            Section::make('Attachments')
-                                ->schema([
-                                    Repeater::make('attachement')
-                                        ->relationship()
-                                        ->schema([
-                                            TextInput::make('name')
-                                                ->maxLength(255)
-                                                ->default(null),
-                                            RichEditor::make('description')
-                                                ->maxLength(255)
-                                                ->default(null),
-                                            FileUpload::make('file_path')
-                                                ->required(),
-                                            //->maxLength(255),
-                                            Select::make('type')
-                                                ->options(function () {
-                                                    $enumValues = DB::select("SHOW COLUMNS FROM attachements WHERE Field = 'type'")[0]->Type;
-                                                    preg_match('/^enum\((.*)\)$/', $enumValues, $matches);
-                                                    $values = array_map(fn($value) => trim($value, "'"), explode(',', $matches[1]));
-
-                                                    return array_combine($values, $values);
-                                                })
-                                                //->options(Attachement::class)
-                                                ->required(),
-                                        ])
-                                        ->columns(3)
-                                        ->default(null)
-                                        ->collapsible()
-                                        ->reorderableWithButtons()
-                                        ->addActionAlignment(Alignment::Start)
-                                        ->addActionLabel('Add Attachment')
-                                        //->grid(2) // Arrange items in grid
-                                        ->columns(2) // Number of columns in the grid
-                                        ->columnSpanFull(),
-                                ])
-                        ])
                 ])
-                    ->columns(1)
                     ->columnSpanFull(),
-
-
-
-                // Forms\Components\Select::make('user_id')
-                //     ->relationship(name: 'user', titleAttribute: 'name')
-                //     ->searchable()
-                //     ->preload(),
-
-                // Forms\Components\TextInput::make('currency')
-                //     ->default('OMR')
-                //     ->required()
-                //     ->maxLength(3),
-
-
-                Toggle::make('is_paid')
-                    ->default(true)
-                    ->required(),
-
             ]);
     }
 
-
-    // Define the table schema for displaying transactions
     public static function table(Table $table): Table
     {
+        $name = app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
+
         return $table
             ->columns([
-                TextColumn::make('horse.en_name')
-                    ->numeric()
+                TextColumn::make('id')
+                    ->label(static::label('id'))
                     ->sortable(),
-                TextColumn::make('service.name')
-                    ->numeric()
+                TextColumn::make('horse.'.$name)
+                    ->label(static::label('horse'))
+                    ->searchable(['en_name', 'ar_name'])
+                    ->sortable(),
+                TextColumn::make('service_id')
+                    ->label(static::label('service'))
+                    ->formatStateUsing(fn (?int $state): string => static::serviceOptions()[$state] ?? '—'),
+                TextColumn::make('amount')
+                    ->label(static::label('amount'))
+                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3))
+                    ->sortable(),
+                TextColumn::make('status')
+                    ->label(static::label('status'))
+                    ->badge()
+                    ->formatStateUsing(fn (string $state): string => Transaction::statusOptions()[$state] ?? $state)
+                    ->color(fn (string $state): string => match ($state) {
+                        'completed' => 'success',
+                        'failed' => 'danger',
+                        'refunded' => 'info',
+                        default => 'warning',
+                    })
                     ->sortable(),
                 TextColumn::make('user.name')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('amount')
-                    ->numeric(3)
-                    ->prefix(fn () => \App\Models\SiteSetting::currency()['symbol'] . ' ')
-                    ->sortable(),
+                    ->label(static::label('created_by'))
+                    ->toggleable(),
                 TextColumn::make('attachement_count')
+                    ->label(static::label('attachments'))
                     ->counts('attachement')
                     ->badge(),
                 TextColumn::make('description')
-                    ->searchable(),
+                    ->label(static::label('description'))
+                    ->limit(40)
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
+                    ->label(static::label('created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                SelectFilter::make('status')
+                    ->label(static::label('status'))
+                    ->options(fn () => Transaction::statusOptions()),
+                SelectFilter::make('service_id')
+                    ->label(static::label('service'))
+                    ->options(fn () => static::serviceOptions()),
             ])
             ->recordActions([
-                // Define actions for the table
-                EditAction::make(),
+                ActionGroup::make([
+                    ViewAction::make(),
+                    EditAction::make(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    ExportBulkAction::make(),
                 ]),
             ]);
     }
 
-    // Define relationships for this resource
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
-    // Define the pages for this resource
     public static function getPages(): array
     {
         return [

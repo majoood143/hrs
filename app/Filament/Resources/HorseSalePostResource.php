@@ -6,8 +6,10 @@ use App\Filament\Resources\HorseSalePostResource\Pages\CreateHorseSalePost;
 use App\Filament\Resources\HorseSalePostResource\Pages\EditHorseSalePost;
 use App\Filament\Resources\HorseSalePostResource\Pages\ListHorseSalePosts;
 use App\Filament\Resources\HorseSalePostResource\Pages\ViewHorseSalePost;
+use App\Filament\Support\PlaceFormFields;
 use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
+use App\Models\Country;
 use App\Models\HorseSalePost;
 use App\Models\Region;
 use App\Models\SiteSetting;
@@ -27,11 +29,13 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
@@ -63,7 +67,23 @@ class HorseSalePostResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::$model::where('status', 'active')->count();
+        return (string) static::$model::where('status', 'active')->count();
+    }
+
+    /** `ar_name` in the Arabic admin, else `en_name` (lookups, locations, posts). */
+    private static function nameColumn(): string
+    {
+        return app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
+    }
+
+    /** A lookup (type, gender, colour, country) by its name in the admin's language. */
+    private static function lookup(string $field, string $relationship, string $label): Select
+    {
+        return Select::make($field)
+            ->label($label)
+            ->relationship($relationship, static::nameColumn())
+            ->searchable()
+            ->preload();
     }
 
     public static function form(Schema $schema): Schema
@@ -72,121 +92,113 @@ class HorseSalePostResource extends Resource
             ->components([
                 Tabs::make('Horse Sale Post')
                     ->tabs([
-                        Tab::make('Horse Info')
+                        Tab::make(__('admin_horse_sale_post.tabs.horse'))
                             ->schema([
                                 TextInput::make('en_name')
+                                    ->label(__('horses-for-sale.name_en'))
                                     ->required()
                                     ->maxLength(255),
                                 TextInput::make('ar_name')
+                                    ->label(__('horses-for-sale.name_ar'))
                                     ->required()
-                                    ->maxLength(255),
-                                Select::make('type_id')
-                                    ->relationship(name: 'type', titleAttribute: 'en_name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->required(),
-                                Select::make('gender_id')
-                                    ->relationship(name: 'gender', titleAttribute: 'en_name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->required(),
-                                Select::make('color_id')
-                                    ->relationship(name: 'color', titleAttribute: 'en_name')
-                                    ->searchable()
-                                    ->preload(),
+                                    ->maxLength(255)
+                                    ->extraInputAttributes(['dir' => 'rtl']),
+                                static::lookup('type_id', 'type', __('horses-for-sale.type'))->required(),
+                                static::lookup('gender_id', 'gender', __('horses-for-sale.gender'))->required(),
+                                static::lookup('color_id', 'color', __('horses-for-sale.color')),
                                 TextInput::make('breed')
+                                    ->label(__('horses-for-sale.breed'))
                                     ->maxLength(255),
-                                DatePicker::make('dob'),
+                                DatePicker::make('dob')
+                                    ->label(__('horses-for-sale.dob'))
+                                    ->maxDate(now()),
                             ])->icon('heroicon-o-information-circle')
                             ->columns(3),
-                        Tab::make('Pedigree & Papers')
+                        Tab::make(__('admin_horse_sale_post.tabs.pedigree'))
                             ->schema([
                                 TextInput::make('dam')
-                                    ->label('Dam (Mother)')
+                                    ->label(__('admin_horse_sale_post.fields.dam'))
                                     ->maxLength(255),
                                 TextInput::make('sire')
-                                    ->label('Sire (Father)')
+                                    ->label(__('admin_horse_sale_post.fields.sire'))
                                     ->maxLength(255),
-                                Select::make('birth_country_id')
-                                    ->label('Birth Country')
-                                    ->relationship(name: 'birthCountry', titleAttribute: 'en_name')
-                                    ->searchable()
-                                    ->preload(),
+                                static::lookup('birth_country_id', 'birthCountry', __('horses-for-sale.birth_country')),
                                 TextInput::make('passport_number')
-                                    ->label('Passport Number')
+                                    ->label(__('horses-for-sale.passport_number'))
                                     ->maxLength(255),
+                                // Same rules as the website/app form (HorseSalePostCreator): the file is public, so never HTML/SVG.
                                 FileUpload::make('passport_document')
-                                    ->label('Passport')
+                                    ->label(__('horses-for-sale.passport_document'))
+                                    ->helperText(__('admin_horse_sale_post.fields.passport_hint'))
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'application/pdf'])
+                                    ->maxSize(4096)
                                     ->disk('public')
                                     ->directory('horse-sale/passports')
                                     ->columnSpanFull(),
                             ])->icon('heroicon-o-identification')
                             ->columns(2),
-                        Tab::make('Location')
+                        Tab::make(__('admin_horse_sale_post.tabs.location'))
                             ->schema([
                                 Select::make('country_id')
-                                    ->relationship(name: 'country', titleAttribute: 'en_name')
+                                    ->label(__('horses-for-sale.country'))
+                                    ->options(fn () => Country::query()->orderBy(static::nameColumn())->pluck(static::nameColumn(), 'id'))
                                     ->searchable()
-                                    ->preload()
                                     ->live()
+                                    ->afterStateUpdated(function (Set $set): void {
+                                        $set('region_id', null);
+                                        $set('city_id', null);
+                                    })
                                     ->required(),
                                 Select::make('region_id')
-                                    ->relationship(name: 'region', titleAttribute: 'en_name')
+                                    ->label(__('horses-for-sale.region'))
                                     ->options(fn (Get $get): Collection => Region::query()
                                         ->where('country_id', $get('country_id'))
-                                        ->pluck('en_name', 'id'))
+                                        ->orderBy(static::nameColumn())
+                                        ->pluck(static::nameColumn(), 'id'))
                                     ->searchable()
-                                    ->preload()
                                     ->live()
+                                    ->afterStateUpdated(fn (Set $set) => $set('city_id', null))
                                     ->required(),
                                 Select::make('city_id')
-                                    ->relationship(name: 'city', titleAttribute: 'en_name')
+                                    ->label(__('horses-for-sale.city'))
                                     ->options(fn (Get $get): Collection => City::query()
                                         ->where('region_id', $get('region_id'))
-                                        ->pluck('en_name', 'id'))
+                                        ->orderBy(static::nameColumn())
+                                        ->pluck(static::nameColumn(), 'id'))
                                     ->searchable()
-                                    ->preload()
                                     ->required(),
                             ])->icon('heroicon-o-map-pin')
                             ->columns(3),
-                        Tab::make('Listing')
+                        Tab::make(__('admin_horse_sale_post.tabs.listing'))
                             ->schema([
                                 TextInput::make('price')
+                                    ->label(__('horses-for-sale.price'))
                                     ->numeric()
                                     ->minValue(0)
                                     ->prefix(fn () => SiteSetting::currencyHtml())
                                     ->required(),
                                 Toggle::make('price_negotiable')
-                                    ->label('Negotiable')
+                                    ->label(__('horses-for-sale.price_negotiable'))
                                     ->inline(false),
                                 Select::make('status')
-                                    ->options([
-                                        'active' => 'Active',
-                                        'sold' => 'Sold',
-                                        'expired' => 'Expired',
-                                        'cancelled' => 'Cancelled',
-                                    ])
+                                    ->label(__('horses-for-sale.status'))
+                                    ->options(fn () => HorseSalePost::statusOptions())
                                     ->required(),
                                 TextInput::make('contact_number')
+                                    ->label(__('horses-for-sale.contact_number'))
                                     ->tel()
+                                    ->maxLength(32)
                                     ->required(),
-                                FileUpload::make('cover_photo')
-                                    ->image()
-                                    ->disk('public')
-                                    ->directory('horse-sale/covers')
+                                PlaceFormFields::coverPhoto('horse-sale/covers', __('horses-for-sale.cover_photo'))
                                     ->required()
                                     ->columnSpanFull(),
-                                FileUpload::make('images')
-                                    ->label('Gallery Photos')
-                                    ->image()
-                                    ->multiple()
-                                    ->reorderable()
-                                    ->disk('public')
-                                    ->directory('horse-sale/gallery')
+                                PlaceFormFields::gallery('horse-sale/gallery', __('horses-for-sale.gallery_photos'), 'images')
                                     ->columnSpanFull(),
                                 Textarea::make('description_en')
+                                    ->label(__('admin_horse_sale_post.fields.description_en'))
                                     ->rows(3),
                                 Textarea::make('description_ar')
+                                    ->label(__('admin_horse_sale_post.fields.description_ar'))
                                     ->rows(3)
                                     ->extraInputAttributes(['dir' => 'rtl']),
                             ])->icon('heroicon-o-currency-dollar')
@@ -197,30 +209,41 @@ class HorseSalePostResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $name = static::nameColumn();
+
         return $table
+            // The type/gender/city columns are eager loaded by Filament; the country under the city is not.
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('country'))
             ->columns([
                 ImageColumn::make('cover_photo')
+                    ->label(__('horses-for-sale.cover_photo'))
                     ->disk('public')
                     ->square(),
-                TextColumn::make('en_name')
-                    ->searchable()
+                TextColumn::make($name)
+                    ->label(__('admin_horse_sale_post.fields.name'))
+                    ->searchable(['en_name', 'ar_name'])
                     ->sortable(),
-                TextColumn::make('type.en_name')
-                    ->searchable()
+                TextColumn::make('type.'.$name)
+                    ->label(__('horses-for-sale.type'))
+                    ->searchable(['en_name', 'ar_name'])
                     ->sortable(),
-                TextColumn::make('gender.en_name')
-                    ->searchable()
+                TextColumn::make('gender.'.$name)
+                    ->label(__('horses-for-sale.gender'))
+                    ->searchable(['en_name', 'ar_name'])
                     ->sortable(),
                 TextColumn::make('price')
+                    ->label(__('horses-for-sale.price'))
                     ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3))
-                    ->description(fn ($record): ?string => $record->price_negotiable ? 'Negotiable' : null)
+                    ->description(fn (HorseSalePost $record): ?string => $record->price_negotiable ? __('horses-for-sale.price_negotiable') : null)
                     ->sortable(),
-                TextColumn::make('city.en_name')
-                    ->label('City')
-                    ->description(fn (HorseSalePost $record): string => $record->country?->en_name ?? '')
-                    ->searchable(),
+                TextColumn::make('city.'.$name)
+                    ->label(__('horses-for-sale.city'))
+                    ->description(fn (HorseSalePost $record): string => (string) $record->country?->{$name})
+                    ->searchable(['en_name', 'ar_name']),
                 TextColumn::make('status')
+                    ->label(__('horses-for-sale.status'))
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => HorseSalePost::statusOptions()[$state] ?? $state)
                     ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
                         'sold' => 'info',
@@ -230,6 +253,7 @@ class HorseSalePostResource extends Resource
                     })
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(__('admin_horse_sale_post.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -237,18 +261,21 @@ class HorseSalePostResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('status')
-                    ->options([
-                        'active' => 'Active',
-                        'sold' => 'Sold',
-                        'expired' => 'Expired',
-                        'cancelled' => 'Cancelled',
-                    ]),
+                    ->label(__('horses-for-sale.status'))
+                    ->options(fn () => HorseSalePost::statusOptions()),
                 SelectFilter::make('type_id')
-                    ->label('Type')
-                    ->relationship('type', 'en_name'),
+                    ->label(__('horses-for-sale.type'))
+                    ->relationship('type', $name)
+                    ->preload(),
+                SelectFilter::make('gender_id')
+                    ->label(__('horses-for-sale.gender'))
+                    ->relationship('gender', $name)
+                    ->preload(),
                 SelectFilter::make('country_id')
-                    ->label('Country')
-                    ->relationship('country', 'en_name'),
+                    ->label(__('horses-for-sale.country'))
+                    ->relationship('country', $name)
+                    ->searchable()
+                    ->preload(),
             ])
             ->recordActions([
                 ActionGroup::make([

@@ -2,13 +2,29 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RefusesDeleteWhileReferenced;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Country extends Model
 {
+    use RefusesDeleteWhileReferenced;
+
+    /** What refers to a country: `RefusesDeleteWhileReferenced` refuses to delete one still in use. */
+    public const DELETE_REFERENCES = [
+        'regions' => 'country_id',
+        'stables' => 'country_id',
+        'shops' => 'country_id',
+        'clinics' => 'country_id',
+        'centers' => 'country_id',
+        'farriers' => 'country_id',
+        'horses' => 'country_id',
+        'horse_sale_posts' => 'country_id',
+        'tool_sale_posts' => 'country_id',
+        'transfer_posts' => ['from_country_id', 'to_country_id'],
+    ];
+
     //
     protected $fillable = [
         'en_name', 'ar_name', 'is_public',
@@ -20,7 +36,7 @@ class Country extends Model
         'is_public' => 'boolean',
     ];
 
-    public function region():HasMany
+    public function region(): HasMany
     {
         return $this->hasMany(Region::class);
     }
@@ -46,12 +62,12 @@ class Country extends Model
             return null;
         }
 
-        return asset('flags/' . strtolower($this->country_code) . '.svg');
+        return asset('flags/'.strtolower($this->country_code).'.svg');
     }
 
     public function getPhoneCodeFormattedAttribute(): ?string
     {
-        return $this->phone_code ? '+' . ltrim($this->phone_code, '+') : null;
+        return $this->phone_code ? '+'.ltrim($this->phone_code, '+') : null;
     }
 
     public function setCurrencyCodeAttribute(?string $value): void

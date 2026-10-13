@@ -2,34 +2,21 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\GenderResource\Pages\ListGenders;
 use App\Filament\Resources\GenderResource\Pages\CreateGender;
-use App\Filament\Resources\GenderResource\Pages\ViewGender;
 use App\Filament\Resources\GenderResource\Pages\EditGender;
-use App\Filament\Resources\GenderResource\Pages;
-use App\Filament\Resources\GenderResource\RelationManagers;
+use App\Filament\Resources\GenderResource\Pages\ListGenders;
+use App\Filament\Resources\GenderResource\Pages\ViewGender;
+use App\Filament\Support\LookupSchema;
 use App\Models\Gender;
-use Filament\Forms;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 class GenderResource extends Resource
 {
     protected static ?string $model = Gender::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-squares-plus';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-squares-plus';
 
     public static function getModelLabel(): string
     {
@@ -48,54 +35,17 @@ class GenderResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::$model::count();
+        return (string) static::$model::count();
     }
 
     public static function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                TextInput::make('en_name')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('ar_name')
-                    ->required()
-                    ->maxLength(255),
-            ]);
+        return LookupSchema::form($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->columns([
-                TextColumn::make('en_name')
-                    ->searchable(),
-                TextColumn::make('ar_name')
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                //
-            ])
-            ->recordActions([
-                ActionGroup::make([
-                    ViewAction::make(),
-                    EditAction::make(),
-                ])
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ExportBulkAction::make(),
-                ]),
-            ]);
+        return LookupSchema::table($table);
     }
 
     public static function getRelations(): array

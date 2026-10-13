@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
@@ -16,12 +17,13 @@ use Filament\Schemas\Schema;
 use Illuminate\Contracts\Foundation\MaintenanceMode;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
 class Maintenance extends Page implements HasForms
 {
-    use InteractsWithForms;
     use HasPageShield;
+    use InteractsWithForms;
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-wrench-screwdriver';
 
@@ -152,7 +154,7 @@ class Maintenance extends Page implements HasForms
             ->all();
 
         $payload = [
-            'except' => app(\App\Http\Middleware\PreventRequestsDuringMaintenance::class)->getExcludedPaths(),
+            'except' => app(PreventRequestsDuringMaintenance::class)->getExcludedPaths(),
             'redirect' => null,
             'retry' => filled($state['retry'] ?? null) ? (int) $state['retry'] : null,
             'refresh' => filled($state['refresh'] ?? null) ? (int) $state['refresh'] : null,
@@ -322,7 +324,7 @@ class Maintenance extends Page implements HasForms
         try {
             $size = 0;
 
-            foreach (\Illuminate\Support\Facades\File::allFiles($path) as $file) {
+            foreach (File::allFiles($path) as $file) {
                 $size += $file->getSize();
             }
 
@@ -342,6 +344,41 @@ class Maintenance extends Page implements HasForms
         $power = min((int) floor(log($bytes, 1024)), count($units) - 1);
 
         return round($bytes / (1024 ** $power), 1).' '.$units[$power];
+    }
+
+    /**
+     * Empties every *.log file under storage/logs. The files are truncated, not
+     * deleted, so running processes (queue workers, php-fpm) keep writing to
+     * them with the same owner and permissions.
+     */
+    public function clearLogs(): void
+    {
+        $freed = 0;
+        $failed = 0;
+
+        foreach (File::allFiles(storage_path('logs')) as $file) {
+            if ($file->getExtension() !== 'log') {
+                continue;
+            }
+
+            $size = $file->getSize();
+
+            if (@file_put_contents($file->getPathname(), '', LOCK_EX) === false) {
+                $failed++;
+
+                continue;
+            }
+
+            $freed += $size;
+        }
+
+        clearstatcache();
+
+        Notification::make()
+            ->title(__('maintenance.notifications.logs_cleared', ['size' => static::formatBytes($freed)]))
+            ->body($failed ? __('maintenance.notifications.logs_failed', ['count' => $failed]) : null)
+            ->{$failed ? 'warning' : 'success'}()
+            ->send();
     }
 
     public function runArtisan(string $command): void

@@ -6,10 +6,13 @@ use App\Filament\Resources\ShopResource\Pages\CreateShop;
 use App\Filament\Resources\ShopResource\Pages\EditShop;
 use App\Filament\Resources\ShopResource\Pages\ListShops;
 use App\Filament\Resources\ShopResource\Pages\ViewShop;
+use App\Filament\Support\PlaceFormFields;
 use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
+use App\Models\Country;
 use App\Models\Region;
 use App\Models\Shop;
+use App\Models\ShopService;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -17,9 +20,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\CheckboxList;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
@@ -28,6 +29,7 @@ use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
@@ -70,17 +72,10 @@ class ShopResource extends Resource
         return static::$model::count();
     }
 
-    protected static function dayLabels(): array
+    /** `ar_name` in the Arabic admin, else `en_name` (countries, regions, cities, categories, shops). */
+    private static function nameColumn(): string
     {
-        return [
-            'mon' => 'Monday',
-            'tue' => 'Tuesday',
-            'wed' => 'Wednesday',
-            'thu' => 'Thursday',
-            'fri' => 'Friday',
-            'sat' => 'Saturday',
-            'sun' => 'Sunday',
-        ];
+        return app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
     }
 
     public static function form(Schema $schema): Schema
@@ -89,150 +84,159 @@ class ShopResource extends Resource
             ->components([
                 Tabs::make('Shop')
                     ->tabs([
-                        Tab::make('Info')
+                        Tab::make(__('admin_shop.tabs.info'))
                             ->schema([
                                 TextInput::make('en_name')
+                                    ->label(__('admin_shop.fields.en_name'))
                                     ->required()
                                     ->maxLength(255)
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn ($state, $set) => $set('slug', Str::slug($state))),
+                                    // The slug follows the English name only while creating: renaming a live shop keeps its links.
+                                    ->afterStateUpdated(function (?string $state, Set $set, string $operation): void {
+                                        if ($operation === 'create') {
+                                            $set('slug', Str::slug((string) $state));
+                                        }
+                                    }),
                                 TextInput::make('ar_name')
+                                    ->label(__('admin_shop.fields.ar_name'))
                                     ->required()
-                                    ->maxLength(255),
+                                    ->maxLength(255)
+                                    ->extraInputAttributes(['dir' => 'rtl']),
                                 TextInput::make('slug')
+                                    ->label(__('admin_shop.fields.slug'))
+                                    ->helperText(__('admin_shop.fields.slug_helper'))
                                     ->required()
+                                    ->alphaDash()
                                     ->unique(ignoreRecord: true)
                                     ->maxLength(255),
                                 Select::make('type')
-                                    ->options(Shop::TYPES)
+                                    ->label(__('admin_shop.fields.type'))
+                                    ->options(fn () => Shop::typeOptions())
                                     ->default('tack')
                                     ->required()
                                     ->live(),
                                 Toggle::make('is_active')
+                                    ->label(__('admin_shop.fields.is_active'))
                                     ->default(true),
                                 Toggle::make('is_online')
-                                    ->label('Online Shop')
-                                    ->helperText('Enable if this shop has no physical storefront and sells online.')
+                                    ->label(__('admin_shop.fields.is_online'))
+                                    ->helperText(__('admin_shop.fields.is_online_helper'))
                                     ->live()
                                     ->default(false),
                             ])->icon('heroicon-o-information-circle')
                             ->columns(2),
-                        Tab::make('Location')
+                        Tab::make(__('admin_shop.tabs.location'))
                             ->schema([
                                 Select::make('country_id')
-                                    ->relationship(name: 'country', titleAttribute: 'en_name')
+                                    ->label(__('admin_shop.fields.country'))
+                                    ->options(fn () => Country::query()->orderBy(static::nameColumn())->pluck(static::nameColumn(), 'id'))
                                     ->searchable()
-                                    ->preload()
                                     ->live()
+                                    ->afterStateUpdated(function (Set $set): void {
+                                        $set('region_id', null);
+                                        $set('city_id', null);
+                                    })
                                     ->required(),
                                 Select::make('region_id')
-                                    ->relationship(name: 'region', titleAttribute: 'en_name')
+                                    ->label(__('admin_shop.fields.region'))
                                     ->options(fn (Get $get): Collection => Region::query()
                                         ->where('country_id', $get('country_id'))
-                                        ->pluck('en_name', 'id'))
+                                        ->orderBy(static::nameColumn())
+                                        ->pluck(static::nameColumn(), 'id'))
                                     ->searchable()
-                                    ->preload()
                                     ->live()
+                                    ->afterStateUpdated(fn (Set $set) => $set('city_id', null))
                                     ->required(),
                                 Select::make('city_id')
-                                    ->relationship(name: 'city', titleAttribute: 'en_name')
+                                    ->label(__('admin_shop.fields.city'))
                                     ->options(fn (Get $get): Collection => City::query()
                                         ->where('region_id', $get('region_id'))
-                                        ->pluck('en_name', 'id'))
+                                        ->orderBy(static::nameColumn())
+                                        ->pluck(static::nameColumn(), 'id'))
                                     ->searchable()
-                                    ->preload()
                                     ->required(),
                                 TextInput::make('address')
+                                    ->label(__('admin_shop.fields.address'))
                                     ->maxLength(255)
                                     ->hidden(fn (Get $get) => $get('is_online'))
                                     ->columnSpanFull(),
                                 TextInput::make('map_link')
-                                    ->label('Map Link')
+                                    ->label(__('admin_shop.fields.map_link'))
                                     ->url()
+                                    ->rule('url:http,https')
                                     ->maxLength(255)
                                     ->hidden(fn (Get $get) => $get('is_online'))
                                     ->columnSpanFull(),
                                 Select::make('delivery_scope')
-                                    ->label('Delivery Scope')
-                                    ->options(Shop::DELIVERY_SCOPES)
+                                    ->label(__('admin_shop.fields.delivery_scope'))
+                                    ->options(fn () => Shop::deliveryScopeOptions())
                                     ->visible(fn (Get $get) => $get('is_online'))
                                     ->required(fn (Get $get) => $get('is_online'))
                                     ->columnSpanFull(),
                                 TextInput::make('phone')
-                                    ->label('Contact Number')
+                                    ->label(__('admin_shop.fields.phone'))
                                     ->tel()
-                                    ->maxLength(255),
+                                    ->maxLength(32),
                                 TextInput::make('website_url')
-                                    ->label('Website URL')
+                                    ->label(__('admin_shop.fields.website_url'))
                                     ->url()
+                                    ->rule('url:http,https')
                                     ->maxLength(255),
                                 TextInput::make('instagram_url')
-                                    ->label('Instagram URL')
+                                    ->label(__('admin_shop.fields.instagram_url'))
                                     ->url()
+                                    ->rule('url:http,https')
                                     ->maxLength(255),
                             ])->icon('heroicon-o-map-pin')
                             ->columns(3),
-                        Tab::make('Description')
-                            ->schema([
-                                Textarea::make('en_description')
-                                    ->label('Description (English)')
-                                    ->rows(4),
-                                Textarea::make('ar_description')
-                                    ->label('Description (Arabic)')
-                                    ->rows(4)
-                                    ->extraInputAttributes(['dir' => 'rtl']),
-                            ])->icon('heroicon-o-document-text')
-                            ->columns(2),
-                        Tab::make('Services')
+                        Tab::make(__('admin_shop.tabs.description'))
+                            ->schema(PlaceFormFields::descriptions(__('admin_shop.fields.en_description'), __('admin_shop.fields.ar_description')))
+                            ->icon('heroicon-o-document-text'),
+                        Tab::make(__('admin_shop.tabs.services'))
                             ->schema([
                                 Select::make('services')
+                                    ->label(__('admin_shop.fields.services'))
                                     ->relationship(
                                         name: 'services',
-                                        titleAttribute: 'en_name',
+                                        titleAttribute: static::nameColumn(),
                                         modifyQueryUsing: fn (Builder $query, Get $get) => $query->forType($get('type')),
                                     )
+                                    ->getOptionLabelFromRecordUsing(fn (ShopService $record) => $record->name)
                                     ->multiple()
                                     ->searchable()
                                     ->preload()
                                     ->required(),
                             ])->icon('heroicon-o-clipboard-document-check'),
-                        Tab::make('Payment Options')
+                        Tab::make(__('admin_shop.tabs.payment_options'))
                             ->schema([
                                 CheckboxList::make('payment_options')
-                                    ->label('Accepted Payment Options')
-                                    ->options(Shop::PAYMENT_OPTIONS)
+                                    ->label(__('admin_shop.fields.payment_options'))
+                                    ->options(fn () => Shop::paymentOptionOptions())
                                     ->columns(2),
                             ])->icon('heroicon-o-credit-card'),
-                        Tab::make('Opening Hours')
-                            ->schema(collect(static::dayLabels())->map(
-                                fn (string $label, string $day) => Fieldset::make($label)
+                        Tab::make(__('admin_shop.tabs.hours'))
+                            ->schema(collect(Shop::DAYS)->map(
+                                fn (string $day) => Fieldset::make(__('shops.days.'.$day))
                                     ->schema([
                                         Toggle::make("opening_hours.{$day}.closed")
-                                            ->label('Closed')
+                                            ->label(__('admin_shop.fields.closed'))
                                             ->live(),
                                         TimePicker::make("opening_hours.{$day}.opens_at")
-                                            ->label('Opens at')
+                                            ->label(__('admin_shop.fields.opens_at'))
                                             ->seconds(false)
-                                            ->hidden(fn (Get $get) => $get("opening_hours.{$day}.closed")),
+                                            ->hidden(fn (Get $get) => (bool) $get("opening_hours.{$day}.closed")),
                                         TimePicker::make("opening_hours.{$day}.closes_at")
-                                            ->label('Closes at')
+                                            ->label(__('admin_shop.fields.closes_at'))
                                             ->seconds(false)
-                                            ->hidden(fn (Get $get) => $get("opening_hours.{$day}.closed")),
+                                            ->hidden(fn (Get $get) => (bool) $get("opening_hours.{$day}.closed")),
                                     ])
                                     ->columns(3)
-                            )->values()->all())
+                            )->all())
                             ->icon('heroicon-o-clock'),
-                        Tab::make('Photos')
+                        Tab::make(__('admin_shop.tabs.photos'))
                             ->schema([
-                                FileUpload::make('cover_photo')
-                                    ->image()
-                                    ->disk('public')
-                                    ->directory('shops/covers'),
-                                FileUpload::make('gallery')
-                                    ->image()
-                                    ->multiple()
-                                    ->disk('public')
-                                    ->directory('shops/gallery'),
+                                PlaceFormFields::coverPhoto('shops/covers', __('admin_shop.fields.cover_photo')),
+                                PlaceFormFields::gallery('shops/gallery', __('admin_shop.fields.gallery')),
                             ])->icon('heroicon-o-photo')
                             ->columns(1),
                     ])->columnSpanFull(),
@@ -241,55 +245,73 @@ class ShopResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $name = static::nameColumn();
+
         return $table
+            // The city/services columns are eager loaded by Filament; the country under the city is not.
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('country'))
             ->columns([
                 ImageColumn::make('cover_photo')
+                    ->label(__('admin_shop.fields.cover_photo'))
                     ->disk('public')
                     ->square(),
-                TextColumn::make('en_name')
-                    ->searchable()
+                TextColumn::make($name)
+                    ->label(__('admin_shop.fields.name'))
+                    ->searchable(['en_name', 'ar_name'])
                     ->sortable(),
                 TextColumn::make('type')
+                    ->label(__('admin_shop.fields.type'))
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => Shop::TYPES[$state] ?? $state)
+                    ->formatStateUsing(fn (string $state): string => Shop::typeOptions()[$state] ?? $state)
                     ->sortable(),
-                TextColumn::make('city.en_name')
-                    ->label('City')
-                    ->description(fn (Shop $record): string => $record->country?->en_name ?? '')
-                    ->searchable(),
-                TextColumn::make('services.en_name')
-                    ->label('Services')
+                TextColumn::make('city.'.$name)
+                    ->label(__('admin_shop.fields.city'))
+                    ->description(fn (Shop $record): string => (string) $record->country?->{$name})
+                    ->searchable(['en_name', 'ar_name']),
+                TextColumn::make('services.'.$name)
+                    ->label(__('admin_shop.fields.services'))
                     ->badge()
                     ->separator(','),
                 IconColumn::make('is_online')
-                    ->label('Online')
+                    ->label(__('admin_shop.fields.online'))
                     ->boolean()
                     ->sortable(),
                 IconColumn::make('is_active')
+                    ->label(__('admin_shop.fields.is_active'))
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(__('admin_shop.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultSort('en_name')
+            ->defaultSort($name)
             ->filters([
                 SelectFilter::make('type')
-                    ->options(Shop::TYPES),
-                SelectFilter::make('city_id')
-                    ->label('City')
-                    ->relationship('city', 'en_name'),
+                    ->label(__('admin_shop.fields.type'))
+                    ->options(fn () => Shop::typeOptions()),
                 SelectFilter::make('country_id')
-                    ->label('Country')
-                    ->relationship('country', 'en_name'),
+                    ->label(__('admin_shop.fields.country'))
+                    ->relationship('country', $name)
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('city_id')
+                    ->label(__('admin_shop.fields.city'))
+                    ->relationship('city', $name)
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('services')
-                    ->relationship('services', 'en_name'),
+                    ->label(__('admin_shop.fields.services'))
+                    ->relationship('services', $name)
+                    ->multiple()
+                    ->preload(),
                 SelectFilter::make('is_active')
-                    ->options([1 => 'Active', 0 => 'Inactive']),
+                    ->label(__('admin_shop.fields.is_active'))
+                    ->options([1 => __('admin_shop.options.active'), 0 => __('admin_shop.options.inactive')]),
                 SelectFilter::make('is_online')
-                    ->label('Shop Mode')
-                    ->options([1 => 'Online', 0 => 'Physical']),
+                    ->label(__('admin_shop.fields.mode'))
+                    ->options([1 => __('admin_shop.options.online'), 0 => __('admin_shop.options.physical')]),
             ])
             ->recordActions([
                 ActionGroup::make([

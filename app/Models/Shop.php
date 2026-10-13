@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\FiltersDirectoryPlaces;
+use App\Models\Concerns\HasRichDescription;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 class Shop extends Model
 {
     use FiltersDirectoryPlaces;
+    use HasRichDescription;
 
     public const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
@@ -107,6 +109,24 @@ class Shop extends Model
     public function scopeOnline(Builder $query): Builder
     {
         return $query->where('is_online', true);
+    }
+
+    /** @return array<string, string> the types in the current language */
+    public static function typeOptions(): array
+    {
+        return collect(self::TYPES)->mapWithKeys(fn ($label, string $type) => [$type => __('shops.types.'.$type)])->all();
+    }
+
+    /** @return array<string, string> */
+    public static function deliveryScopeOptions(): array
+    {
+        return collect(self::DELIVERY_SCOPES)->mapWithKeys(fn ($label, string $scope) => [$scope => __('shops.delivery_scopes.'.$scope)])->all();
+    }
+
+    /** @return array<string, string> */
+    public static function paymentOptionOptions(): array
+    {
+        return collect(self::PAYMENT_OPTIONS)->mapWithKeys(fn ($label, string $option) => [$option => __('shops.payment_options_list.'.$option)])->all();
     }
 
     public function getTypeLabelAttribute(): string

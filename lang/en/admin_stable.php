@@ -7,6 +7,7 @@ return [
     ],
 
     'tabs' => [
+        'services' => 'Services',
         'owner' => 'Owner & approval',
     ],
 
@@ -20,6 +21,12 @@ return [
         'no_owner' => 'No owner account (added by an admin)',
         'reason' => 'Reason given to the owner',
         'approved_at' => 'Approved at',
+        'slug' => 'Slug',
+        'slug_helper' => 'Part of the stable\'s web address. Changing it breaks links already shared.',
+        'services' => 'Services',
+        'created_at' => 'Created',
+        'active' => 'Active',
+        'inactive' => 'Inactive',
     ],
 
     'approval' => [

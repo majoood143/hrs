@@ -16,7 +16,7 @@ class CenterController extends Controller
     {
         return view('site.centers.index', Seo::forSlug(
             'centers',
-            __('centers.board_title') . ' — ' . SiteSetting::siteName(),
+            __('centers.board_title').' — '.SiteSetting::siteName(),
         ));
     }
 
@@ -31,8 +31,8 @@ class CenterController extends Controller
 
         return view('site.centers.show', [
             'center' => $center,
-            'seoTitle' => $center->name . ' — ' . SiteSetting::siteName(),
-            'seoDescription' => $center->description ? Str::limit($center->description, 160) : null,
+            'seoTitle' => $center->name.' — '.SiteSetting::siteName(),
+            'seoDescription' => ($text = $center->descriptionText()) ? Str::limit(Str::squish($text), 160) : null,
             'seoImage' => $center->cover_photo_url,
         ]);
     }

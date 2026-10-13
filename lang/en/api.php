@@ -13,4 +13,11 @@ return [
         'verification_required' => 'Confirm your phone number to post.',
         'limit' => 'You can publish up to :count posts a day from the app. Please try again tomorrow.',
     ],
+    'app' => [
+        'update_optional' => 'A new version of the app is available, with the latest improvements.',
+        'update_required' => 'This version of the app is no longer supported. Please update to continue.',
+        'maintenance' => 'The app is being updated. Please try again shortly.',
+        'feature_disabled' => 'This is not available in the app right now.',
+        'announcement_button' => 'Open',
+    ],
 ];

@@ -2,29 +2,21 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\StableServiceResource\Pages\ListStableServices;
 use App\Filament\Resources\StableServiceResource\Pages\CreateStableService;
-use App\Filament\Resources\StableServiceResource\Pages\ViewStableService;
 use App\Filament\Resources\StableServiceResource\Pages\EditStableService;
-use App\Filament\Resources\StableServiceResource\Pages;
+use App\Filament\Resources\StableServiceResource\Pages\ListStableServices;
+use App\Filament\Resources\StableServiceResource\Pages\ViewStableService;
+use App\Filament\Support\LookupSchema;
 use App\Models\StableService;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 class StableServiceResource extends Resource
 {
     protected static ?string $model = StableService::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-wrench-screwdriver';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-wrench-screwdriver';
 
     public static function getModelLabel(): string
     {
@@ -43,54 +35,17 @@ class StableServiceResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::$model::count();
+        return (string) static::$model::count();
     }
 
     public static function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                TextInput::make('en_name')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('ar_name')
-                    ->required()
-                    ->maxLength(255),
-            ]);
+        return LookupSchema::form($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->columns([
-                TextColumn::make('en_name')
-                    ->searchable(),
-                TextColumn::make('ar_name')
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                //
-            ])
-            ->recordActions([
-                ActionGroup::make([
-                    ViewAction::make(),
-                    EditAction::make(),
-                ])
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ExportBulkAction::make(),
-                ]),
-            ]);
+        return LookupSchema::table($table);
     }
 
     public static function getRelations(): array

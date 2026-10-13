@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
 
 class Horse extends Model
 {
@@ -20,8 +20,7 @@ class Horse extends Model
         'is_featured' => 'boolean',
     ];
 
-    protected $fillable = ['en_name', 'ar_name', 'country_id', 'region_id', 'city_id', 'type_id', 'gender_id', 'user_id', 'dob', 'color_id', 'breed', 'microchip', 'registration_number', 'dam_id', 'sire_id', 'is_featured', 'cover_photo', 'public_story_en', 'public_story_ar'];
-
+    protected $fillable = ['en_name', 'ar_name', 'country_id', 'region_id', 'city_id', 'type_id', 'gender_id', 'user_id', 'dob', 'color_id', 'breed', 'microchip', 'passport_number', 'registration_number', 'dam_id', 'sire_id', 'is_featured', 'cover_photo', 'public_story_en', 'public_story_ar'];
 
     use HasFactory;
 
@@ -49,20 +48,33 @@ class Horse extends Model
     {
         return $this->belongsTo(Gender::class);
     }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function horse(): BelongsTo
+    /** The mother (`dam_id`); cleared, not cascaded, when she is deleted. */
+    public function dam(): BelongsTo
     {
-        return $this->belongsTo(Horse::class);
+        return $this->belongsTo(Horse::class, 'dam_id');
+    }
+
+    /** The father (`sire_id`); cleared, not cascaded, when he is deleted. */
+    public function sire(): BelongsTo
+    {
+        return $this->belongsTo(Horse::class, 'sire_id');
+    }
+
+    public function color(): BelongsTo
+    {
+        return $this->belongsTo(Color::class);
     }
 
     protected function age(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->dob ? Carbon::parse($this->dob)->age : null,
+            get: fn () => $this->dob ? Carbon::parse($this->dob)->age : null,
         );
     }
 

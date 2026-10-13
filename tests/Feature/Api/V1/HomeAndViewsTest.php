@@ -70,6 +70,25 @@ class HomeAndViewsTest extends TestCase
         $this->getJson('/api/v1/home')->assertOk()->assertJsonPath('data.ads', []);
     }
 
+    public function test_home_leaves_out_the_sections_switched_off_for_this_app(): void
+    {
+        $this->row('transfer_posts', ['type' => 'offer', 'transfer_date' => now()->addDay()->toDateString(), 'from_city_id' => $this->ids['seeb'], 'to_city_id' => $this->ids['bawshar'], 'status' => 'active']);
+        $this->row('events', ['title' => $this->both('Show', 'عرض'), 'date' => now()->addDay()->toDateString(), 'start_time' => '10:00', 'end_time' => '11:00']);
+        $this->seedApiSettings(['mobile.features' => json_encode([
+            'transfer_board' => ['enabled' => false],
+            'events' => ['enabled' => true, 'platforms' => ['android']],
+        ])]);
+
+        $this->getJson('/api/v1/home', ['X-App-Platform' => 'ios', 'X-App-Version' => '1.0.0'])
+            ->assertOk()
+            ->assertJsonPath('data.transfers', [])
+            ->assertJsonPath('data.events', []);
+
+        $this->getJson('/api/v1/home', ['X-App-Platform' => 'android', 'X-App-Version' => '1.0.0'])
+            ->assertJsonPath('data.transfers', [])
+            ->assertJsonPath('data.events.0.title', 'Show');
+    }
+
     public function test_a_view_from_the_app_is_counted_but_never_by_a_get(): void
     {
         $clinic = $this->row('clinics', ['en_name' => 'Clinic', 'slug' => 'clinic', 'is_active' => true]);

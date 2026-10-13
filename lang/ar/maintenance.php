@@ -14,6 +14,7 @@ return [
     'confirm' => [
         'enable' => 'سيؤدي هذا إلى إيقاف الموقع العام عن جميع الزوار باستثناء عناوين IP المسموح بها ورابط التجاوز. هل تريد المتابعة؟',
         'disable' => 'سيؤدي هذا إلى إعادة تشغيل الموقع العام. هل تريد المتابعة؟',
+        'clear_logs' => 'سيؤدي هذا إلى إفراغ جميع ملفات السجل في storage/logs نهائيًا. هل تريد المتابعة؟',
     ],
 
     'actions' => [
@@ -49,6 +50,8 @@ return [
         'disabled' => 'تم إيقاف وضع الصيانة — الموقع يعمل الآن من جديد.',
         'bypass_hint' => 'رابط التجاوز: :url',
         'command_ran' => 'تم تنفيذ الأمر `:command` بنجاح.',
+        'logs_cleared' => 'تم مسح ملفات السجل (تم تحرير :size).',
+        'logs_failed' => 'تعذّر إفراغ :count ملف (تحقق من صلاحيات الملفات).',
     ],
 
     'system' => [
@@ -106,6 +109,7 @@ return [
         'optimize' => 'تحسين التطبيق',
         'queue_restart' => 'إعادة تشغيل عمّال قائمة الانتظار',
         'storage_link' => 'إنشاء رابط التخزين الرمزي',
+        'clear_logs' => 'مسح ملفات السجل',
     ],
 
     'default_message_en' => "We're currently performing scheduled maintenance and will be back shortly. Thank you for your patience.",

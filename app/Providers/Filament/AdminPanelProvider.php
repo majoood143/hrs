@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Insights;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dashboard;
 use App\Models\SiteSetting;
@@ -60,6 +61,15 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 // Widgets\AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,
+            ])
+            // The Stable insights page's widgets live outside the discovered folders: Livewire must know
+            // them by name, or every request after the first render (filters, lazy loading) answers 419.
+            ->livewireComponents([
+                Insights\InsightsKpis::class,
+                Insights\InsightsSalesChart::class,
+                Insights\InsightsTopStables::class,
+                Insights\InsightsOccupancy::class,
+                Insights\InsightsTopServices::class,
             ])
             ->navigationItems([
                 NavigationItem::make('api_docs')

@@ -62,10 +62,12 @@
                     </section>
                 @endif
 
-                @if($stable->description)
+                @if($descriptionHtml = $stable->descriptionHtml())
                     <div class="mt-8">
                         <h2 class="font-display text-xl font-semibold text-warm-900">{{ __('stables.description') }}</h2>
-                        <p class="mt-2 whitespace-pre-line text-sm leading-relaxed text-warm-900/80">{{ $stable->description }}</p>
+                        <div class="mt-2 space-y-3 text-sm leading-relaxed text-warm-900/80 [&_a]:text-warm-700 [&_a]:underline [&_a:hover]:text-warm-900 [&_blockquote]:border-s-4 [&_blockquote]:border-warm-200 [&_blockquote]:ps-4 [&_h2]:font-display [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-warm-900 [&_h3]:font-display [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-warm-900 [&_li]:ms-5 [&_ol]:list-decimal [&_ul]:list-disc">
+                            {!! $descriptionHtml !!}
+                        </div>
                     </div>
                 @endif
 

@@ -97,6 +97,12 @@
                     <div class="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
                         <div class="h-full rounded-full bg-danger-500" style="width: {{ $usage['log']['percent'] }}%"></div>
                     </div>
+                    @if ($usage['log']['bytes'] > 0)
+                        <x-filament::link tag="button" size="sm" color="danger" icon="heroicon-o-trash" class="mt-2"
+                            wire:click="clearLogs" wire:confirm="{{ __('maintenance.confirm.clear_logs') }}">
+                            {{ __('maintenance.quick_actions.clear_logs') }}
+                        </x-filament::link>
+                    @endif
                 </div>
 
                 <div>
@@ -166,6 +172,10 @@
                 </x-filament::button>
                 <x-filament::button size="sm" color="gray" wire:click="runArtisan('queue:restart')">
                     {{ __('maintenance.quick_actions.queue_restart') }}
+                </x-filament::button>
+                <x-filament::button size="sm" color="danger" icon="heroicon-o-trash" wire:click="clearLogs"
+                    wire:confirm="{{ __('maintenance.confirm.clear_logs') }}">
+                    {{ __('maintenance.quick_actions.clear_logs') }}
                 </x-filament::button>
                 @unless ($this->storageLinked())
                     <x-filament::button size="sm" color="warning" wire:click="runArtisan('storage:link')">

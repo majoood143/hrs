@@ -15,7 +15,7 @@ class StableController extends Controller
     {
         return view('site.stables.index', Seo::forSlug(
             'stables',
-            __('stables.board_title') . ' — ' . SiteSetting::siteName(),
+            __('stables.board_title').' — '.SiteSetting::siteName(),
         ));
     }
 
@@ -28,8 +28,8 @@ class StableController extends Controller
 
         return view('site.stables.show', [
             'stable' => $stable,
-            'seoTitle' => $stable->name . ' — ' . SiteSetting::siteName(),
-            'seoDescription' => $stable->description ? Str::limit($stable->description, 160) : null,
+            'seoTitle' => $stable->name.' — '.SiteSetting::siteName(),
+            'seoDescription' => ($text = $stable->descriptionText()) ? Str::limit(Str::squish($text), 160) : null,
             'seoImage' => $stable->cover_photo_url,
         ]);
     }

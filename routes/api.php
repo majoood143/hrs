@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AppConfigController;
+use App\Http\Controllers\Api\V1\AppStatusController;
 use App\Http\Controllers\Api\V1\BlogController;
 use App\Http\Controllers\Api\V1\CenterController;
 use App\Http\Controllers\Api\V1\ClinicController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Api\V1\TransferBoardController;
 use App\Http\Controllers\Api\V1\VerificationController;
 use App\Http\Controllers\Api\V1\VideoLibraryController;
 use App\Http\Controllers\Api\V1\ViewController;
+use App\Http\Middleware\EnsureMobileFeature;
 use App\Http\Middleware\SetApiLocale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +32,8 @@ Route::prefix('v1')
     ->middleware([SetApiLocale::class, 'throttle:api-public'])
     ->group(function () {
         Route::get('app-config', AppConfigController::class)->name('app-config');
+        // Maintenance, updates, feature switches and popups (admin → Mobile app), per platform/version.
+        Route::get('app-status', AppStatusController::class)->name('app-status');
         Route::get('lookups', LookupController::class)->name('lookups');
         Route::get('home', HomeController::class)->name('home');
 
@@ -63,12 +67,14 @@ Route::prefix('v1')
 
         // Posting from the app: a verified phone (code by WhatsApp, else SMS) instead of the site's captcha.
         Route::middleware('throttle:10,1')->group(function () {
-            Route::post('verification/request', [VerificationController::class, 'request'])->name('verification.request');
-            Route::post('verification/verify', [VerificationController::class, 'verify'])->name('verification.verify');
-            Route::post('horses-for-sale', [HorseForSaleController::class, 'store'])->name('horses-for-sale.store');
-            Route::post('tools-for-sale', [ToolForSaleController::class, 'store'])->name('tools-for-sale.store');
-            Route::post('farriers', [FarrierController::class, 'store'])->name('farriers.store');
-            Route::post('transfer-board', [TransferBoardController::class, 'store'])->name('transfer-board.store');
+            // Each refused while its feature is off, the app is in maintenance or below the minimum version.
+            $anyPosting = EnsureMobileFeature::class.':post_horse,post_tool,post_farrier,post_transfer';
+            Route::post('verification/request', [VerificationController::class, 'request'])->middleware($anyPosting)->name('verification.request');
+            Route::post('verification/verify', [VerificationController::class, 'verify'])->middleware($anyPosting)->name('verification.verify');
+            Route::post('horses-for-sale', [HorseForSaleController::class, 'store'])->middleware(EnsureMobileFeature::class.':post_horse')->name('horses-for-sale.store');
+            Route::post('tools-for-sale', [ToolForSaleController::class, 'store'])->middleware(EnsureMobileFeature::class.':post_tool')->name('tools-for-sale.store');
+            Route::post('farriers', [FarrierController::class, 'store'])->middleware(EnsureMobileFeature::class.':post_farrier')->name('farriers.store');
+            Route::post('transfer-board', [TransferBoardController::class, 'store'])->middleware(EnsureMobileFeature::class.':post_transfer')->name('transfer-board.store');
         });
 
         Route::post('views/{section}/{key}', [ViewController::class, 'store'])->middleware('throttle:30,1')->name('views.store');

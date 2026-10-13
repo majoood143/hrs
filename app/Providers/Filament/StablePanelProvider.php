@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Insights;
 use App\Filament\Stable\Pages\Auth\Login;
 use App\Filament\Stable\Pages\Auth\Register;
 use App\Filament\Stable\Pages\Dashboard;
@@ -66,6 +67,14 @@ class StablePanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Stable/Widgets'), for: 'App\\Filament\\Stable\\Widgets')
+            // The Insights page's widgets live outside the discovered folder: Livewire must know them by
+            // name, or every request after the first render (filters, lazy loading) answers 419.
+            ->livewireComponents([
+                Insights\InsightsKpis::class,
+                Insights\InsightsSalesChart::class,
+                Insights\InsightsOccupancy::class,
+                Insights\InsightsTopServices::class,
+            ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

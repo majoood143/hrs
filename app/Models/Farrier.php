@@ -12,6 +12,14 @@ class Farrier extends Model
     /** Sort options (website `?sort=` and the mobile API); the first is the default. */
     public const SORTS = ['newest', 'price_asc', 'price_desc'];
 
+    public const STATUSES = ['active', 'inactive'];
+
+    /** @return array<string, string> the statuses in the current language */
+    public static function statusOptions(): array
+    {
+        return collect(self::STATUSES)->mapWithKeys(fn (string $status) => [$status => __('admin_farrier.statuses.'.$status)])->all();
+    }
+
     protected $fillable = [
         'en_name',
         'ar_name',

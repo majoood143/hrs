@@ -2,30 +2,21 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\ClinicServiceResource\Pages\ListClinicServices;
 use App\Filament\Resources\ClinicServiceResource\Pages\CreateClinicService;
-use App\Filament\Resources\ClinicServiceResource\Pages\ViewClinicService;
 use App\Filament\Resources\ClinicServiceResource\Pages\EditClinicService;
-use App\Filament\Resources\ClinicServiceResource\Pages;
+use App\Filament\Resources\ClinicServiceResource\Pages\ListClinicServices;
+use App\Filament\Resources\ClinicServiceResource\Pages\ViewClinicService;
+use App\Filament\Support\DirectoryPlaceSchema;
 use App\Models\ClinicService;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 class ClinicServiceResource extends Resource
 {
     protected static ?string $model = ClinicService::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-check';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-check';
 
     public static function getModelLabel(): string
     {
@@ -49,58 +40,12 @@ class ClinicServiceResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                TextInput::make('en_name')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('ar_name')
-                    ->required()
-                    ->maxLength(255),
-                Select::make('applies_to')
-                    ->label('Applies To')
-                    ->options(ClinicService::APPLIES_TO)
-                    ->default('both')
-                    ->required(),
-            ]);
+        return DirectoryPlaceSchema::serviceForm($schema, ClinicService::class, 'clinics', 'both');
     }
 
     public static function table(Table $table): Table
     {
-        return $table
-            ->columns([
-                TextColumn::make('en_name')
-                    ->searchable(),
-                TextColumn::make('ar_name')
-                    ->searchable(),
-                TextColumn::make('applies_to')
-                    ->badge()
-                    ->formatStateUsing(fn (string $state): string => ClinicService::APPLIES_TO[$state] ?? $state)
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-            ])
-            ->filters([
-                //
-            ])
-            ->recordActions([
-                ActionGroup::make([
-                    ViewAction::make(),
-                    EditAction::make(),
-                ])
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ExportBulkAction::make(),
-                ]),
-            ]);
+        return DirectoryPlaceSchema::serviceTable($table, ClinicService::class, 'clinics');
     }
 
     public static function getRelations(): array

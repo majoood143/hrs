@@ -16,7 +16,7 @@ class ShopController extends Controller
     {
         return view('site.shops.index', Seo::forSlug(
             'shops',
-            __('shops.board_title') . ' — ' . SiteSetting::siteName(),
+            __('shops.board_title').' — '.SiteSetting::siteName(),
         ));
     }
 
@@ -31,8 +31,8 @@ class ShopController extends Controller
 
         return view('site.shops.show', [
             'shop' => $shop,
-            'seoTitle' => $shop->name . ' — ' . SiteSetting::siteName(),
-            'seoDescription' => $shop->description ? Str::limit($shop->description, 160) : null,
+            'seoTitle' => $shop->name.' — '.SiteSetting::siteName(),
+            'seoDescription' => ($text = $shop->descriptionText()) ? Str::limit(Str::squish($text), 160) : null,
             'seoImage' => $shop->cover_photo_url,
         ]);
     }

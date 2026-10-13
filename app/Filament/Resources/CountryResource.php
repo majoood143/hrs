@@ -2,44 +2,38 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Schemas\Components\Utilities\Get;
+use App\Filament\Resources\CountryResource\Pages\CreateCountry;
+use App\Filament\Resources\CountryResource\Pages\EditCountry;
+use App\Filament\Resources\CountryResource\Pages\ListCountries;
+use App\Filament\Resources\CountryResource\Pages\ViewCountry;
+use App\Filament\Resources\CountryResource\RelationManagers\RegionRelationManager;
+use App\Filament\Support\InUseDeleteActions;
+use App\Models\Country;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Placeholder;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\TernaryFilter;
-use Filament\Actions\ActionGroup;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\CountryResource\Pages\ListCountries;
-use App\Filament\Resources\CountryResource\Pages\CreateCountry;
-use App\Filament\Resources\CountryResource\Pages\ViewCountry;
-use App\Filament\Resources\CountryResource\Pages\EditCountry;
-use App\Filament\Resources\CountryResource\Pages;
-use App\Filament\Resources\CountryResource\RelationManagers;
-use App\Filament\Resources\CountryResource\RelationManagers\RegionRelationManager;
-use App\Models\Country;
-use Filament\Forms;
-use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\HtmlString;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 class CountryResource extends Resource
 {
     protected static ?string $model = Country::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-globe-asia-australia';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-globe-asia-australia';
 
-    public static function getNavigationGroup(): string | \UnitEnum | null
+    public static function getNavigationGroup(): string|\UnitEnum|null
     {
         return __('admin_navigation.countries');
     }
@@ -61,53 +55,60 @@ class CountryResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::$model::count();
+        return (string) static::$model::count();
     }
 
     public static function form(Schema $schema): Schema
     {
+        $upper = fn (?string $state) => $state ? strtoupper($state) : $state;
+
         return $schema
             ->components([
                 TextInput::make('en_name')
+                    ->label(__('admin_locations.fields.en_name'))
                     ->required()
                     ->maxLength(255),
                 TextInput::make('ar_name')
+                    ->label(__('admin_locations.fields.ar_name'))
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->extraInputAttributes(['dir' => 'rtl']),
                 TextInput::make('country_code')
                     ->label(__('admin_country.fields.country_code'))
-                    ->helperText('2-letter ISO code, e.g. OM')
+                    ->helperText(__('admin_country.fields.country_code_helper'))
                     ->live(onBlur: true)
                     ->length(2)
                     ->alpha()
-                    ->formatStateUsing(fn (?string $state) => $state ? strtoupper($state) : $state)
-                    ->dehydrateStateUsing(fn (?string $state) => $state ? strtoupper($state) : $state),
+                    ->unique(ignoreRecord: true)
+                    ->formatStateUsing($upper)
+                    ->dehydrateStateUsing($upper),
                 TextInput::make('phone_code')
                     ->label(__('admin_country.fields.phone_code'))
-                    ->helperText('Digits only, e.g. 968')
+                    ->helperText(__('admin_country.fields.phone_code_helper'))
                     ->prefix('+')
                     ->maxLength(5)
-                    ->numeric(),
+                    ->regex('/^\+?\d{1,5}$/'),
                 Placeholder::make('flag_preview')
                     ->label(__('admin_country.fields.flag'))
                     ->content(function (Get $get) {
                         $code = strtolower((string) $get('country_code'));
 
-                        if ($code === '' || strlen($code) !== 2) {
+                        // Only two letters ever reach the URL (the field is not saved yet when previewed).
+                        if (! preg_match('/^[a-z]{2}$/', $code)) {
                             return '—';
                         }
 
-                        return new \Illuminate\Support\HtmlString(
-                            '<img src="' . asset("flags/{$code}.svg") . '" style="width:32px;height:24px;object-fit:cover;border:1px solid #e5e7eb;border-radius:2px" onerror="this.style.display=\'none\'">'
+                        return new HtmlString(
+                            '<img src="'.e(asset("flags/{$code}.svg")).'" alt="" style="width:32px;height:24px;object-fit:cover;border:1px solid #e5e7eb;border-radius:2px" onerror="this.style.display=\'none\'">'
                         );
                     }),
                 TextInput::make('currency_code')
                     ->label(__('admin_country.fields.currency_code'))
-                    ->helperText('3-letter ISO 4217 code, e.g. OMR')
+                    ->helperText(__('admin_country.fields.currency_code_helper'))
                     ->length(3)
                     ->alpha()
-                    ->formatStateUsing(fn (?string $state) => $state ? strtoupper($state) : $state)
-                    ->dehydrateStateUsing(fn (?string $state) => $state ? strtoupper($state) : $state),
+                    ->formatStateUsing($upper)
+                    ->dehydrateStateUsing($upper),
                 TextInput::make('nationality_en')
                     ->label(__('admin_country.fields.nationality_en'))
                     ->maxLength(255),
@@ -117,10 +118,11 @@ class CountryResource extends Resource
                     ->extraInputAttributes(['dir' => 'rtl']),
                 TextInput::make('order')
                     ->label(__('admin_country.fields.order'))
-                    ->numeric()
+                    ->integer()
                     ->default(0),
                 Toggle::make('is_public')
-                    ->label('Visible in public transfer form')
+                    ->label(__('admin_country.fields.is_public'))
+                    ->helperText(__('admin_country.fields.is_public_helper'))
                     ->default(true),
             ]);
     }
@@ -134,9 +136,11 @@ class CountryResource extends Resource
                     ->width(32)
                     ->height(24),
                 TextColumn::make('en_name')
+                    ->label(__('admin_locations.fields.en_name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('ar_name')
+                    ->label(__('admin_locations.fields.ar_name'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('country_code')
@@ -161,15 +165,19 @@ class CountryResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('region_count')
+                    ->label(__('admin_locations.fields.regions'))
                     ->counts('region')
-                    ->badge(),
+                    ->badge()
+                    ->sortable(),
                 ToggleColumn::make('is_public')
-                    ->label('Public'),
+                    ->label(__('admin_country.fields.public')),
                 TextColumn::make('created_at')
+                    ->label(__('admin_locations.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('admin_locations.fields.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -177,18 +185,18 @@ class CountryResource extends Resource
             ->defaultSort('order')
             ->filters([
                 TernaryFilter::make('is_public')
-                    ->label('Public visibility'),
+                    ->label(__('admin_country.fields.is_public')),
             ])
             ->recordActions([
                 ActionGroup::make([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
-                ])
+                    ViewAction::make(),
+                    EditAction::make(),
+                    InUseDeleteActions::delete('admin_locations'),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    InUseDeleteActions::bulk('admin_locations'),
                     ExportBulkAction::make(),
                 ]),
             ]);
@@ -197,7 +205,6 @@ class CountryResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
             RegionRelationManager::class,
         ];
     }

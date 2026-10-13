@@ -25,6 +25,7 @@ return [
     'cover_photo_optional' => 'Photo (optional)',
     'photo_upload_hint' => 'A clear photo helps others recognize your transfer.',
     'contact_number' => 'Contact Number',
+    'same_city' => 'The destination must be a different city.',
     'route' => 'Route',
     'status' => 'Status',
 

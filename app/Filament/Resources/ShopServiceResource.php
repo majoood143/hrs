@@ -2,22 +2,22 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Schemas\Schema;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
+use App\Filament\Resources\ShopServiceResource\Pages\CreateShopService;
+use App\Filament\Resources\ShopServiceResource\Pages\EditShopService;
+use App\Filament\Resources\ShopServiceResource\Pages\ListShopServices;
+use App\Filament\Resources\ShopServiceResource\Pages\ViewShopService;
+use App\Models\ShopService;
 use Filament\Actions\ActionGroup;
-use Filament\Actions\ViewAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use App\Filament\Resources\ShopServiceResource\Pages\ListShopServices;
-use App\Filament\Resources\ShopServiceResource\Pages\CreateShopService;
-use App\Filament\Resources\ShopServiceResource\Pages\ViewShopService;
-use App\Filament\Resources\ShopServiceResource\Pages\EditShopService;
-use App\Filament\Resources\ShopServiceResource\Pages;
-use App\Models\ShopService;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
@@ -25,7 +25,7 @@ class ShopServiceResource extends Resource
 {
     protected static ?string $model = ShopService::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-clipboard-document-check';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-clipboard-document-check';
 
     public static function getModelLabel(): string
     {
@@ -52,14 +52,17 @@ class ShopServiceResource extends Resource
         return $schema
             ->components([
                 TextInput::make('en_name')
+                    ->label(__('admin_shop_service.fields.en_name'))
                     ->required()
                     ->maxLength(255),
                 TextInput::make('ar_name')
+                    ->label(__('admin_shop_service.fields.ar_name'))
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->extraInputAttributes(['dir' => 'rtl']),
                 Select::make('applies_to')
-                    ->label('Applies To')
-                    ->options(ShopService::APPLIES_TO)
+                    ->label(__('admin_shop_service.fields.applies_to'))
+                    ->options(fn () => ShopService::appliesToOptions())
                     ->default('all')
                     ->required(),
             ]);
@@ -70,30 +73,37 @@ class ShopServiceResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('en_name')
+                    ->label(__('admin_shop_service.fields.en_name'))
                     ->searchable(),
                 TextColumn::make('ar_name')
+                    ->label(__('admin_shop_service.fields.ar_name'))
                     ->searchable(),
                 TextColumn::make('applies_to')
+                    ->label(__('admin_shop_service.fields.applies_to'))
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => ShopService::APPLIES_TO[$state] ?? $state)
+                    ->formatStateUsing(fn (string $state): string => ShopService::appliesToOptions()[$state] ?? $state)
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(__('admin_shop_service.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('admin_shop_service.fields.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('applies_to')
+                    ->label(__('admin_shop_service.fields.applies_to'))
+                    ->options(fn () => ShopService::appliesToOptions()),
             ])
             ->recordActions([
                 ActionGroup::make([
                     ViewAction::make(),
                     EditAction::make(),
-                ])
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

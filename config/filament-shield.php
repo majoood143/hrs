@@ -27,7 +27,7 @@ return [
             'pages' => true,
             'widgets' => true,
             'resources' => true,
-            'custom_permissions' => false,
+            'custom_permissions' => true,
         ],
     ],
 
@@ -120,7 +120,8 @@ return [
         'separator' => ':',
         'case' => 'pascal',
         'generate' => true,
-        'format_custom_permission_keys' => true,
+        // Off: custom keys must match what plugins check verbatim (e.g. 'create-backup').
+        'format_custom_permission_keys' => false,
     ],
 
     /*
@@ -252,7 +253,13 @@ return [
     |
     */
 
-    'custom_permissions' => [],
+    // shuvroroy/filament-spatie-laravel-backup checks these exact abilities
+    // (`can('create-backup')` etc.) for its Create / Download / Delete buttons.
+    'custom_permissions' => [
+        'create-backup' => 'Create Backup',
+        'download-backup' => 'Download Backup',
+        'delete-backup' => 'Delete Backup',
+    ],
 
     /*
     |--------------------------------------------------------------------------

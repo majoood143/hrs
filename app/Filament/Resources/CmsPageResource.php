@@ -311,6 +311,7 @@ class CmsPageResource extends Resource
                 TextColumn::make('status')
                     ->label(__('cms_page.columns.status'))
                     ->badge()
+                    ->formatStateUsing(fn (string $state) => __('cms_page.status.'.$state))
                     ->color(fn (string $state) => match ($state) {
                         'published' => 'success',
                         'scheduled' => 'warning',

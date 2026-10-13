@@ -12,34 +12,35 @@ use App\Filament\Resources\StableResource\RelationManagers\PaymentAccountsRelati
 use App\Filament\Resources\StableResource\RelationManagers\ReviewsRelationManager;
 use App\Filament\Resources\StableResource\RelationManagers\SettlementsRelationManager;
 use App\Filament\Resources\StableResource\StableApprovalActions;
+use App\Filament\Stable\Schemas\StableProfileForm;
 use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
+use App\Models\Country;
 use App\Models\Region;
 use App\Models\Stable;
+use App\Models\StableService;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
@@ -70,22 +71,41 @@ class StableResource extends Resource
         return __('admin_stable.navigation.plural');
     }
 
+    /** @return array{total: int, pending: int} counted once per request for the badge, colour and tooltip */
+    private static function badgeCounts(): array
+    {
+        return once(function (): array {
+            $row = Stable::query()
+                ->toBase()
+                ->selectRaw('count(*) as total, sum(case when approval_status = ? then 1 else 0 end) as pending', [StableApprovalStatus::Pending->value])
+                ->first();
+
+            return ['total' => (int) $row?->total, 'pending' => (int) $row?->pending];
+        });
+    }
+
     /** Stables waiting for approval when there are any, else how many there are. */
     public static function getNavigationBadge(): ?string
     {
-        $pending = static::$model::query()->pendingApproval()->count();
+        $counts = static::badgeCounts();
 
-        return (string) ($pending ?: static::$model::count());
+        return (string) ($counts['pending'] ?: $counts['total']);
     }
 
     public static function getNavigationBadgeColor(): ?string
     {
-        return static::$model::query()->pendingApproval()->exists() ? 'warning' : null;
+        return static::badgeCounts()['pending'] ? 'warning' : null;
     }
 
     public static function getNavigationBadgeTooltip(): ?string
     {
-        return static::$model::query()->pendingApproval()->exists() ? __('admin_stable.approval.pending_badge') : null;
+        return static::badgeCounts()['pending'] ? __('admin_stable.approval.pending_badge') : null;
+    }
+
+    /** `ar_name` in the Arabic admin, else `en_name` (countries, regions, cities, services, stables). */
+    private static function nameColumn(): string
+    {
+        return app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
     }
 
     public static function getRelations(): array
@@ -98,124 +118,91 @@ class StableResource extends Resource
         ];
     }
 
-    protected static function dayLabels(): array
-    {
-        return [
-            'mon' => 'Monday',
-            'tue' => 'Tuesday',
-            'wed' => 'Wednesday',
-            'thu' => 'Thursday',
-            'fri' => 'Friday',
-            'sat' => 'Saturday',
-            'sun' => 'Sunday',
-        ];
-    }
-
     public static function form(Schema $schema): Schema
     {
+        [$enName, $arName] = StableProfileForm::names();
+
         return $schema
             ->components([
                 Tabs::make('Stable')
                     ->tabs([
-                        Tab::make('Info')
+                        Tab::make(__('stable_panel.profile.tabs.info'))
                             ->schema([
-                                TextInput::make('en_name')
-                                    ->required()
-                                    ->maxLength(255)
+                                // The slug follows the English name only while creating: renaming a live stable keeps its links.
+                                $enName
                                     ->live(onBlur: true)
-                                    ->afterStateUpdated(fn ($state, $set) => $set('slug', Str::slug($state))),
-                                TextInput::make('ar_name')
-                                    ->required()
-                                    ->maxLength(255),
+                                    ->afterStateUpdated(function (?string $state, Set $set, string $operation): void {
+                                        if ($operation === 'create') {
+                                            $set('slug', Str::slug((string) $state));
+                                        }
+                                    }),
+                                $arName,
                                 TextInput::make('slug')
+                                    ->label(__('admin_stable.fields.slug'))
+                                    ->helperText(__('admin_stable.fields.slug_helper'))
                                     ->required()
+                                    ->alphaDash()
                                     ->unique(ignoreRecord: true)
                                     ->maxLength(255),
                                 Toggle::make('is_active')
+                                    ->label(__('stable_panel.fields.is_active'))
                                     ->default(true),
-                                TextInput::make('phone')
-                                    ->label(__('stable_panel.fields.stable_phone'))
-                                    ->tel()
-                                    ->maxLength(32),
-                                TextInput::make('email')
-                                    ->label(__('stable_panel.fields.stable_email'))
-                                    ->email()
-                                    ->maxLength(255),
+                                ...StableProfileForm::contact(),
                             ])->icon('heroicon-o-information-circle')
                             ->columns(2),
-                        Tab::make('Location')
+                        Tab::make(__('stable_panel.profile.tabs.location'))
                             ->schema([
                                 Select::make('country_id')
-                                    ->relationship(name: 'country', titleAttribute: 'en_name')
+                                    ->label(__('stable_panel.fields.country'))
+                                    ->options(fn () => Country::query()->orderBy(static::nameColumn())->pluck(static::nameColumn(), 'id'))
                                     ->searchable()
-                                    ->preload()
                                     ->live()
+                                    ->afterStateUpdated(function (Set $set): void {
+                                        $set('region_id', null);
+                                        $set('city_id', null);
+                                    })
                                     ->required(),
                                 Select::make('region_id')
-                                    ->relationship(name: 'region', titleAttribute: 'en_name')
+                                    ->label(__('stable_panel.fields.region'))
                                     ->options(fn (Get $get): Collection => Region::query()
                                         ->where('country_id', $get('country_id'))
-                                        ->pluck('en_name', 'id'))
+                                        ->orderBy(static::nameColumn())
+                                        ->pluck(static::nameColumn(), 'id'))
                                     ->searchable()
-                                    ->preload()
                                     ->live()
+                                    ->afterStateUpdated(fn (Set $set) => $set('city_id', null))
                                     ->required(),
                                 Select::make('city_id')
-                                    ->relationship(name: 'city', titleAttribute: 'en_name')
+                                    ->label(__('stable_panel.fields.city'))
                                     ->options(fn (Get $get): Collection => City::query()
                                         ->where('region_id', $get('region_id'))
-                                        ->pluck('en_name', 'id'))
+                                        ->orderBy(static::nameColumn())
+                                        ->pluck(static::nameColumn(), 'id'))
                                     ->searchable()
-                                    ->preload()
                                     ->required(),
-                                TextInput::make('address')
-                                    ->maxLength(255)
-                                    ->columnSpanFull(),
-                                TextInput::make('map_link')
-                                    ->label('Map Link')
-                                    ->url()
-                                    ->maxLength(255)
-                                    ->columnSpanFull(),
+                                ...collect(StableProfileForm::location())
+                                    ->filter(fn ($field) => in_array($field->getName(), ['address', 'map_link'], true))
+                                    ->map(fn ($field) => $field->columnSpanFull())
+                                    ->values()
+                                    ->all(),
                             ])->icon('heroicon-o-map-pin')
                             ->columns(3),
-                        Tab::make('Description')
-                            ->schema([
-                                Textarea::make('en_description')
-                                    ->label('Description (English)')
-                                    ->rows(4),
-                                Textarea::make('ar_description')
-                                    ->label('Description (Arabic)')
-                                    ->rows(4)
-                                    ->extraInputAttributes(['dir' => 'rtl']),
-                            ])->icon('heroicon-o-document-text')
-                            ->columns(2),
-                        Tab::make('Services')
+                        Tab::make(__('stable_panel.profile.tabs.description'))
+                            ->schema(StableProfileForm::description())
+                            ->icon('heroicon-o-document-text'),
+                        Tab::make(__('admin_stable.tabs.services'))
                             ->schema([
                                 Select::make('services')
-                                    ->relationship('services', 'en_name')
+                                    ->label(__('admin_stable.fields.services'))
+                                    ->relationship('services', static::nameColumn())
+                                    ->getOptionLabelFromRecordUsing(fn (StableService $record) => $record->name)
                                     ->multiple()
                                     ->searchable()
                                     ->preload()
                                     ->required(),
                             ])->icon('heroicon-o-wrench-screwdriver'),
-                        Tab::make('Opening Hours')
-                            ->schema(collect(static::dayLabels())->map(
-                                fn (string $label, string $day) => Fieldset::make($label)
-                                    ->schema([
-                                        Toggle::make("opening_hours.{$day}.closed")
-                                            ->label('Closed')
-                                            ->live(),
-                                        TimePicker::make("opening_hours.{$day}.opens_at")
-                                            ->label('Opens at')
-                                            ->seconds(false)
-                                            ->hidden(fn (Get $get) => $get("opening_hours.{$day}.closed")),
-                                        TimePicker::make("opening_hours.{$day}.closes_at")
-                                            ->label('Closes at')
-                                            ->seconds(false)
-                                            ->hidden(fn (Get $get) => $get("opening_hours.{$day}.closed")),
-                                    ])
-                                    ->columns(3)
-                            )->values()->all())
+                        Tab::make(__('stable_panel.profile.tabs.hours'))
+                            ->schema(StableProfileForm::openingHours())
                             ->icon('heroicon-o-clock'),
                         Tab::make(__('admin_stable.tabs.owner'))
                             ->icon('heroicon-o-check-badge')
@@ -243,18 +230,9 @@ class StableResource extends Resource
                                     ->dateTime()
                                     ->placeholder('—'),
                             ]),
-                        Tab::make('Photos')
-                            ->schema([
-                                FileUpload::make('cover_photo')
-                                    ->image()
-                                    ->disk('public')
-                                    ->directory('stables/covers'),
-                                FileUpload::make('gallery')
-                                    ->image()
-                                    ->multiple()
-                                    ->disk('public')
-                                    ->directory('stables/gallery'),
-                            ])->icon('heroicon-o-photo')
+                        Tab::make(__('stable_panel.profile.tabs.photos'))
+                            ->schema(StableProfileForm::photos())
+                            ->icon('heroicon-o-photo')
                             ->columns(1),
                     ])->columnSpanFull(),
             ]);
@@ -262,20 +240,26 @@ class StableResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $name = static::nameColumn();
+
         return $table
+            // The city/services/owners columns are eager loaded by Filament; the country under the city is not.
+            ->modifyQueryUsing(fn (Builder $query) => $query->with('country'))
             ->columns([
                 ImageColumn::make('cover_photo')
+                    ->label(__('stable_panel.fields.cover_photo'))
                     ->disk('public')
                     ->square(),
-                TextColumn::make('en_name')
-                    ->searchable()
+                TextColumn::make($name)
+                    ->label(__('stable_panel.fields.name'))
+                    ->searchable(['en_name', 'ar_name'])
                     ->sortable(),
-                TextColumn::make('city.en_name')
-                    ->label('City')
-                    ->description(fn (Stable $record): string => $record->country?->en_name ?? '')
-                    ->searchable(),
-                TextColumn::make('services.en_name')
-                    ->label('Services')
+                TextColumn::make('city.'.$name)
+                    ->label(__('stable_panel.fields.city'))
+                    ->description(fn (Stable $record): string => (string) $record->country?->{$name})
+                    ->searchable(['en_name', 'ar_name']),
+                TextColumn::make('services.'.$name)
+                    ->label(__('admin_stable.fields.services'))
                     ->badge()
                     ->separator(','),
                 TextColumn::make('approval_status')
@@ -295,25 +279,35 @@ class StableResource extends Resource
                     ->placeholder('—')
                     ->toggleable(),
                 IconColumn::make('is_active')
+                    ->label(__('stable_panel.fields.is_active'))
                     ->boolean()
                     ->sortable(),
                 TextColumn::make('created_at')
+                    ->label(__('admin_stable.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->defaultSort('en_name')
+            ->defaultSort($name)
             ->filters([
-                SelectFilter::make('city_id')
-                    ->label('City')
-                    ->relationship('city', 'en_name'),
                 SelectFilter::make('country_id')
-                    ->label('Country')
-                    ->relationship('country', 'en_name'),
+                    ->label(__('stable_panel.fields.country'))
+                    ->relationship('country', $name)
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('city_id')
+                    ->label(__('stable_panel.fields.city'))
+                    ->relationship('city', $name)
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('services')
-                    ->relationship('services', 'en_name'),
+                    ->label(__('admin_stable.fields.services'))
+                    ->relationship('services', $name)
+                    ->multiple()
+                    ->preload(),
                 SelectFilter::make('is_active')
-                    ->options([1 => 'Active', 0 => 'Inactive']),
+                    ->label(__('stable_panel.fields.is_active'))
+                    ->options([1 => __('admin_stable.fields.active'), 0 => __('admin_stable.fields.inactive')]),
                 SelectFilter::make('approval_status')
                     ->label(__('admin_stable.fields.approval_status'))
                     ->options(StableApprovalStatus::options()),

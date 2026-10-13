@@ -52,6 +52,14 @@ class NotificationTexts extends Page implements HasForms
         return str_replace('.', '__', $key);
     }
 
+    /** The label keys contain dots ("sms.completed"), which __() would read as nesting, so look them up in the array. */
+    public static function fieldLabel(string $key): string
+    {
+        $labels = __('admin_notification_texts.labels');
+
+        return is_array($labels) && isset($labels[$key]) ? $labels[$key] : $key;
+    }
+
     /** @return list<string> */
     private static function locales(): array
     {
@@ -100,7 +108,7 @@ class NotificationTexts extends Page implements HasForms
 
         return Grid::make(count(static::locales()))->schema(array_map(
             fn (string $locale) => Textarea::make('texts.'.static::field($key).'.'.$locale)
-                ->label(__('admin_notification_texts.labels.'.$key).' ('.config("languages.available.{$locale}.name", $locale).')')
+                ->label(static::fieldLabel($key).' ('.config("languages.available.{$locale}.name", $locale).')')
                 ->helperText($hint)
                 ->rows($isSms ? 2 : 3)
                 ->extraInputAttributes($locale === 'ar' ? ['dir' => 'rtl'] : [])

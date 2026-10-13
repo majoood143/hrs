@@ -2,14 +2,13 @@
 
 namespace App\Filament\Stable\Schemas;
 
+use App\Filament\Support\PlaceFormFields;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Region;
 use App\Models\Stable;
 use App\Models\StableService;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
@@ -93,6 +92,7 @@ final class StableProfileForm
             TextInput::make('map_link')
                 ->label(__('stable_panel.fields.map_link'))
                 ->url()
+                ->rule('url:http,https')
                 ->maxLength(255),
         ];
     }
@@ -100,15 +100,7 @@ final class StableProfileForm
     /** @return array<int, mixed> */
     public static function description(): array
     {
-        return [
-            Textarea::make('en_description')
-                ->label(__('stable_panel.fields.en_description'))
-                ->rows(5),
-            Textarea::make('ar_description')
-                ->label(__('stable_panel.fields.ar_description'))
-                ->rows(5)
-                ->extraInputAttributes(['dir' => 'rtl']),
-        ];
+        return PlaceFormFields::descriptions(__('stable_panel.fields.en_description'), __('stable_panel.fields.ar_description'));
     }
 
     /** @return array<int, mixed> */
@@ -128,19 +120,8 @@ final class StableProfileForm
     public static function photos(): array
     {
         return [
-            FileUpload::make('cover_photo')
-                ->label(__('stable_panel.fields.cover_photo'))
-                ->image()
-                ->disk('public')
-                ->directory('stables/covers'),
-            FileUpload::make('gallery')
-                ->label(__('stable_panel.fields.gallery'))
-                ->image()
-                ->multiple()
-                ->reorderable()
-                ->maxFiles(20)
-                ->disk('public')
-                ->directory('stables/gallery'),
+            PlaceFormFields::coverPhoto('stables/covers', __('stable_panel.fields.cover_photo')),
+            PlaceFormFields::gallery('stables/gallery', __('stable_panel.fields.gallery')),
         ];
     }
 

@@ -29,8 +29,12 @@ class PlaceResource extends JsonResource
             'id' => (int) $place->getKey(),
             'slug' => (string) $place->getAttribute('slug'),
             'name' => (string) $place->getAttribute('name'),
-            /** @var string|null */
-            'description' => $place->getAttribute('description'),
+            /**
+             * Plain text, paragraphs separated by line breaks (rich text arrives without markup).
+             *
+             * @var string|null
+             */
+            'description' => method_exists($place, 'descriptionText') ? $place->descriptionText() : $place->getAttribute('description'),
             'type' => $type ? OptionResource::of((string) $type, (string) $place->getAttribute('type_label')) : null,
             'country' => LookupResource::make($this->whenLoaded('country')),
             'region' => LookupResource::make($this->whenLoaded('region')),

@@ -16,6 +16,9 @@ use App\Models\Event;
 use App\Models\HorseSalePost;
 use App\Models\ToolSalePost;
 use App\Models\TransferPost;
+use App\Support\MobileApp\AppClient;
+use App\Support\MobileApp\MobileFeatures;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
 /**
@@ -29,30 +32,34 @@ class HomeController extends Controller
      * Home feed
      *
      * Promos (as on the website's homepage), the newest horses and tools for sale, the soonest
-     * transfers, upcoming events and the latest blog posts.
+     * transfers, upcoming events and the latest blog posts. A section whose feature is off for this
+     * app (admin → Mobile app → Features) comes back empty.
      *
      * @unauthenticated
      */
-    public function __invoke(): array
+    public function __invoke(Request $request): array
     {
+        $client = AppClient::fromRequest($request);
+        $on = fn (string $feature) => MobileFeatures::enabledFor($feature, $client);
+
         return [
             'data' => [
-                'ads' => AdResource::collection($this->ads()),
-                'horses' => HorseForSaleListResource::collection(
-                    HorseSalePost::visible()->with(['type', 'gender', 'city', 'country'])->latest('id')->take(self::PER_SECTION)->get()
-                ),
-                'tools' => ToolForSaleListResource::collection(
-                    ToolSalePost::visible()->with(['city', 'country'])->latest('id')->take(self::PER_SECTION)->get()
-                ),
-                'transfers' => TransferPostResource::collection(
-                    TransferPost::visible()->with(['fromCountry', 'fromCity', 'toCountry', 'toCity'])->orderBy('transfer_date')->take(self::PER_SECTION)->get()
-                ),
-                'events' => EventResource::collection(
-                    Event::query()->upcoming()->with('category')->orderBy('date')->orderBy('start_time')->take(self::PER_SECTION)->get()
-                ),
-                'posts' => BlogPostListResource::collection(
-                    CmsPost::query()->published()->with(['category', 'media'])->latest('published_at')->take(4)->get()
-                ),
+                'ads' => AdResource::collection($on('promos') ? $this->ads() : collect()),
+                'horses' => HorseForSaleListResource::collection($on('horses_for_sale')
+                    ? HorseSalePost::visible()->with(['type', 'gender', 'city', 'country'])->latest('id')->take(self::PER_SECTION)->get()
+                    : collect()),
+                'tools' => ToolForSaleListResource::collection($on('tools_for_sale')
+                    ? ToolSalePost::visible()->with(['city', 'country'])->latest('id')->take(self::PER_SECTION)->get()
+                    : collect()),
+                'transfers' => TransferPostResource::collection($on('transfer_board')
+                    ? TransferPost::visible()->with(['fromCountry', 'fromCity', 'toCountry', 'toCity'])->orderBy('transfer_date')->take(self::PER_SECTION)->get()
+                    : collect()),
+                'events' => EventResource::collection($on('events')
+                    ? Event::query()->upcoming()->with('category')->orderBy('date')->orderBy('start_time')->take(self::PER_SECTION)->get()
+                    : collect()),
+                'posts' => BlogPostListResource::collection($on('blog')
+                    ? CmsPost::query()->published()->with(['category', 'media'])->latest('published_at')->take(4)->get()
+                    : collect()),
             ],
         ];
     }

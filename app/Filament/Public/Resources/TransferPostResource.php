@@ -7,6 +7,7 @@ use App\Filament\Public\Resources\TransferPostResource\Pages\ListTransferPosts;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Region;
+use App\Models\SiteSetting;
 use App\Models\TransferPost;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -28,7 +29,7 @@ class TransferPostResource extends Resource
 {
     protected static ?string $model = TransferPost::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-truck';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-truck';
 
     public static function getModelLabel(): string
     {
@@ -73,7 +74,7 @@ class TransferPostResource extends Resource
                         ->schema([
                             TextInput::make('capacity')
                                 ->label(__('transportation.capacity'))
-                                ->numeric()
+                                ->integer()
                                 ->minValue(1)
                                 ->required(),
                             DatePicker::make('transfer_date')
@@ -85,12 +86,13 @@ class TransferPostResource extends Resource
                                 ->label(__('transportation.price'))
                                 ->numeric()
                                 ->minValue(0)
-                                ->prefix(fn () => \App\Models\SiteSetting::currency()['symbol'])
+                                ->prefix(fn () => SiteSetting::currency()['symbol'])
                                 ->visible(fn (Get $get) => $get('type') === 'offer')
                                 ->required(fn (Get $get) => $get('type') === 'offer'),
                             TextInput::make('contact_number')
                                 ->label(__('transportation.contact_number'))
                                 ->tel()
+                                ->maxLength(32)
                                 ->required(),
                         ])->columns(2),
                     Step::make(__('transportation.step_verify'))
@@ -132,6 +134,10 @@ class TransferPostResource extends Resource
                     ->pluck('name', 'id'))
                 ->searchable()
                 ->preload()
+                // Same rule as the website/app form (TransferPostCreator): a route goes somewhere else.
+                ->when($prefix === 'to', fn (Select $field) => $field
+                    ->notIn(fn (Get $get): array => array_filter([$get('from_city_id')]))
+                    ->validationMessages(['not_in' => __('transportation.same_city')]))
                 ->required(),
         ];
     }
@@ -167,7 +173,7 @@ class TransferPostResource extends Resource
                 TextColumn::make('price')
                     ->label(__('transportation.price'))
                     ->formatStateUsing(fn (?string $state, TransferPost $record): string => $record->type === 'offer' && filled($state)
-                        ? \App\Models\SiteSetting::formatCurrency($state)
+                        ? SiteSetting::formatCurrency($state)
                         : '—')
                     ->sortable(),
                 TextColumn::make('contact_number')
@@ -190,18 +196,18 @@ class TransferPostResource extends Resource
                         ->when($data['capacity_min'] ?? null, fn (Builder $query, $value): Builder => $query->where('capacity', '>=', $value))),
                 Filter::make('transfer_date')
                     ->schema([
-                        DatePicker::make('date_from')->label(__('transportation.transfer_date')),
-                        DatePicker::make('date_to')->label(__('transportation.transfer_date')),
+                        DatePicker::make('date_from')->label(__('transportation.filter_date_from')),
+                        DatePicker::make('date_to')->label(__('transportation.filter_date_to')),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
                         ->when($data['date_from'] ?? null, fn (Builder $query, $date): Builder => $query->whereDate('transfer_date', '>=', $date))
                         ->when($data['date_to'] ?? null, fn (Builder $query, $date): Builder => $query->whereDate('transfer_date', '<=', $date))),
                 SelectFilter::make('from_country_id')
-                    ->label(__('transportation.step_from') . ' — ' . __('transportation.country'))
-                    ->relationship('fromCountry', 'en_name'),
+                    ->label(__('transportation.step_from').' — '.__('transportation.country'))
+                    ->relationship('fromCountry', app()->getLocale() === 'ar' ? 'ar_name' : 'en_name'),
                 SelectFilter::make('to_country_id')
-                    ->label(__('transportation.step_to') . ' — ' . __('transportation.country'))
-                    ->relationship('toCountry', 'en_name'),
+                    ->label(__('transportation.step_to').' — '.__('transportation.country'))
+                    ->relationship('toCountry', app()->getLocale() === 'ar' ? 'ar_name' : 'en_name'),
             ])
             ->recordActions([])
             ->toolbarActions([]);
@@ -209,7 +215,8 @@ class TransferPostResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->visible();
+        // The route column shows both cities and countries of every card.
+        return parent::getEloquentQuery()->visible()->with(['fromCity', 'fromCountry', 'toCity', 'toCountry']);
     }
 
     public static function getPages(): array

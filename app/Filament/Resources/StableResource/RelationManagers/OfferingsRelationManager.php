@@ -36,7 +36,7 @@ class OfferingsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('en_name')
             ->columns([
-                TextColumn::make('en_name')
+                TextColumn::make('name')
                     ->label(__('admin_stable.offerings.name'))
                     ->description(fn (StableOffering $record) => $record->type?->label()),
                 TextColumn::make('price')

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\FiltersDirectoryPlaces;
+use App\Models\Concerns\HasRichDescription;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 class Center extends Model
 {
     use FiltersDirectoryPlaces;
+    use HasRichDescription;
 
     public const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
