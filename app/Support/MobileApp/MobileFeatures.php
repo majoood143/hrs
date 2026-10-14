@@ -27,7 +27,7 @@ final class MobileFeatures
         'directory' => ['stables', 'clinics', 'centers', 'shops', 'farriers', 'events', 'blog', 'videos'],
         'transfer' => ['transfer_board'],
         'posting' => ['post_horse', 'post_tool', 'post_farrier', 'post_transfer'],
-        'racing' => ['silks'],
+        'racing' => ['racing', 'silks'],
         'other' => ['promos', 'contact_call', 'contact_whatsapp', 'language_switch'],
     ];
 

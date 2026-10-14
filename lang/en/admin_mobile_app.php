@@ -65,6 +65,8 @@ return [
         'contact_whatsapp_help' => 'On listings with a phone number.',
         'language_switch' => 'Language switch',
         'language_switch_help' => 'Off: the switch is hidden in More; the app keeps the language it has.',
+        'racing' => 'Racing database',
+        'racing_help' => 'Directory → Racing: search horses, owners, jockeys and trainers, results, entries, race cards, form guides, handicap ratings and the race calendar.',
         'silks' => 'Silks designer',
         'silks_help' => 'The racing silks designer in Directory.',
     ],
@@ -173,6 +175,7 @@ return [
         'post_tool' => 'Post a tool for sale',
         'post_farrier' => 'Add a farrier',
         'post_transfer' => 'Post a transfer',
+        'racing' => 'Racing',
         'silks' => 'Silks designer',
     ],
 

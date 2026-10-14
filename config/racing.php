@@ -8,12 +8,13 @@ return [
     |--------------------------------------------------------------------------
     |
     | Base URL of the racing database (horse / owner / jockey / trainer search
-    | and detail pages). It is plain HTTP, so it is only ever called from the
-    | server (App\Services\Racing\RacingClient) and never from the browser.
+    | and detail pages): the racing club's iframe site. It is only ever called
+    | from the server (App\Services\Racing\RacingClient), never from the browser
+    | or the app: we parse and cache its pages and re-present them.
     |
     */
 
-    'base_url' => env('RACING_BASE_URL', 'http://185.64.25.43'),
+    'base_url' => env('RACING_BASE_URL', 'https://iframe.rhrc.om'),
 
     // Public website of the data's owner, credited on every racing page and PDF
     // (the base_url above is only the address we fetch from, never shown).

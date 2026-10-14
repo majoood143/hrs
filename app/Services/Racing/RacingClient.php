@@ -302,6 +302,51 @@ class RacingClient
     }
 
     /**
+     * The race days of the season a date falls in; empty when the calendar does not offer that season
+     * (so only seasons from seasons() ever reach the source).
+     *
+     * @return array<string, ?string> Y-m-d => meeting name
+     *
+     * @throws RacingUnavailableException
+     */
+    public function raceDaysOfSeasonOf(string $date): array
+    {
+        $season = self::seasonOf($date);
+
+        return in_array($season, $this->seasons(), true) ? $this->raceDays($season) : [];
+    }
+
+    /**
+     * The race day to open on: the next one from today; once the season is over, the first of the next
+     * season; else the last one run. Like the source's own widget (the website's and the app's).
+     *
+     * @throws RacingUnavailableException
+     */
+    public function defaultRaceDay(string $today): ?string
+    {
+        $current = $this->raceDaysOfSeasonOf($today);
+
+        foreach (array_keys($current) as $day) {
+            if ($day >= $today) {
+                return $day;
+            }
+        }
+
+        // raceDays() is sorted, so the first key is the earliest
+        $next = $this->raceDaysOfSeasonOf(date('Y-m-d', strtotime(self::seasonRange(self::seasonOf($today))['to'].' +1 day')));
+
+        if ($next !== []) {
+            return array_key_first($next);
+        }
+
+        // today's season is not offered (yet): the newest one's last race day rather than nothing
+        $seasons = $this->seasons();
+        $latest = $current !== [] ? $current : ($seasons !== [] ? $this->raceDays($seasons[0]) : []);
+
+        return array_key_last($latest);
+    }
+
+    /**
      * The races run (or scheduled) on one day, with which of their pages / video / photo exist. The date
      * must be one raceDays() lists. The source pages this call three rows at a time unless `rows` is
      * given, so a generous page size is always sent.

@@ -14,9 +14,7 @@ use Illuminate\View\View;
 
 class RacingController extends Controller
 {
-    public function __construct(private readonly RacingClient $racing)
-    {
-    }
+    public function __construct(private readonly RacingClient $racing) {}
 
     public function search(Request $request): View
     {
@@ -72,10 +70,10 @@ class RacingController extends Controller
             'id' => $id,
             'profile' => $profile,
             'unavailable' => false,
-        ] + RacingSeo::for($profile['title'] . ' — ' . __('racing.title'), implode(' · ', array_filter([__('racing.profile_types.' . $entity), ...$profile['meta'], $profile['pedigree']]))));
+        ] + RacingSeo::for($profile['title'].' — '.__('racing.title'), implode(' · ', array_filter([__('racing.profile_types.'.$entity), ...$profile['meta'], $profile['pedigree']]))));
     }
 
-    /** Proxy for the source's /img/* files (it is http:// only). */
+    /** Proxy for the source's /img/* files, so pages and the app never load anything from the source itself. */
     public function image(Request $request): Response
     {
         $path = $request->query('p');

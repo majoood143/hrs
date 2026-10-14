@@ -126,7 +126,7 @@ class RacingCalendarTest extends TestCase
         $this->get('/racing/calendar')->assertOk()
             ->assertSee('Data sourced from the official Horse Racing Club website')
             ->assertSee('href="https://rhrc.om"', false)
-            ->assertDontSee('185.64.25.43');
+            ->assertDontSee('iframe.rhrc.om');
 
         $this->get('/racing/calendar?lang=ar')->assertOk()
             ->assertSee('مصدر البيانات: الموقع الرسمي لنادي سباق الخيل ')

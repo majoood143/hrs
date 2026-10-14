@@ -72,7 +72,7 @@ class RacingRaceTest extends TestCase
             ->assertSee('/racing/jockey/26', false)
             // owner silks are served through our own domain, never the source's http:// URL
             ->assertSee('/racing/image?p=', false)
-            ->assertDontSee('185.64.25.43');
+            ->assertDontSee('iframe.rhrc.om');
     }
 
     public function test_form_guide_page(): void
@@ -91,7 +91,7 @@ class RacingRaceTest extends TestCase
             ->assertOk()
             ->assertSee('Al Rahba , Saturday, Final Meeting, 18 Apr 2026')
             // no race carried, so the nav points at the latest pages, not a fixed race
-            ->assertSee('href="' . url('/racing/entries') . '"', false);
+            ->assertSee('href="'.url('/racing/entries').'"', false);
 
         $this->assertSame(1, $this->sentCount('page=RaceResults'));
     }

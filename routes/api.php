@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\FarrierController;
 use App\Http\Controllers\Api\V1\HomeController;
 use App\Http\Controllers\Api\V1\HorseForSaleController;
 use App\Http\Controllers\Api\V1\LookupController;
+use App\Http\Controllers\Api\V1\RacingController;
 use App\Http\Controllers\Api\V1\ShopController;
 use App\Http\Controllers\Api\V1\SilksController;
 use App\Http\Controllers\Api\V1\StableController;
@@ -67,6 +68,17 @@ Route::prefix('v1')
         Route::get('videos/{slug}', [VideoLibraryController::class, 'show'])->name('videos.show');
 
         Route::get('silks', SilksController::class)->name('silks');
+
+        // The racing database (scraped and cached, like the website's /racing pages).
+        Route::prefix('racing')->name('racing.')->controller(RacingController::class)->group(function () {
+            // every search is a request to the source with a visitor-typed name: a tighter limit
+            Route::get('search', 'search')->middleware('throttle:30,1')->name('search');
+            Route::get('calendar', 'calendar')->name('calendar');
+            Route::get('days/{date}', 'day')->where('date', '\d{4}-\d{2}-\d{2}')->name('day');
+            Route::get('handicap', 'handicap')->name('handicap');
+            Route::get('races/{page}/{race?}', 'meeting')->whereIn('page', ['results', 'entries', 'card', 'form-guide'])->whereNumber('race')->name('meeting');
+            Route::get('{entity}/{id}', 'profile')->whereIn('entity', ['horse', 'owner', 'jockey', 'trainer'])->whereNumber('id')->name('profile');
+        });
 
         // Posting from the app: a verified phone (code by WhatsApp, else SMS) instead of the site's captcha.
         Route::middleware('throttle:10,1')->group(function () {

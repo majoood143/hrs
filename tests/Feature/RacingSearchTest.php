@@ -206,7 +206,7 @@ class RacingSearchTest extends TestCase
         $this->get('/racing/owner/100')
             ->assertOk()
             ->assertSee('/racing/image?p=', false)
-            ->assertDontSee('185.64.25.43');
+            ->assertDontSee('iframe.rhrc.om');
     }
 
     public function test_image_proxy_only_serves_img_paths(): void

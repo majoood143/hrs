@@ -115,7 +115,7 @@ class RaceWidget extends Component
     {
         $query = http_build_query($this->carry + array_filter([self::MONTH_KEY => $month, self::DATE_KEY => $date]));
 
-        return $this->action . '?' . $query . '#race-widget';
+        return $this->action.'?'.$query.'#race-widget';
     }
 
     /** A same-site path and nothing else, so the links can never be pointed at another host. */
@@ -165,28 +165,10 @@ class RaceWidget extends Component
         return preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $value, $m) === 1 && checkdate((int) $m[2], (int) $m[3], (int) $m[1]);
     }
 
-    /** The next race day from today; once the season is over, the first of the next season, else the last one run. */
+    /** The next race day from today (else the next season's first, else the last one run). */
     private function defaultDay(): ?string
     {
-        $current = $this->daysFor($this->today);
-
-        foreach (array_keys($current) as $day) {
-            if ($day >= $this->today) {
-                return $day;
-            }
-        }
-
-        // ksort()ed by the parser, so the first key is the earliest
-        $next = $this->daysFor(CarbonImmutable::parse(RacingClient::seasonRange(RacingClient::seasonOf($this->today))['to'])->addDay()->format('Y-m-d'));
-
-        if ($next !== []) {
-            return array_key_first($next);
-        }
-
-        // today's season is not offered (yet): show the newest one's last race day rather than an empty widget
-        $latest = $current !== [] ? $current : $this->daysFor(RacingClient::seasonRange($this->seasons[0] ?? '')['from'] ?? '');
-
-        return array_key_last($latest);
+        return $this->racing->defaultRaceDay($this->today);
     }
 
     private function buildMonth(): void

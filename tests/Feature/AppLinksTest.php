@@ -34,7 +34,10 @@ class AppLinksTest extends TestCase
         $this->assertContains('/', $paths);
         $this->assertContains('/horses-for-sale/*', $paths);
         $this->assertContains('/video-library', $paths);
-        $this->assertNotContains('/racing/*', $paths);
+        $this->assertContains('/racing/*', $paths);
+        $this->assertNotContains('/account/*', $paths);
+        $excluded = collect($response->json('applinks.details.0.components'))->where('exclude', true)->pluck('/');
+        $this->assertContains('/racing/*/*/pdf', $excluded);
         $this->assertSame('/*/captcha', $response->json('applinks.details.0.components.0./'));
         $this->assertStringNotContainsString('\/', $response->getContent());
     }
