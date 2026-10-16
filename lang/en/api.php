@@ -13,6 +13,20 @@ return [
         'verification_required' => 'Confirm your phone number to post.',
         'limit' => 'You can publish up to :count posts a day from the app. Please try again tomorrow.',
     ],
+    'account' => [
+        'signed_out' => 'You are signed out.',
+        'deleted' => 'Your account was deleted.',
+        'delete_blocked' => 'You still have an upcoming booking or a package with sessions left. Cancel or use them first, or contact us to delete your account.',
+    ],
+    'owner' => [
+        'not_owner' => 'This is for stable owners. Sign in with your stable account.',
+        'no_account' => 'No stable account uses this number. Sign in with your email and password, or register your stable on the website.',
+        'wrong_login' => 'The email or password is not right.',
+        'throttled' => 'Too many tries. Please wait :seconds seconds.',
+        'not_due' => 'This session has not come yet. Mark it on its day.',
+        'slot_started' => 'This time has already started.',
+        'reopened' => 'The days are open again.',
+    ],
     'app' => [
         'update_optional' => 'A new version of the app is available, with the latest improvements.',
         'update_required' => 'This version of the app is no longer supported. Please update to continue.',

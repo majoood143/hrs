@@ -13,15 +13,17 @@ return [
         'updates' => 'Updates',
         'maintenance' => 'Maintenance',
         'posting' => 'Posting',
+        'images' => 'Services screen',
         'links' => 'Website links',
     ],
 
     'groups' => [
         'marketplace' => 'Marketplace',
-        'directory' => 'Directory',
+        'directory' => 'Services',
         'transfer' => 'Transfer',
         'posting' => 'Posting from the app',
         'racing' => 'Racing',
+        'bookings' => 'Stable bookings',
         'other' => 'Other',
     ],
 
@@ -69,6 +71,10 @@ return [
         'racing_help' => 'Directory → Racing: search horses, owners, jockeys and trainers, results, entries, race cards, form guides, handicap ratings and the race calendar.',
         'silks' => 'Silks designer',
         'silks_help' => 'The racing silks designer in Directory.',
+        'bookings' => 'Stable bookings',
+        'bookings_help' => 'Book riding sessions and lesson packages at stables, pay online (Thawani) and see or cancel bookings, after signing in with a phone number.',
+        'stable_owner' => 'My stable (owners)',
+        'stable_owner_help' => 'More → My stable: stable owners sign in (phone code or email and password) to see today\'s bookings, mark riders attended or no-show, call bookings off, close times or whole days, and see their income. Setup stays on the website\'s stable panel. Also refused by the server while off.',
     ],
 
     'updates' => [
@@ -80,6 +86,16 @@ return [
 
     'posting' => [
         'help' => 'Posts from the app (horses and tools for sale, farriers, transfer board) by phones confirmed with a code. The website\'s own form is not affected.',
+    ],
+
+    'images' => [
+        'help' => 'The photos on the app\'s Services tab. Landscape photos work best (at least 1200 px wide); the name is written over the bottom of the photo, so keep the subject in the top half. Without a photo here the app shows its built-in one.',
+        'bookings' => '"Book a session" banner',
+        'bookings_help' => 'The large card at the top.',
+        'stables' => 'Stables',
+        'stables_help' => 'The wide card above the horse services.',
+        'racing' => 'Racing',
+        'racing_help' => 'The racing card (shown in a square-ish frame).',
     ],
 
     'links' => [
@@ -177,6 +193,9 @@ return [
         'post_transfer' => 'Post a transfer',
         'racing' => 'Racing',
         'silks' => 'Silks designer',
+        'bookings' => 'Book a session',
+        'my_bookings' => 'My bookings',
+        'my_stable' => 'My stable (owners)',
     ],
 
     'frequency' => [

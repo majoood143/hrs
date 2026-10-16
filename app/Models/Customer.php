@@ -4,13 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * Someone who orders services. Signs in with a phone number and an SMS code (App\Services\Auth\
  * CustomerOtpService) on the separate "customer" guard, so it has no password and no way into the admin.
+ * The app signs in the same way and gets a Sanctum token (guard "customer_api").
  */
 class Customer extends Authenticatable
 {
+    use HasApiTokens;
+
     protected $guarded = [];
 
     protected function casts(): array

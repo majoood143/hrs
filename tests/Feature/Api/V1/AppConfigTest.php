@@ -2,6 +2,12 @@
 
 namespace Tests\Feature\Api\V1;
 
+use App\Models\SiteSetting;
+use App\Support\MobileApp\MobileImages;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Tests\Concerns\PreparesMobileApi;
 use Tests\TestCase;
 
@@ -27,6 +33,7 @@ class AppConfigTest extends TestCase
             'terms_url_en' => 'https://example.com/terms',
             'terms_url_ar' => 'https://example.com/ar/terms',
             'privacy_url_en' => 'https://example.com/privacy',
+            'mobile.images' => json_encode(['stables' => 'mobile-app/services/stables.jpg']),
         ]);
     }
 
@@ -52,6 +59,11 @@ class AppConfigTest extends TestCase
             ->assertJsonPath('data.social.x_url', null)
             ->assertJsonPath('data.terms_url', 'https://example.com/terms')
             ->assertJsonPath('data.privacy_url', 'https://example.com/privacy')
+            ->assertJsonPath('data.services_images', [
+                'bookings' => null,
+                'stables' => url('/storage/mobile-app/services/stables.jpg'),
+                'racing' => null,
+            ])
             ->assertJsonPath('data.locale', 'en')
             ->assertJsonPath('data.locales.1', ['code' => 'ar', 'name' => 'Arabic', 'native' => 'عربي', 'dir' => 'rtl']);
     }
@@ -69,6 +81,43 @@ class AppConfigTest extends TestCase
         // A language the site does not have falls through to the next one asked for, then the default.
         $this->getJson('/api/v1/app-config', ['Accept-Language' => 'fr-FR,ar;q=0.5'])->assertJsonPath('data.locale', 'ar');
         $this->getJson('/api/v1/app-config', ['Accept-Language' => 'fr'])->assertJsonPath('data.locale', 'en');
+    }
+
+    public function test_services_photos_are_saved_and_a_replaced_one_is_deleted(): void
+    {
+        Storage::fake('public');
+        Cache::forget('site_settings.all');
+        SiteSetting::resetMemo();
+        if (! Schema::hasTable('site_settings')) {
+            Schema::create('site_settings', function (Blueprint $table) {
+                $table->id();
+                $table->string('key')->unique();
+                $table->string('type')->default('text');
+                $table->text('value')->nullable();
+                $table->string('description')->nullable();
+                $table->string('managed_by')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        Storage::disk('public')->put('mobile-app/services/old.jpg', 'old');
+        Storage::disk('public')->put('mobile-app/services/new.jpg', 'new');
+        Storage::disk('public')->put('mobile-app/services/racing.jpg', 'racing');
+
+        // FileUpload hands over a list while it holds an upload, a plain path otherwise.
+        MobileImages::save(['stables' => 'mobile-app/services/old.jpg', 'racing' => ['mobile-app/services/racing.jpg']]);
+        $this->assertSame(['bookings' => null, 'stables' => 'mobile-app/services/old.jpg', 'racing' => 'mobile-app/services/racing.jpg'], MobileImages::settings());
+
+        MobileImages::save(['stables' => 'mobile-app/services/new.jpg', 'racing' => null]);
+        $this->assertSame(['bookings' => null, 'stables' => 'mobile-app/services/new.jpg', 'racing' => null], MobileImages::settings());
+        Storage::disk('public')->assertMissing('mobile-app/services/old.jpg');
+        Storage::disk('public')->assertMissing('mobile-app/services/racing.jpg');
+        Storage::disk('public')->assertExists('mobile-app/services/new.jpg');
+
+        $this->getJson('/api/v1/app-config')
+            ->assertOk()
+            ->assertJsonPath('data.services_images.stables', Storage::disk('public')->url('mobile-app/services/new.jpg'))
+            ->assertJsonPath('data.services_images.racing', null);
     }
 
     public function test_it_is_public_and_rate_limited_without_a_session(): void

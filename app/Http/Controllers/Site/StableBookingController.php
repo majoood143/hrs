@@ -16,12 +16,12 @@ use App\Services\Stables\StableBookingPricing;
 use App\Services\Stables\StablePackages;
 use App\Support\PhoneNumber;
 use App\Support\Seo;
+use App\Support\StableBookingForm;
 use App\Support\StableBookingSettings;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -31,7 +31,7 @@ use Illuminate\View\View;
  */
 class StableBookingController extends Controller
 {
-    public const MAX_RIDERS = 20;
+    public const MAX_RIDERS = StableBookingForm::MAX_RIDERS;
 
     public function __construct(
         private readonly SlotFinder $finder,
@@ -149,22 +149,18 @@ class StableBookingController extends Controller
         $quote = $slot->offering ? $this->pricing->quote($slot->offering, $count, $slot->stable) : null;
 
         $customer = Auth::guard('customer')->user();
-        $data = $request->validate($this->rules($settings, $count, $quote?->isFree() ?? true, (bool) $customer), [], $this->attributeNames($count));
+        $data = $request->validate([
+            ...StableBookingForm::rules($settings, $count, $quote?->isFree() ?? true, (bool) $customer),
+            'phone' => ['required', 'string', 'max:20', function (string $attribute, mixed $value, \Closure $fail): void {
+                $phone = PhoneNumber::normalize($value);
 
-        $riders = collect($data['riders'])->take($count)->map(fn (array $rider) => array_filter([
-            'name' => trim($rider['name']),
-            'age' => isset($rider['age']) && $rider['age'] !== '' ? (int) $rider['age'] : null,
-            'level' => $rider['level'] ?? null,
-            'weight' => isset($rider['weight']) && $rider['weight'] !== '' ? (float) $rider['weight'] : null,
-            'height' => isset($rider['height']) && $rider['height'] !== '' ? (float) $rider['height'] : null,
-            'guardian_name' => $rider['guardian_name'] ?? null,
-            'guardian_phone' => PhoneNumber::normalize($rider['guardian_phone'] ?? null),
-            'notes' => $rider['notes'] ?? null,
-        ], fn ($value) => $value !== null && $value !== ''))->values()->all();
+                if ($phone === null || strlen($phone) < 10 || strlen($phone) > 15) {
+                    $fail(__('account.phone_invalid'));
+                }
+            }],
+        ], [], StableBookingForm::attributeNames($count));
 
-        if ($settings->showsRiderField('waiver') && ($data['waiver'] ?? false)) {
-            $riders = array_map(fn (array $rider) => $rider + ['waiver_accepted_at' => now()->toIso8601String()], $riders);
-        }
+        $riders = StableBookingForm::riders($data, $count, $settings);
 
         $withPackage = ($data['payment_option'] ?? null) === CreateStableBooking::PACKAGE;
 
@@ -186,53 +182,6 @@ class StableBookingController extends Controller
         return $order->isPayable()
             ? redirect()->route('payment.start', $order->order_number)
             : redirect()->route('orders.show', $order->order_number)->with('status', __('stable_bookings.form.booked'));
-    }
-
-    /** @return array<string, mixed> */
-    private function rules(StableBookingSettings $settings, int $count, bool $free, bool $signedIn = false): array
-    {
-        $field = fn (string $name, array $rules) => $settings->showsRiderField($name)
-            ? [$settings->requiresRiderField($name) ? 'required' : 'nullable', ...$rules]
-            : ['prohibited'];
-
-        return [
-            'riders_count' => ['required', 'integer', 'min:1', 'max:'.self::MAX_RIDERS],
-            'name' => ['required', 'string', 'max:120'],
-            'phone' => ['required', 'string', 'max:20', function (string $attribute, mixed $value, \Closure $fail): void {
-                $phone = PhoneNumber::normalize($value);
-
-                if ($phone === null || strlen($phone) < 10 || strlen($phone) > 15) {
-                    $fail(__('account.phone_invalid'));
-                }
-            }],
-            'email' => ['nullable', 'email', 'max:190'],
-            'payment_option' => $free ? ['nullable'] : ['required', Rule::in([...$settings->paymentOptions(), ...($signedIn ? [CreateStableBooking::PACKAGE] : [])])],
-            'package_purchase_id' => ['nullable', 'required_if:payment_option,package', 'integer'],
-            'riders' => ['required', 'array', 'size:'.$count],
-            'riders.*.name' => ['required', 'string', 'max:120'],
-            'riders.*.age' => $field('age', ['integer', 'min:2', 'max:100']),
-            'riders.*.level' => $field('level', [Rule::in(StableBookingSettings::LEVELS)]),
-            'riders.*.weight' => $field('weight', ['numeric', 'min:10', 'max:250']),
-            'riders.*.height' => $field('height', ['numeric', 'min:50', 'max:250']),
-            'riders.*.guardian_name' => $field('guardian', ['string', 'max:120']),
-            'riders.*.guardian_phone' => $field('guardian', ['string', 'max:20']),
-            'riders.*.notes' => $field('notes', ['string', 'max:500']),
-            'waiver' => $settings->showsRiderField('waiver') ? ['accepted'] : ['prohibited'],
-        ];
-    }
-
-    /** "Rider 2: age" instead of "riders.1.age" in the error messages. */
-    private function attributeNames(int $count): array
-    {
-        $names = [];
-
-        foreach (range(0, $count - 1) as $i) {
-            foreach (['name', 'age', 'level', 'weight', 'height', 'guardian_name', 'guardian_phone', 'notes'] as $field) {
-                $names["riders.{$i}.{$field}"] = __('stable_bookings.form.rider_n', ['n' => $i + 1]).': '.__('stable_bookings.rider.'.$field);
-            }
-        }
-
-        return $names;
     }
 
     private function liveStable(string $slug): Stable
@@ -264,6 +213,6 @@ class StableBookingController extends Controller
 
     private function riders(mixed $value): int
     {
-        return max(1, min(self::MAX_RIDERS, (int) ($value ?: 1)));
+        return StableBookingForm::riderCount($value);
     }
 }

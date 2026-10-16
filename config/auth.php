@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Customer;
+use App\Models\User;
+
 return [
 
     /*
@@ -46,6 +49,26 @@ return [
             'driver' => 'session',
             'provider' => 'customers',
         ],
+
+        // The mobile app's signed-in customers: Sanctum bearer tokens, accepted only when they belong to a Customer.
+        'customer_api' => [
+            'driver' => 'sanctum',
+            'provider' => 'customers',
+        ],
+
+        // The app's stable owners (/api/v1/owner/*): users' tokens with the `stable_owner` ability. Such a token
+        // is refused everywhere else, the admin API included (AppServiceProvider), and EnsureStableOwner
+        // refuses every other user token here.
+        'owner_api' => [
+            'driver' => 'sanctum',
+            'provider' => 'users',
+        ],
+
+        // The admin API (/api/{panel}/*): users' tokens only, so a customer's app token can never reach it.
+        'sanctum' => [
+            'driver' => 'sanctum',
+            'provider' => 'users',
+        ],
     ],
 
     /*
@@ -68,12 +91,12 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+            'model' => env('AUTH_MODEL', User::class),
         ],
 
         'customers' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Customer::class,
+            'model' => Customer::class,
         ],
 
         // 'users' => [

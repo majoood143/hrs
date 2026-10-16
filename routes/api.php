@@ -1,15 +1,24 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AccountBookingController;
+use App\Http\Controllers\Api\V1\AccountController;
+use App\Http\Controllers\Api\V1\AccountPackageController;
 use App\Http\Controllers\Api\V1\AppConfigController;
 use App\Http\Controllers\Api\V1\AppStatusController;
 use App\Http\Controllers\Api\V1\BlogController;
+use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\V1\CenterController;
 use App\Http\Controllers\Api\V1\ClinicController;
+use App\Http\Controllers\Api\V1\CustomerAuthController;
 use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\FarrierController;
 use App\Http\Controllers\Api\V1\HomeController;
 use App\Http\Controllers\Api\V1\HorseForSaleController;
 use App\Http\Controllers\Api\V1\LookupController;
+use App\Http\Controllers\Api\V1\Owner\OwnerAuthController;
+use App\Http\Controllers\Api\V1\Owner\OwnerBookingController;
+use App\Http\Controllers\Api\V1\Owner\OwnerScheduleController;
+use App\Http\Controllers\Api\V1\Owner\OwnerStableController;
 use App\Http\Controllers\Api\V1\RacingController;
 use App\Http\Controllers\Api\V1\ShopController;
 use App\Http\Controllers\Api\V1\SilksController;
@@ -20,6 +29,7 @@ use App\Http\Controllers\Api\V1\VerificationController;
 use App\Http\Controllers\Api\V1\VideoLibraryController;
 use App\Http\Controllers\Api\V1\ViewController;
 use App\Http\Middleware\EnsureMobileFeature;
+use App\Http\Middleware\EnsureStableOwner;
 use App\Http\Middleware\SetApiLocale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -28,7 +38,7 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-// The mobile app's API (public, read-only in v1). Never the admin API (/api/{panel}/*).
+// The mobile app's API (public reads; posting with a verified phone; bookings with a signed-in customer). Never the admin API (/api/{panel}/*).
 Route::prefix('v1')
     ->name('api.v1.')
     ->middleware([SetApiLocale::class, 'throttle:api-public'])
@@ -90,6 +100,71 @@ Route::prefix('v1')
             Route::post('tools-for-sale', [ToolForSaleController::class, 'store'])->middleware(EnsureMobileFeature::class.':post_tool')->name('tools-for-sale.store');
             Route::post('farriers', [FarrierController::class, 'store'])->middleware(EnsureMobileFeature::class.':post_farrier')->name('farriers.store');
             Route::post('transfer-board', [TransferBoardController::class, 'store'])->middleware(EnsureMobileFeature::class.':post_transfer')->name('transfer-board.store');
+        });
+
+        // Stable bookings: the website's booking engine. Reading is open; booking, paying for a package,
+        // cancelling and reviewing need a signed-in customer and the `bookings` feature.
+        Route::prefix('bookings')->name('bookings.')->controller(BookingController::class)->group(function () {
+            Route::get('search', 'search')->name('search');
+            Route::get('offerings/{id}', 'offering')->whereNumber('id')->name('offering');
+            Route::get('slots/{id}', 'slot')->whereNumber('id')->name('slot');
+        });
+
+        // Customer sign-in (phone + code, like the website's /account/login): a bearer token for `customer_api`.
+        Route::middleware('throttle:10,1')->group(function () {
+            Route::post('auth/request', [CustomerAuthController::class, 'request'])->name('auth.request');
+            Route::post('auth/verify', [CustomerAuthController::class, 'verify'])->name('auth.verify');
+        });
+
+        Route::middleware('auth:customer_api')->group(function () {
+            Route::post('auth/logout', [CustomerAuthController::class, 'logout'])->name('auth.logout');
+            Route::get('account', [AccountController::class, 'show'])->name('account.show');
+            Route::post('account', [AccountController::class, 'update'])->middleware('throttle:10,1')->name('account.update');
+            Route::delete('account', [AccountController::class, 'destroy'])->middleware('throttle:5,1')->name('account.destroy');
+            Route::get('account/bookings', [AccountBookingController::class, 'index'])->name('account.bookings.index');
+            Route::get('account/bookings/{reference}', [AccountBookingController::class, 'show'])->name('account.bookings.show');
+            Route::get('account/packages', [AccountPackageController::class, 'index'])->name('account.packages.index');
+
+            Route::middleware([EnsureMobileFeature::class.':bookings', 'throttle:10,1'])->group(function () {
+                Route::post('bookings/slots/{id}', [BookingController::class, 'store'])->whereNumber('id')->name('bookings.store');
+                Route::post('account/bookings/{reference}/cancel', [AccountBookingController::class, 'cancel'])->name('account.bookings.cancel');
+                Route::post('account/bookings/{reference}/review', [AccountBookingController::class, 'review'])->name('account.bookings.review');
+                Route::post('packages/{id}/buy', [AccountPackageController::class, 'buy'])->whereNumber('id')->name('packages.buy');
+            });
+        });
+
+        // Stable owners (the website's /stable panel, day to day): phone + code or email + password, then a
+        // token with the `stable_owner` ability, good for these endpoints only (AppServiceProvider).
+        Route::prefix('owner')->name('owner.')->group(function () {
+            Route::middleware([EnsureMobileFeature::class.':stable_owner', 'throttle:10,1'])->group(function () {
+                Route::post('auth/request', [CustomerAuthController::class, 'request'])->name('auth.request');
+                Route::post('auth/verify', [OwnerAuthController::class, 'verify'])->name('auth.verify');
+                Route::post('auth/login', [OwnerAuthController::class, 'login'])->name('auth.login');
+            });
+
+            Route::middleware(['auth:owner_api', EnsureStableOwner::class])->group(function () {
+                Route::post('auth/logout', [OwnerAuthController::class, 'logout'])->name('auth.logout');
+                Route::get('me', [OwnerAuthController::class, 'me'])->name('me');
+
+                Route::prefix('stables/{slug}')->name('stables.')->group(function () {
+                    Route::get('/', [OwnerStableController::class, 'show'])->name('show');
+                    Route::get('income', [OwnerStableController::class, 'income'])->name('income');
+                    Route::get('bookings', [OwnerBookingController::class, 'index'])->name('bookings.index');
+                    Route::get('bookings/{reference}', [OwnerBookingController::class, 'show'])->name('bookings.show');
+                    Route::get('slots', [OwnerScheduleController::class, 'slots'])->name('slots.index');
+                    Route::get('closures', [OwnerScheduleController::class, 'closures'])->name('closures.index');
+
+                    Route::middleware([EnsureMobileFeature::class.':stable_owner', 'throttle:30,1'])->group(function () {
+                        Route::post('bookings/{reference}/attended', [OwnerBookingController::class, 'attended'])->name('bookings.attended');
+                        Route::post('bookings/{reference}/no-show', [OwnerBookingController::class, 'noShow'])->name('bookings.no-show');
+                        Route::post('bookings/{reference}/cancel', [OwnerBookingController::class, 'cancel'])->name('bookings.cancel');
+                        Route::post('slots/{id}/close', [OwnerScheduleController::class, 'close'])->whereNumber('id')->name('slots.close');
+                        Route::post('slots/{id}/open', [OwnerScheduleController::class, 'open'])->whereNumber('id')->name('slots.open');
+                        Route::post('closures', [OwnerScheduleController::class, 'storeClosure'])->name('closures.store');
+                        Route::delete('closures/{id}', [OwnerScheduleController::class, 'destroyClosure'])->whereNumber('id')->name('closures.destroy');
+                    });
+                });
+            });
         });
 
         Route::post('views/{section}/{key}', [ViewController::class, 'store'])->middleware('throttle:30,1')->name('views.store');

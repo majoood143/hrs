@@ -6,11 +6,13 @@ use App\Support\MobileApp\AppClient;
 use App\Support\MobileApp\AppLinks;
 use App\Support\MobileApp\AppVersion;
 use App\Support\MobileApp\MobileFeatures;
+use App\Support\MobileApp\MobileImages;
 use App\Support\MobileApp\MobileMaintenance;
 use App\Support\MobileApp\MobilePosting;
 use App\Support\MobileApp\MobileUpdates;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -29,7 +31,7 @@ use Filament\Schemas\Schema;
 
 /**
  * What the Muhra app shows: feature switches, the versions that must / may update, maintenance, and
- * how posting from the app is moderated, and the keys that let website links open the app.
+ * how posting from the app is moderated, the photos of the Services screen, and the keys that let website links open the app.
  * Read by the app from GET /api/v1/app-status. Every save is written to the activity log
  * (log name `mobile_app`) with the values before and after.
  */
@@ -68,7 +70,7 @@ class MobileAppSettings extends Page implements HasForms
         $this->form->fill(self::currentState());
     }
 
-    /** @return array{features: array<string, mixed>, updates: array<string, mixed>, maintenance: array<string, mixed>, posting: array<string, mixed>, links: array<string, mixed>} */
+    /** @return array{features: array<string, mixed>, updates: array<string, mixed>, maintenance: array<string, mixed>, posting: array<string, mixed>, images: array<string, string|null>, links: array<string, mixed>} */
     private static function currentState(): array
     {
         return [
@@ -76,6 +78,7 @@ class MobileAppSettings extends Page implements HasForms
             'updates' => MobileUpdates::settings(),
             'maintenance' => MobileMaintenance::settings(),
             'posting' => MobilePosting::settings(),
+            'images' => MobileImages::settings(),
             'links' => ['android_fingerprints' => implode("\n", AppLinks::settings()['android_fingerprints'])] + AppLinks::settings(),
         ];
     }
@@ -98,6 +101,9 @@ class MobileAppSettings extends Page implements HasForms
                     Tab::make(__('admin_mobile_app.tabs.posting'))
                         ->icon('heroicon-o-shield-check')
                         ->schema($this->postingSections()),
+                    Tab::make(__('admin_mobile_app.tabs.images'))
+                        ->icon('heroicon-o-photo')
+                        ->schema($this->imageSections()),
                     Tab::make(__('admin_mobile_app.tabs.links'))
                         ->icon('heroicon-o-link')
                         ->schema($this->linkSections()),
@@ -251,6 +257,29 @@ class MobileAppSettings extends Page implements HasForms
         ];
     }
 
+    /** @return list<Section> */
+    private function imageSections(): array
+    {
+        return [
+            Section::make(__('admin_mobile_app.tabs.images'))
+                ->description(__('admin_mobile_app.images.help'))
+                ->columns(['default' => 1, 'md' => 3])
+                ->schema(array_map(fn (string $key) => FileUpload::make("images.{$key}")
+                    ->label(__('admin_mobile_app.images.'.$key))
+                    ->helperText(__('admin_mobile_app.images.'.$key.'_help'))
+                    ->image()
+                    ->imageEditor()
+                    ->disk('public')
+                    ->directory(MobileImages::DIRECTORY)
+                    ->visibility('public')
+                    ->maxSize(5120)
+                    ->imageResizeMode('contain')
+                    ->imageResizeTargetWidth('1600')
+                    ->imageResizeTargetHeight('1600')
+                    ->imageResizeUpscale(false), MobileImages::KEYS)),
+        ];
+    }
+
     /** @return list<Section|Text> */
     private function linkSections(): array
     {
@@ -304,6 +333,7 @@ class MobileAppSettings extends Page implements HasForms
         MobileUpdates::save((array) ($state['updates'] ?? []));
         MobileMaintenance::save((array) ($state['maintenance'] ?? []));
         MobilePosting::save((array) ($state['posting'] ?? []));
+        MobileImages::save((array) ($state['images'] ?? []));
         AppLinks::save((array) ($state['links'] ?? []));
 
         $after = self::currentState();

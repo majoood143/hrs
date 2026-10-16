@@ -2,9 +2,15 @@
 
 namespace App\Http\Resources\V1;
 
+use App\Http\Resources\V1\Bookings\OfferingResource;
+use App\Http\Resources\V1\Bookings\StablePackageResource;
+use App\Models\BookingSlot;
 use App\Models\Shop;
 use App\Models\Stable;
+use App\Models\StableOffering;
 use App\Models\StableReview;
+use App\Services\Stables\SlotFinder;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -111,11 +117,36 @@ class PlaceResource extends JsonResource
                     'created_at' => $review->created_at?->toIso8601String(),
                 ])->all()
                 : [],
+            /**
+             * Stables taking bookings only (else null): the services one can book (with the next day
+             * that has an open time) and the lesson packages on sale.
+             */
+            'booking' => $place instanceof Stable && $place->acceptsBookings() ? $this->booking($place) : null,
             /** @var int|null */
             'views_count' => $place->getAttribute('views_count'),
             'created_at' => $place->getAttribute('created_at')?->toIso8601String(),
             /** The place's page on the website, for sharing. */
             'share_url' => route($section.'.show', $place->getAttribute('slug')),
+        ];
+    }
+
+    /** @return array{offerings: list<array{offering: OfferingResource, next_date: string|null}>, packages: list<array<string, mixed>>} */
+    private function booking(Stable $stable): array
+    {
+        $today = BookingSlot::today();
+        $horizon = CarbonImmutable::parse($today)->addDays($stable->bookingSettings()->horizonDays() - 1)->toDateString();
+        $open = app(SlotFinder::class)->between($today, $horizon, 1, ['stable_id' => $stable->getKey()]);
+
+        return [
+            'offerings' => $stable->offerings()->active()->orderBy('price')->get()
+                ->map(fn (StableOffering $offering) => [
+                    'offering' => OfferingResource::make($offering),
+                    /** The first day with an open time for one rider; null when none is open. */
+                    'next_date' => $open->firstWhere('stable_offering_id', $offering->getKey())?->date->toDateString(),
+                ])->all(),
+            'packages' => StablePackageResource::collection(
+                $stable->packages()->active()->with('offering')->whereHas('offering', fn ($q) => $q->where('is_active', true))->orderBy('price')->get()
+            )->resolve(),
         ];
     }
 }

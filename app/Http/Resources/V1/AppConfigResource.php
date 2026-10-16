@@ -5,6 +5,7 @@ namespace App\Http\Resources\V1;
 use App\Models\SiteSetting;
 use App\Services\Auth\CustomerOtpService;
 use App\Services\Sms\SmsManager;
+use App\Support\MobileApp\MobileImages;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -78,6 +79,12 @@ class AppConfigResource extends JsonResource
                 'whatsapp' => (bool) rescue(fn () => app(CustomerOtpService::class)->whatsappAvailable(), false, false),
                 'sms' => (bool) rescue(fn () => app(SmsManager::class)->canSend(), false, false),
             ],
+            /**
+             * Photos of the app's Services screen (admin → Mobile app → Services screen); null = the app's built-in photo.
+             *
+             * @var array{bookings: string|null, stables: string|null, racing: string|null}
+             */
+            'services_images' => MobileImages::urls(),
             /** The language this response is in (from Accept-Language). */
             'locale' => app()->getLocale(),
             'default_locale' => (string) config('languages.default', 'en'),

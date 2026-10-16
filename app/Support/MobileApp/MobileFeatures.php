@@ -28,6 +28,7 @@ final class MobileFeatures
         'transfer' => ['transfer_board'],
         'posting' => ['post_horse', 'post_tool', 'post_farrier', 'post_transfer'],
         'racing' => ['racing', 'silks'],
+        'bookings' => ['bookings', 'stable_owner'],
         'other' => ['promos', 'contact_call', 'contact_whatsapp', 'language_switch'],
     ];
 

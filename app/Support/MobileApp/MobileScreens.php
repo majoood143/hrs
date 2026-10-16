@@ -29,6 +29,9 @@ final class MobileScreens
         'post_transfer' => 'post_transfer',
         'racing' => 'racing',
         'silks' => 'silks',
+        'bookings' => 'bookings',
+        'my_bookings' => 'bookings',
+        'my_stable' => 'stable_owner',
     ];
 
     /** @return list<string> */

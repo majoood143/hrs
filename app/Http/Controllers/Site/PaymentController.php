@@ -13,6 +13,7 @@ use App\Services\Payments\Gateways\NboGateway;
 use App\Services\Payments\Gateways\ThawaniGateway;
 use App\Services\Payments\OrderPaymentService;
 use App\Services\Payments\PaymentGateways;
+use App\Support\MobileApp\AppReturnUrl;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,6 +30,9 @@ use Throwable;
  */
 class PaymentController extends Controller
 {
+    /** Session key prefix: the app address to return to, per order number. */
+    private const APP_RETURN = 'payment.app_return.';
+
     public function __construct(
         private readonly PaymentGateways $gateways,
         private readonly OrderPaymentService $payments,
@@ -36,12 +40,17 @@ class PaymentController extends Controller
 
     // ── Choosing a gateway ───────────────────────────────────────────────────
 
-    public function show(string $order): View|RedirectResponse
+    public function show(Request $request, string $order): View|RedirectResponse
     {
         $order = $this->findOrder($order);
 
+        // opened from the app: send the browser back to it once the order is settled (toOrder())
+        if ($back = AppReturnUrl::valid($request->query('app_return'))) {
+            $request->session()->put(self::APP_RETURN.$order->order_number, $back);
+        }
+
         if (! $order->isPayable()) {
-            return redirect()->route('orders.show', $order->order_number);
+            return $this->toOrder($order);
         }
 
         return view('site.payments.checkout', [
@@ -57,7 +66,7 @@ class PaymentController extends Controller
         $order = $this->findOrder($order);
 
         if (! $order->isPayable()) {
-            return redirect()->route('orders.show', $order->order_number);
+            return $this->toOrder($order);
         }
 
         $gateway = $this->gateways->findForOrder($order, (string) $request->input('gateway'));
@@ -84,7 +93,7 @@ class PaymentController extends Controller
             }
 
             if (! $order->isPayable()) {
-                return redirect()->route('orders.show', $order->order_number);
+                return $this->toOrder($order);
             }
         }
 
@@ -135,7 +144,7 @@ class PaymentController extends Controller
         // Paid, but the order could not be marked paid (amount mismatch): say so plainly, since
         // "try again" would send the customer off to pay a second time.
         if ($status === 'paid' || $status === 'amount_mismatch') {
-            return redirect()->route('orders.show', $order->order_number)->with('error', __('payments.paid_but_unconfirmed'));
+            return $this->toOrder($order)->with('error', __('payments.paid_but_unconfirmed'));
         }
 
         // Unpaid: a failed card attempt, or the customer backed out. The session stays payable and
@@ -389,7 +398,7 @@ class PaymentController extends Controller
         $order = $this->findDemoOrder($order);
 
         if (! $order->isPayable()) {
-            return redirect()->route('orders.show', $order->order_number);
+            return $this->toOrder($order);
         }
 
         return view('site.payments.demo', ['order' => $order->loadMissing('service'), 'seoTitle' => __('payments.demo_title'), 'noindex' => true]);
@@ -400,7 +409,7 @@ class PaymentController extends Controller
         $order = $this->findDemoOrder($order);
 
         if (! $order->isPayable()) {
-            return redirect()->route('orders.show', $order->order_number);
+            return $this->toOrder($order);
         }
 
         $approved = $request->input('decision') === 'approve';
@@ -442,8 +451,15 @@ class PaymentController extends Controller
             : null;
     }
 
+    /** The order's page, or back to the app when the checkout was opened from it. */
     private function toOrder(ServiceOrder $order): RedirectResponse
     {
+        $back = session()->pull(self::APP_RETURN.$order->order_number);
+
+        if (is_string($back) && AppReturnUrl::valid($back)) {
+            return redirect()->away(AppReturnUrl::with($back, $order->order_number, $order->isPaid() ? 'paid' : $order->status->value));
+        }
+
         return redirect()->route('orders.show', $order->order_number);
     }
 

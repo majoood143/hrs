@@ -6,6 +6,7 @@ use App\Filament\Forms\SubmissionPdfActions;
 use App\Filament\Forms\ViewFormInsights;
 use App\Filament\RichEditor\TextDirectionPlugin;
 use App\Filament\Support\FormPaymentTab;
+use App\Http\Controllers\Api\V1\Owner\OwnerAuthController;
 use App\Models\Setting;
 use App\Models\SiteSetting;
 use App\Policies\ActivityPolicy;
@@ -37,6 +38,8 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Sanctum\PersonalAccessToken;
+use Laravel\Sanctum\Sanctum;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Packstub\FormBuilder\Facades\FormBuilder;
 use Packstub\FormBuilder\Models\Form as FormBuilderForm;
@@ -97,6 +100,11 @@ class AppServiceProvider extends ServiceProvider
 
         // The mobile app's public API (/api/v1): per device IP, generous enough for scrolling lists.
         RateLimiter::for('api-public', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
+
+        // A stable owner's app token is a User token, which the admin API's guard would accept too:
+        // it opens the owner endpoints only.
+        Sanctum::authenticateAccessTokensUsing(fn (PersonalAccessToken $token, bool $isValid): bool => $isValid
+            && (! in_array(OwnerAuthController::ABILITY, (array) $token->abilities, true) || request()->is('api/v1/owner/*')));
 
         // Its own docs (/docs/v1, same access as /docs/api), so the app's types follow only its endpoints.
         Scramble::registerApi('v1', [
