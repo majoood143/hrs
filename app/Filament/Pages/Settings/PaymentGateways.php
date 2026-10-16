@@ -102,12 +102,13 @@ class PaymentGateways extends Page implements HasForms
                     ->schema([
                         CheckboxList::make('enabled_gateways')
                             ->label(__('payment_gateways.options.active_gateway'))
-                            ->options([
+                            ->options(array_filter([
                                 'thawani' => __('payment_gateways.options.thawani'),
                                 'nbo' => __('payment_gateways.options.nbo'),
                                 'ccavenue' => __('payment_gateways.options.ccavenue'),
-                                'demo' => __('payment_gateways.options.demo'),
-                            ])
+                                // marks orders paid without money: never offered on a live site
+                                'demo' => app()->isProduction() ? null : __('payment_gateways.options.demo'),
+                            ]))
                             ->descriptions(['demo' => __('payment_gateways.options.demo_desc')])
                             ->required()
                             ->live()

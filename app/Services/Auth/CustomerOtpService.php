@@ -19,7 +19,7 @@ use App\Support\WhatsAppSettings;
  *
  * A code is six digits, lives five minutes, allows five wrong tries and works once. Only a keyed
  * hash of it is stored. Asking for codes is limited per phone (one a minute, five an hour) and per
- * address (twenty an hour), counted from the database so it holds whatever the cache driver is.
+ * address (sixty an hour: mobile carriers put many phones behind one address), counted from the database so it holds whatever the cache driver is.
  */
 class CustomerOtpService
 {
@@ -31,7 +31,7 @@ class CustomerOtpService
 
     public const MAX_PER_PHONE_PER_HOUR = 5;
 
-    public const MAX_PER_IP_PER_HOUR = 20;
+    public const MAX_PER_IP_PER_HOUR = 60;
 
     public const VERIFIED = 'verified';
 
@@ -166,20 +166,30 @@ class CustomerOtpService
             ->latest('id')
             ->first();
 
-        if (! $otp || $otp->expires_at->isPast() || $otp->attempts >= self::MAX_ATTEMPTS) {
+        if (! $otp || $otp->expires_at->isPast()) {
             return self::EXPIRED;
         }
 
-        // count the try before looking at it, so a guess is spent even if the request dies
-        $otp->increment('attempts');
+        // Count the try before looking at it, so a guess is spent even if the request dies. One
+        // conditional UPDATE, so guesses sent all at once cannot get past the limit together.
+        $counted = CustomerOtp::query()
+            ->whereKey($otp->getKey())
+            ->whereNull('consumed_at')
+            ->where('attempts', '<', self::MAX_ATTEMPTS)
+            ->increment('attempts');
+
+        if ($counted === 0) {
+            return self::EXPIRED;
+        }
 
         if (! hash_equals($otp->code_hash, $this->hash($phone, $code))) {
             return self::WRONG;
         }
 
-        $otp->forceFill(['consumed_at' => now()])->save();
+        // and a right code works once, even when sent twice at the same moment
+        $used = CustomerOtp::query()->whereKey($otp->getKey())->whereNull('consumed_at')->update(['consumed_at' => now()]);
 
-        return self::VERIFIED;
+        return $used === 1 ? self::VERIFIED : self::EXPIRED;
     }
 
     /**

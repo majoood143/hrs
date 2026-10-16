@@ -10,6 +10,7 @@ use App\Models\StableOffering;
 use App\Models\User;
 use App\Services\Stables\SlotGenerator;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Tests\Concerns\PreparesStableBookings;
 use Tests\TestCase;
@@ -202,6 +203,19 @@ class OwnerTest extends TestCase
         $this->assertSame(StableBookingStatus::Completed, StableBooking::query()->where('reference', $reference)->value('status'));
         $this->as($token)->getJson("{$base}?when=to_mark")->assertOk()->assertJsonCount(0, 'data');
         $this->as($token)->getJson("{$base}?when=past")->assertOk()->assertJsonCount(2, 'data');
+    }
+
+    public function test_a_list_of_bookings_reads_the_places_left_with_its_slots(): void
+    {
+        $this->customerBooks();
+        $this->customerBooks('93334444');
+        $token = $this->ownerToken();
+
+        DB::enableQueryLog();
+        $this->as($token)->getJson('/api/v1/owner/stables/desert-riders/bookings')->assertOk()->assertJsonPath('data.0.slot.places_left', 2);
+        $perBooking = collect(DB::getQueryLog())->filter(fn (array $q) => str_starts_with($q['query'], 'select sum('));
+
+        $this->assertCount(0, $perBooking, 'one places-left query per booking');
     }
 
     public function test_income_counts_an_attended_pay_at_the_stable_booking(): void

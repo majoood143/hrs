@@ -7,6 +7,7 @@ use App\Enums\PaymentGateway;
 use App\Enums\PaymentStatus;
 use App\Events\ServiceOrderReceived;
 use App\Models\PaymentGatewayLog;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Support\Facades\Event;
 use Tests\Concerns\PreparesOrderSite;
 use Tests\TestCase;
@@ -65,6 +66,30 @@ class DemoPaymentAndPagesTest extends TestCase
         $order = $this->makeOrder();
 
         $this->get(route('payment.demo', $order->order_number))->assertNotFound();
+        $this->post(route('payment.demo.decide', $order->order_number), ['decision' => 'approve'])->assertNotFound();
+
+        $this->assertFalse($order->refresh()->isPaid());
+    }
+
+    public function test_the_demo_gateway_does_not_exist_on_a_live_site(): void
+    {
+        $this->app['env'] = 'production';
+        // a live environment switches CSRF checks back on; this test is about the gateway
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+        $order = $this->makeOrder();
+
+        $this->post(route('payment.begin', $order->order_number), ['gateway' => 'demo'])->assertRedirect();
+        $this->get(route('payment.demo', $order->order_number))->assertNotFound();
+        $this->post(route('payment.demo.decide', $order->order_number), ['decision' => 'approve'])->assertNotFound();
+
+        $this->assertFalse($order->refresh()->isPaid());
+    }
+
+    public function test_the_demo_cannot_approve_an_order_started_with_another_gateway(): void
+    {
+        $order = $this->makeOrder();
+        $order->forceFill(['payment_method' => PaymentGateway::Thawani, 'payment_session_id' => 'thawani-session'])->save();
+
         $this->post(route('payment.demo.decide', $order->order_number), ['decision' => 'approve'])->assertNotFound();
 
         $this->assertFalse($order->refresh()->isPaid());

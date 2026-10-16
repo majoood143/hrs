@@ -434,12 +434,19 @@ class PaymentController extends Controller
         return ServiceOrder::query()->where('order_number', $number)->firstOrFail();
     }
 
-    /** The demo gateway only exists while an admin has it ticked. */
+    /**
+     * The demo gateway only exists while an admin has it ticked (never on a live site), and only for
+     * an order whose checkout was started with it: never a way to mark another gateway's order paid.
+     */
     private function findDemoOrder(string $number): ServiceOrder
     {
         abort_unless(in_array(PaymentGateway::Demo, $this->gateways->selected(), true), 404);
 
-        return $this->findOrder($number);
+        $order = $this->findOrder($number);
+
+        abort_unless($order->payment_method === PaymentGateway::Demo, 404);
+
+        return $order;
     }
 
     private function orderFromReference(Request $request): ?ServiceOrder

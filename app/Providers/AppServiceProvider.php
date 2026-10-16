@@ -17,6 +17,7 @@ use App\Policies\WhatsappInstancePolicy;
 use App\Policies\WhatsappMessagePolicy;
 use App\Policies\WhatsappWebhookPolicy;
 use App\Services\SettingsService;
+use App\Support\Api\PostingToken;
 use App\Support\FormOrderSettings;
 use App\Support\ImageCompressor;
 use App\Support\PhoneNumber;
@@ -100,6 +101,39 @@ class AppServiceProvider extends ServiceProvider
 
         // The mobile app's public API (/api/v1): per device IP, generous enough for scrolling lists.
         RateLimiter::for('api-public', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
+
+        // Asking for and checking codes, and the owners' password sign-in: per address (roomy: a mobile
+        // carrier puts many phones behind one) and per phone or email, which no change of address resets.
+        // The codes themselves have their own limits too (CustomerOtpService).
+        RateLimiter::for('api-codes', function (Request $request) {
+            $who = PhoneNumber::normalize((string) $request->input('phone')) ?? mb_strtolower(trim((string) $request->input('email')));
+
+            return array_filter([
+                Limit::perMinute(60)->by('ip|'.$request->ip()),
+                $who !== '' ? Limit::perMinute(10)->by('who|'.$who) : null,
+            ]);
+        });
+
+        // Posting from the app: per address, and per verified phone (its posting token).
+        RateLimiter::for('api-posting', function (Request $request) {
+            $phone = PostingToken::phone($request->input('posting_token'));
+
+            return array_filter([
+                Limit::perMinute(30)->by('ip|'.$request->ip()),
+                $phone !== null ? Limit::perMinute(10)->by('phone|'.$phone) : null,
+            ]);
+        });
+
+        // A signed-in customer's or stable owner's changes (booking, cancelling, closing times…): per
+        // account, after auth (the address only when there is somehow no user).
+        RateLimiter::for('api-account', fn (Request $request) => Limit::perMinute(20)
+            ->by(($request->user('customer_api') ? 'customer|'.$request->user('customer_api')->getKey() : 'ip|'.$request->ip())));
+        RateLimiter::for('api-owner', fn (Request $request) => Limit::perMinute(60)
+            ->by(($request->user('owner_api') ? 'owner|'.$request->user('owner_api')->getKey() : 'ip|'.$request->ip())));
+
+        // Racing search asks the source each time; view counts are cheap but should not be inflated.
+        RateLimiter::for('api-racing-search', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
+        RateLimiter::for('api-views', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
 
         // A stable owner's app token is a User token, which the admin API's guard would accept too:
         // it opens the owner endpoints only.

@@ -28,7 +28,10 @@ class PaymentGateways
         });
     }
 
-    /** @return list<PaymentGateway> the keys ticked in the settings, whether or not they are configured */
+    /**
+     * @return list<PaymentGateway> the keys ticked in the settings, whether or not they are configured.
+     *                              Never the demo gateway on a live site: it marks orders paid without money.
+     */
     public function selected(): array
     {
         $stored = SiteSetting::get('enabled_gateways');
@@ -37,6 +40,7 @@ class PaymentGateways
         return collect(is_array($decoded) ? $decoded : [])
             ->map(fn ($key) => PaymentGateway::tryFrom((string) $key))
             ->filter()
+            ->reject(fn (PaymentGateway $key) => $key === PaymentGateway::Demo && app()->isProduction())
             ->values()
             ->all();
     }

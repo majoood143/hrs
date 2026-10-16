@@ -82,7 +82,7 @@ Route::prefix('v1')
         // The racing database (scraped and cached, like the website's /racing pages).
         Route::prefix('racing')->name('racing.')->controller(RacingController::class)->group(function () {
             // every search is a request to the source with a visitor-typed name: a tighter limit
-            Route::get('search', 'search')->middleware('throttle:30,1')->name('search');
+            Route::get('search', 'search')->middleware('throttle:api-racing-search')->name('search');
             Route::get('calendar', 'calendar')->name('calendar');
             Route::get('days/{date}', 'day')->where('date', '\d{4}-\d{2}-\d{2}')->name('day');
             Route::get('handicap', 'handicap')->name('handicap');
@@ -91,16 +91,14 @@ Route::prefix('v1')
         });
 
         // Posting from the app: a verified phone (code by WhatsApp, else SMS) instead of the site's captcha.
-        Route::middleware('throttle:10,1')->group(function () {
-            // Each refused while its feature is off, the app is in maintenance or below the minimum version.
-            $anyPosting = EnsureMobileFeature::class.':post_horse,post_tool,post_farrier,post_transfer';
-            Route::post('verification/request', [VerificationController::class, 'request'])->middleware($anyPosting)->name('verification.request');
-            Route::post('verification/verify', [VerificationController::class, 'verify'])->middleware($anyPosting)->name('verification.verify');
-            Route::post('horses-for-sale', [HorseForSaleController::class, 'store'])->middleware(EnsureMobileFeature::class.':post_horse')->name('horses-for-sale.store');
-            Route::post('tools-for-sale', [ToolForSaleController::class, 'store'])->middleware(EnsureMobileFeature::class.':post_tool')->name('tools-for-sale.store');
-            Route::post('farriers', [FarrierController::class, 'store'])->middleware(EnsureMobileFeature::class.':post_farrier')->name('farriers.store');
-            Route::post('transfer-board', [TransferBoardController::class, 'store'])->middleware(EnsureMobileFeature::class.':post_transfer')->name('transfer-board.store');
-        });
+        // Each refused while its feature is off, the app is in maintenance or below the minimum version.
+        $anyPosting = EnsureMobileFeature::class.':post_horse,post_tool,post_farrier,post_transfer';
+        Route::post('verification/request', [VerificationController::class, 'request'])->middleware([$anyPosting, 'throttle:api-codes'])->name('verification.request');
+        Route::post('verification/verify', [VerificationController::class, 'verify'])->middleware([$anyPosting, 'throttle:api-codes'])->name('verification.verify');
+        Route::post('horses-for-sale', [HorseForSaleController::class, 'store'])->middleware([EnsureMobileFeature::class.':post_horse', 'throttle:api-posting'])->name('horses-for-sale.store');
+        Route::post('tools-for-sale', [ToolForSaleController::class, 'store'])->middleware([EnsureMobileFeature::class.':post_tool', 'throttle:api-posting'])->name('tools-for-sale.store');
+        Route::post('farriers', [FarrierController::class, 'store'])->middleware([EnsureMobileFeature::class.':post_farrier', 'throttle:api-posting'])->name('farriers.store');
+        Route::post('transfer-board', [TransferBoardController::class, 'store'])->middleware([EnsureMobileFeature::class.':post_transfer', 'throttle:api-posting'])->name('transfer-board.store');
 
         // Stable bookings: the website's booking engine. Reading is open; booking, paying for a package,
         // cancelling and reviewing need a signed-in customer and the `bookings` feature.
@@ -111,7 +109,7 @@ Route::prefix('v1')
         });
 
         // Customer sign-in (phone + code, like the website's /account/login): a bearer token for `customer_api`.
-        Route::middleware('throttle:10,1')->group(function () {
+        Route::middleware('throttle:api-codes')->group(function () {
             Route::post('auth/request', [CustomerAuthController::class, 'request'])->name('auth.request');
             Route::post('auth/verify', [CustomerAuthController::class, 'verify'])->name('auth.verify');
         });
@@ -119,13 +117,13 @@ Route::prefix('v1')
         Route::middleware('auth:customer_api')->group(function () {
             Route::post('auth/logout', [CustomerAuthController::class, 'logout'])->name('auth.logout');
             Route::get('account', [AccountController::class, 'show'])->name('account.show');
-            Route::post('account', [AccountController::class, 'update'])->middleware('throttle:10,1')->name('account.update');
-            Route::delete('account', [AccountController::class, 'destroy'])->middleware('throttle:5,1')->name('account.destroy');
+            Route::post('account', [AccountController::class, 'update'])->middleware('throttle:api-account')->name('account.update');
+            Route::delete('account', [AccountController::class, 'destroy'])->middleware('throttle:api-account')->name('account.destroy');
             Route::get('account/bookings', [AccountBookingController::class, 'index'])->name('account.bookings.index');
             Route::get('account/bookings/{reference}', [AccountBookingController::class, 'show'])->name('account.bookings.show');
             Route::get('account/packages', [AccountPackageController::class, 'index'])->name('account.packages.index');
 
-            Route::middleware([EnsureMobileFeature::class.':bookings', 'throttle:10,1'])->group(function () {
+            Route::middleware([EnsureMobileFeature::class.':bookings', 'throttle:api-account'])->group(function () {
                 Route::post('bookings/slots/{id}', [BookingController::class, 'store'])->whereNumber('id')->name('bookings.store');
                 Route::post('account/bookings/{reference}/cancel', [AccountBookingController::class, 'cancel'])->name('account.bookings.cancel');
                 Route::post('account/bookings/{reference}/review', [AccountBookingController::class, 'review'])->name('account.bookings.review');
@@ -136,7 +134,7 @@ Route::prefix('v1')
         // Stable owners (the website's /stable panel, day to day): phone + code or email + password, then a
         // token with the `stable_owner` ability, good for these endpoints only (AppServiceProvider).
         Route::prefix('owner')->name('owner.')->group(function () {
-            Route::middleware([EnsureMobileFeature::class.':stable_owner', 'throttle:10,1'])->group(function () {
+            Route::middleware([EnsureMobileFeature::class.':stable_owner', 'throttle:api-codes'])->group(function () {
                 Route::post('auth/request', [CustomerAuthController::class, 'request'])->name('auth.request');
                 Route::post('auth/verify', [OwnerAuthController::class, 'verify'])->name('auth.verify');
                 Route::post('auth/login', [OwnerAuthController::class, 'login'])->name('auth.login');
@@ -154,7 +152,7 @@ Route::prefix('v1')
                     Route::get('slots', [OwnerScheduleController::class, 'slots'])->name('slots.index');
                     Route::get('closures', [OwnerScheduleController::class, 'closures'])->name('closures.index');
 
-                    Route::middleware([EnsureMobileFeature::class.':stable_owner', 'throttle:30,1'])->group(function () {
+                    Route::middleware([EnsureMobileFeature::class.':stable_owner', 'throttle:api-owner'])->group(function () {
                         Route::post('bookings/{reference}/attended', [OwnerBookingController::class, 'attended'])->name('bookings.attended');
                         Route::post('bookings/{reference}/no-show', [OwnerBookingController::class, 'noShow'])->name('bookings.no-show');
                         Route::post('bookings/{reference}/cancel', [OwnerBookingController::class, 'cancel'])->name('bookings.cancel');
@@ -167,7 +165,7 @@ Route::prefix('v1')
             });
         });
 
-        Route::post('views/{section}/{key}', [ViewController::class, 'store'])->middleware('throttle:30,1')->name('views.store');
+        Route::post('views/{section}/{key}', [ViewController::class, 'store'])->middleware('throttle:api-views')->name('views.store');
 
         // An unknown API path is a JSON 404 here, never the website's fallback (CMS redirects, HTML 404).
         Route::any('{path}', fn () => abort(404))->where('path', '.*')->name('not-found');

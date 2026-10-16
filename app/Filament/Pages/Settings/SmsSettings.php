@@ -71,8 +71,8 @@ class SmsSettings extends Page implements HasForms
     {
         return array_filter([
             SmsManager::TAMIMAH => __('admin_sms_settings.drivers.tamimah'),
-            SmsManager::DEMO => __('admin_sms_settings.drivers.demo'),
-            // the log driver writes one-time codes to the application log: not offered on a live site
+            // demo shows codes to whoever asks and log writes them to the application log: neither on a live site
+            SmsManager::DEMO => app()->isProduction() ? null : __('admin_sms_settings.drivers.demo'),
             SmsManager::LOG => app()->isProduction() ? null : __('admin_sms_settings.drivers.log'),
         ]);
     }

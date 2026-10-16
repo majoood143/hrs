@@ -23,6 +23,8 @@ Schedule::command('orders:recover-late-payments')->everyFiveMinutes()->withoutOv
 
 // One-time codes are only needed for minutes; keep a day of them for the rate limits, then drop them.
 Schedule::command('model:prune', ['--model' => [CustomerOtp::class]])->daily();
+// app sign-in tokens (customers 180 days, stable owners 90) that have expired
+Schedule::command('sanctum:prune-expired', ['--hours' => 24])->daily();
 
 // The handicap ratings list is cached for racing.handicap_ttl (1 hour by default) and can take
 // up to racing.handicap_timeout (45s) to fetch cold; warming it well inside that window means

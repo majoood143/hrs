@@ -25,11 +25,16 @@ class SmsManager
 
     public const DEMO = 'demo';
 
+    /**
+     * The chosen driver. On a live site only real messages: "demo" hands the code to whoever asks
+     * (the API returns it), so anyone could sign in as any phone; "log" writes codes to the log.
+     */
     public function driver(): ?string
     {
         $driver = (string) SiteSetting::get('sms.driver', '');
+        $allowed = app()->isProduction() ? [self::TAMIMAH] : [self::TAMIMAH, self::LOG, self::DEMO];
 
-        return in_array($driver, [self::TAMIMAH, self::LOG, self::DEMO], true) ? $driver : null;
+        return in_array($driver, $allowed, true) ? $driver : null;
     }
 
     public function isDemo(): bool

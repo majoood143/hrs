@@ -138,7 +138,8 @@ class OwnerBookingController extends Controller
             ->where('stable_bookings.stable_id', $stable->getKey())
             ->join('booking_slots', 'booking_slots.id', '=', 'stable_bookings.booking_slot_id')
             ->select('stable_bookings.*')
-            ->with(['slot.trainer', 'offering', 'order', 'packagePurchase']);
+            // places left come with the slots, not one query per booking
+            ->with(['slot' => fn ($q) => $q->withBookedRiders(), 'slot.trainer', 'offering', 'order', 'packagePurchase']);
     }
 
     /** @return Builder<StableBooking> sessions that have started and are still confirmed (attended or no-show is owed) */

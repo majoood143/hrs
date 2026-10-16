@@ -124,6 +124,22 @@ class CustomerOtpTest extends TestCase
         $this->assertSame(CustomerOtpService::VERIFIED, $this->otp()->verify('96891234567', $result->demoCode)[0]);
     }
 
+    public function test_a_live_site_never_hands_out_codes_or_writes_them_to_the_log(): void
+    {
+        $this->app['env'] = 'production';
+
+        foreach (['demo', 'log'] as $driver) {
+            $this->useSms($driver);
+
+            $result = $this->ask();
+
+            $this->assertSame(OtpRequestResult::UNAVAILABLE, $result->status, $driver);
+            $this->assertNull($result->demoCode);
+        }
+
+        $this->assertSame(0, CustomerOtp::count());
+    }
+
     // ── Rate limits ──────────────────────────────────────────────────────────
 
     public function test_a_second_code_within_a_minute_is_refused_with_the_wait(): void
@@ -157,11 +173,11 @@ class CustomerOtpTest extends TestCase
         $this->assertTrue($this->ask()->sent(), 'an hour later it is fine again');
     }
 
-    public function test_only_twenty_codes_an_hour_per_address(): void
+    public function test_only_sixty_codes_an_hour_per_address(): void
     {
         Carbon::setTestNow('2026-09-23 10:00:00');
 
-        foreach (range(1, 20) as $i) {
+        foreach (range(1, CustomerOtpService::MAX_PER_IP_PER_HOUR) as $i) {
             $this->assertTrue($this->ask('9100 '.str_pad((string) $i, 4, '0', STR_PAD_LEFT), '10.9.9.9')->sent(), "phone {$i}");
         }
 
