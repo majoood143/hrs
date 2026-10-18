@@ -17,7 +17,7 @@ return [
         'Gathering the results, almost there…',
     ],
     'loading_label' => 'Loading results',
-    'hint' => 'Search using the English spelling of the name (at least :min characters).',
+    'hint' => 'Search using the English or Arabic name (at least :min characters).',
     'min_chars' => 'Please enter at least :min characters.',
 
     'types' => [
@@ -34,6 +34,8 @@ return [
         'jockey' => 'Jockey',
         'trainer' => 'Trainer',
     ],
+
+    'stats' => ['wins' => 'Wins', 'runs' => 'Runs'],
 
     'results_for' => 'Results for “:q”',
     'no_results_title' => 'No results found',

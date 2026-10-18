@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
+use App\Support\LogReader;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
@@ -18,6 +19,7 @@ use Illuminate\Contracts\Foundation\MaintenanceMode;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 
 class Maintenance extends Page implements HasForms
@@ -37,6 +39,17 @@ class Maintenance extends Page implements HasForms
     protected string $view = 'filament.pages.maintenance';
 
     public ?array $data = [];
+
+    /** Log viewer: off until opened, so the page does not read the log on every request. */
+    public bool $showLogs = false;
+
+    public string $logFile = '';
+
+    public int $logLimit = 50;
+
+    public string $logLevel = '';
+
+    public string $logSearch = '';
 
     public function getTitle(): string
     {
@@ -378,6 +391,74 @@ class Maintenance extends Page implements HasForms
             ->title(__('maintenance.notifications.logs_cleared', ['size' => static::formatBytes($freed)]))
             ->body($failed ? __('maintenance.notifications.logs_failed', ['count' => $failed]) : null)
             ->{$failed ? 'warning' : 'success'}()
+            ->send();
+    }
+
+    /**
+     * @return array<string, array{size: int, modified: int}>
+     */
+    public function logFiles(): array
+    {
+        return LogReader::files();
+    }
+
+    /** The chosen log file, only ever one of the files in storage/logs. */
+    protected function logPath(): ?string
+    {
+        $files = $this->logFiles();
+        $name = array_key_exists($this->logFile, $files) ? $this->logFile : array_key_first($files);
+
+        return $name ? storage_path('logs/'.$name) : null;
+    }
+
+    /**
+     * @return array{entries: list<array{time: string, env: string, level: string, message: string, details: string}>, truncated: bool}
+     */
+    public function logEntries(): array
+    {
+        $path = $this->logPath();
+
+        if (! $this->showLogs || ! $path) {
+            return ['entries' => [], 'truncated' => false];
+        }
+
+        return LogReader::tail(
+            $path,
+            in_array($this->logLimit, [25, 50, 100, 200], true) ? $this->logLimit : 50,
+            in_array($this->logLevel, LogReader::LEVELS, true) ? $this->logLevel : null,
+            mb_substr($this->logSearch, 0, 200),
+        );
+    }
+
+    public function toggleLogs(): void
+    {
+        $this->showLogs = ! $this->showLogs;
+    }
+
+    public function downloadLog(): void
+    {
+        $path = $this->logPath();
+
+        if ($path && is_file($path)) {
+            $this->redirect(URL::temporarySignedRoute('admin.logs.download', now()->addMinutes(5), ['file' => basename($path)]));
+        }
+    }
+
+    public function clearLogFile(): void
+    {
+        $path = $this->logPath();
+
+        if (! $path || @file_put_contents($path, '', LOCK_EX) === false) {
+            Notification::make()->title(__('maintenance.notifications.logs_failed', ['count' => 1]))->warning()->send();
+
+            return;
+        }
+
+        clearstatcache();
+
+        Notification::make()
+            ->title(__('maintenance.notifications.log_file_cleared', ['file' => basename($path)]))
+            ->success()
             ->send();
     }
 

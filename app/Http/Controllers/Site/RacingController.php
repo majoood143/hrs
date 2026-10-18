@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
+use App\Services\Racing\ArabicNameSearch;
 use App\Services\Racing\RacingClient;
 use App\Services\Racing\RacingSearchType;
 use App\Services\Racing\RacingUnavailableException;
@@ -14,7 +15,10 @@ use Illuminate\View\View;
 
 class RacingController extends Controller
 {
-    public function __construct(private readonly RacingClient $racing) {}
+    public function __construct(
+        private readonly RacingClient $racing,
+        private readonly ArabicNameSearch $arabic,
+    ) {}
 
     public function search(Request $request): View
     {
@@ -97,7 +101,9 @@ class RacingController extends Controller
      */
     private function sections(Request $request, string $query, RacingSearchType $type): array
     {
-        $groups = $this->racing->search($query, $type, app()->getLocale());
+        $groups = ArabicNameSearch::applies($query)
+            ? $this->arabic->search($query, $type, app()->getLocale())
+            : $this->racing->search($query, $type, app()->getLocale());
         $sections = [];
 
         foreach (['horse', 'owner', 'jockey', 'trainer'] as $group) {

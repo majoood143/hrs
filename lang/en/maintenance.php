@@ -15,6 +15,7 @@ return [
         'enable' => 'This will take the public website offline for all visitors except allowed IPs and the bypass link. Continue?',
         'disable' => 'This will bring the public website back online. Continue?',
         'clear_logs' => 'This permanently empties every log file in storage/logs. Continue?',
+        'clear_log_file' => 'This permanently empties the selected log file. Continue?',
     ],
 
     'actions' => [
@@ -52,6 +53,7 @@ return [
         'command_ran' => 'Ran `:command` successfully.',
         'logs_cleared' => 'Log files cleared (:size freed).',
         'logs_failed' => ':count file(s) could not be emptied (check file permissions).',
+        'log_file_cleared' => ':file cleared.',
     ],
 
     'system' => [
@@ -97,6 +99,22 @@ return [
 
         'view_health_report' => 'View full health report',
         'view_backups' => 'Manage backups',
+    ],
+
+    'logs' => [
+        'title' => 'Log Viewer',
+        'description' => 'The latest entries of the application logs (storage/logs), newest first. Click an entry for its details.',
+        'show' => 'Show logs',
+        'hide' => 'Hide logs',
+        'no_files' => 'There are no log files yet.',
+        'all_levels' => 'All levels',
+        'search' => 'Search the logs…',
+        'last_entries' => 'Last :count entries',
+        'refresh' => 'Refresh',
+        'download' => 'Download file',
+        'clear_file' => 'Clear this file',
+        'empty' => 'No log entries match.',
+        'truncated' => 'Only the most recent 64 MB of the file were searched. Download the file to search all of it.',
     ],
 
     'quick_actions' => [

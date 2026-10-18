@@ -34,7 +34,7 @@ class RacingHandicapController extends Controller
             return view('site.racing.handicap', ['unavailable' => true] + $state + RacingSeo::for(__('racing.pages.handicap.title')));
         }
 
-        $horses = HandicapRatings::filterAndSort($horses, $q, $sort, $dir);
+        $horses = HandicapRatings::filterAndSort($horses, $q, $sort, $dir, $q === '' ? [] : HandicapRatings::otherNames($this->racing, app()->getLocale()));
 
         $perPage = config('racing.handicap_per_page');
         $page = max(1, (int) $request->query('page', 1));

@@ -8,6 +8,7 @@ use App\Http\Resources\V1\Racing\RacingMeetingResource;
 use App\Http\Resources\V1\Racing\RacingProfileResource;
 use App\Http\Resources\V1\Racing\RacingRaceDayResource;
 use App\Http\Resources\V1\Racing\RacingSearchGroupResource;
+use App\Services\Racing\ArabicNameSearch;
 use App\Services\Racing\HandicapRatings;
 use App\Services\Racing\RacingClient;
 use App\Services\Racing\RacingSearchType;
@@ -30,14 +31,18 @@ class RacingController extends Controller
 {
     private const SEARCH_TYPES = ['all', 'horse', 'owner', 'jockey', 'trainer'];
 
-    public function __construct(private readonly RacingClient $racing) {}
+    public function __construct(
+        private readonly RacingClient $racing,
+        private readonly ArabicNameSearch $arabic,
+    ) {}
 
     /**
      * Search the racing database
      *
-     * Horses, owners, jockeys and trainers by name (Latin letters only: the source does not search
-     * Arabic). `type=all` (default) gives the first results of each group with its `total`; one
-     * type gives that group's results page by page (`meta`).
+     * Horses, owners, jockeys and trainers by name. `type=all` (default) gives the first results of
+     * each group with its `total`; one type gives that group's results page by page (`meta`).
+     * An Arabic name is matched in the source's Arabic lists (the source's search is Latin-only), so
+     * its rows show what those lists know: a horse's rating and last run, a person's wins and runs.
      *
      * @unauthenticated
      */
@@ -51,7 +56,9 @@ class RacingController extends Controller
 
         $query = trim(preg_replace('/\s+/u', ' ', $validated['q']) ?? '');
         $type = ($validated['type'] ?? 'all') === 'all' ? RacingSearchType::All : RacingSearchType::fromGroup($validated['type']);
-        $groups = $this->available(fn () => $this->racing->search($query, $type, app()->getLocale()));
+        $groups = $this->available(fn () => ArabicNameSearch::applies($query)
+            ? $this->arabic->search($query, $type, app()->getLocale())
+            : $this->racing->search($query, $type, app()->getLocale()));
 
         $sections = [];
         $meta = null;
@@ -202,7 +209,7 @@ class RacingController extends Controller
      * Handicap ratings
      *
      * Every rated horse, filtered like the website (`breed` all|tb|pa, `location`
-     * all|local|non-local, `q` part of the name) and sorted (`sort` name|rating|rating_date|last_ran,
+     * all|local|non-local, `q` part of the name, in any language) and sorted (`sort` name|rating|rating_date|last_ran,
      * `dir` asc|desc; unrated horses last). 50 per page. A cold list can take the source up to 45 s.
      *
      * @unauthenticated
@@ -221,11 +228,14 @@ class RacingController extends Controller
         $breed = $validated['breed'] ?? 'all';
         $location = $validated['location'] ?? 'all';
 
+        $q = trim((string) ($validated['q'] ?? ''));
+
         $horses = HandicapRatings::filterAndSort(
             $this->available(fn () => $this->racing->handicap(HandicapRatings::BREEDS[$breed], HandicapRatings::LOCATIONS[$location], app()->getLocale())),
-            trim((string) ($validated['q'] ?? '')),
+            $q,
             $validated['sort'] ?? 'name',
             $validated['dir'] ?? 'asc',
+            $q === '' ? [] : HandicapRatings::otherNames($this->racing, app()->getLocale()),
         );
 
         $perPage = config('racing.handicap_per_page');

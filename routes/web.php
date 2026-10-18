@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\LogDownloadController;
 use App\Http\Controllers\Site\AccountAuthController;
 use App\Http\Controllers\Site\AccountOrderController;
 use App\Http\Controllers\Site\AccountPackageController;
@@ -21,8 +22,8 @@ use App\Http\Controllers\Site\RacingHandicapController;
 use App\Http\Controllers\Site\RacingPdfController;
 use App\Http\Controllers\Site\RacingRaceController;
 use App\Http\Controllers\Site\RacingWidgetController;
-use App\Http\Controllers\Site\SilksController;
 use App\Http\Controllers\Site\ShopController;
+use App\Http\Controllers\Site\SilksController;
 use App\Http\Controllers\Site\StableBookingController;
 use App\Http\Controllers\Site\StableController;
 use App\Http\Controllers\Site\ToolSaleController;
@@ -32,6 +33,12 @@ use App\Models\CmsRedirect;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PageController::class, 'home'])->name('home');
+
+// Admin → Maintenance → Log viewer: a signed link made by the page.
+Route::get('/admin-logs/{file}', LogDownloadController::class)
+    ->middleware(['auth', 'signed'])
+    ->where('file', '[A-Za-z0-9._-]+\\.log')
+    ->name('admin.logs.download');
 
 // Website links that open the Muhra app (universal links / App Links): see Support\MobileApp\AppLinks.
 Route::get('/.well-known/apple-app-site-association', [AppLinksController::class, 'apple'])->name('app-links.apple');

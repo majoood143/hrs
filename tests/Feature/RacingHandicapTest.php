@@ -64,7 +64,14 @@ class RacingHandicapTest extends TestCase
         $names = array_column($this->horses('/racing/handicap-ratings?q=QOUS'), 'name');
 
         $this->assertSame(['Al Qous (OM)'], $names);
-        $this->assertSame(1, $this->sentCount('method=getHandicapRatings'), 'searching does not ask the source again');
+        $this->assertSame(1, $this->sentCount('lang=en'), 'searching does not ask the source again');
+    }
+
+    public function test_name_search_matches_the_name_in_either_language(): void
+    {
+        $this->assertSame(['القوس (عُمان)'], array_column($this->horses('/racing/handicap-ratings?q=qous&lang=ar'), 'name'));
+        $this->assertSame(['Aamaaq (GB)', 'Al Qous (OM)'], array_column($this->horses('/racing/handicap-ratings?lang=en&q='.urlencode('القوس')), 'name'));
+        $this->assertSame(['القوس (عُمان)'], array_column($this->horses('/racing/handicap-ratings?q='.urlencode('القُوس (عمان)').'&lang=ar'), 'name'), 'diacritics are ignored');
     }
 
     public function test_no_matches_message(): void
@@ -135,8 +142,11 @@ class RacingHandicapTest extends TestCase
         $this->get('/racing/handicap-ratings')->assertOk();
         $this->get('/racing/handicap-ratings?sort=rating')->assertOk();
         $this->get('/racing/handicap-ratings?q=al')->assertOk();
+        $this->get('/racing/handicap-ratings?q=qous')->assertOk();
 
-        $this->assertSame(1, $this->sentCount('method=getHandicapRatings'));
+        // one list per language: a search also reads the names in the other language
+        $this->assertSame(1, $this->sentCount('lang=en'));
+        $this->assertSame(1, $this->sentCount('lang=ar'));
     }
 
     public function test_an_error_page_from_the_source_is_a_friendly_message(): void
@@ -162,6 +172,7 @@ class RacingHandicapTest extends TestCase
         $this->artisan('racing:warm')
             ->expectsOutputToContain('Handicap ratings (en): 31 horses cached.')
             ->expectsOutputToContain('Handicap ratings (ar): 31 horses cached.')
+            ->expectsOutputToContain('Statistics, jockeys (ar): 4 cached.')
             ->assertSuccessful();
 
         $this->get('/racing/handicap-ratings')->assertOk();

@@ -217,6 +217,8 @@ class RacingTest extends TestCase
         $name = $all['data'][0]['name'];
         $this->getJson('/api/v1/racing/handicap?q='.urlencode(mb_substr($name, 0, 4)))->assertOk()->assertJsonPath('data.0.name', fn ($n) => mb_stripos($n, mb_substr($name, 0, 4)) !== false);
 
+        $this->getJson('/api/v1/racing/handicap?q=qous', ['Accept-Language' => 'ar'])->assertOk()->assertJsonPath('data.0.name', 'القوس (عُمان)')->assertJsonCount(1, 'data');
+
         $this->getJson('/api/v1/racing/handicap?breed=xx')->assertUnprocessable()->assertJsonValidationErrors('breed');
     }
 

@@ -31,6 +31,7 @@ class RacingClient
         private readonly RacingMeetingParser $meetingParser,
         private readonly RacingHandicapParser $handicapParser,
         private readonly RacingCalendarParser $calendarParser,
+        private readonly RacingStatsParser $statsParser,
     ) {}
 
     /**
@@ -198,6 +199,55 @@ class RacingClient
         Cache::put($this->handicapKey($breed, $location, $locale), $horses, config('racing.handicap_ttl'));
 
         return count($horses);
+    }
+
+    /**
+     * Every jockey, owner or trainer who has run a horse (the Statistics page, all seasons), with
+     * their name in $locale: the list behind the Arabic name search. One quick call (~2 s), cached
+     * like the handicap list and kept warm by `racing:warm`.
+     *
+     * @param  'owner'|'jockey'|'trainer'  $entity
+     * @return list<array{id: int, name: string, rank: int, wins: int, runs: int}>
+     *
+     * @throws RacingUnavailableException
+     */
+    public function people(string $entity, string $locale): array
+    {
+        return Cache::remember($this->peopleKey($entity, $locale), config('racing.handicap_ttl'), fn () => $this->fetchPeople($entity, $locale));
+    }
+
+    /**
+     * Re-fetch a people list and swap it into the cache, for `racing:warm`.
+     *
+     * @param  'owner'|'jockey'|'trainer'  $entity
+     *
+     * @throws RacingUnavailableException
+     */
+    public function refreshPeople(string $entity, string $locale): int
+    {
+        $people = $this->fetchPeople($entity, $locale);
+
+        Cache::put($this->peopleKey($entity, $locale), $people, config('racing.handicap_ttl'));
+
+        return count($people);
+    }
+
+    private function peopleKey(string $entity, string $locale): string
+    {
+        return sprintf('racing:people:%s:%s', $entity, $this->lang($locale));
+    }
+
+    /** @throws RacingUnavailableException */
+    private function fetchPeople(string $entity, string $locale): array
+    {
+        return $this->statsParser->parse($this->get("/components/{$entity}.cfc", [
+            'method' => 'get'.ucfirst($entity).'Stats',
+            'jqgrid' => 'true',
+            'breed' => 'TB,PA',
+            'season' => '', // every season
+            'rows' => 10000,
+            'page' => 1,
+        ], $locale, config('racing.handicap_timeout')));
     }
 
     private function handicapKey(string $breed, string $location, string $locale): string

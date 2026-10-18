@@ -1,6 +1,12 @@
 @php
     $systemGroups = $this->systemInfoGroups();
     $usage = $this->usageStats();
+    $logFiles = $this->logFiles();
+    $log = $this->logEntries();
+    $levelColors = [
+        'emergency' => 'danger', 'alert' => 'danger', 'critical' => 'danger', 'error' => 'danger',
+        'warning' => 'warning', 'notice' => 'info', 'info' => 'info', 'debug' => 'gray',
+    ];
 @endphp
 <x-filament-panels::page>
     <div class="flex flex-col gap-y-6">
@@ -183,6 +189,108 @@
                     </x-filament::button>
                 @endunless
             </div>
+        </x-filament::section>
+
+        <x-filament::section
+            :heading="__('maintenance.logs.title')"
+            :description="__('maintenance.logs.description')"
+            icon="heroicon-o-document-text"
+            icon-color="danger"
+        >
+            <x-slot name="afterHeader">
+                <x-filament::button size="sm" color="gray" wire:click="toggleLogs"
+                    :icon="$showLogs ? 'heroicon-o-eye-slash' : 'heroicon-o-eye'">
+                    {{ $showLogs ? __('maintenance.logs.hide') : __('maintenance.logs.show') }}
+                </x-filament::button>
+            </x-slot>
+
+            @if ($showLogs)
+                @if ($logFiles === [])
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('maintenance.logs.no_files') }}</p>
+                @else
+                    <div class="flex flex-col gap-4">
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                            <x-filament::input.wrapper>
+                                <x-filament::input.select wire:model.live="logFile">
+                                    @foreach ($logFiles as $name => $file)
+                                        <option value="{{ $name }}">{{ $name }} ({{ $this::formatBytes($file['size']) }})</option>
+                                    @endforeach
+                                </x-filament::input.select>
+                            </x-filament::input.wrapper>
+
+                            <x-filament::input.wrapper>
+                                <x-filament::input.select wire:model.live="logLevel">
+                                    <option value="">{{ __('maintenance.logs.all_levels') }}</option>
+                                    @foreach (\App\Support\LogReader::LEVELS as $level)
+                                        <option value="{{ $level }}">{{ strtoupper($level) }}</option>
+                                    @endforeach
+                                </x-filament::input.select>
+                            </x-filament::input.wrapper>
+
+                            <x-filament::input.wrapper prefix-icon="heroicon-o-magnifying-glass">
+                                <x-filament::input type="search" wire:model.live.debounce.500ms="logSearch"
+                                    :placeholder="__('maintenance.logs.search')" />
+                            </x-filament::input.wrapper>
+
+                            <x-filament::input.wrapper>
+                                <x-filament::input.select wire:model.live="logLimit">
+                                    @foreach ([25, 50, 100, 200] as $limit)
+                                        <option value="{{ $limit }}">{{ __('maintenance.logs.last_entries', ['count' => $limit]) }}</option>
+                                    @endforeach
+                                </x-filament::input.select>
+                            </x-filament::input.wrapper>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <x-filament::button size="sm" color="gray" icon="heroicon-o-arrow-path" wire:click="$refresh">
+                                {{ __('maintenance.logs.refresh') }}
+                            </x-filament::button>
+                            <x-filament::button size="sm" color="gray" icon="heroicon-o-arrow-down-tray" wire:click="downloadLog">
+                                {{ __('maintenance.logs.download') }}
+                            </x-filament::button>
+                            <x-filament::button size="sm" color="danger" icon="heroicon-o-trash" wire:click="clearLogFile"
+                                wire:confirm="{{ __('maintenance.confirm.clear_log_file') }}">
+                                {{ __('maintenance.logs.clear_file') }}
+                            </x-filament::button>
+                            <x-filament::loading-indicator class="h-5 w-5 text-gray-400" wire:loading />
+                        </div>
+
+                        <div dir="ltr" class="max-h-[36rem] overflow-y-auto rounded-xl border border-gray-800 bg-gray-950 font-mono text-xs">
+                            @forelse ($log['entries'] as $i => $entry)
+                                <details wire:key="log-{{ md5($entry['time'].$entry['message'].$i) }}"
+                                    class="group border-b border-gray-800/80 last:border-b-0">
+                                    <summary @class([
+                                        'flex cursor-pointer list-none items-start gap-3 px-4 py-2 hover:bg-white/5',
+                                        'cursor-default' => $entry['details'] === '',
+                                    ])>
+                                        <span class="shrink-0 text-gray-500">{{ $entry['time'] }}</span>
+                                        <x-filament::badge size="sm" :color="$levelColors[$entry['level']] ?? 'gray'" class="shrink-0">
+                                            {{ strtoupper($entry['level']) }}
+                                        </x-filament::badge>
+                                        <span class="min-w-0 flex-1 break-words text-gray-200">{{ $entry['message'] }}</span>
+                                        @if ($entry['details'] !== '')
+                                            <x-filament::icon icon="heroicon-m-chevron-down"
+                                                class="h-4 w-4 shrink-0 text-gray-500 transition group-open:rotate-180" />
+                                        @endif
+                                    </summary>
+                                    @if ($entry['details'] !== '')
+                                        <pre class="overflow-x-auto whitespace-pre px-4 pb-3 pt-1 text-[11px] leading-relaxed text-gray-400">{{ $entry['details'] }}</pre>
+                                    @endif
+                                </details>
+                            @empty
+                                <div class="flex flex-col items-center justify-center gap-2 px-4 py-12 text-center">
+                                    <x-filament::icon icon="heroicon-o-document-magnifying-glass" class="h-8 w-8 text-gray-600" />
+                                    <p class="text-sm text-gray-500">{{ __('maintenance.logs.empty') }}</p>
+                                </div>
+                            @endforelse
+                        </div>
+
+                        @if ($log['truncated'])
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('maintenance.logs.truncated') }}</p>
+                        @endif
+                    </div>
+                @endif
+            @endif
         </x-filament::section>
 
         <form wire:submit.prevent>

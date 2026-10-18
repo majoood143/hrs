@@ -41,6 +41,11 @@ trait FakesRacingSource
             $path = parse_url($request->url(), PHP_URL_PATH);
             $ar = ($q['lang'] ?? 'en') === 'ar';
 
+            // the Statistics page's lists (all seasons), behind the Arabic name search
+            if (preg_match('#^/components/(jockey|owner|trainer)\.cfc$#', $path, $m)) {
+                return Http::response($this->fixture("stats_{$m[1]}_".($ar ? 'ar' : 'en').'.json'));
+            }
+
             if ($path === '/components/race.cfc') {
                 return match ($q['method'] ?? null) {
                     'getRaceLink' => Http::response($this->fixture(match ((int) $q['raceID']) {
@@ -48,7 +53,10 @@ trait FakesRacingSource
                         10005 => 'raceinfo_10005.json',
                         default => 'raceinfo_9178.json',
                     })),
-                    'getHandicapRatings' => Http::response($this->fixture('handicap.json')),
+                    // the source names horses in the page's language: two Arabic names are enough to test the searches
+                    'getHandicapRatings' => Http::response($ar
+                        ? strtr($this->fixture('handicap.json'), ['Al Qous (OM)' => 'القوس (عُمان)', 'Aamaaq (GB)' => 'أعماق القوس (بريطانيا)'])
+                        : $this->fixture('handicap.json')),
                     'getRaceDetailsWeb' => Http::response(match (true) {
                         // one day's races (the widget) vs the race dates of a season (the calendar)
                         ($q['dateFrom'] ?? null) === ($q['dateTo'] ?? 0) => match ($q['dateFrom']) {
