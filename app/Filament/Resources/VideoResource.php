@@ -164,6 +164,11 @@ class VideoResource extends Resource
                     ->label(__('videos.fields.order'))
                     ->sortable(),
 
+                TextColumn::make('views_count')
+                    ->label(__('videos.fields.views_count'))
+                    ->numeric()
+                    ->sortable(),
+
                 TextColumn::make('created_at')
                     ->label(__('videos.fields.created_at'))
                     ->dateTime()

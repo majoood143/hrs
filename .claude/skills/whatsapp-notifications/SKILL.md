@@ -23,6 +23,8 @@ Every WhatsApp text this app sends contains **English first, then Arabic, in one
 - `$type` is a short log key (max 32 chars): `new_horse_sale_post`, `test`, and later `order_received` and so on.
 - Settings are read through `App\Support\WhatsAppSettings`: `enabled()`, `instanceId()` (a **UUID**: plugin instances use UUID keys), `recipients()` (normalized, de-duplicated), `alertEnabled($type)` (defaults to on).
 - Evolution credentials are in `.env` (`EVOLUTION_URL`, `EVOLUTION_API_KEY`, …), never in the DB. The plugin's webhook route is `POST /api/webhooks/evolution` (its README says otherwise).
+- The plugin never sends the `X-Webhook-Secret` header its own controller requires (every webhook is a 401 once `EVOLUTION_WEBHOOK_SECRET` is set). Point an instance's webhook with `php artisan whatsapp:webhook [instance] [--url=]` (`--show` prints the current one) after changing the URL/secret or creating an instance. Locally, Evolution needs a public tunnel to reach the site.
+- Sent texts are logged in `notification_logs` **and** kept in the plugin's `whatsapp_messages` (outgoing; one-time codes without their text), where `MESSAGES_UPDATE` webhooks move them to delivered/read.
 
 ## Adding a new alert (e.g. an order received, a booking)
 

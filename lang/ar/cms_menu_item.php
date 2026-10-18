@@ -28,6 +28,9 @@ return [
         'target' => 'الهدف',
         'order' => 'الترتيب',
     ],
+    'filters' => [
+        'top_level' => 'العناصر الرئيسية فقط',
+    ],
     'actions' => [
         'create_first' => 'أضف أول عنصر قائمة',
     ],

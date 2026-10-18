@@ -13,6 +13,7 @@ return [
         'youtube_url' => 'YouTube URL',
         'youtube_url_helper' => 'Paste a YouTube link (e.g. youtube.com/watch?v=... or youtu.be/...).',
         'order' => 'Order',
+        'views_count' => 'Views',
         'created_at' => 'Created',
         'is_active' => 'Active',
     ],

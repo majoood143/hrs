@@ -17,6 +17,8 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class CmsMenuItemsRelationManager extends RelationManager
@@ -28,7 +30,7 @@ class CmsMenuItemsRelationManager extends RelationManager
         return $schema
             ->components([
                 TranslatableInput::grid(fn ($code, $meta) => TextInput::make("label.{$code}")
-                    ->label(__('cms_menu_item.fields.label') . ' (' . $meta['native'] . ')')
+                    ->label(__('cms_menu_item.fields.label').' ('.$meta['native'].')')
                     ->required($code === TranslatableInput::defaultLocale())
                     ->maxLength(255))
                     ->columnSpanFull(),
@@ -94,7 +96,7 @@ class CmsMenuItemsRelationManager extends RelationManager
                 TextColumn::make('label')
                     ->label(__('cms_menu_item.columns.label'))
                     ->weight('bold')
-                    ->formatStateUsing(fn ($state, CmsMenuItem $record) => $record->parent_id ? '— ' . $state : $state),
+                    ->formatStateUsing(fn ($state, CmsMenuItem $record) => $record->parent_id ? '— '.$state : $state),
 
                 TextColumn::make('parent.label')
                     ->label(__('cms_menu_item.columns.parent'))
@@ -115,6 +117,31 @@ class CmsMenuItemsRelationManager extends RelationManager
                 TextColumn::make('order')
                     ->label(__('cms_menu_item.columns.order'))
                     ->sortable(),
+            ])
+            ->filters([
+                SelectFilter::make('parent_id')
+                    ->label(__('cms_menu_item.columns.parent'))
+                    ->options(fn () => ['top' => __('cms_menu_item.filters.top_level')]
+                        + $this->getOwnerRecord()->items()->get()
+                            ->mapWithKeys(fn (CmsMenuItem $item) => [$item->id => $item->getTranslation('label', app()->getLocale())])
+                            ->all())
+                    ->query(fn ($query, array $data) => match ($data['value'] ?? null) {
+                        null, '' => $query,
+                        'top' => $query->whereNull('parent_id'),
+                        default => $query->where('parent_id', $data['value']),
+                    })
+                    ->native(false),
+
+                SelectFilter::make('target')
+                    ->label(__('cms_menu_item.columns.target'))
+                    ->options([
+                        '_self' => __('cms_menu_item.fields.target_self'),
+                        '_blank' => __('cms_menu_item.fields.target_blank'),
+                    ])
+                    ->native(false),
+
+                TernaryFilter::make('is_button')
+                    ->label(__('cms_menu_item.fields.is_button')),
             ])
             ->modifyQueryUsing(fn ($query) => $query->orderByRaw('COALESCE(parent_id, id) asc, parent_id is not null asc, `order` asc'))
             ->headerActions([

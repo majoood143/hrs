@@ -27,6 +27,7 @@ use Livewire\Livewire;
 use Tests\Concerns\PreparesOrderSite;
 use Tests\TestCase;
 use WallaceMartinss\FilamentEvolution\Models\WhatsappInstance;
+use WallaceMartinss\FilamentEvolution\Models\WhatsappMessage;
 use WallaceMartinss\FilamentEvolution\Services\EvolutionClient;
 
 class WhatsAppAdminAlertsTest extends TestCase
@@ -42,6 +43,7 @@ class WhatsAppAdminAlertsTest extends TestCase
         foreach ([
             '2026_09_23_000002_create_notification_logs_table',
             '2026_09_26_140451_create_whatsapp_instances_table',
+            '2026_09_26_140452_create_whatsapp_messages_table',
         ] as $migration) {
             (require database_path("migrations/{$migration}.php"))->up();
         }
@@ -210,6 +212,65 @@ class WhatsAppAdminAlertsTest extends TestCase
         $this->assertSame('sent', $log->status);
         $this->assertSame('whatsapp', $log->channel);
         $this->assertSame('MSG-1', $log->provider_reference);
+    }
+
+    public function test_a_sent_text_is_kept_in_the_whatsapp_messages_page(): void
+    {
+        $this->alertsOn();
+        $instance = WhatsappInstance::create(['name' => 'online', 'number' => '96890000002', 'status' => 'open']);
+        Http::fake(['evo.test/*' => Http::response(['key' => ['id' => 'MSG-9', 'remoteJid' => '96891234567@s.whatsapp.net']], 201)]);
+
+        app(WhatsAppNotifier::class)->send('9123 4567', 'Hello', 'test');
+        app(WhatsAppNotifier::class)->send('9123 4567', 'Your code is 123456', 'verification_code', sensitive: true);
+
+        $messages = WhatsappMessage::orderBy('created_at')->get();
+        $this->assertCount(2, $messages);
+        $this->assertSame($instance->id, $messages[0]->instance_id);
+        $this->assertSame('MSG-9', $messages[0]->message_id);
+        $this->assertSame('96891234567', $messages[0]->phone);
+        $this->assertSame('outgoing', $messages[0]->direction->value);
+        $this->assertSame('Hello', $messages[0]->content['text']);
+        // a one-time code stays out of the admin, like in notification_logs
+        $this->assertNull($messages[1]->content['text']);
+        $this->assertNull($messages[1]->raw_payload);
+    }
+
+    public function test_a_failed_send_is_not_kept_as_a_message(): void
+    {
+        $this->alertsOn();
+        WhatsappInstance::create(['name' => 'online', 'number' => '96890000002', 'status' => 'open']);
+        Http::fake(['evo.test/*' => Http::response(['message' => 'instance not connected'], 400)]);
+
+        app(WhatsAppNotifier::class)->send('91234567', 'Hi', 'test');
+
+        $this->assertSame(0, WhatsappMessage::count());
+    }
+
+    public function test_the_webhook_command_sets_the_url_events_and_secret_header(): void
+    {
+        WhatsappInstance::create(['name' => 'hrs-alerts', 'number' => '96890000002', 'status' => 'open']);
+        config([
+            'filament-evolution.webhook.url' => 'https://hrs.test/api/webhooks/evolution',
+            'filament-evolution.webhook.secret' => 's3cret',
+        ]);
+        Http::fake(['evo.test/*' => Http::response(['id' => 'x'], 201)]);
+
+        $this->artisan('whatsapp:webhook')->assertSuccessful();
+
+        Http::assertSent(fn (Request $request) => $request->url() === 'https://evo.test/webhook/set/hrs-alerts'
+            && $request->header('apikey') === ['test-key']
+            && $request['webhook']['enabled'] === true
+            && $request['webhook']['url'] === 'https://hrs.test/api/webhooks/evolution'
+            && $request['webhook']['headers'] === ['X-Webhook-Secret' => 's3cret']
+            && in_array('MESSAGES_UPSERT', $request['webhook']['events'], true));
+    }
+
+    public function test_the_webhook_command_reports_an_api_error(): void
+    {
+        config(['filament-evolution.webhook.url' => 'https://hrs.test/api/webhooks/evolution']);
+        Http::fake(['evo.test/*' => Http::response(['response' => ['message' => ['Instance not found']]], 404)]);
+
+        $this->artisan('whatsapp:webhook', ['instance' => 'missing'])->assertFailed();
     }
 
     public function test_without_a_chosen_instance_the_first_connected_one_is_used(): void

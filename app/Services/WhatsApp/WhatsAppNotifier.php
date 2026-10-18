@@ -8,11 +8,14 @@ use App\Support\WhatsAppSettings;
 use Throwable;
 use WallaceMartinss\FilamentEvolution\Enums\StatusConnectionEnum;
 use WallaceMartinss\FilamentEvolution\Models\WhatsappInstance;
+use WallaceMartinss\FilamentEvolution\Models\WhatsappMessage;
 use WallaceMartinss\FilamentEvolution\Services\EvolutionClient;
 
 /**
  * Sends one WhatsApp text through the Evolution API (the filament-whatsapp-conector plugin) and
  * writes the attempt to notification_logs (channel "whatsapp"), like SMS and email. Never throws.
+ * A sent text is also kept in the plugin's whatsapp_messages (admin → WhatsApp messages), where
+ * the MESSAGES_UPDATE webhooks then move it to delivered / read.
  *
  * Goes through EvolutionClient, not the plugin's WhatsappService/Whatsapp facade: that one's
  * formatNumber() takes any 10-11 digit number for a Brazilian one and prefixes 55, and an Omani
@@ -59,6 +62,7 @@ class WhatsAppNotifier
 
             if ($error === null) {
                 $response = $this->client->sendText($instance->name, $phone, $message);
+                $this->record($instance, $phone, $sensitive ? null : $message, $response);
             }
         } catch (Throwable $e) {
             $error = 'WhatsApp error: '.$e->getMessage();
@@ -74,5 +78,26 @@ class WhatsAppNotifier
             'error' => $error,
             'response' => $response ?? ($instance ? ['instance' => $instance->name] : null),
         ]);
+    }
+
+    /** Never lets a bookkeeping error turn a sent message into a failed one. */
+    private function record(WhatsappInstance $instance, string $phone, ?string $message, array $response): void
+    {
+        try {
+            WhatsappMessage::create([
+                'instance_id' => $instance->id,
+                'message_id' => $response['key']['id'] ?? null,
+                'remote_jid' => $response['key']['remoteJid'] ?? $phone.'@s.whatsapp.net',
+                'phone' => $phone,
+                'direction' => 'outgoing',
+                'type' => 'text',
+                'content' => ['text' => $message],
+                'status' => 'sent',
+                'raw_payload' => $message === null ? null : $response,
+                'sent_at' => now(),
+            ]);
+        } catch (Throwable $e) {
+            report($e);
+        }
     }
 }

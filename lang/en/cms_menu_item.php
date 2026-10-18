@@ -28,6 +28,9 @@ return [
         'target' => 'Target',
         'order' => 'Order',
     ],
+    'filters' => [
+        'top_level' => 'Top level only',
+    ],
     'actions' => [
         'create_first' => 'Add your first menu item',
     ],
