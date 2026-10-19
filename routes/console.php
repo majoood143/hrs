@@ -32,6 +32,10 @@ Schedule::command('sanctum:prune-expired', ['--hours' => 24])->daily();
 // around a cold fetch as a safety net, e.g. right after a deploy).
 Schedule::command('racing:warm')->everyThirtyMinutes()->withoutOverlapping();
 
+// Watched YouTube channels (admin → YouTube channels): new videos → the inbox + a WhatsApp alert.
+// YouTube refreshes the feeds with some delay anyway, so checking more often gains little.
+Schedule::command('youtube:check')->everyFifteenMinutes()->withoutOverlapping();
+
 // WhatsApp (Evolution API plugin): drop old webhook events and message history
 // (config/filament-evolution.php → cleanup; the admin alerts' own log is notification_logs).
 Schedule::command('evolution:cleanup')->dailyAt('03:30');

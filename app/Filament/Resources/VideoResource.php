@@ -66,7 +66,7 @@ class VideoResource extends Resource
      *
      * @return Collection<int, string>
      */
-    protected static function folderOptions(): Collection
+    public static function folderOptions(): Collection
     {
         return VideoFolder::query()
             ->with('parent.parent.parent')

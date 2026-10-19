@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    // YouTube Data API v3 key, for the watched channels (admin → YouTube channels): live/upcoming
+    // status, duration and embeddability of new videos. Optional: without it the free feed alone
+    // is used. Restrict it in Google Cloud to the YouTube Data API and the server's IP.
+    'youtube' => [
+        'key' => env('YOUTUBE_API_KEY'),
+    ],
+
 ];

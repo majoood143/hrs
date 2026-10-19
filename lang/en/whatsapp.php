@@ -20,12 +20,24 @@ return [
         'admin' => '🛠 Review and approve: :link',
     ],
 
+    'youtube' => [
+        'heading' => '▶️ New on YouTube: :channel',
+        'kind' => 'Type: :kind',
+        'live' => '🔴 Live now',
+        'upcoming' => '📅 Live stream or premiere, scheduled',
+        'upcoming_at' => '📅 Live stream or premiere, starts :time (Muscat time)',
+        'not_embeddable' => '⚠️ The channel does not allow playing it on other sites, so it cannot play in the video library.',
+        'more' => '…and :count more in the inbox.',
+        'inbox' => '🛠 Add to the video library: :link',
+    ],
+
     'post_types' => [
         'transfer_post' => 'Transfer board',
         'horse_sale_post' => 'Horses for sale',
         'tool_sale_post' => 'Tools for sale',
         'farrier' => 'Farriers',
         'stable_registration' => 'New stable registrations',
+        'youtube_video' => 'New YouTube videos (watched channels)',
     ],
 
     'transfer_kinds' => [
