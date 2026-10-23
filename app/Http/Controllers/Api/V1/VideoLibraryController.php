@@ -42,7 +42,7 @@ class VideoLibraryController extends Controller
                 /** Where "back" goes; null at the top. */
                 'parent' => $parent ? new VideoFolderResource($parent) : null,
                 'children' => VideoFolderResource::collection($folder->children()->active()->ordered()->with('media')->get()),
-                'videos' => VideoResource::collection($folder->videos()->active()->latest()->latest('id')->get()),
+                'videos' => VideoResource::collection($folder->videos()->active()->ordered()->get()),
             ],
         ];
     }

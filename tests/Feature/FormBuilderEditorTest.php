@@ -102,7 +102,7 @@ class FormBuilderEditorTest extends TestCase
 
         $this->assertSame(
             ['text', 'number', 'textarea', 'date', 'email', 'phone', 'url', 'nationality',
-                'select', 'radio', 'conditional_radio', 'checkbox', 'checkboxes', 'hidden', 'file', 'heading', 'paragraph'],
+                'select', 'radio', 'conditional_radio', 'race_winner', 'checkbox', 'checkboxes', 'hidden', 'file', 'heading', 'paragraph'],
             $order,
         );
 

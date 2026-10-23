@@ -37,6 +37,12 @@ class Video extends Model
         return $query->where('is_active', true);
     }
 
+    /** The admin's order (race 1, 2, …), then newest first among equal orders (most folders leave it at 0). */
+    public function scopeOrdered(Builder $query): Builder
+    {
+        return $query->orderBy('order')->latest()->latest('id');
+    }
+
     /**
      * The description as safe HTML (rich text from the admin editor, sanitized,
      * keeping alignment, `dir` and links), or null when empty.

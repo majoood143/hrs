@@ -234,6 +234,13 @@ class FieldBlocks
             array_push($schema, ...$type->editorSchema());
         }
 
+        if ($type->canBeUnique()) {
+            $schema[] = Toggle::make('unique')
+                ->label(__('packstub-form-builder::form-builder.editor.unique'))
+                ->helperText(__('packstub-form-builder::form-builder.editor.unique_hint'))
+                ->columnSpanFull();
+        }
+
         array_push($schema, ...static::rulesSchema($type));
 
         if ($schema === []) {

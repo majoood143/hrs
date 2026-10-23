@@ -31,6 +31,18 @@ return [
         'inbox' => '🛠 للإضافة إلى مكتبة الفيديو: :link',
     ],
 
+    'race_result' => [
+        'heading' => 'نتائج السباق: :race',
+        'jockey' => 'الفارس: :name',
+        'trainer' => 'المدرب: :name',
+        'owner' => 'المالك: :name',
+        'margin' => 'الفارق :value',
+        'replay' => 'إعادة السباق: :link',
+        'no_replay' => 'إعادة السباق: لم تُنشر على يوتيوب بعد',
+        'page' => 'النتائج كاملة: :link',
+        'video_heading' => 'إعادة السباق متاحة على يوتيوب: :race',
+    ],
+
     'post_types' => [
         'transfer_post' => 'لوحة النقل',
         'horse_sale_post' => 'خيول للبيع',
@@ -38,6 +50,7 @@ return [
         'farrier' => 'البياطرة',
         'stable_registration' => 'تسجيل إسطبلات جديدة',
         'youtube_video' => 'فيديوهات يوتيوب جديدة (القنوات المتابعة)',
+        'race_result' => 'نتائج السباقات (تُرسل تلقائيًا عند نشرها)',
     ],
 
     'transfer_kinds' => [

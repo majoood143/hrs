@@ -49,7 +49,7 @@ class AppLinksTest extends TestCase
         $this->get('/.well-known/assetlinks.json')
             ->assertOk()
             ->assertJsonPath('0.relation', ['delegate_permission/common.handle_all_urls'])
-            ->assertJsonPath('0.target.package_name', 'om.muhra.app')
+            ->assertJsonPath('0.target.package_name', 'om.muhra.android')
             ->assertJsonPath('0.target.sha256_cert_fingerprints', [self::FINGERPRINT]);
     }
 

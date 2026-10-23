@@ -157,6 +157,20 @@ class ContentTest extends TestCase
         $this->getJson('/api/v1/videos/folders/hidden')->assertNotFound();
     }
 
+    public function test_a_folders_videos_follow_the_admins_order_then_newest_first(): void
+    {
+        $meeting = $this->row('video_folders', ['name' => $this->both('10th Meeting', 'السباق العاشر'), 'slug' => '10th-meeting']);
+        // a race added later still sits in its place
+        $this->row('videos', ['folder_id' => $meeting, 'title' => $this->both('race 2', 'الشوط الثاني'), 'slug' => 'race-2', 'order' => 1, 'created_at' => now()]);
+        $this->row('videos', ['folder_id' => $meeting, 'title' => $this->both('race 1', 'الشوط الأول'), 'slug' => 'race-1', 'order' => 0, 'created_at' => now()->subWeek()]);
+        $this->row('videos', ['folder_id' => $meeting, 'title' => $this->both('race 3', 'الشوط الثالث'), 'slug' => 'race-3', 'order' => 2, 'created_at' => now()->subWeek()]);
+        $this->row('videos', ['folder_id' => $meeting, 'title' => $this->both('Older talk', 'قديم'), 'slug' => 'older', 'order' => 5, 'created_at' => now()->subYear()]);
+        $this->row('videos', ['folder_id' => $meeting, 'title' => $this->both('Newer talk', 'جديد'), 'slug' => 'newer', 'order' => 5, 'created_at' => now()->subMonth()]);
+
+        $this->getJson('/api/v1/videos/folders/10th-meeting')
+            ->assertJsonPath('data.videos.*.slug', ['race-1', 'race-2', 'race-3', 'newer', 'older']);
+    }
+
     private function event(array $values): int
     {
         return $this->row('events', $values + [

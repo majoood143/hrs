@@ -31,6 +31,18 @@ return [
         'inbox' => '🛠 Add to the video library: :link',
     ],
 
+    'race_result' => [
+        'heading' => 'Race results: :race',
+        'jockey' => 'Jockey: :name',
+        'trainer' => 'Trainer: :name',
+        'owner' => 'Owner: :name',
+        'margin' => 'margin :value',
+        'replay' => 'Replay: :link',
+        'no_replay' => 'Replay: not on YouTube yet',
+        'page' => 'Full results: :link',
+        'video_heading' => 'The replay is on YouTube: :race',
+    ],
+
     'post_types' => [
         'transfer_post' => 'Transfer board',
         'horse_sale_post' => 'Horses for sale',
@@ -38,6 +50,7 @@ return [
         'farrier' => 'Farriers',
         'stable_registration' => 'New stable registrations',
         'youtube_video' => 'New YouTube videos (watched channels)',
+        'race_result' => 'Race results (sent automatically once published)',
     ],
 
     'transfer_kinds' => [

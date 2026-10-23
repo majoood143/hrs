@@ -22,6 +22,9 @@ return [
 
     'timeout' => (int) env('RACING_TIMEOUT', 15),
 
+    // The source's race times are the course's local time (race prediction forms close at the first race).
+    'timezone' => env('RACING_TIMEZONE', 'Asia/Muscat'),
+
     // Seconds parsed search results / profiles are cached for.
     'cache_ttl' => (int) env('RACING_CACHE_TTL', 600),
 
@@ -46,6 +49,10 @@ return [
 
     // Once a race day is over its races, results and links no longer change, so they are cached for a day.
     'past_day_ttl' => (int) env('RACING_PAST_DAY_TTL', 86400),
+
+    // Minutes the automatic race-result WhatsApp waits for the YouTube replay once the results are out
+    // (racing:result-alerts); a replay that comes later still goes out as a short follow-up.
+    'result_alert_video_wait' => (int) env('RACING_RESULT_ALERT_VIDEO_WAIT', 20),
 
     // Rows shown per section on the "All" search before linking to the full list.
     'all_preview' => 10,

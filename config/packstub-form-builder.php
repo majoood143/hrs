@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\Forms\RaceWinnerField;
 use Packstub\FormBuilder\Fields\Types;
 use Packstub\FormBuilder\Models\Form;
 use Packstub\FormBuilder\Models\FormSubmission;
@@ -59,6 +60,8 @@ return [
         Types\NationalityField::class,
         Types\RadioField::class,
         Types\ConditionalRadioField::class,
+        // the app's: a race's runners from the racing calendar ("Who will win race 3?")
+        RaceWinnerField::class,
         Types\CheckboxField::class,
         Types\CheckboxesField::class,
         Types\DateField::class,

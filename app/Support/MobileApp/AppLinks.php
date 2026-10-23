@@ -15,8 +15,8 @@ use App\Models\SiteSetting;
  */
 final class AppLinks
 {
-    /** The app's iOS bundle id and Android package (fixed once published). */
-    public const APP_ID = 'om.muhra.app';
+    /** The app's iOS bundle id (fixed once published); the Android package is `mobile_app.android_package`. */
+    public const IOS_APP_ID = 'om.muhra.app';
 
     /** The website paths' first segments the app has screens for; plus the homepage. */
     public const SECTIONS = [
@@ -97,7 +97,7 @@ final class AppLinks
         return [
             'applinks' => [
                 'details' => [
-                    ['appIDs' => ["{$team}.".self::APP_ID], 'components' => $components],
+                    ['appIDs' => ["{$team}.".self::IOS_APP_ID], 'components' => $components],
                 ],
             ],
         ];
@@ -116,7 +116,7 @@ final class AppLinks
             'relation' => ['delegate_permission/common.handle_all_urls'],
             'target' => [
                 'namespace' => 'android_app',
-                'package_name' => self::APP_ID,
+                'package_name' => (string) config('mobile_app.android_package'),
                 'sha256_cert_fingerprints' => $fingerprints,
             ],
         ]];

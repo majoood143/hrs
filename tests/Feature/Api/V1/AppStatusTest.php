@@ -101,8 +101,8 @@ class AppStatusTest extends TestCase
         $this->getJson('/api/v1/app-status', ['X-App-Platform' => 'android', 'X-App-Version' => '1.0.0'])
             ->assertJsonPath('data.update.status', 'optional')
             ->assertJsonPath('data.update.min_version', null)
-            ->assertJsonPath('data.update.store_url', 'https://play.google.com/store/apps/details?id=om.muhra.app')
-            ->assertJsonPath('data.update.store_app_url', 'market://details?id=om.muhra.app');
+            ->assertJsonPath('data.update.store_url', 'https://play.google.com/store/apps/details?id=om.muhra.android')
+            ->assertJsonPath('data.update.store_app_url', 'market://details?id=om.muhra.android');
 
         // No headers, a made-up platform or a malformed version: never told to update.
         $this->getJson('/api/v1/app-status')->assertJsonPath('data.update.status', 'none');

@@ -107,6 +107,8 @@ return [
         'paste_choices_lines' => 'Choices',
         'paste_choices_hint' => 'One choice per line. Put the Arabic after a | (or a tab, when copied from a spreadsheet): Yes | نعم. Choices already in the list are skipped.',
         'rules' => 'Extra validation rules',
+        'unique' => 'Only one answer per value',
+        'unique_hint' => 'A second submission with the same value is refused: the same email, or the same phone number however it is typed.',
         'rules_hint' => 'Laravel rules, e.g. max:100 or regex:/^[A-Z]/.',
         'choices' => 'Choices',
         'choice_value' => 'Value',
@@ -278,6 +280,7 @@ return [
     'frontend' => [
         'submit' => 'Send',
         'success' => 'Thank you, your message has been sent.',
+        'already_sent' => 'This :attribute has already been used to answer this form.',
         'invalid' => 'Please check the highlighted fields.',
         'failed' => 'Something went wrong. Please try again.',
         'closed' => 'This form is closed.',

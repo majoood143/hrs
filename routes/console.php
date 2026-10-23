@@ -32,6 +32,12 @@ Schedule::command('sanctum:prune-expired', ['--hours' => 24])->daily();
 // around a cold fetch as a safety net, e.g. right after a deploy).
 Schedule::command('racing:warm')->everyThirtyMinutes()->withoutOverlapping();
 
+// Race prediction forms still open follow the race card (declarations, scratched horses) until they close.
+Schedule::command('forms:reload-race-runners')->hourly()->withoutOverlapping();
+
+// Race results to the admins by WhatsApp (admin → Race results), each race once it is published.
+Schedule::command('racing:result-alerts')->everyTenMinutes()->withoutOverlapping();
+
 // Watched YouTube channels (admin → YouTube channels): new videos → the inbox + a WhatsApp alert.
 // YouTube refreshes the feeds with some delay anyway, so checking more often gains little.
 Schedule::command('youtube:check')->everyFifteenMinutes()->withoutOverlapping();

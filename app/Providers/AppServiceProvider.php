@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Filament\Forms\RacePredictionActions;
 use App\Filament\Forms\SubmissionPdfActions;
 use App\Filament\Forms\ViewFormInsights;
 use App\Filament\RichEditor\TextDirectionPlugin;
@@ -16,6 +17,7 @@ use App\Policies\TokenPolicy;
 use App\Policies\WhatsappInstancePolicy;
 use App\Policies\WhatsappMessagePolicy;
 use App\Policies\WhatsappWebhookPolicy;
+use App\Services\Forms\RacePredictions;
 use App\Services\SettingsService;
 use App\Support\Api\PostingToken;
 use App\Support\FormOrderSettings;
@@ -190,6 +192,7 @@ class AppServiceProvider extends ServiceProvider
 
             return $orders->hasService() && ! $orders->service()?->is_active ? __('orders.service_unavailable') : null;
         });
+        FormBuilder::closedWhen(fn (FormBuilderForm $form): ?string => RacePredictions::waitingForRunners($form) ? __('race_predictions.waiting_for_runners') : null);
         FormBuilder::beforeForm(fn (FormBuilderForm $form): string => FormOrderSettings::for($form)->priceNoticeHtml());
         FormBuilder::holdNotificationsWhen(fn (FormBuilderForm $form): bool => FormOrderSettings::for($form)->heldUntilPaid());
 
@@ -200,6 +203,10 @@ class AppServiceProvider extends ServiceProvider
             ->color('gray')
             ->url(fn (FormBuilderForm $record): string => ViewFormInsights::getUrl(['record' => $record]))
             ->visible(fn (FormBuilderForm $record): bool => ViewFormInsights::canAccess(['record' => $record])));
+
+        // Race prediction forms: start one from a race day, reload the runners of one.
+        FormBuilder::registerCreateAction(fn () => RacePredictionActions::create());
+        FormBuilder::registerRecordAction(fn () => RacePredictionActions::reload());
 
         // "PDF" (per language) in each form's submissions menus: all as filtered, the selected ones, one.
         FormBuilder::registerSubmissionActions(SubmissionPdfActions::for(...));

@@ -1,0 +1,7363 @@
+{
+ "root": "flat-races",
+ "seasons": [
+  {
+   "slug": "season-20172018",
+   "name": {
+    "en": "2017/2018 Season",
+    "ar": "موسم سباقات 2017/2018"
+   },
+   "meetings": [
+    {
+     "slug": "1st-meeting",
+     "name": {
+      "en": "1st Meeting",
+      "ar": "السباق الأول"
+     },
+     "date": "2017-10-19",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "4c261z8Jl1o"
+      },
+      {
+       "number": 2,
+       "youtube_id": "B2Z744ZSl9Y"
+      },
+      {
+       "number": 3,
+       "youtube_id": "54YtV_ECuf4"
+      },
+      {
+       "number": 4,
+       "youtube_id": "MeWGGkdebJo"
+      },
+      {
+       "number": 5,
+       "youtube_id": "1uAtpMCkZgU"
+      },
+      {
+       "number": 6,
+       "youtube_id": "AqMTa1ZzQEQ"
+      },
+      {
+       "number": 7,
+       "youtube_id": "ZQHgbTVYzoI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "flUbcs22xJY"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "2nd-meeting",
+     "name": {
+      "en": "2nd Meeting",
+      "ar": "السباق الثاني"
+     },
+     "date": "2017-10-26",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "hF69uXYsmpU"
+      },
+      {
+       "number": 2,
+       "youtube_id": "UgMhSUFn14s"
+      },
+      {
+       "number": 3,
+       "youtube_id": "cKXwhcC1Bjc"
+      },
+      {
+       "number": 4,
+       "youtube_id": "dQmAzYJS-pM"
+      },
+      {
+       "number": 5,
+       "youtube_id": "YfL319aZaWY"
+      },
+      {
+       "number": 6,
+       "youtube_id": "gG9CPXt126E"
+      },
+      {
+       "number": 7,
+       "youtube_id": "Xzu_vwdS-CE"
+      },
+      {
+       "number": 8,
+       "youtube_id": "DQtPwKvZ3vo"
+      },
+      {
+       "number": 9,
+       "youtube_id": "wrdaWgePQ7E"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "3rd-meeting",
+     "name": {
+      "en": "3rd Meeting",
+      "ar": "السباق الثالث"
+     },
+     "date": "2017-11-02",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "lnZArcsKZGo"
+      },
+      {
+       "number": 2,
+       "youtube_id": "p1nqlaDZ4RY"
+      },
+      {
+       "number": 3,
+       "youtube_id": "akQAlKlTbBE"
+      },
+      {
+       "number": 4,
+       "youtube_id": "D-fTRXMfrFs"
+      },
+      {
+       "number": 5,
+       "youtube_id": "MK7Fev9Glsc"
+      },
+      {
+       "number": 6,
+       "youtube_id": "1SRLX_Bn_SU"
+      },
+      {
+       "number": 7,
+       "youtube_id": "M33AvrpoU00"
+      },
+      {
+       "number": 8,
+       "youtube_id": "XRVeCGRFjCc"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "4th-meeting",
+     "name": {
+      "en": "4th Meeting",
+      "ar": "السباق الرابع"
+     },
+     "date": "2017-11-11",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "pbH45wS_8CE"
+      },
+      {
+       "number": 2,
+       "youtube_id": "tKeo_jytods"
+      },
+      {
+       "number": 3,
+       "youtube_id": "Ku7xle_f5wc"
+      },
+      {
+       "number": 4,
+       "youtube_id": "vP3l--WcAJ8"
+      },
+      {
+       "number": 5,
+       "youtube_id": "r1QNUSKAOKg"
+      },
+      {
+       "number": 6,
+       "youtube_id": "pLbNbBhURro"
+      },
+      {
+       "number": 7,
+       "youtube_id": "38-1tABCVNc"
+      },
+      {
+       "number": 8,
+       "youtube_id": "JLFXfg3rAHE"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "5th-meeting",
+     "name": {
+      "en": "5th Meeting",
+      "ar": "السباق الخامس"
+     },
+     "date": "2017-11-17",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "O3N7chw_fXM"
+      },
+      {
+       "number": 2,
+       "youtube_id": "CqKwx3FRIh8"
+      },
+      {
+       "number": 3,
+       "youtube_id": "3gtW-gaNa7U"
+      },
+      {
+       "number": 4,
+       "youtube_id": "WrxP-9pqaAI"
+      },
+      {
+       "number": 5,
+       "youtube_id": "vM9Mfhz3hW4"
+      },
+      {
+       "number": 6,
+       "youtube_id": "G9Z7schcgug"
+      },
+      {
+       "number": 7,
+       "youtube_id": "aDGjW_s2Klo"
+      },
+      {
+       "number": 8,
+       "youtube_id": "ADw8B-WgOCU"
+      },
+      {
+       "number": 9,
+       "youtube_id": "33jHGfaCTRY"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "6th-meeting",
+     "name": {
+      "en": "6th Meeting",
+      "ar": "السباق السادس"
+     },
+     "date": "2017-11-23",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "XlpagxHf2ss"
+      },
+      {
+       "number": 2,
+       "youtube_id": "tUsWRdldNLE"
+      },
+      {
+       "number": 3,
+       "youtube_id": "DRM7uCrLaro"
+      },
+      {
+       "number": 4,
+       "youtube_id": "UGrUGmOHdJY"
+      },
+      {
+       "number": 5,
+       "youtube_id": "s2ucUOVG9n0"
+      },
+      {
+       "number": 6,
+       "youtube_id": "_PI_PTwnPVc"
+      },
+      {
+       "number": 7,
+       "youtube_id": "CGE0OZ56nNM"
+      },
+      {
+       "number": 8,
+       "youtube_id": "Vt0QPjfjc7M"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "royal-meeting-20172018",
+     "name": {
+      "en": "Royal Meeting",
+      "ar": "السباق السلطاني"
+     },
+     "date": "2017-11-28",
+     "races": [],
+     "day_stream": null
+    },
+    {
+     "slug": "7th-meeting",
+     "name": {
+      "en": "7th Meeting",
+      "ar": "السباق السابع"
+     },
+     "date": "2017-12-08",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "1P50Jb-aYno"
+      },
+      {
+       "number": 2,
+       "youtube_id": "ee733yj4KiE"
+      },
+      {
+       "number": 3,
+       "youtube_id": "-HgIRvnOZ9s"
+      },
+      {
+       "number": 4,
+       "youtube_id": "TzNkBfacBbA"
+      },
+      {
+       "number": 5,
+       "youtube_id": "N_bVwg-DwCU"
+      },
+      {
+       "number": 6,
+       "youtube_id": "EQum_ltaQew"
+      },
+      {
+       "number": 7,
+       "youtube_id": "-7MAPrTbxEM"
+      },
+      {
+       "number": 8,
+       "youtube_id": "tExTtvBkL9E"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "8th-meeting",
+     "name": {
+      "en": "8th Meeting",
+      "ar": "السباق الثامن"
+     },
+     "date": "2017-12-16",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "7RQN1ExzOss"
+      },
+      {
+       "number": 2,
+       "youtube_id": "V4FeeoEA5Fo"
+      },
+      {
+       "number": 3,
+       "youtube_id": "oDiNpzr3Pfg"
+      },
+      {
+       "number": 4,
+       "youtube_id": "_E7o9YrL4eg"
+      },
+      {
+       "number": 5,
+       "youtube_id": "jbaw8hCr85o"
+      },
+      {
+       "number": 6,
+       "youtube_id": "_0zVXWEJN1Y"
+      },
+      {
+       "number": 7,
+       "youtube_id": "c-4leejJUus"
+      },
+      {
+       "number": 8,
+       "youtube_id": "lzt1LZwPqng"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "9th-meeting",
+     "name": {
+      "en": "9th Meeting",
+      "ar": "السباق التاسع"
+     },
+     "date": "2018-01-04",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "zilZC_bFO2g"
+      },
+      {
+       "number": 2,
+       "youtube_id": "Ic4GDXZzxx8"
+      },
+      {
+       "number": 3,
+       "youtube_id": "McvgMNZOi-E"
+      },
+      {
+       "number": 4,
+       "youtube_id": "PIwttMsFqKM"
+      },
+      {
+       "number": 5,
+       "youtube_id": "1YF9HbbAbrQ"
+      },
+      {
+       "number": 6,
+       "youtube_id": "N5GKu0DwA3I"
+      },
+      {
+       "number": 7,
+       "youtube_id": "Yn2ksP38bqc"
+      },
+      {
+       "number": 8,
+       "youtube_id": "i2aksafaccU"
+      },
+      {
+       "number": 9,
+       "youtube_id": "K039Del1Bm4"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "10th-meeting",
+     "name": {
+      "en": "10th Meeting",
+      "ar": "السباق العاشر"
+     },
+     "date": "2018-01-11",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "d5bqEM_F6NE"
+      },
+      {
+       "number": 2,
+       "youtube_id": "IjMONpy-66A"
+      },
+      {
+       "number": 3,
+       "youtube_id": "eUnHHU5hHew"
+      },
+      {
+       "number": 4,
+       "youtube_id": "kkcsCxhOSxg"
+      },
+      {
+       "number": 5,
+       "youtube_id": "7EAhvDxFMu4"
+      },
+      {
+       "number": 6,
+       "youtube_id": "0rUiydW41SI"
+      },
+      {
+       "number": 7,
+       "youtube_id": "Bmigl9nEkF4"
+      },
+      {
+       "number": 8,
+       "youtube_id": "2Gs_9EYNZNo"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "11th-meeting",
+     "name": {
+      "en": "11th Meeting",
+      "ar": "السباق الحادي عشر"
+     },
+     "date": "2018-01-19",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "G5vjMB8VLH4"
+      },
+      {
+       "number": 2,
+       "youtube_id": "WxzJZvZc5PA"
+      },
+      {
+       "number": 3,
+       "youtube_id": "nmgWay1gb3c"
+      },
+      {
+       "number": 4,
+       "youtube_id": "vdiGyV6U7mw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "GFECw3VVLGg"
+      },
+      {
+       "number": 6,
+       "youtube_id": "NZRdzzytKkc"
+      },
+      {
+       "number": 7,
+       "youtube_id": "D5zx31iWnt8"
+      },
+      {
+       "number": 8,
+       "youtube_id": "ykU-FhOhaic"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "12th-meeting",
+     "name": {
+      "en": "12th Meeting",
+      "ar": "السباق الثاني عشر"
+     },
+     "date": "2018-01-27",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "qInSF0JQINY"
+      },
+      {
+       "number": 2,
+       "youtube_id": "k8tLoix-Cik"
+      },
+      {
+       "number": 3,
+       "youtube_id": "sdiKS8j45TI"
+      },
+      {
+       "number": 4,
+       "youtube_id": "eC6j_ZI8sd4"
+      },
+      {
+       "number": 5,
+       "youtube_id": "pJYpzk9BJ94"
+      },
+      {
+       "number": 6,
+       "youtube_id": "CRMQ5DKL-TM"
+      },
+      {
+       "number": 7,
+       "youtube_id": "ideHRDjxEsg"
+      },
+      {
+       "number": 8,
+       "youtube_id": "N_hG4EOoUqA"
+      },
+      {
+       "number": 9,
+       "youtube_id": "2CBkEvmdUY8"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "13th-meeting",
+     "name": {
+      "en": "13th Meeting",
+      "ar": "السباق الثالث عشر"
+     },
+     "date": "2018-02-10",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "hYQRZUBppyI"
+      },
+      {
+       "number": 2,
+       "youtube_id": "ceO6RWj6KL0"
+      },
+      {
+       "number": 3,
+       "youtube_id": "XvT-kXQjq6g"
+      },
+      {
+       "number": 4,
+       "youtube_id": "SaW51mw2TP0"
+      },
+      {
+       "number": 5,
+       "youtube_id": "8HiOHsSQn3Q"
+      },
+      {
+       "number": 6,
+       "youtube_id": "MZFIpZ-Rqj8"
+      },
+      {
+       "number": 7,
+       "youtube_id": "T0q3mq1NVlg"
+      },
+      {
+       "number": 8,
+       "youtube_id": "nQEno-sNno8"
+      },
+      {
+       "number": 9,
+       "youtube_id": "jL5Adxv-ZA8"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "14th-meeting",
+     "name": {
+      "en": "14th Meeting",
+      "ar": "السباق الرابع عشر"
+     },
+     "date": "2018-02-17",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "1WY8uS78Nko"
+      },
+      {
+       "number": 2,
+       "youtube_id": "dFQSpbnLhD0"
+      },
+      {
+       "number": 3,
+       "youtube_id": "ntrks9b-1Xg"
+      },
+      {
+       "number": 4,
+       "youtube_id": "6VgbspzpKvQ"
+      },
+      {
+       "number": 5,
+       "youtube_id": "-RYGDyI0TP4"
+      },
+      {
+       "number": 6,
+       "youtube_id": "gI_fXYk_2RE"
+      },
+      {
+       "number": 7,
+       "youtube_id": "9YqHyFUGDAU"
+      },
+      {
+       "number": 8,
+       "youtube_id": "tmZ_U3jlOHk"
+      },
+      {
+       "number": 9,
+       "youtube_id": "QrCgyWQ2Nhk"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "15th-meeting",
+     "name": {
+      "en": "15th Meeting",
+      "ar": "السباق الخامس عشر"
+     },
+     "date": "2018-03-01",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "UX4eVETqHJs"
+      },
+      {
+       "number": 2,
+       "youtube_id": "pFTYuXncB3I"
+      },
+      {
+       "number": 3,
+       "youtube_id": "vWgRHotVaK4"
+      },
+      {
+       "number": 4,
+       "youtube_id": "r5QnzRsz8Q8"
+      },
+      {
+       "number": 5,
+       "youtube_id": "2ZQ39EthOH8"
+      },
+      {
+       "number": 6,
+       "youtube_id": "JlZavIPPMAw"
+      },
+      {
+       "number": 7,
+       "youtube_id": "xdq6HTbaKpI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "7IRaNpuIbpE"
+      },
+      {
+       "number": 9,
+       "youtube_id": "HHxJpkUabzA"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "16th-meeting",
+     "name": {
+      "en": "16th Meeting",
+      "ar": "السباق السادس عشر"
+     },
+     "date": "2018-03-09",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "6Qk1BgbfoNg"
+      },
+      {
+       "number": 2,
+       "youtube_id": "HXjFDrWJlyw"
+      },
+      {
+       "number": 3,
+       "youtube_id": "LdM53ulAlv8"
+      },
+      {
+       "number": 4,
+       "youtube_id": "_aGHfrF9xMU"
+      },
+      {
+       "number": 5,
+       "youtube_id": "8GADAwqcZSw"
+      },
+      {
+       "number": 6,
+       "youtube_id": "Vm5DRjOCHvk"
+      },
+      {
+       "number": 7,
+       "youtube_id": "POg4U23L4VM"
+      },
+      {
+       "number": 8,
+       "youtube_id": "wCgl2CEo7GA"
+      },
+      {
+       "number": 9,
+       "youtube_id": "M1UUntPKgOw"
+      },
+      {
+       "number": 10,
+       "youtube_id": "TKHfiztyNf8"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "17th-meeting",
+     "name": {
+      "en": "17th Meeting",
+      "ar": "السباق السابع عشر"
+     },
+     "date": "2018-03-16",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "ZprY7xc1DKQ"
+      },
+      {
+       "number": 2,
+       "youtube_id": "b0VcJykqDB4"
+      },
+      {
+       "number": 3,
+       "youtube_id": "idQliA6TmBM"
+      },
+      {
+       "number": 4,
+       "youtube_id": "FrvIySed-Kg"
+      },
+      {
+       "number": 5,
+       "youtube_id": "yoyGcHRG8Ts"
+      },
+      {
+       "number": 6,
+       "youtube_id": "1QwNPxRMOrQ"
+      },
+      {
+       "number": 7,
+       "youtube_id": "he6nsw9Jow0"
+      },
+      {
+       "number": 8,
+       "youtube_id": "6acdkdt9r7M"
+      },
+      {
+       "number": 9,
+       "youtube_id": "YmJAIYCWl_w"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "18th-meeting",
+     "name": {
+      "en": "18th Meeting",
+      "ar": "السباق الثامن عشر"
+     },
+     "date": "2018-03-25",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "OmUYsLIDEok"
+      },
+      {
+       "number": 2,
+       "youtube_id": "pFtFjVDzaLY"
+      },
+      {
+       "number": 3,
+       "youtube_id": "oTMCi1WmgjY"
+      },
+      {
+       "number": 4,
+       "youtube_id": "pRlv9Q3R_vg"
+      },
+      {
+       "number": 5,
+       "youtube_id": "9_-odXq7QnI"
+      },
+      {
+       "number": 6,
+       "youtube_id": "v5iwJfcqWrk"
+      },
+      {
+       "number": 7,
+       "youtube_id": "F6XAxp_AT8o"
+      },
+      {
+       "number": 8,
+       "youtube_id": "VMYgnzSz9I0"
+      },
+      {
+       "number": 9,
+       "youtube_id": "5Up6E6gp4fI"
+      },
+      {
+       "number": 10,
+       "youtube_id": "eapfjCXWjcw"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "19th-meeting",
+     "name": {
+      "en": "19th Meeting",
+      "ar": "السباق التاسع عشر"
+     },
+     "date": "2018-04-06",
+     "races": [
+      {
+       "number": 2,
+       "youtube_id": "3RJI0_STwJY"
+      },
+      {
+       "number": 3,
+       "youtube_id": "w2DV-PnRc3c"
+      },
+      {
+       "number": 4,
+       "youtube_id": "HjCYKQk4pxk"
+      },
+      {
+       "number": 5,
+       "youtube_id": "ubCIW8IE2Kc"
+      },
+      {
+       "number": 7,
+       "youtube_id": "PeMtfxJkmlA"
+      },
+      {
+       "number": 8,
+       "youtube_id": "ZGNILCvqdVU"
+      },
+      {
+       "number": 9,
+       "youtube_id": "leyhAQ_5Rgk"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "20th-meeting",
+     "name": {
+      "en": "20th Meeting",
+      "ar": "السباق العشرون"
+     },
+     "date": "2018-04-07",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "AxObTetauMQ"
+      },
+      {
+       "number": 2,
+       "youtube_id": "yetZQO1ecx8"
+      },
+      {
+       "number": 3,
+       "youtube_id": "U2lACp_ShKE"
+      },
+      {
+       "number": 4,
+       "youtube_id": "oe8TVb4908w"
+      },
+      {
+       "number": 5,
+       "youtube_id": "ktZ6og_W8kQ"
+      }
+     ],
+     "day_stream": null
+    }
+   ]
+  },
+  {
+   "slug": "season-20182019",
+   "name": {
+    "en": "2018/2019 Season",
+    "ar": "موسم سباقات 2018/2019"
+   },
+   "meetings": [
+    {
+     "slug": "1st-meeting-20182019",
+     "name": {
+      "en": "1st Meeting",
+      "ar": "السباق الأول"
+     },
+     "date": "2018-10-18",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "H0ISwm4H5gc"
+      },
+      {
+       "number": 2,
+       "youtube_id": "CqrSTLW7W8A"
+      },
+      {
+       "number": 3,
+       "youtube_id": "9KRA1TedXSQ"
+      },
+      {
+       "number": 4,
+       "youtube_id": "F49eC5nhPmQ"
+      },
+      {
+       "number": 5,
+       "youtube_id": "iZkTNN_n17M"
+      },
+      {
+       "number": 6,
+       "youtube_id": "8diLzQGB-7U"
+      },
+      {
+       "number": 7,
+       "youtube_id": "WDjBvYNmTgg"
+      },
+      {
+       "number": 8,
+       "youtube_id": "-0_KnZiDggY"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "2nd-meeting-20182019",
+     "name": {
+      "en": "2nd Meeting",
+      "ar": "السباق الثاني"
+     },
+     "date": "2018-10-27",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "lnIG5qf61XA"
+      },
+      {
+       "number": 2,
+       "youtube_id": "YuNWfm_YJNc"
+      },
+      {
+       "number": 3,
+       "youtube_id": "F8KQbcBbIGQ"
+      },
+      {
+       "number": 4,
+       "youtube_id": "eeoqsqdrqCE"
+      },
+      {
+       "number": 5,
+       "youtube_id": "s8bU9gLnuJk"
+      },
+      {
+       "number": 6,
+       "youtube_id": "UPw9MGYl5nA"
+      },
+      {
+       "number": 7,
+       "youtube_id": "ft5Eyhx-z3M"
+      },
+      {
+       "number": 8,
+       "youtube_id": "9nhfiwmqZmo"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "3rd-meeting-20182019",
+     "name": {
+      "en": "3rd Meeting",
+      "ar": "السباق الثالث"
+     },
+     "date": "2018-11-02",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "z9QVj9XFVrs"
+      },
+      {
+       "number": 2,
+       "youtube_id": "CHUNw4-XZ8U"
+      },
+      {
+       "number": 3,
+       "youtube_id": "A8uzVlwxpL0"
+      },
+      {
+       "number": 4,
+       "youtube_id": "mhh0WeS2rO8"
+      },
+      {
+       "number": 5,
+       "youtube_id": "Oo8YX6G8wf4"
+      },
+      {
+       "number": 6,
+       "youtube_id": "qXk8Z_HLxSo"
+      },
+      {
+       "number": 7,
+       "youtube_id": "9RWnCWgmDNs"
+      },
+      {
+       "number": 8,
+       "youtube_id": "9LF-Nkq-vr0"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "4th-meeting-20182019",
+     "name": {
+      "en": "4th Meeting",
+      "ar": "السباق الرابع"
+     },
+     "date": "2018-11-10",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "OJbGW_YBd6U"
+      },
+      {
+       "number": 2,
+       "youtube_id": "GGIyyFySPqc"
+      },
+      {
+       "number": 3,
+       "youtube_id": "K5ZbNPHQUxA"
+      },
+      {
+       "number": 4,
+       "youtube_id": "32uVSvcbD48"
+      },
+      {
+       "number": 5,
+       "youtube_id": "or0L6s2XKhQ"
+      },
+      {
+       "number": 6,
+       "youtube_id": "jKPA74RbZJ4"
+      },
+      {
+       "number": 7,
+       "youtube_id": "QJot3MFp-vI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "_T6mktMkbuI"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "5th-meeting-20182019",
+     "name": {
+      "en": "5th Meeting",
+      "ar": "السباق الخامس"
+     },
+     "date": "2018-11-16",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "u1efF1g-eko"
+      },
+      {
+       "number": 2,
+       "youtube_id": "pE9GRX0PZoE"
+      },
+      {
+       "number": 3,
+       "youtube_id": "yWG2_TiIhgE"
+      },
+      {
+       "number": 4,
+       "youtube_id": "Cske2YfJSak"
+      },
+      {
+       "number": 5,
+       "youtube_id": "OgSgUuDHnUA"
+      },
+      {
+       "number": 6,
+       "youtube_id": "QvPiJNdWzjQ"
+      },
+      {
+       "number": 7,
+       "youtube_id": "W6XlKV_UNcA"
+      },
+      {
+       "number": 8,
+       "youtube_id": "lLynQfsItls"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "6th-meeting-20182019",
+     "name": {
+      "en": "6th Meeting",
+      "ar": "السباق السادس"
+     },
+     "date": "2018-11-29",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "C8OJrYrbYno"
+      },
+      {
+       "number": 2,
+       "youtube_id": "JnFB4_qg1JQ"
+      },
+      {
+       "number": 3,
+       "youtube_id": "-yilTOL4pqU"
+      },
+      {
+       "number": 4,
+       "youtube_id": "oWCe8MJcJos"
+      },
+      {
+       "number": 5,
+       "youtube_id": "DH74XbJ0POc"
+      },
+      {
+       "number": 6,
+       "youtube_id": "5XY4QEWL0Ug"
+      },
+      {
+       "number": 7,
+       "youtube_id": "-Oq0ckdJAlk"
+      },
+      {
+       "number": 8,
+       "youtube_id": "2LZZNzZ1ft8"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "royal-meeting-20182019",
+     "name": {
+      "en": "Royal Meeting",
+      "ar": "السباق السلطاني"
+     },
+     "date": "2018-12-03",
+     "races": [],
+     "day_stream": "q3iQtEO_SPE"
+    },
+    {
+     "slug": "7th-meeting-20182019",
+     "name": {
+      "en": "7th Meeting",
+      "ar": "السباق السابع"
+     },
+     "date": "2018-12-15",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "kdLpewps5e0"
+      },
+      {
+       "number": 2,
+       "youtube_id": "mk8uSZdpNdE"
+      },
+      {
+       "number": 3,
+       "youtube_id": "2kRMavtpmeA"
+      },
+      {
+       "number": 4,
+       "youtube_id": "ot0y_DjBET0"
+      },
+      {
+       "number": 5,
+       "youtube_id": "EQoPwAVkvjs"
+      },
+      {
+       "number": 6,
+       "youtube_id": "0-McLl3nfGU"
+      },
+      {
+       "number": 7,
+       "youtube_id": "m_kp7nE66pk"
+      },
+      {
+       "number": 8,
+       "youtube_id": "Y1eO0OvJGvc"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "8th-meeting-20182019",
+     "name": {
+      "en": "8th Meeting",
+      "ar": "السباق الثامن"
+     },
+     "date": "2018-12-21",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "OGFRGuTCG_E"
+      },
+      {
+       "number": 2,
+       "youtube_id": "m9xFGhZ23yU"
+      },
+      {
+       "number": 3,
+       "youtube_id": "JzeDmYOPWsI"
+      },
+      {
+       "number": 4,
+       "youtube_id": "lwMhBsSngEg"
+      },
+      {
+       "number": 5,
+       "youtube_id": "hFd2X_U-glQ"
+      },
+      {
+       "number": 6,
+       "youtube_id": "MgjQ_eJwgY8"
+      },
+      {
+       "number": 7,
+       "youtube_id": "-FnvqA-TN_0"
+      },
+      {
+       "number": 8,
+       "youtube_id": "aC6uwmHqCus"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "9th-meeting-20182019",
+     "name": {
+      "en": "9th Meeting",
+      "ar": "السباق التاسع"
+     },
+     "date": "2019-01-03",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "Svibchf9cSo"
+      },
+      {
+       "number": 2,
+       "youtube_id": "smZIkIJpVx8"
+      },
+      {
+       "number": 3,
+       "youtube_id": "sC7qHgjrhx0"
+      },
+      {
+       "number": 4,
+       "youtube_id": "O4JnpG860vg"
+      },
+      {
+       "number": 5,
+       "youtube_id": "JR-PKy6S9Yo"
+      },
+      {
+       "number": 6,
+       "youtube_id": "X38QXg7AKS4"
+      },
+      {
+       "number": 7,
+       "youtube_id": "qXPkemxcJUQ"
+      },
+      {
+       "number": 8,
+       "youtube_id": "_C-PhRNSvBE"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "10th-meeting-20182019",
+     "name": {
+      "en": "10th Meeting",
+      "ar": "السباق العاشر"
+     },
+     "date": "2019-01-12",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "H4wpNf78gSA"
+      },
+      {
+       "number": 2,
+       "youtube_id": "qjDiZQCdQpA"
+      },
+      {
+       "number": 3,
+       "youtube_id": "KEFcRomFb6g"
+      },
+      {
+       "number": 4,
+       "youtube_id": "9MUYTSosKNQ"
+      },
+      {
+       "number": 5,
+       "youtube_id": "Kfz24X8z3wU"
+      },
+      {
+       "number": 6,
+       "youtube_id": "n_wcdpVhxy8"
+      },
+      {
+       "number": 7,
+       "youtube_id": "Fk54hZEmaeo"
+      },
+      {
+       "number": 8,
+       "youtube_id": "YBZKTClDktM"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "11th-meeting-20182019",
+     "name": {
+      "en": "11th Meeting",
+      "ar": "السباق الحادي عشر"
+     },
+     "date": "2019-01-18",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "7YPAAGkCgEk"
+      },
+      {
+       "number": 2,
+       "youtube_id": "mXoepLKQWH4"
+      },
+      {
+       "number": 3,
+       "youtube_id": "5HqFAVZfgFw"
+      },
+      {
+       "number": 4,
+       "youtube_id": "HqVtfeEgjsw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "yXvJe_SXAfw"
+      },
+      {
+       "number": 6,
+       "youtube_id": "bjBwUj4zpSc"
+      },
+      {
+       "number": 7,
+       "youtube_id": "XJyS-TtuU9Q"
+      },
+      {
+       "number": 8,
+       "youtube_id": "QeUlVKmAfFQ"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "12th-meeting-20182019",
+     "name": {
+      "en": "12th Meeting",
+      "ar": "السباق الثاني عشر"
+     },
+     "date": "2019-01-26",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "wQNsvBGCyiQ"
+      },
+      {
+       "number": 2,
+       "youtube_id": "1C1q7Iy_sAI"
+      },
+      {
+       "number": 3,
+       "youtube_id": "ah3l1qDegwI"
+      },
+      {
+       "number": 4,
+       "youtube_id": "jJa3rqin_cg"
+      },
+      {
+       "number": 5,
+       "youtube_id": "bxGGFaxlXJc"
+      },
+      {
+       "number": 6,
+       "youtube_id": "mp57FjMTVZU"
+      },
+      {
+       "number": 7,
+       "youtube_id": "oCFLR5_FNpY"
+      },
+      {
+       "number": 8,
+       "youtube_id": "QVPM3_maNts"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "13th-meeting-20182019",
+     "name": {
+      "en": "13th Meeting",
+      "ar": "السباق الثالث عشر"
+     },
+     "date": "2019-02-01",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "_EZB9ZQ82V8"
+      },
+      {
+       "number": 2,
+       "youtube_id": "IyUC4hTjVpg"
+      },
+      {
+       "number": 3,
+       "youtube_id": "qe9Yw80_kaY"
+      },
+      {
+       "number": 4,
+       "youtube_id": "NCtz8WuS_zY"
+      },
+      {
+       "number": 5,
+       "youtube_id": "g6CcXya8qns"
+      },
+      {
+       "number": 6,
+       "youtube_id": "rjrnnfBLPwk"
+      },
+      {
+       "number": 7,
+       "youtube_id": "2GelAKPZvWI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "OMPOO9yABDE"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "14th-meeting-20182019",
+     "name": {
+      "en": "14th Meeting",
+      "ar": "السباق الرابع عشر"
+     },
+     "date": "2019-02-14",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "NtKVFiBYZf8"
+      },
+      {
+       "number": 2,
+       "youtube_id": "1oGd_wdV87Y"
+      },
+      {
+       "number": 3,
+       "youtube_id": "sr1fLCYB9oc"
+      },
+      {
+       "number": 4,
+       "youtube_id": "u3bF9KupqiQ"
+      },
+      {
+       "number": 5,
+       "youtube_id": "pTNpuKFdjFI"
+      },
+      {
+       "number": 6,
+       "youtube_id": "0a0GDodX1Ng"
+      },
+      {
+       "number": 7,
+       "youtube_id": "Jyv38OpSs94"
+      },
+      {
+       "number": 8,
+       "youtube_id": "caE7oy1FEXQ"
+      },
+      {
+       "number": 9,
+       "youtube_id": "2RAj1Didejk"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "15th-meeting-20182019",
+     "name": {
+      "en": "15th Meeting",
+      "ar": "السباق الخامس عشر"
+     },
+     "date": "2019-02-28",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "x9rraCXuue0"
+      },
+      {
+       "number": 2,
+       "youtube_id": "vgma3Dg9Rl0"
+      },
+      {
+       "number": 3,
+       "youtube_id": "2-phEhgDd5M"
+      },
+      {
+       "number": 4,
+       "youtube_id": "DW1B0yNlkxk"
+      },
+      {
+       "number": 5,
+       "youtube_id": "X8IirqM5zZE"
+      },
+      {
+       "number": 6,
+       "youtube_id": "NIiH1_5U_vs"
+      },
+      {
+       "number": 7,
+       "youtube_id": "K0WbxphKwx0"
+      },
+      {
+       "number": 8,
+       "youtube_id": "OHJDoW4hULM"
+      },
+      {
+       "number": 9,
+       "youtube_id": "5fyZ_yZQctg"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "16th-meeting-20182019",
+     "name": {
+      "en": "16th Meeting",
+      "ar": "السباق السادس عشر"
+     },
+     "date": "2019-03-08",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "PvcX_YJD7vs"
+      },
+      {
+       "number": 2,
+       "youtube_id": "368lGVLmf5Y"
+      },
+      {
+       "number": 3,
+       "youtube_id": "ZnqO0uuK8Yk"
+      },
+      {
+       "number": 4,
+       "youtube_id": "KN5Sut_TRtk"
+      },
+      {
+       "number": 5,
+       "youtube_id": "xs43dhuf7BY"
+      },
+      {
+       "number": 6,
+       "youtube_id": "UdfVXvmHF1U"
+      },
+      {
+       "number": 7,
+       "youtube_id": "LeF1whomW4E"
+      },
+      {
+       "number": 8,
+       "youtube_id": "EOzG2E_mB4c"
+      },
+      {
+       "number": 9,
+       "youtube_id": "BsbqnsczXeQ"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "17th-meeting-20182019",
+     "name": {
+      "en": "17th Meeting",
+      "ar": "السباق السابع عشر"
+     },
+     "date": "2019-03-14",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "KxH2wrY_9Xg"
+      },
+      {
+       "number": 2,
+       "youtube_id": "Z7pIjxuBKvU"
+      },
+      {
+       "number": 3,
+       "youtube_id": "ioiEJmUVqdg"
+      },
+      {
+       "number": 4,
+       "youtube_id": "Ze6Sleqlm_w"
+      },
+      {
+       "number": 5,
+       "youtube_id": "DrQSWvdiBOk"
+      },
+      {
+       "number": 6,
+       "youtube_id": "bLgqJ1Gd0zw"
+      },
+      {
+       "number": 7,
+       "youtube_id": "CLN9a80rhbE"
+      },
+      {
+       "number": 8,
+       "youtube_id": "X-cMXTAzh30"
+      },
+      {
+       "number": 9,
+       "youtube_id": "L_7SvKzkBr4"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "18th-meeting-20182019",
+     "name": {
+      "en": "18th Meeting",
+      "ar": "السباق الثامن عشر"
+     },
+     "date": "2019-03-23",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "aG5_CSUloMI"
+      },
+      {
+       "number": 2,
+       "youtube_id": "vYiIceiMAis"
+      },
+      {
+       "number": 3,
+       "youtube_id": "SWRbHcWMr3A"
+      },
+      {
+       "number": 4,
+       "youtube_id": "KEvTmcJsS9M"
+      },
+      {
+       "number": 5,
+       "youtube_id": "2k4YvxrNoco"
+      },
+      {
+       "number": 6,
+       "youtube_id": "i-lD6p-w5XQ"
+      },
+      {
+       "number": 7,
+       "youtube_id": "acit17p1q64"
+      },
+      {
+       "number": 8,
+       "youtube_id": "iLBWz4FSmdU"
+      },
+      {
+       "number": 9,
+       "youtube_id": "xBIqQHVzJXo"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "19th-meeting-20182019",
+     "name": {
+      "en": "19th Meeting",
+      "ar": "السباق التاسع عشر"
+     },
+     "date": "2019-04-05",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "uabYXeiRJ_g"
+      },
+      {
+       "number": 3,
+       "youtube_id": "CkPN4rypS0M"
+      },
+      {
+       "number": 4,
+       "youtube_id": "_O9mKiRCx00"
+      },
+      {
+       "number": 5,
+       "youtube_id": "FOt4uCsp8wc"
+      },
+      {
+       "number": 6,
+       "youtube_id": "MFfRbnq256A"
+      },
+      {
+       "number": 7,
+       "youtube_id": "9yke3yHUjSU"
+      },
+      {
+       "number": 8,
+       "youtube_id": "48IYHlRPGbg"
+      },
+      {
+       "number": 9,
+       "youtube_id": "SnsRTRgiDpk"
+      }
+     ],
+     "day_stream": "fOFGB_Bofws"
+    },
+    {
+     "slug": "20th-meeting-20182019",
+     "name": {
+      "en": "20th Meeting",
+      "ar": "السباق العشرون"
+     },
+     "date": "2019-04-06",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "pmyaV2BkhMU"
+      },
+      {
+       "number": 2,
+       "youtube_id": "cDFP92i602k"
+      },
+      {
+       "number": 3,
+       "youtube_id": "L080T2-hsE0"
+      },
+      {
+       "number": 4,
+       "youtube_id": "Y-m0Q8zC1uM"
+      },
+      {
+       "number": 5,
+       "youtube_id": "lSKw_rELOdo"
+      }
+     ],
+     "day_stream": null
+    }
+   ]
+  },
+  {
+   "slug": "season-20192020",
+   "name": {
+    "en": "2019/2020 Season",
+    "ar": "موسم سباقات 2019/2020"
+   },
+   "meetings": [
+    {
+     "slug": "1st-meeting-20192020",
+     "name": {
+      "en": "1st Meeting",
+      "ar": "السباق الأول"
+     },
+     "date": "2019-10-17",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "UgOhQQ584RM"
+      },
+      {
+       "number": 2,
+       "youtube_id": "XvxESG6zzCw"
+      },
+      {
+       "number": 3,
+       "youtube_id": "amF40Sd1jdo"
+      },
+      {
+       "number": 4,
+       "youtube_id": "40ol4jKCG-A"
+      },
+      {
+       "number": 5,
+       "youtube_id": "cklU2V9v3uI"
+      },
+      {
+       "number": 6,
+       "youtube_id": "qZeCDLErEFo"
+      },
+      {
+       "number": 7,
+       "youtube_id": "4ZoYToWGCW0"
+      },
+      {
+       "number": 8,
+       "youtube_id": "xjkvzUD_UD4"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "2nd-meeting-20192020",
+     "name": {
+      "en": "2nd Meeting",
+      "ar": "السباق الثاني"
+     },
+     "date": "2019-10-25",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "E2apU8lnUps"
+      },
+      {
+       "number": 2,
+       "youtube_id": "OaRn2ZqiQCk"
+      },
+      {
+       "number": 3,
+       "youtube_id": "ofFJeB_hu0E"
+      },
+      {
+       "number": 4,
+       "youtube_id": "fvSnLpzyV0Y"
+      },
+      {
+       "number": 5,
+       "youtube_id": "7hnpeDsQSgI"
+      },
+      {
+       "number": 6,
+       "youtube_id": "xpSlVDnvkSc"
+      },
+      {
+       "number": 7,
+       "youtube_id": "paWy-2v3OIM"
+      },
+      {
+       "number": 8,
+       "youtube_id": "Q1a20EprlJs"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "3rd-meeting-20192020",
+     "name": {
+      "en": "3rd Meeting",
+      "ar": "السباق الثالث"
+     },
+     "date": "2019-11-02",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "qhYT6SgGtk4"
+      },
+      {
+       "number": 2,
+       "youtube_id": "kBz1F1iZ7mY"
+      },
+      {
+       "number": 3,
+       "youtube_id": "MCXXhER5XAo"
+      },
+      {
+       "number": 4,
+       "youtube_id": "oe72WXV2Pa4"
+      },
+      {
+       "number": 5,
+       "youtube_id": "gQROKSLBOkw"
+      },
+      {
+       "number": 6,
+       "youtube_id": "C86RqJedV_o"
+      },
+      {
+       "number": 7,
+       "youtube_id": "KTUup4wpTUc"
+      },
+      {
+       "number": 8,
+       "youtube_id": "RxbxftAfo1Y"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "4th-meeting-20192020",
+     "name": {
+      "en": "4th Meeting",
+      "ar": "السباق الرابع"
+     },
+     "date": "2019-11-16",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "nnOKTNQXbCs"
+      },
+      {
+       "number": 2,
+       "youtube_id": "cnM1dOmoyRU"
+      },
+      {
+       "number": 3,
+       "youtube_id": "RhwGctMcuYw"
+      },
+      {
+       "number": 4,
+       "youtube_id": "zqTxzd4LWvM"
+      },
+      {
+       "number": 5,
+       "youtube_id": "OwG59EWBKk8"
+      },
+      {
+       "number": 6,
+       "youtube_id": "1Dya_5dLUHI"
+      },
+      {
+       "number": 7,
+       "youtube_id": "nF0FoEsGOzA"
+      },
+      {
+       "number": 8,
+       "youtube_id": "uC-x5zPq4QM"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "royal-meeting-20192020",
+     "name": {
+      "en": "Royal Meeting",
+      "ar": "السباق السلطاني"
+     },
+     "date": "2019-11-26",
+     "races": [],
+     "day_stream": null
+    },
+    {
+     "slug": "5th-meeting-20192020",
+     "name": {
+      "en": "5th Meeting",
+      "ar": "السباق الخامس"
+     },
+     "date": "2019-12-07",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "eQzpORwDu2Q"
+      },
+      {
+       "number": 2,
+       "youtube_id": "4yKrMOUexfQ"
+      },
+      {
+       "number": 3,
+       "youtube_id": "1KaU_9opXyw"
+      },
+      {
+       "number": 4,
+       "youtube_id": "6BttoG_JSuw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "mt027EVcco0"
+      },
+      {
+       "number": 6,
+       "youtube_id": "0Jj4GR9FWns"
+      },
+      {
+       "number": 7,
+       "youtube_id": "QaAvy5gSR1s"
+      },
+      {
+       "number": 8,
+       "youtube_id": "VESTZ2gJFc0"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "6th-meeting-20192020",
+     "name": {
+      "en": "6th Meeting",
+      "ar": "السباق السادس"
+     },
+     "date": "2019-12-14",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "w20RKRzdxrk"
+      },
+      {
+       "number": 2,
+       "youtube_id": "UrxndtLlHzU"
+      },
+      {
+       "number": 3,
+       "youtube_id": "doXujyzEkHQ"
+      },
+      {
+       "number": 4,
+       "youtube_id": "2TzrHc-FC84"
+      },
+      {
+       "number": 5,
+       "youtube_id": "oGsi0I49E-Q"
+      },
+      {
+       "number": 6,
+       "youtube_id": "wp9-YA7oMwg"
+      },
+      {
+       "number": 7,
+       "youtube_id": "scNOK_NxG6Q"
+      },
+      {
+       "number": 8,
+       "youtube_id": "Q4HxO3MVWOM"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "7th-meeting-20192020",
+     "name": {
+      "en": "7th Meeting",
+      "ar": "السباق السابع"
+     },
+     "date": "2019-12-21",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "YlKSWYLpSjI"
+      },
+      {
+       "number": 2,
+       "youtube_id": "_v9RWsGBRZE"
+      },
+      {
+       "number": 3,
+       "youtube_id": "9hqH5PkEyIQ"
+      },
+      {
+       "number": 4,
+       "youtube_id": "Z4TDhl1pLZY"
+      },
+      {
+       "number": 5,
+       "youtube_id": "pAjPhkZVHqY"
+      },
+      {
+       "number": 6,
+       "youtube_id": "ZNv5b6nXCVc"
+      },
+      {
+       "number": 7,
+       "youtube_id": "0E5gGvOyoQs"
+      },
+      {
+       "number": 8,
+       "youtube_id": "K8F6GMIbGks"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "8th-meeting-20192020",
+     "name": {
+      "en": "8th Meeting",
+      "ar": "السباق الثامن"
+     },
+     "date": "2019-12-27",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "3SmqUsL6h5w"
+      },
+      {
+       "number": 2,
+       "youtube_id": "hJWF--UGztk"
+      },
+      {
+       "number": 3,
+       "youtube_id": "x24x7JI7EkI"
+      },
+      {
+       "number": 4,
+       "youtube_id": "wqKVGJH8XGE"
+      },
+      {
+       "number": 5,
+       "youtube_id": "ZLDSjgPOLlU"
+      },
+      {
+       "number": 6,
+       "youtube_id": "oJwfFieVQMQ"
+      },
+      {
+       "number": 7,
+       "youtube_id": "7Dh_iAnIWcI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "EL5hZyZPlzc"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "9th-meeting-20192020",
+     "name": {
+      "en": "9th Meeting",
+      "ar": "السباق التاسع"
+     },
+     "date": "2020-01-02",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "SLXj7uThqtE"
+      },
+      {
+       "number": 2,
+       "youtube_id": "35ovQ4iwSMI"
+      },
+      {
+       "number": 3,
+       "youtube_id": "etj5gz-Dz1Q"
+      },
+      {
+       "number": 4,
+       "youtube_id": "HBKnDUNq_Tg"
+      },
+      {
+       "number": 5,
+       "youtube_id": "IZ8xfTRieQ4"
+      },
+      {
+       "number": 6,
+       "youtube_id": "LWETqAH4ZoQ"
+      },
+      {
+       "number": 7,
+       "youtube_id": "d5YDwhTxw54"
+      },
+      {
+       "number": 8,
+       "youtube_id": "xG6OYKBJxcc"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "10th-meeting-20192020",
+     "name": {
+      "en": "10th Meeting",
+      "ar": "السباق العاشر"
+     },
+     "date": "2020-01-09",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "JZmC5EZ8QT0"
+      },
+      {
+       "number": 2,
+       "youtube_id": "BP02cYmUdYY"
+      },
+      {
+       "number": 3,
+       "youtube_id": "eAAR969RyZI"
+      },
+      {
+       "number": 4,
+       "youtube_id": "0vBBU7aHap0"
+      },
+      {
+       "number": 5,
+       "youtube_id": "-3jrSBLWDkg"
+      },
+      {
+       "number": 6,
+       "youtube_id": "Wd59hes6LbM"
+      },
+      {
+       "number": 7,
+       "youtube_id": "5YRAjM59ULs"
+      },
+      {
+       "number": 8,
+       "youtube_id": "dq0u_P1G78g"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "11th-meeting-20192020",
+     "name": {
+      "en": "11th Meeting",
+      "ar": "السباق الحادي عشر"
+     },
+     "date": "2020-03-06",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "ObQHkHAq8JE"
+      },
+      {
+       "number": 2,
+       "youtube_id": "AOoUh6l6gLc"
+      },
+      {
+       "number": 3,
+       "youtube_id": "adPMdYtERgw"
+      },
+      {
+       "number": 4,
+       "youtube_id": "d_-3WcwR3jc"
+      },
+      {
+       "number": 5,
+       "youtube_id": "d-JjEoDoits"
+      },
+      {
+       "number": 6,
+       "youtube_id": "3IiTt-APyb8"
+      },
+      {
+       "number": 7,
+       "youtube_id": "zLXrUkDt2gs"
+      },
+      {
+       "number": 8,
+       "youtube_id": "rzCqy4mKTd0"
+      },
+      {
+       "number": 9,
+       "youtube_id": "FeM2xEA9RIw"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "12th-meeting-20192020",
+     "name": {
+      "en": "12th Meeting",
+      "ar": "السباق الثاني عشر"
+     },
+     "date": "2020-03-13",
+     "races": [],
+     "day_stream": "_2nWbi3WF-w"
+    }
+   ]
+  },
+  {
+   "slug": "season-20202021",
+   "name": {
+    "en": "2020/2021 Season",
+    "ar": "موسم سباقات 2020/2021"
+   },
+   "meetings": [
+    {
+     "slug": "1st-meeting-20202021",
+     "name": {
+      "en": "1st Meeting",
+      "ar": "السباق الأول"
+     },
+     "date": "2020-10-17",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "IS7_P3Ij8Z4"
+      },
+      {
+       "number": 2,
+       "youtube_id": "Ri_m_2Ga37Q"
+      },
+      {
+       "number": 3,
+       "youtube_id": "ZypEohaRFaI"
+      },
+      {
+       "number": 4,
+       "youtube_id": "Mb3bWxIYoaQ"
+      },
+      {
+       "number": 5,
+       "youtube_id": "onY9uAEOHIA"
+      },
+      {
+       "number": 6,
+       "youtube_id": "RJoyEclT4So"
+      },
+      {
+       "number": 7,
+       "youtube_id": "OEKTB1iaUPQ"
+      },
+      {
+       "number": 8,
+       "youtube_id": "61xfAHBWyu4"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "2nd-meeting-20202021",
+     "name": {
+      "en": "2nd Meeting",
+      "ar": "السباق الثاني"
+     },
+     "date": "2020-10-23",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "4kVMIFs3V-g"
+      },
+      {
+       "number": 2,
+       "youtube_id": "Np7r6KEnk4Y"
+      },
+      {
+       "number": 3,
+       "youtube_id": "eBNGI_2f2So"
+      },
+      {
+       "number": 4,
+       "youtube_id": "1G9pefpHUuE"
+      },
+      {
+       "number": 5,
+       "youtube_id": "pQK8LSQ8tRk"
+      },
+      {
+       "number": 6,
+       "youtube_id": "7PJ3ZZLcsLY"
+      },
+      {
+       "number": 7,
+       "youtube_id": "OsHG6DnYM7s"
+      },
+      {
+       "number": 8,
+       "youtube_id": "bSWTRGonmDU"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "3rd-meeting-20202021",
+     "name": {
+      "en": "3rd Meeting",
+      "ar": "السباق الثالث"
+     },
+     "date": "2020-11-06",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "ZGce2gJMf-g"
+      },
+      {
+       "number": 2,
+       "youtube_id": "cKry-4LZ9VI"
+      },
+      {
+       "number": 3,
+       "youtube_id": "Pe35q5tHAF4"
+      },
+      {
+       "number": 4,
+       "youtube_id": "VvEpOZAhAaU"
+      },
+      {
+       "number": 5,
+       "youtube_id": "cAWPRdSWhLU"
+      },
+      {
+       "number": 6,
+       "youtube_id": "u77JwaQSE-c"
+      },
+      {
+       "number": 7,
+       "youtube_id": "_cWKA47BknU"
+      },
+      {
+       "number": 8,
+       "youtube_id": "efvssQUpcFU"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "4th-meeting-20202021",
+     "name": {
+      "en": "4th Meeting",
+      "ar": "السباق الرابع"
+     },
+     "date": "2020-11-12",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "e0J6z7GuMNk"
+      },
+      {
+       "number": 2,
+       "youtube_id": "a83neBxw3ps"
+      },
+      {
+       "number": 3,
+       "youtube_id": "ZBzwIRGG1LI"
+      },
+      {
+       "number": 4,
+       "youtube_id": "qIJ_76fyfRI"
+      },
+      {
+       "number": 5,
+       "youtube_id": "G5azbunf5ns"
+      },
+      {
+       "number": 6,
+       "youtube_id": "v3ZIwshI6C4"
+      },
+      {
+       "number": 7,
+       "youtube_id": "cm_KLXmESLc"
+      },
+      {
+       "number": 8,
+       "youtube_id": "EMF7bQUW2DM"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "5th-meeting-20202021",
+     "name": {
+      "en": "5th Meeting",
+      "ar": "السباق الخامس"
+     },
+     "date": "2020-11-19",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "acOTYKqqSfU"
+      },
+      {
+       "number": 2,
+       "youtube_id": "WNhwWPeO5b4"
+      },
+      {
+       "number": 3,
+       "youtube_id": "-EBw300-uqE"
+      },
+      {
+       "number": 4,
+       "youtube_id": "9teFvzH97Ps"
+      },
+      {
+       "number": 5,
+       "youtube_id": "__mxKxXOS1E"
+      },
+      {
+       "number": 6,
+       "youtube_id": "IDOXInefq7M"
+      },
+      {
+       "number": 7,
+       "youtube_id": "qcBaAWL1Dy0"
+      },
+      {
+       "number": 8,
+       "youtube_id": "Yvc5FHXQYuw"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "6th-meeting-20202021",
+     "name": {
+      "en": "6th Meeting",
+      "ar": "السباق السادس"
+     },
+     "date": "2020-12-03",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "znjDfmWRaRk"
+      },
+      {
+       "number": 2,
+       "youtube_id": "4DV_VqnYAtY"
+      },
+      {
+       "number": 3,
+       "youtube_id": "dX-obqVJ0dM"
+      },
+      {
+       "number": 4,
+       "youtube_id": "2J8BQ6WQH-Y"
+      },
+      {
+       "number": 5,
+       "youtube_id": "o1aeXMFAQzc"
+      },
+      {
+       "number": 6,
+       "youtube_id": "5D1YuMEZf8U"
+      },
+      {
+       "number": 7,
+       "youtube_id": "fGlnNPneq6Q"
+      },
+      {
+       "number": 8,
+       "youtube_id": "ac6tIKSppXE"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "7th-meeting-20202021",
+     "name": {
+      "en": "7th Meeting",
+      "ar": "السباق السابع"
+     },
+     "date": "2020-12-11",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "3FE8tqA3APc"
+      },
+      {
+       "number": 2,
+       "youtube_id": "TWm4OvRGA4A"
+      },
+      {
+       "number": 3,
+       "youtube_id": "wD7aqKy2u9A"
+      },
+      {
+       "number": 4,
+       "youtube_id": "g1QRilIuagc"
+      },
+      {
+       "number": 5,
+       "youtube_id": "do_IqeE0p0Q"
+      },
+      {
+       "number": 6,
+       "youtube_id": "5UXjrbMUDUg"
+      },
+      {
+       "number": 7,
+       "youtube_id": "qxFDa_55mV8"
+      },
+      {
+       "number": 8,
+       "youtube_id": "mmD0TsI0a0I"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "8th-meeting-20202021",
+     "name": {
+      "en": "8th Meeting",
+      "ar": "السباق الثامن"
+     },
+     "date": "2020-12-19",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "NjeyaZEub-g"
+      },
+      {
+       "number": 2,
+       "youtube_id": "hExMZKbRbvI"
+      },
+      {
+       "number": 3,
+       "youtube_id": "knYP2DZ0IdE"
+      },
+      {
+       "number": 4,
+       "youtube_id": "TxThlykT0qQ"
+      },
+      {
+       "number": 5,
+       "youtube_id": "X1M-gOy2mWE"
+      },
+      {
+       "number": 6,
+       "youtube_id": "r-5PtjEOndY"
+      },
+      {
+       "number": 7,
+       "youtube_id": "8lFnpGTdyaA"
+      },
+      {
+       "number": 8,
+       "youtube_id": "jg7P_WEVETE"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "9th-meeting-20202021",
+     "name": {
+      "en": "9th Meeting",
+      "ar": "السباق التاسع"
+     },
+     "date": "2021-01-09",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "ym841sZRnAg"
+      },
+      {
+       "number": 2,
+       "youtube_id": "eb0MqSz4AkQ"
+      },
+      {
+       "number": 3,
+       "youtube_id": "NGsC4uqotPs"
+      },
+      {
+       "number": 4,
+       "youtube_id": "WyvzRRLfVyY"
+      },
+      {
+       "number": 5,
+       "youtube_id": "LvixBzHzmys"
+      },
+      {
+       "number": 6,
+       "youtube_id": "Z7y61nH9iRs"
+      },
+      {
+       "number": 7,
+       "youtube_id": "e1N4-Kxdi9M"
+      },
+      {
+       "number": 8,
+       "youtube_id": "tr1617Lddkc"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "10th-meeting-20202021",
+     "name": {
+      "en": "10th Meeting",
+      "ar": "السباق العاشر"
+     },
+     "date": "2021-01-15",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "N9arw1P_Qsw"
+      },
+      {
+       "number": 2,
+       "youtube_id": "aTG_3smQPHA"
+      },
+      {
+       "number": 3,
+       "youtube_id": "gGa7AE7gqjU"
+      },
+      {
+       "number": 4,
+       "youtube_id": "VHaCQuNiVa8"
+      },
+      {
+       "number": 5,
+       "youtube_id": "eWj7PCjpqeo"
+      },
+      {
+       "number": 6,
+       "youtube_id": "wQF-KAOUcv8"
+      },
+      {
+       "number": 7,
+       "youtube_id": "pPN4vjWm1wk"
+      },
+      {
+       "number": 8,
+       "youtube_id": "smgfnkTR5Qs"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "11th-meeting-20202021",
+     "name": {
+      "en": "11th Meeting",
+      "ar": "السباق الحادي عشر"
+     },
+     "date": "2021-01-23",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "lICR8tHJTR0"
+      },
+      {
+       "number": 2,
+       "youtube_id": "3hVCLoSRV1E"
+      },
+      {
+       "number": 3,
+       "youtube_id": "Xpp9ZsaOWNE"
+      },
+      {
+       "number": 4,
+       "youtube_id": "bSpgye0rbFw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "XxUO_UvBaG8"
+      },
+      {
+       "number": 6,
+       "youtube_id": "J0b-tOP5YrU"
+      },
+      {
+       "number": 7,
+       "youtube_id": "45qFA7R8hj0"
+      },
+      {
+       "number": 8,
+       "youtube_id": "2sqHXCa6970"
+      }
+     ],
+     "day_stream": null
+    }
+   ]
+  },
+  {
+   "slug": "season-20212022",
+   "name": {
+    "en": "2021/2022 Season",
+    "ar": "موسم سباقات 2021/2022"
+   },
+   "meetings": [
+    {
+     "slug": "1st-meeting-20212022",
+     "name": {
+      "en": "1st Meeting",
+      "ar": "السباق الأول"
+     },
+     "date": "2021-10-21",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "mlVVqwZgMBU"
+      },
+      {
+       "number": 2,
+       "youtube_id": "PNsc-WHQ5Iw"
+      },
+      {
+       "number": 3,
+       "youtube_id": "oQvwDtGvG3Q"
+      },
+      {
+       "number": 4,
+       "youtube_id": "wCOdGka4DMg"
+      },
+      {
+       "number": 5,
+       "youtube_id": "4ZDCK1KTWLI"
+      },
+      {
+       "number": 6,
+       "youtube_id": "4MTiA_0JWSI"
+      },
+      {
+       "number": 7,
+       "youtube_id": "sdccGq0Qotw"
+      },
+      {
+       "number": 8,
+       "youtube_id": "nsMggZ3Lrl4"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "2nd-meeting-20212022",
+     "name": {
+      "en": "2nd Meeting",
+      "ar": "السباق الثاني"
+     },
+     "date": "2021-10-28",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "ZCzZ4FZ-8Qc"
+      },
+      {
+       "number": 2,
+       "youtube_id": "9O7j9X-KNt8"
+      },
+      {
+       "number": 3,
+       "youtube_id": "W5aH_w3p_Qw"
+      },
+      {
+       "number": 4,
+       "youtube_id": "EKUIuAf9vwI"
+      },
+      {
+       "number": 5,
+       "youtube_id": "rl8gj7cByQw"
+      },
+      {
+       "number": 6,
+       "youtube_id": "c7DgIn38NZ0"
+      },
+      {
+       "number": 7,
+       "youtube_id": "MgUC0qX1URw"
+      },
+      {
+       "number": 8,
+       "youtube_id": "cVTZKbs0JA8"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "3rd-meeting-20212022",
+     "name": {
+      "en": "3rd Meeting",
+      "ar": "السباق الثالث"
+     },
+     "date": "2021-11-05",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "BNIvcygW1Wc"
+      },
+      {
+       "number": 2,
+       "youtube_id": "aUKlyuf3rU8"
+      },
+      {
+       "number": 3,
+       "youtube_id": "0fKM9DeG090"
+      },
+      {
+       "number": 4,
+       "youtube_id": "ZzpvcSoedko"
+      },
+      {
+       "number": 5,
+       "youtube_id": "kHynSB3r_i8"
+      },
+      {
+       "number": 6,
+       "youtube_id": "ghGxN6Ot-2o"
+      },
+      {
+       "number": 7,
+       "youtube_id": "qOg3eRK51Ao"
+      },
+      {
+       "number": 8,
+       "youtube_id": "yx7qnU2dOMc"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "4th-meeting-20212022",
+     "name": {
+      "en": "4th Meeting",
+      "ar": "السباق الرابع"
+     },
+     "date": "2021-11-13",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "bDVUFo2uNIA"
+      },
+      {
+       "number": 2,
+       "youtube_id": "mxFEMznJyf0"
+      },
+      {
+       "number": 3,
+       "youtube_id": "DsAtl4hHtVs"
+      },
+      {
+       "number": 4,
+       "youtube_id": "vt4IOtKE0xs"
+      },
+      {
+       "number": 5,
+       "youtube_id": "w0AdJ5bHCPE"
+      },
+      {
+       "number": 6,
+       "youtube_id": "6vsmJyePKeI"
+      },
+      {
+       "number": 7,
+       "youtube_id": "g0wfYFAQXnI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "FltFANvbnwI"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "5th-meeting-20212022",
+     "name": {
+      "en": "5th Meeting",
+      "ar": "السباق الخامس"
+     },
+     "date": "2021-11-19",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "2S6yQ4HJHU8"
+      },
+      {
+       "number": 2,
+       "youtube_id": "__89VcL3Gf8"
+      },
+      {
+       "number": 3,
+       "youtube_id": "hW8YAtnDbb8"
+      },
+      {
+       "number": 4,
+       "youtube_id": "atRy5NMV760"
+      },
+      {
+       "number": 5,
+       "youtube_id": "tO3uBvhxzKo"
+      },
+      {
+       "number": 6,
+       "youtube_id": "axWB21e1azg"
+      },
+      {
+       "number": 7,
+       "youtube_id": "BWiHFW2MOz0"
+      },
+      {
+       "number": 8,
+       "youtube_id": "1DFTS1ySgIY"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "6th-meeting-20212022",
+     "name": {
+      "en": "6th Meeting",
+      "ar": "السباق السادس"
+     },
+     "date": "2021-12-02",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "zKkbYL0X8Gs"
+      },
+      {
+       "number": 2,
+       "youtube_id": "zg988YiA02w"
+      },
+      {
+       "number": 3,
+       "youtube_id": "Kzf5X3P6ycw"
+      },
+      {
+       "number": 4,
+       "youtube_id": "FQhYTreZiys"
+      },
+      {
+       "number": 5,
+       "youtube_id": "7nx2WfEmYK4"
+      },
+      {
+       "number": 6,
+       "youtube_id": "fwdVJTOx-9Y"
+      },
+      {
+       "number": 7,
+       "youtube_id": "BzaBVX7slUw"
+      },
+      {
+       "number": 8,
+       "youtube_id": "maJWwqqRksE"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "7th-meeting-20212022",
+     "name": {
+      "en": "7th Meeting",
+      "ar": "السباق السابع"
+     },
+     "date": "2021-12-10",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "SQwEKBfqMdk"
+      },
+      {
+       "number": 2,
+       "youtube_id": "Hqxi4qt3veg"
+      },
+      {
+       "number": 3,
+       "youtube_id": "FdraB31YbJQ"
+      },
+      {
+       "number": 4,
+       "youtube_id": "6W9RxW_XSXU"
+      },
+      {
+       "number": 5,
+       "youtube_id": "EK7-_mgwizw"
+      },
+      {
+       "number": 6,
+       "youtube_id": "8MbyvPXTzgE"
+      },
+      {
+       "number": 7,
+       "youtube_id": "G7YpMXZ6T6k"
+      },
+      {
+       "number": 8,
+       "youtube_id": "ImVFrFkGDJo"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "8th-meeting-20212022",
+     "name": {
+      "en": "8th Meeting",
+      "ar": "السباق الثامن"
+     },
+     "date": "2021-12-18",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "nMGYQNY_yMw"
+      },
+      {
+       "number": 2,
+       "youtube_id": "nmdgfCwrAtA"
+      },
+      {
+       "number": 3,
+       "youtube_id": "K0_L80hkNMo"
+      },
+      {
+       "number": 4,
+       "youtube_id": "pnJM6pKx6S8"
+      },
+      {
+       "number": 5,
+       "youtube_id": "isGk29Af3G8"
+      },
+      {
+       "number": 6,
+       "youtube_id": "XBVnE2EcisY"
+      },
+      {
+       "number": 7,
+       "youtube_id": "jSxhSEoE-Wc"
+      },
+      {
+       "number": 8,
+       "youtube_id": "TKxr7QaqsXk"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "9th-meeting-20212022",
+     "name": {
+      "en": "9th Meeting",
+      "ar": "السباق التاسع"
+     },
+     "date": "2021-12-30",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "-MZ7oEsj1Qc"
+      },
+      {
+       "number": 2,
+       "youtube_id": "xZfVAcE-nYE"
+      },
+      {
+       "number": 3,
+       "youtube_id": "ICFBtcO5qAg"
+      },
+      {
+       "number": 4,
+       "youtube_id": "ii4k3BfrCms"
+      },
+      {
+       "number": 5,
+       "youtube_id": "MlAcIVGh7ko"
+      },
+      {
+       "number": 6,
+       "youtube_id": "NvpayVdwMnQ"
+      },
+      {
+       "number": 7,
+       "youtube_id": "zV51S2z5KY4"
+      },
+      {
+       "number": 8,
+       "youtube_id": "N0J5AZxpntA"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "10th-meeting-20212022",
+     "name": {
+      "en": "10th Meeting",
+      "ar": "السباق العاشر"
+     },
+     "date": "2022-01-08",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "kYpkIlaNr9c"
+      },
+      {
+       "number": 2,
+       "youtube_id": "4yQTaYX21gs"
+      },
+      {
+       "number": 3,
+       "youtube_id": "QV6GathiAI8"
+      },
+      {
+       "number": 4,
+       "youtube_id": "pAygGMLXQNc"
+      },
+      {
+       "number": 5,
+       "youtube_id": "z4iwMGuXEBM"
+      },
+      {
+       "number": 6,
+       "youtube_id": "OiIGVOodN3w"
+      },
+      {
+       "number": 7,
+       "youtube_id": "gFX1VsJ9yFs"
+      },
+      {
+       "number": 8,
+       "youtube_id": "ySb6DKQKqnM"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "11th-meeting-20212022",
+     "name": {
+      "en": "11th Meeting",
+      "ar": "السباق الحادي عشر"
+     },
+     "date": "2022-01-14",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "mt-rWMMzALE"
+      },
+      {
+       "number": 2,
+       "youtube_id": "ORgP8nvi2PQ"
+      },
+      {
+       "number": 3,
+       "youtube_id": "XZl4CKAYq6U"
+      },
+      {
+       "number": 4,
+       "youtube_id": "KTDrB3EJrdw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "qci2eFesaiY"
+      },
+      {
+       "number": 6,
+       "youtube_id": "XM7of3veqd4"
+      },
+      {
+       "number": 7,
+       "youtube_id": "OYiSlEVaiTw"
+      },
+      {
+       "number": 8,
+       "youtube_id": "AhFLe2tKDBI"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "12th-meeting-20212022",
+     "name": {
+      "en": "12th Meeting",
+      "ar": "السباق الثاني عشر"
+     },
+     "date": "2022-01-20",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "ckbMMH4fXyw"
+      },
+      {
+       "number": 2,
+       "youtube_id": "E3-6wsjglTU"
+      },
+      {
+       "number": 3,
+       "youtube_id": "aQpbwUIh9nA"
+      },
+      {
+       "number": 4,
+       "youtube_id": "XHfNUpfrZSI"
+      },
+      {
+       "number": 5,
+       "youtube_id": "i5D1kfkHGWg"
+      },
+      {
+       "number": 6,
+       "youtube_id": "4gLY2EbMYCg"
+      },
+      {
+       "number": 7,
+       "youtube_id": "la4rX5R1LWg"
+      },
+      {
+       "number": 8,
+       "youtube_id": "Zf20UB6a4gw"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "13th-meeting-20212022",
+     "name": {
+      "en": "13th Meeting",
+      "ar": "السباق الثالث عشر"
+     },
+     "date": "2022-01-28",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "G_kfWzIOaY4"
+      },
+      {
+       "number": 2,
+       "youtube_id": "m1qaKg_AwjY"
+      },
+      {
+       "number": 3,
+       "youtube_id": "YyQKAZFtRJ0"
+      },
+      {
+       "number": 4,
+       "youtube_id": "B-uIAtDkcxM"
+      },
+      {
+       "number": 5,
+       "youtube_id": "soRzvF8615I"
+      },
+      {
+       "number": 6,
+       "youtube_id": "PZ7bfUtwYaI"
+      },
+      {
+       "number": 7,
+       "youtube_id": "eNwcVhRzvUE"
+      },
+      {
+       "number": 8,
+       "youtube_id": "MIzMCLjpKcM"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "14th-meeting-20212022",
+     "name": {
+      "en": "14th Meeting",
+      "ar": "السباق الرابع عشر"
+     },
+     "date": "2022-02-10",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "l_xme_MKMHM"
+      },
+      {
+       "number": 2,
+       "youtube_id": "RBb79JtpANE"
+      },
+      {
+       "number": 3,
+       "youtube_id": "r5dXX6NWC3g"
+      },
+      {
+       "number": 4,
+       "youtube_id": "OC4xTZMvt-I"
+      },
+      {
+       "number": 5,
+       "youtube_id": "AwC8da8IURs"
+      },
+      {
+       "number": 6,
+       "youtube_id": "ytHuZTF4Cts"
+      },
+      {
+       "number": 7,
+       "youtube_id": "nGyBF1z-MBQ"
+      },
+      {
+       "number": 8,
+       "youtube_id": "OeBPsFT8v58"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "15th-meeting-20212022",
+     "name": {
+      "en": "15th Meeting",
+      "ar": "السباق الخامس عشر"
+     },
+     "date": "2022-02-17",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "78E2H3gS968"
+      },
+      {
+       "number": 2,
+       "youtube_id": "7N0FVuqs3HI"
+      },
+      {
+       "number": 3,
+       "youtube_id": "_O9gJfDQduQ"
+      },
+      {
+       "number": 4,
+       "youtube_id": "Xlj4xvrBdb0"
+      },
+      {
+       "number": 5,
+       "youtube_id": "7SbrW4OoCl4"
+      },
+      {
+       "number": 6,
+       "youtube_id": "nBomQgmB-zI"
+      },
+      {
+       "number": 7,
+       "youtube_id": "cLN3gEz50v0"
+      },
+      {
+       "number": 8,
+       "youtube_id": "IGMwzEQqClA"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "16th-meeting-20212022",
+     "name": {
+      "en": "16th Meeting",
+      "ar": "السباق السادس عشر"
+     },
+     "date": "2022-02-25",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "zj5lWVh3XTU"
+      },
+      {
+       "number": 2,
+       "youtube_id": "VdEOj20yEwE"
+      },
+      {
+       "number": 3,
+       "youtube_id": "BLoWSbulCP4"
+      },
+      {
+       "number": 4,
+       "youtube_id": "RzNYSpMtEnQ"
+      },
+      {
+       "number": 5,
+       "youtube_id": "KWD8IMCDTUg"
+      },
+      {
+       "number": 6,
+       "youtube_id": "NfdYglUHTng"
+      },
+      {
+       "number": 7,
+       "youtube_id": "t1ifprATpiE"
+      },
+      {
+       "number": 8,
+       "youtube_id": "oFMJczhQui0"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "17th-meeting-20212022",
+     "name": {
+      "en": "17th Meeting",
+      "ar": "السباق السابع عشر"
+     },
+     "date": "2022-03-04",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "mk-S2--i8k4"
+      },
+      {
+       "number": 2,
+       "youtube_id": "OU7Ol7VDmB4"
+      },
+      {
+       "number": 3,
+       "youtube_id": "cejHDmdm-xE"
+      },
+      {
+       "number": 4,
+       "youtube_id": "uoG7BHACMKw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "u6KrGqttuJ8"
+      },
+      {
+       "number": 6,
+       "youtube_id": "Cx0omVp9pUw"
+      },
+      {
+       "number": 7,
+       "youtube_id": "1Fg5x5_iW7k"
+      },
+      {
+       "number": 8,
+       "youtube_id": "5wKvjSvp1A0"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "18th-meeting-20212022",
+     "name": {
+      "en": "18th Meeting",
+      "ar": "السباق الثامن عشر"
+     },
+     "date": "2022-03-12",
+     "races": [],
+     "day_stream": "i-kUJ8kvRrg"
+    },
+    {
+     "slug": "royal-cavalry-annual-meeting-salalah-20212022",
+     "name": {
+      "en": "Royal Cavalry Annual Meeting - Salalah",
+      "ar": "سباق الخيالة السلطانية السنوي - صلالة"
+     },
+     "date": "2022-03-19",
+     "races": [],
+     "day_stream": null
+    },
+    {
+     "slug": "19th-meeting-20212022",
+     "name": {
+      "en": "19th Meeting",
+      "ar": "السباق التاسع عشر"
+     },
+     "date": "2022-03-31",
+     "races": [],
+     "day_stream": "zdFgd1uHioY"
+    },
+    {
+     "slug": "20th-meeting-20212022",
+     "name": {
+      "en": "20th Meeting",
+      "ar": "السباق العشرون"
+     },
+     "date": "2022-04-01",
+     "races": [],
+     "day_stream": "U5dVetNipI4"
+    }
+   ]
+  },
+  {
+   "slug": "season-20222023",
+   "name": {
+    "en": "2022/2023 Season",
+    "ar": "موسم سباقات 2022/2023"
+   },
+   "meetings": [
+    {
+     "slug": "1st-meeting-20222023",
+     "name": {
+      "en": "1st Meeting",
+      "ar": "السباق الأول"
+     },
+     "date": "2022-10-15",
+     "races": [],
+     "day_stream": "3Xc9upiDTtw"
+    },
+    {
+     "slug": "2nd-meeting-20222023",
+     "name": {
+      "en": "2nd Meeting",
+      "ar": "السباق الثاني"
+     },
+     "date": "2022-10-21",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "cOLqVBzTdxM"
+      },
+      {
+       "number": 2,
+       "youtube_id": "YkwIArkVcuY"
+      },
+      {
+       "number": 3,
+       "youtube_id": "QUT2lsJDF4Q"
+      },
+      {
+       "number": 4,
+       "youtube_id": "U3ST8BHENfw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "d9NOSbGNpqw"
+      },
+      {
+       "number": 6,
+       "youtube_id": "GqEiunFdRcQ"
+      },
+      {
+       "number": 7,
+       "youtube_id": "7rkoLqWG78U"
+      },
+      {
+       "number": 8,
+       "youtube_id": "slyVkpt53mw"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "3rd-meeting-20222023",
+     "name": {
+      "en": "3rd Meeting",
+      "ar": "السباق الثالث"
+     },
+     "date": "2022-10-28",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "xukYGhjIvGc"
+      },
+      {
+       "number": 2,
+       "youtube_id": "yIh7DLx4BZQ"
+      },
+      {
+       "number": 3,
+       "youtube_id": "oFcgCq9tQ5Q"
+      },
+      {
+       "number": 4,
+       "youtube_id": "-5CRKkbseWA"
+      },
+      {
+       "number": 5,
+       "youtube_id": "x-CYiwSVu1k"
+      },
+      {
+       "number": 6,
+       "youtube_id": "abBAZkM62cA"
+      },
+      {
+       "number": 7,
+       "youtube_id": "bU2AusERXEY"
+      },
+      {
+       "number": 8,
+       "youtube_id": "FXYx7j9kbuQ"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "4th-meeting-20222023",
+     "name": {
+      "en": "4th Meeting",
+      "ar": "السباق الرابع"
+     },
+     "date": "2022-11-05",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "hjbv6RgIbwg"
+      },
+      {
+       "number": 2,
+       "youtube_id": "jX7ZFVDf3Eg"
+      },
+      {
+       "number": 3,
+       "youtube_id": "_Vt3oySN5Q8"
+      },
+      {
+       "number": 4,
+       "youtube_id": "zwzIXpzSJgM"
+      },
+      {
+       "number": 5,
+       "youtube_id": "_-S2-YxXsZ8"
+      },
+      {
+       "number": 6,
+       "youtube_id": "6e0iJOi-CWk"
+      },
+      {
+       "number": 7,
+       "youtube_id": "nGfgnUpjcbI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "xX5N3TjbpkE"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "5th-meeting-20222023",
+     "name": {
+      "en": "5th Meeting",
+      "ar": "السباق الخامس"
+     },
+     "date": "2022-11-12",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "ZdyVa2BHnOA"
+      },
+      {
+       "number": 2,
+       "youtube_id": "LP6ndfFVjTA"
+      },
+      {
+       "number": 3,
+       "youtube_id": "mXxGbpulm5k"
+      },
+      {
+       "number": 4,
+       "youtube_id": "5tVuoJrUh3c"
+      },
+      {
+       "number": 5,
+       "youtube_id": "ZdMvMzotyHM"
+      },
+      {
+       "number": 6,
+       "youtube_id": "1cwpuadw574"
+      },
+      {
+       "number": 7,
+       "youtube_id": "66pPbyP7jHA"
+      },
+      {
+       "number": 8,
+       "youtube_id": "Y-lDy5DZ8MI"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "6th-meeting-20222023",
+     "name": {
+      "en": "6th Meeting",
+      "ar": "السباق السادس"
+     },
+     "date": "2022-11-19",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "tSMN-3atDo8"
+      },
+      {
+       "number": 2,
+       "youtube_id": "5t4bFqmmDOY"
+      },
+      {
+       "number": 3,
+       "youtube_id": "qDXRdGLk8lU"
+      },
+      {
+       "number": 4,
+       "youtube_id": "WEH6SRIMbuI"
+      },
+      {
+       "number": 5,
+       "youtube_id": "-soqejrvIy8"
+      },
+      {
+       "number": 6,
+       "youtube_id": "ruDAEVRKpos"
+      },
+      {
+       "number": 7,
+       "youtube_id": "WaDUOALf4Yc"
+      },
+      {
+       "number": 8,
+       "youtube_id": "fOZRyyGwz54"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "7th-meeting-20222023",
+     "name": {
+      "en": "7th Meeting",
+      "ar": "السباق السابع"
+     },
+     "date": "2022-11-26",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "98Fel6g-jXw"
+      },
+      {
+       "number": 2,
+       "youtube_id": "Y5K-T8XWiqY"
+      },
+      {
+       "number": 3,
+       "youtube_id": "PKulWrxir7o"
+      },
+      {
+       "number": 4,
+       "youtube_id": "Vf8RscUD1zw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "9Br5wJseSe8"
+      },
+      {
+       "number": 6,
+       "youtube_id": "8H2HCSPxdVI"
+      },
+      {
+       "number": 7,
+       "youtube_id": "cA-WRCOI4CE"
+      },
+      {
+       "number": 8,
+       "youtube_id": "DgnfSdbDt_c"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "oman-equestrian-racing-festival-20222023",
+     "name": {
+      "en": "Oman Equestrian Racing Festival",
+      "ar": "مهرجان عُمان لسباقات الخيل"
+     },
+     "date": "2022-12-07",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "gZobo1IsxEA"
+      },
+      {
+       "number": 2,
+       "youtube_id": "Q9g42P-qe2U"
+      },
+      {
+       "number": 3,
+       "youtube_id": "3sSnDQyP_zo"
+      },
+      {
+       "number": 4,
+       "youtube_id": "sbiJ-AXjU9A"
+      },
+      {
+       "number": 5,
+       "youtube_id": "wurxJsnjDwE"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "8th-meeting-20222023",
+     "name": {
+      "en": "8th Meeting",
+      "ar": "السباق الثامن"
+     },
+     "date": "2022-12-08",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "D5L9P5bxnJ0"
+      },
+      {
+       "number": 2,
+       "youtube_id": "Yt6qDCytNis"
+      },
+      {
+       "number": 3,
+       "youtube_id": "_k4bUaxrxPI"
+      },
+      {
+       "number": 4,
+       "youtube_id": "13NR6kXWrys"
+      },
+      {
+       "number": 5,
+       "youtube_id": "rM6rUAz4nYM"
+      },
+      {
+       "number": 6,
+       "youtube_id": "Zt3r2tz2pw8"
+      },
+      {
+       "number": 7,
+       "youtube_id": "di2asezBsOU"
+      },
+      {
+       "number": 8,
+       "youtube_id": "Acq-zABM6wI"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "9th-meeting-20222023",
+     "name": {
+      "en": "9th Meeting",
+      "ar": "السباق التاسع"
+     },
+     "date": "2022-12-16",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "5Dn2jHb20ks"
+      },
+      {
+       "number": 2,
+       "youtube_id": "vow2GMY1qBw"
+      },
+      {
+       "number": 3,
+       "youtube_id": "VsQ9q4PAlQU"
+      },
+      {
+       "number": 4,
+       "youtube_id": "HqrH3egxCGs"
+      },
+      {
+       "number": 5,
+       "youtube_id": "0snHflb-Li4"
+      },
+      {
+       "number": 6,
+       "youtube_id": "0az1_fIuoN0"
+      },
+      {
+       "number": 7,
+       "youtube_id": "8r16DlmHZsg"
+      },
+      {
+       "number": 8,
+       "youtube_id": "whFja9m-O1Q"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "10th-meeting-20222023",
+     "name": {
+      "en": "10th Meeting",
+      "ar": "السباق العاشر"
+     },
+     "date": "2022-12-24",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "Zmiyigjo22Q"
+      },
+      {
+       "number": 2,
+       "youtube_id": "V96M0H8qM-Y"
+      },
+      {
+       "number": 3,
+       "youtube_id": "IU6Sd6_XqyQ"
+      },
+      {
+       "number": 4,
+       "youtube_id": "3c0ujk-0U5s"
+      },
+      {
+       "number": 5,
+       "youtube_id": "bGKFi_k1KE0"
+      },
+      {
+       "number": 6,
+       "youtube_id": "dS5IdfcNnlE"
+      },
+      {
+       "number": 7,
+       "youtube_id": "5ok3-_SbTeg"
+      },
+      {
+       "number": 8,
+       "youtube_id": "kPVpt01nlrc"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "11th-meeting-20222023",
+     "name": {
+      "en": "11th Meeting",
+      "ar": "السباق الحادي عشر"
+     },
+     "date": "2023-01-05",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "Gb_vMtb_shs"
+      },
+      {
+       "number": 2,
+       "youtube_id": "UWnW7-cSnHs"
+      },
+      {
+       "number": 3,
+       "youtube_id": "Q5CchbtNJE4"
+      },
+      {
+       "number": 4,
+       "youtube_id": "gj_JMAmSSCU"
+      },
+      {
+       "number": 5,
+       "youtube_id": "wWVjIWBiTUo"
+      },
+      {
+       "number": 6,
+       "youtube_id": "QSVNUO3nk3A"
+      },
+      {
+       "number": 7,
+       "youtube_id": "WK6YRRFIFZE"
+      },
+      {
+       "number": 8,
+       "youtube_id": "VPoMhgjTAyk"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "12th-meeting-20222023",
+     "name": {
+      "en": "12th Meeting",
+      "ar": "السباق الثاني عشر"
+     },
+     "date": "2023-01-19",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "kLqXW2jvmB0"
+      },
+      {
+       "number": 2,
+       "youtube_id": "94eHk8QQz3E"
+      },
+      {
+       "number": 3,
+       "youtube_id": "mcQ2qB5AdWA"
+      },
+      {
+       "number": 4,
+       "youtube_id": "Lm4GHxsY5DA"
+      },
+      {
+       "number": 5,
+       "youtube_id": "CUjsJJlSN5o"
+      },
+      {
+       "number": 6,
+       "youtube_id": "obmt5V4thZE"
+      },
+      {
+       "number": 7,
+       "youtube_id": "0fTNW1AOZ4A"
+      },
+      {
+       "number": 8,
+       "youtube_id": "H2u44lOXf_U"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "royal-cavalry-meeting-20222023",
+     "name": {
+      "en": "Royal Cavalry Meeting",
+      "ar": "سباق الخيالة السلطانية"
+     },
+     "date": "2023-01-26",
+     "races": [],
+     "day_stream": null
+    },
+    {
+     "slug": "13th-meeting-20222023",
+     "name": {
+      "en": "13th Meeting",
+      "ar": "السباق الثالث عشر"
+     },
+     "date": "2023-01-28",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "-dA6T_JkP9o"
+      },
+      {
+       "number": 2,
+       "youtube_id": "28vOyNwOzaM"
+      },
+      {
+       "number": 3,
+       "youtube_id": "P2_TMhzycYg"
+      },
+      {
+       "number": 4,
+       "youtube_id": "HF1hoqHC1Qk"
+      },
+      {
+       "number": 5,
+       "youtube_id": "_JUon69SUtg"
+      },
+      {
+       "number": 6,
+       "youtube_id": "cshyUu_Q-8c"
+      },
+      {
+       "number": 7,
+       "youtube_id": "rtZeOmv9tMU"
+      },
+      {
+       "number": 8,
+       "youtube_id": "X3ySGBPsDfo"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "14th-meeting-20222023",
+     "name": {
+      "en": "14th Meeting",
+      "ar": "السباق الرابع عشر"
+     },
+     "date": "2023-02-03",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "yt3Cwazq3tY"
+      },
+      {
+       "number": 2,
+       "youtube_id": "vi2ftceDzUM"
+      },
+      {
+       "number": 3,
+       "youtube_id": "TrzoHbdL8wg"
+      },
+      {
+       "number": 4,
+       "youtube_id": "CtnRHqQeOLE"
+      },
+      {
+       "number": 5,
+       "youtube_id": "BTy-HddsjdM"
+      },
+      {
+       "number": 6,
+       "youtube_id": "NCJ1CwOOMjM"
+      },
+      {
+       "number": 7,
+       "youtube_id": "t8Lro6OMMvY"
+      },
+      {
+       "number": 8,
+       "youtube_id": "LBhCGPPeW2M"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "15th-meeting-20222023",
+     "name": {
+      "en": "15th Meeting",
+      "ar": "السباق الخامس عشر"
+     },
+     "date": "2023-02-09",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "XgQVfhj-38Q"
+      },
+      {
+       "number": 2,
+       "youtube_id": "svcw0WkLBb4"
+      },
+      {
+       "number": 3,
+       "youtube_id": "PB0nE2VCFLI"
+      },
+      {
+       "number": 4,
+       "youtube_id": "16BxpZAVUdY"
+      },
+      {
+       "number": 5,
+       "youtube_id": "5eQ0j2sZRJ0"
+      },
+      {
+       "number": 6,
+       "youtube_id": "9pY7oQ_q0I4"
+      },
+      {
+       "number": 7,
+       "youtube_id": "4WFUzxpk87k"
+      },
+      {
+       "number": 8,
+       "youtube_id": "BjmA6s6bf9c"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "16th-meeting-20222023",
+     "name": {
+      "en": "16th Meeting",
+      "ar": "السباق السادس عشر"
+     },
+     "date": "2023-02-24",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "ybU5LyILrig"
+      },
+      {
+       "number": 2,
+       "youtube_id": "2MKxocJkCeI"
+      },
+      {
+       "number": 3,
+       "youtube_id": "vftji0WJ3u0"
+      },
+      {
+       "number": 4,
+       "youtube_id": "qsUQ-S1_JDk"
+      },
+      {
+       "number": 5,
+       "youtube_id": "iA7Lh2eR5gg"
+      },
+      {
+       "number": 6,
+       "youtube_id": "3gmfjo-XF4k"
+      },
+      {
+       "number": 7,
+       "youtube_id": "IG6xBtKQIdI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "EkoKr8KByr0"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "17th-meeting-20222023",
+     "name": {
+      "en": "17th Meeting",
+      "ar": "السباق السابع عشر"
+     },
+     "date": "2023-03-02",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "qaG8rmijwsQ"
+      },
+      {
+       "number": 2,
+       "youtube_id": "_DMXFqU8eIM"
+      },
+      {
+       "number": 3,
+       "youtube_id": "_nmTkOTg0ac"
+      },
+      {
+       "number": 4,
+       "youtube_id": "6AP_jSim35A"
+      },
+      {
+       "number": 5,
+       "youtube_id": "pxsBE_RMHPA"
+      },
+      {
+       "number": 6,
+       "youtube_id": "0SPXA_A6Lb4"
+      },
+      {
+       "number": 7,
+       "youtube_id": "Uj89wt2XawI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "BJ96yC2ADmw"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "18th-meeting-20222023",
+     "name": {
+      "en": "18th Meeting",
+      "ar": "السباق الثامن عشر"
+     },
+     "date": "2023-03-09",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "c42zkeVVm8U"
+      },
+      {
+       "number": 2,
+       "youtube_id": "RuOKgvu87xU"
+      },
+      {
+       "number": 3,
+       "youtube_id": "V0zhYmjx_HI"
+      },
+      {
+       "number": 4,
+       "youtube_id": "3lqzz0VMQa4"
+      },
+      {
+       "number": 5,
+       "youtube_id": "gvksshQNkH4"
+      },
+      {
+       "number": 6,
+       "youtube_id": "xJRzwyYWFms"
+      },
+      {
+       "number": 7,
+       "youtube_id": "_CvsdKRA8mc"
+      },
+      {
+       "number": 8,
+       "youtube_id": "p7WpVEXLURk"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "19th-meeting-20222023",
+     "name": {
+      "en": "19th Meeting",
+      "ar": "السباق التاسع عشر"
+     },
+     "date": "2023-03-17",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "BIjkb7z-3UM"
+      },
+      {
+       "number": 2,
+       "youtube_id": "-ObvL_n15Vo"
+      },
+      {
+       "number": 3,
+       "youtube_id": "i0addnm3Mzw"
+      },
+      {
+       "number": 4,
+       "youtube_id": "N0JG1me5HNw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "ZbdkD_QNNK0"
+      },
+      {
+       "number": 6,
+       "youtube_id": "9mbQvjIcXXA"
+      },
+      {
+       "number": 7,
+       "youtube_id": "D_wgBcmxxqo"
+      },
+      {
+       "number": 8,
+       "youtube_id": "NLQZrNAWtrw"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "20th-meeting-20222023",
+     "name": {
+      "en": "20th Meeting",
+      "ar": "السباق العشرون"
+     },
+     "date": "2023-03-18",
+     "races": [],
+     "day_stream": "16nUl-Aza68"
+    }
+   ]
+  },
+  {
+   "slug": "season-20232024",
+   "name": {
+    "en": "2023/2024 Season",
+    "ar": "موسم سباقات 2023/2024"
+   },
+   "meetings": [
+    {
+     "slug": "1st-meeting-20232024",
+     "name": {
+      "en": "1st Meeting",
+      "ar": "السباق الأول"
+     },
+     "date": "2023-10-13",
+     "races": [],
+     "day_stream": null
+    },
+    {
+     "slug": "2nd-meeting-20232024",
+     "name": {
+      "en": "2nd Meeting",
+      "ar": "السباق الثاني"
+     },
+     "date": "2023-10-20",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "mD4UIdsX5LQ"
+      },
+      {
+       "number": 2,
+       "youtube_id": "fTFbn6Rpmyc"
+      },
+      {
+       "number": 3,
+       "youtube_id": "wE7ejSNRohc"
+      },
+      {
+       "number": 4,
+       "youtube_id": "CbAajC9h9Gw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "KMpXY_jWww4"
+      },
+      {
+       "number": 6,
+       "youtube_id": "xY_1UaDVe7g"
+      },
+      {
+       "number": 7,
+       "youtube_id": "hdRIhR5DmHo"
+      },
+      {
+       "number": 8,
+       "youtube_id": "a1dDPwlgvg0"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "3rd-meeting-20232024",
+     "name": {
+      "en": "3rd Meeting",
+      "ar": "السباق الثالث"
+     },
+     "date": "2023-11-02",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "Yj2djmmhTNU"
+      },
+      {
+       "number": 2,
+       "youtube_id": "WtCC7AShbcY"
+      },
+      {
+       "number": 3,
+       "youtube_id": "wI0itz9qKGo"
+      },
+      {
+       "number": 4,
+       "youtube_id": "AARJ6igVPIs"
+      },
+      {
+       "number": 5,
+       "youtube_id": "kdZ4j4N7AVw"
+      },
+      {
+       "number": 6,
+       "youtube_id": "4OvJdgnrUsM"
+      },
+      {
+       "number": 7,
+       "youtube_id": "x_tJSwus_j0"
+      },
+      {
+       "number": 8,
+       "youtube_id": "6JRLVCd5lwg"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "4th-meeting-20232024",
+     "name": {
+      "en": "4th Meeting",
+      "ar": "السباق الرابع"
+     },
+     "date": "2023-11-09",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "PJsFGE50BTQ"
+      },
+      {
+       "number": 2,
+       "youtube_id": "E7KXllfvk7Q"
+      },
+      {
+       "number": 3,
+       "youtube_id": "5thb8xn05jY"
+      },
+      {
+       "number": 4,
+       "youtube_id": "sBIf0E7ShTI"
+      },
+      {
+       "number": 5,
+       "youtube_id": "AKw6UjURwzY"
+      },
+      {
+       "number": 6,
+       "youtube_id": "YpMyTJk9Tn0"
+      },
+      {
+       "number": 7,
+       "youtube_id": "Cr6lslJr4So"
+      },
+      {
+       "number": 8,
+       "youtube_id": "hgypv8GmSwA"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "5th-meeting-20232024",
+     "name": {
+      "en": "5th Meeting",
+      "ar": "السباق الخامس"
+     },
+     "date": "2023-11-17",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "vLEPIz_HHOY"
+      },
+      {
+       "number": 2,
+       "youtube_id": "5lVzm9K92qI"
+      },
+      {
+       "number": 3,
+       "youtube_id": "Q64w1_Anyvg"
+      },
+      {
+       "number": 4,
+       "youtube_id": "qhVUCDRoEbU"
+      },
+      {
+       "number": 5,
+       "youtube_id": "fKHYO6lAdWk"
+      },
+      {
+       "number": 6,
+       "youtube_id": "UPejPSkfGGU"
+      },
+      {
+       "number": 7,
+       "youtube_id": "TWEyP5vWhNI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "o0rsohcy1BM"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "6th-meeting-20232024",
+     "name": {
+      "en": "6th Meeting",
+      "ar": "السباق السادس"
+     },
+     "date": "2023-11-25",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "vP6rL0dfK90"
+      },
+      {
+       "number": 2,
+       "youtube_id": "rNXd8GyTaxI"
+      },
+      {
+       "number": 3,
+       "youtube_id": "198bEvP2PvI"
+      },
+      {
+       "number": 4,
+       "youtube_id": "fe-G0anCUr0"
+      },
+      {
+       "number": 5,
+       "youtube_id": "39c-tQgof14"
+      },
+      {
+       "number": 6,
+       "youtube_id": "SOvRB-ji0HI"
+      },
+      {
+       "number": 7,
+       "youtube_id": "l3XW3kZbzos"
+      },
+      {
+       "number": 8,
+       "youtube_id": "by-4sHdNrmE"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "7th-meeting-20232024",
+     "name": {
+      "en": "7th Meeting",
+      "ar": "السباق السابع"
+     },
+     "date": "2023-12-01",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "SdXb4kSn7-o"
+      },
+      {
+       "number": 2,
+       "youtube_id": "PqEcMSU9bY0"
+      },
+      {
+       "number": 3,
+       "youtube_id": "1Yp9Y9Wx45o"
+      },
+      {
+       "number": 4,
+       "youtube_id": "CfCS02rVdhs"
+      },
+      {
+       "number": 5,
+       "youtube_id": "QPgJEklCTsc"
+      },
+      {
+       "number": 6,
+       "youtube_id": "aL2iAHcHAMI"
+      },
+      {
+       "number": 7,
+       "youtube_id": "lmD-jBaZagI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "dbZTQf7T3lc"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "8th-meeting-20232024",
+     "name": {
+      "en": "8th Meeting",
+      "ar": "السباق الثامن"
+     },
+     "date": "2023-12-07",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "LhP9Lg7RxGg"
+      },
+      {
+       "number": 2,
+       "youtube_id": "qFyNiTomoxc"
+      },
+      {
+       "number": 3,
+       "youtube_id": "s0H7jKK4e7o"
+      },
+      {
+       "number": 4,
+       "youtube_id": "H44Umr4vizE"
+      },
+      {
+       "number": 5,
+       "youtube_id": "VfoaO_vg6Nk"
+      },
+      {
+       "number": 6,
+       "youtube_id": "_76xp6Bkf5k"
+      },
+      {
+       "number": 7,
+       "youtube_id": "LvFrlgZ0pAA"
+      },
+      {
+       "number": 8,
+       "youtube_id": "JGkV5bJwvAQ"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "9th-meeting-20232024",
+     "name": {
+      "en": "9th Meeting",
+      "ar": "السباق التاسع"
+     },
+     "date": "2023-12-16",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "0i15VBzBXtc"
+      },
+      {
+       "number": 2,
+       "youtube_id": "AP_IEbuz8NE"
+      },
+      {
+       "number": 3,
+       "youtube_id": "OgEQycrDH_o"
+      },
+      {
+       "number": 4,
+       "youtube_id": "-CklhqDOcbQ"
+      },
+      {
+       "number": 5,
+       "youtube_id": "sFN3qvOuOmM"
+      },
+      {
+       "number": 6,
+       "youtube_id": "IWRu2AuBKAc"
+      },
+      {
+       "number": 7,
+       "youtube_id": "HIQx-clCVLY"
+      },
+      {
+       "number": 8,
+       "youtube_id": "iBx3ZZo3SEk"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "10th-meeting-20232024",
+     "name": {
+      "en": "10th Meeting",
+      "ar": "السباق العاشر"
+     },
+     "date": "2023-12-23",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "94MiH87TVFw"
+      },
+      {
+       "number": 2,
+       "youtube_id": "AR5z7N5_Yvk"
+      },
+      {
+       "number": 3,
+       "youtube_id": "WInWp6eim3A"
+      },
+      {
+       "number": 4,
+       "youtube_id": "zF-bJGaZNAs"
+      },
+      {
+       "number": 5,
+       "youtube_id": "vM6gN2oLUFU"
+      },
+      {
+       "number": 6,
+       "youtube_id": "uSOWIRX388U"
+      },
+      {
+       "number": 7,
+       "youtube_id": "_dKOj7MLyzY"
+      },
+      {
+       "number": 8,
+       "youtube_id": "34MuEi1wwDM"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "11th-meeting-20232024",
+     "name": {
+      "en": "11th Meeting",
+      "ar": "السباق الحادي عشر"
+     },
+     "date": "2023-12-30",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "0UQTPmtGatU"
+      },
+      {
+       "number": 2,
+       "youtube_id": "wetdSPnr4DI"
+      },
+      {
+       "number": 3,
+       "youtube_id": "T4eLV1AqNEg"
+      },
+      {
+       "number": 4,
+       "youtube_id": "5h52jFmFsKo"
+      },
+      {
+       "number": 5,
+       "youtube_id": "0D0NCP9VCsw"
+      },
+      {
+       "number": 6,
+       "youtube_id": "mSVlB3-szp8"
+      },
+      {
+       "number": 7,
+       "youtube_id": "2-2ZS9rH5P0"
+      },
+      {
+       "number": 8,
+       "youtube_id": "NQZUpGx9VA8"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "12th-meeting-20232024",
+     "name": {
+      "en": "12th Meeting",
+      "ar": "السباق الثاني عشر"
+     },
+     "date": "2024-01-13",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "UULLw79YJUA"
+      },
+      {
+       "number": 2,
+       "youtube_id": "yTw-38lXDXs"
+      },
+      {
+       "number": 3,
+       "youtube_id": "F4UqmthvSZ0"
+      },
+      {
+       "number": 4,
+       "youtube_id": "4D8UbCKZjhA"
+      },
+      {
+       "number": 5,
+       "youtube_id": "7mGxKTW4ADo"
+      },
+      {
+       "number": 6,
+       "youtube_id": "cA14QciUzlc"
+      },
+      {
+       "number": 7,
+       "youtube_id": "xl8qT166Ifk"
+      },
+      {
+       "number": 8,
+       "youtube_id": "znTISsOY-DY"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "13th-meeting-20232024",
+     "name": {
+      "en": "13th Meeting",
+      "ar": "السباق الثالث عشر"
+     },
+     "date": "2024-01-19",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "hyk3u2fG5no"
+      },
+      {
+       "number": 2,
+       "youtube_id": "GdOzZeTIOI4"
+      },
+      {
+       "number": 3,
+       "youtube_id": "ScYyXdmav3M"
+      },
+      {
+       "number": 4,
+       "youtube_id": "K97h8yW9CqM"
+      },
+      {
+       "number": 5,
+       "youtube_id": "dJKu_ang1Yc"
+      },
+      {
+       "number": 6,
+       "youtube_id": "QkALsbYpBu8"
+      },
+      {
+       "number": 7,
+       "youtube_id": "z94h1ypZrpM"
+      },
+      {
+       "number": 8,
+       "youtube_id": "eJ4TXUW7ONs"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "royal-cavalry-meeting-20232024",
+     "name": {
+      "en": "Royal Cavalry Meeting",
+      "ar": "سباق الخيالة السلطانية"
+     },
+     "date": "2024-01-22",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "Ri_akJEx0gA"
+      },
+      {
+       "number": 2,
+       "youtube_id": "eUxhP5ErAaM"
+      },
+      {
+       "number": 3,
+       "youtube_id": "Ad2mCW2tnqA"
+      },
+      {
+       "number": 4,
+       "youtube_id": "599fr0mVSaI"
+      },
+      {
+       "number": 5,
+       "youtube_id": "KyLWjTFFk0E"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "14th-meeting-20232024",
+     "name": {
+      "en": "14th Meeting",
+      "ar": "السباق الرابع عشر"
+     },
+     "date": "2024-01-25",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "e3cySnnT4mg"
+      },
+      {
+       "number": 2,
+       "youtube_id": "NYIbu-G6644"
+      },
+      {
+       "number": 3,
+       "youtube_id": "bSyqWiXRApc"
+      },
+      {
+       "number": 4,
+       "youtube_id": "l6JZuHq4hLg"
+      },
+      {
+       "number": 5,
+       "youtube_id": "6haAhFa_EOw"
+      },
+      {
+       "number": 6,
+       "youtube_id": "MaTl9HmNTHo"
+      },
+      {
+       "number": 7,
+       "youtube_id": "dsRw_UpAdkI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "2aywNGz7ri4"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "15th-meeting-20232024",
+     "name": {
+      "en": "15th Meeting",
+      "ar": "السباق الخامس عشر"
+     },
+     "date": "2024-02-02",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "JO-1Da1MgdI"
+      },
+      {
+       "number": 2,
+       "youtube_id": "5cr6dBOv-N4"
+      },
+      {
+       "number": 3,
+       "youtube_id": "VKtY7VeZWYc"
+      },
+      {
+       "number": 4,
+       "youtube_id": "husuzD17lVs"
+      },
+      {
+       "number": 5,
+       "youtube_id": "tM4y9BRCMOo"
+      },
+      {
+       "number": 6,
+       "youtube_id": "jBFlWjK-UqE"
+      },
+      {
+       "number": 7,
+       "youtube_id": "wYgYoWdmtVs"
+      },
+      {
+       "number": 8,
+       "youtube_id": "kB8eLDgNl3Q"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "16th-meeting-20232024",
+     "name": {
+      "en": "16th Meeting",
+      "ar": "السباق السادس عشر"
+     },
+     "date": "2024-02-08",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "yDR90Y69YxM"
+      },
+      {
+       "number": 2,
+       "youtube_id": "IeEauqD0gyI"
+      },
+      {
+       "number": 3,
+       "youtube_id": "_RgFqp448L8"
+      },
+      {
+       "number": 4,
+       "youtube_id": "km5edfQqQH0"
+      },
+      {
+       "number": 5,
+       "youtube_id": "Z1mQi9HNKWU"
+      },
+      {
+       "number": 6,
+       "youtube_id": "VaSV4azeZVw"
+      },
+      {
+       "number": 7,
+       "youtube_id": "eSJVscHHGz8"
+      },
+      {
+       "number": 8,
+       "youtube_id": "xf_Rx71vOpA"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "17th-meeting-20232024",
+     "name": {
+      "en": "17th Meeting",
+      "ar": "السباق السابع عشر"
+     },
+     "date": "2024-02-15",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "nLGb6E0HEcI"
+      },
+      {
+       "number": 2,
+       "youtube_id": "RvuEPTFxs58"
+      },
+      {
+       "number": 3,
+       "youtube_id": "i3bBxa56r6I"
+      },
+      {
+       "number": 4,
+       "youtube_id": "gLM6R1HNAhc"
+      },
+      {
+       "number": 5,
+       "youtube_id": "NPKflnlOFrs"
+      },
+      {
+       "number": 6,
+       "youtube_id": "dFmMXy90WYM"
+      },
+      {
+       "number": 7,
+       "youtube_id": "Ne3oPSVBqwg"
+      },
+      {
+       "number": 8,
+       "youtube_id": "jrA8Uz2poFA"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "18th-meeting-20232024",
+     "name": {
+      "en": "18th Meeting",
+      "ar": "السباق الثامن عشر"
+     },
+     "date": "2024-02-23",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "HPkDmv1IYcw"
+      },
+      {
+       "number": 2,
+       "youtube_id": "usnAIjwHq7E"
+      },
+      {
+       "number": 3,
+       "youtube_id": "xDMSeHNaqjQ"
+      },
+      {
+       "number": 4,
+       "youtube_id": "wIGvex9YJiU"
+      },
+      {
+       "number": 5,
+       "youtube_id": "zpAcZps5R9s"
+      },
+      {
+       "number": 6,
+       "youtube_id": "sSgQ_6-og5w"
+      },
+      {
+       "number": 7,
+       "youtube_id": "-Ms0lpnRbtI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "vuTkAWzzTPQ"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "19th-meeting-20232024",
+     "name": {
+      "en": "19th Meeting",
+      "ar": "السباق التاسع عشر"
+     },
+     "date": "2024-03-08",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "m6SHckn4pKY"
+      },
+      {
+       "number": 2,
+       "youtube_id": "o0X7S1zBkbQ"
+      },
+      {
+       "number": 3,
+       "youtube_id": "M8dPe2cT3ZM"
+      },
+      {
+       "number": 4,
+       "youtube_id": "AOgtLyKXCY0"
+      },
+      {
+       "number": 5,
+       "youtube_id": "N-kW6rNLtWs"
+      },
+      {
+       "number": 6,
+       "youtube_id": "60KLKS7odoA"
+      },
+      {
+       "number": 7,
+       "youtube_id": "0649-SCbzzM"
+      },
+      {
+       "number": 8,
+       "youtube_id": "O_-xeN0X0Hg"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "final-meeting-20232024",
+     "name": {
+      "en": "Final Meeting",
+      "ar": "السباق الختامي"
+     },
+     "date": "2024-03-16",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "tWS6uYafxvM"
+      },
+      {
+       "number": 2,
+       "youtube_id": "N5gzDSphGWc"
+      },
+      {
+       "number": 3,
+       "youtube_id": "-G-isTSUKHY"
+      },
+      {
+       "number": 4,
+       "youtube_id": "WBvQ1_OpvI0"
+      },
+      {
+       "number": 5,
+       "youtube_id": "uBcJt-iZNCk"
+      }
+     ],
+     "day_stream": null
+    }
+   ]
+  },
+  {
+   "slug": "season-20242025",
+   "name": {
+    "en": "2024/2025 Season",
+    "ar": "موسم سباقات 2024/2025"
+   },
+   "meetings": [
+    {
+     "slug": "1st-meeting-20242025",
+     "name": {
+      "en": "1st Meeting",
+      "ar": "السباق الأول"
+     },
+     "date": "2024-10-18",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "Zoes_n3-6XY"
+      },
+      {
+       "number": 2,
+       "youtube_id": "SvOdIC-cdf8"
+      },
+      {
+       "number": 3,
+       "youtube_id": "L2dsBLlC0W4"
+      },
+      {
+       "number": 4,
+       "youtube_id": "rS7IaByf3qo"
+      },
+      {
+       "number": 5,
+       "youtube_id": "ncLKu6Kx5hk"
+      },
+      {
+       "number": 6,
+       "youtube_id": "r53_3F_JkW8"
+      },
+      {
+       "number": 7,
+       "youtube_id": "myuYamu3E58"
+      },
+      {
+       "number": 8,
+       "youtube_id": "aNTvUGOU0T0"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "2nd-meeting-20242025",
+     "name": {
+      "en": "2nd Meeting",
+      "ar": "السباق الثاني"
+     },
+     "date": "2024-10-25",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "3AOA5EkqoAk"
+      },
+      {
+       "number": 2,
+       "youtube_id": "BgNOGgGtfLA"
+      },
+      {
+       "number": 3,
+       "youtube_id": "_e0NJueTaBI"
+      },
+      {
+       "number": 4,
+       "youtube_id": "noEQL_7DUtQ"
+      },
+      {
+       "number": 5,
+       "youtube_id": "MW27vuCYobY"
+      },
+      {
+       "number": 6,
+       "youtube_id": "ClR_B6fbFCU"
+      },
+      {
+       "number": 7,
+       "youtube_id": "W7nyYVj5BNI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "VawuKIWdLM8"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "3rd-meeting-20242025",
+     "name": {
+      "en": "3rd Meeting",
+      "ar": "السباق الثالث"
+     },
+     "date": "2024-10-31",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "nXg05quMicE"
+      },
+      {
+       "number": 2,
+       "youtube_id": "zQDwpLrxQ9A"
+      },
+      {
+       "number": 3,
+       "youtube_id": "xeqL0vlrKl8"
+      },
+      {
+       "number": 4,
+       "youtube_id": "W2-6Lithpqc"
+      },
+      {
+       "number": 5,
+       "youtube_id": "zvCeClMQJaw"
+      },
+      {
+       "number": 6,
+       "youtube_id": "CNgqrIrGAnQ"
+      },
+      {
+       "number": 7,
+       "youtube_id": "KH0b1FUeTOA"
+      },
+      {
+       "number": 8,
+       "youtube_id": "LwnCOsiPkMY"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "4th-meeting-20242025",
+     "name": {
+      "en": "4th Meeting",
+      "ar": "السباق الرابع"
+     },
+     "date": "2024-11-07",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "hinJTfuoJyY"
+      },
+      {
+       "number": 2,
+       "youtube_id": "b_nTD-RHxzg"
+      },
+      {
+       "number": 3,
+       "youtube_id": "FwRFt2zY1xU"
+      },
+      {
+       "number": 4,
+       "youtube_id": "g2UPTdpBz0w"
+      },
+      {
+       "number": 5,
+       "youtube_id": "zTOVsDVfRL4"
+      },
+      {
+       "number": 6,
+       "youtube_id": "yUZkHQojNGE"
+      },
+      {
+       "number": 7,
+       "youtube_id": "8b9I2GC3vww"
+      },
+      {
+       "number": 8,
+       "youtube_id": "U8J6v-oMwnM"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "5th-meeting-20242025",
+     "name": {
+      "en": "5th Meeting",
+      "ar": "السباق الخامس"
+     },
+     "date": "2024-11-16",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "B3TKCmHqzT8"
+      },
+      {
+       "number": 2,
+       "youtube_id": "MPMX1cVrd0Y"
+      },
+      {
+       "number": 3,
+       "youtube_id": "nuRBPSz3eyY"
+      },
+      {
+       "number": 4,
+       "youtube_id": "MjCcHkFTE2Q"
+      },
+      {
+       "number": 5,
+       "youtube_id": "Q20FvDjIO1E"
+      },
+      {
+       "number": 6,
+       "youtube_id": "1vilylbiH0c"
+      },
+      {
+       "number": 7,
+       "youtube_id": "R6b90ZRdQdk"
+      },
+      {
+       "number": 8,
+       "youtube_id": "JdclngfSOKI"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "6th-meeting-20242025",
+     "name": {
+      "en": "6th Meeting",
+      "ar": "السباق السادس"
+     },
+     "date": "2024-11-28",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "qqZ8utisp_M"
+      },
+      {
+       "number": 2,
+       "youtube_id": "_39jBp5rVZg"
+      },
+      {
+       "number": 3,
+       "youtube_id": "rkBvOUso-e4"
+      },
+      {
+       "number": 4,
+       "youtube_id": "0sFnue60s3w"
+      },
+      {
+       "number": 5,
+       "youtube_id": "A6Of_zplt7w"
+      },
+      {
+       "number": 6,
+       "youtube_id": "VLL3VrCODw4"
+      },
+      {
+       "number": 7,
+       "youtube_id": "9cYxsu-nJ5k"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "7th-meeting-20242025",
+     "name": {
+      "en": "7th Meeting",
+      "ar": "السباق السابع"
+     },
+     "date": "2024-12-05",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "sCtQwD8GXI4"
+      },
+      {
+       "number": 2,
+       "youtube_id": "1M8X2VD8Lwc"
+      },
+      {
+       "number": 3,
+       "youtube_id": "eezcdqZgIHY"
+      },
+      {
+       "number": 4,
+       "youtube_id": "vq_oo_JVKxo"
+      },
+      {
+       "number": 5,
+       "youtube_id": "lrtLa710hzg"
+      },
+      {
+       "number": 6,
+       "youtube_id": "1YXqPaXh1TA"
+      },
+      {
+       "number": 7,
+       "youtube_id": "U5Na0Fm9UHk"
+      },
+      {
+       "number": 8,
+       "youtube_id": "bWCdra3HfBY"
+      },
+      {
+       "number": 9,
+       "youtube_id": "-6bodNaxfDU"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "8th-meeting-20242025",
+     "name": {
+      "en": "8th Meeting",
+      "ar": "السباق الثامن"
+     },
+     "date": "2024-12-12",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "WGoG5S1VIO4"
+      },
+      {
+       "number": 2,
+       "youtube_id": "D0vQ65nOE_w"
+      },
+      {
+       "number": 3,
+       "youtube_id": "zB4T5GWo92w"
+      },
+      {
+       "number": 4,
+       "youtube_id": "7OQWCgeNu9Q"
+      },
+      {
+       "number": 5,
+       "youtube_id": "_UnE9IsdWGA"
+      },
+      {
+       "number": 6,
+       "youtube_id": "baGAps2JxZ4"
+      },
+      {
+       "number": 7,
+       "youtube_id": "zoluwSwV8z0"
+      },
+      {
+       "number": 8,
+       "youtube_id": "vFJabIg7r1Y"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "9th-meeting-20242025",
+     "name": {
+      "en": "9th Meeting",
+      "ar": "السباق التاسع"
+     },
+     "date": "2024-12-21",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "_zo0bmUZNo8"
+      },
+      {
+       "number": 2,
+       "youtube_id": "tPgDUhGxQyE"
+      },
+      {
+       "number": 3,
+       "youtube_id": "tar9Uoy3Ebg"
+      },
+      {
+       "number": 4,
+       "youtube_id": "HXhRPZ7lD14"
+      },
+      {
+       "number": 5,
+       "youtube_id": "BD39rOn61bo"
+      },
+      {
+       "number": 6,
+       "youtube_id": "mwi2x6zd6qM"
+      },
+      {
+       "number": 7,
+       "youtube_id": "HMGpiAMToUQ"
+      },
+      {
+       "number": 8,
+       "youtube_id": "GUGrZH-WN44"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "10th-meeting-20242025",
+     "name": {
+      "en": "10th Meeting",
+      "ar": "السباق العاشر"
+     },
+     "date": "2025-01-02",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "sjIzRwynNts"
+      },
+      {
+       "number": 2,
+       "youtube_id": "2Ifua6OO848"
+      },
+      {
+       "number": 3,
+       "youtube_id": "MYsF5o5iywY"
+      },
+      {
+       "number": 4,
+       "youtube_id": "49JndTy0shw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "q6Ze12bun8c"
+      },
+      {
+       "number": 6,
+       "youtube_id": "CJgMH3WxwKg"
+      },
+      {
+       "number": 7,
+       "youtube_id": "1JgenyPJbdI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "4cuWPEsN9CE"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "royal-cavalry-meeting-20242025",
+     "name": {
+      "en": "Royal Cavalry Meeting",
+      "ar": "سباق الخيالة السلطانية"
+     },
+     "date": "2025-01-07",
+     "races": [],
+     "day_stream": null
+    },
+    {
+     "slug": "11th-meeting-20242025",
+     "name": {
+      "en": "11th Meeting",
+      "ar": "السباق الحادي عشر"
+     },
+     "date": "2025-01-16",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "BwuhOAIlWYU"
+      },
+      {
+       "number": 2,
+       "youtube_id": "Mf2ItFiyRS8"
+      },
+      {
+       "number": 3,
+       "youtube_id": "M3j4ddnoGcY"
+      },
+      {
+       "number": 4,
+       "youtube_id": "rUExi0xbObM"
+      },
+      {
+       "number": 5,
+       "youtube_id": "ZFFhZysa0ic"
+      },
+      {
+       "number": 6,
+       "youtube_id": "pacKijHIz40"
+      },
+      {
+       "number": 7,
+       "youtube_id": "rhMfylmBpek"
+      },
+      {
+       "number": 8,
+       "youtube_id": "1Qa4IiidOsk"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "12th-meeting-20242025",
+     "name": {
+      "en": "12th Meeting",
+      "ar": "السباق الثاني عشر"
+     },
+     "date": "2025-01-23",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "xYJnOFH7Q5w"
+      },
+      {
+       "number": 2,
+       "youtube_id": "fGiCtDYPSvI"
+      },
+      {
+       "number": 3,
+       "youtube_id": "Ls6N3Rt_dTU"
+      },
+      {
+       "number": 4,
+       "youtube_id": "STmc2uIl48s"
+      },
+      {
+       "number": 5,
+       "youtube_id": "6I70v7yz5Yc"
+      },
+      {
+       "number": 6,
+       "youtube_id": "IKEY2Vv-5hM"
+      },
+      {
+       "number": 7,
+       "youtube_id": "Nw5AlgfXAuE"
+      },
+      {
+       "number": 8,
+       "youtube_id": "lbh4nXh__V4"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "13th-meeting-20242025",
+     "name": {
+      "en": "13th Meeting",
+      "ar": "السباق الثالث عشر"
+     },
+     "date": "2025-02-01",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "Lr2075lCJSU"
+      },
+      {
+       "number": 2,
+       "youtube_id": "0H0GP2nh1dI"
+      },
+      {
+       "number": 3,
+       "youtube_id": "7m6xpzBtPnM"
+      },
+      {
+       "number": 4,
+       "youtube_id": "P0dINXoaRbo"
+      },
+      {
+       "number": 5,
+       "youtube_id": "IlS1YCHE-pc"
+      },
+      {
+       "number": 6,
+       "youtube_id": "CxF1L_rUs90"
+      },
+      {
+       "number": 7,
+       "youtube_id": "5sIQ1ti59Zo"
+      },
+      {
+       "number": 8,
+       "youtube_id": "z-fQO_7RpdI"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "14th-meeting-20242025",
+     "name": {
+      "en": "14th Meeting",
+      "ar": "السباق الرابع عشر"
+     },
+     "date": "2025-02-08",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "SceNfljZ10g"
+      },
+      {
+       "number": 2,
+       "youtube_id": "EY-amIO_M2Y"
+      },
+      {
+       "number": 3,
+       "youtube_id": "yZMTZwY7fS8"
+      },
+      {
+       "number": 4,
+       "youtube_id": "mxSHhWc_Kaw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "YZqjGM3jd6U"
+      },
+      {
+       "number": 6,
+       "youtube_id": "AxrzfZgO68M"
+      },
+      {
+       "number": 7,
+       "youtube_id": "YZz1MTf7qCI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "Z8JiFoQGfik"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "15th-meeting-20242025",
+     "name": {
+      "en": "15th Meeting",
+      "ar": "السباق الخامس عشر"
+     },
+     "date": "2025-02-20",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "04HjQXDAlD8"
+      },
+      {
+       "number": 2,
+       "youtube_id": "vil-rsWdzpI"
+      },
+      {
+       "number": 3,
+       "youtube_id": "h6irsZepgcQ"
+      },
+      {
+       "number": 4,
+       "youtube_id": "K79f2sIs3lw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "k6NYFkYNrtc"
+      },
+      {
+       "number": 6,
+       "youtube_id": "lD8rp0NHzyM"
+      },
+      {
+       "number": 7,
+       "youtube_id": "Qiz44nMKF20"
+      },
+      {
+       "number": 8,
+       "youtube_id": "BHJcpjKB5dc"
+      },
+      {
+       "number": 9,
+       "youtube_id": "BQyA9jrR3oU"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "1st-night-meeting-20242025",
+     "name": {
+      "en": "1st Night Meeting",
+      "ar": "السباق الليلي الأول"
+     },
+     "date": "2025-03-05",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "0sbaeKm15BY"
+      },
+      {
+       "number": 2,
+       "youtube_id": "zCG7aij_-OQ"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "16th-meeting-20242025",
+     "name": {
+      "en": "16th Meeting",
+      "ar": "السباق السادس عشر"
+     },
+     "date": "2025-03-08",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "qJTMSOKGY98"
+      },
+      {
+       "number": 2,
+       "youtube_id": "JjaS3Ovt7rc"
+      },
+      {
+       "number": 3,
+       "youtube_id": "kma2jagKXsY"
+      },
+      {
+       "number": 4,
+       "youtube_id": "vIh4NAhP-sM"
+      },
+      {
+       "number": 5,
+       "youtube_id": "fnepwh4jtMs"
+      },
+      {
+       "number": 6,
+       "youtube_id": "cBuoWkKc3VY"
+      },
+      {
+       "number": 7,
+       "youtube_id": "XCnPzML55zo"
+      },
+      {
+       "number": 8,
+       "youtube_id": "nJaTb47cf0g"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "17th-meeting-20242025",
+     "name": {
+      "en": "17th Meeting",
+      "ar": "السباق السابع عشر"
+     },
+     "date": "2025-03-15",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "Ll9ScrzFEbU"
+      },
+      {
+       "number": 2,
+       "youtube_id": "DyKbPnJJJXI"
+      },
+      {
+       "number": 3,
+       "youtube_id": "mdxeR9KxOq0"
+      },
+      {
+       "number": 4,
+       "youtube_id": "jF3LX0_o67E"
+      },
+      {
+       "number": 5,
+       "youtube_id": "cg-xkJ38mLg"
+      },
+      {
+       "number": 6,
+       "youtube_id": "G7ty30xG8RU"
+      },
+      {
+       "number": 7,
+       "youtube_id": "ZTyPHn2R9K4"
+      },
+      {
+       "number": 8,
+       "youtube_id": "BJPMoqM-Js8"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "2nd-night-meeting-20242025",
+     "name": {
+      "en": "2nd Night Meeting",
+      "ar": "السباق الليلي الثاني"
+     },
+     "date": "2025-03-19",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "lMT3hsZuPCE"
+      },
+      {
+       "number": 2,
+       "youtube_id": "4qWT9SLzAuY"
+      },
+      {
+       "number": 3,
+       "youtube_id": "qKmtOfohYkQ"
+      },
+      {
+       "number": 4,
+       "youtube_id": "xpi46kAFZMo"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "18th-meeting-20242025",
+     "name": {
+      "en": "18th Meeting",
+      "ar": "السباق الثامن عشر"
+     },
+     "date": "2025-03-22",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "5coae7a-S0E"
+      },
+      {
+       "number": 2,
+       "youtube_id": "D_Q9Hn7NhOE"
+      },
+      {
+       "number": 3,
+       "youtube_id": "O5Da1ouxTZw"
+      },
+      {
+       "number": 4,
+       "youtube_id": "NVtsQO4MlP4"
+      },
+      {
+       "number": 5,
+       "youtube_id": "Z-JHGHzCyI8"
+      },
+      {
+       "number": 6,
+       "youtube_id": "zZQIXbWbX9Q"
+      },
+      {
+       "number": 7,
+       "youtube_id": "NemVIcNwgMA"
+      },
+      {
+       "number": 8,
+       "youtube_id": "yUUHH7It-So"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "3rd-night-meeting-rop-cup-20242025",
+     "name": {
+      "en": "3rd Night Meeting - ROP Cup",
+      "ar": "السباق الليلي الثالث - كأس شرطة عُمان السلطانية"
+     },
+     "date": "2025-03-26",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "3sbiwTWd9is"
+      },
+      {
+       "number": 2,
+       "youtube_id": "gWP9I_Azis4"
+      },
+      {
+       "number": 3,
+       "youtube_id": "lqJ4TFuLJc8"
+      },
+      {
+       "number": 4,
+       "youtube_id": "F4W3tr9k90Q"
+      },
+      {
+       "number": 5,
+       "youtube_id": "W_mfLOtBqaM"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "19th-meeting-20242025",
+     "name": {
+      "en": "19th Meeting",
+      "ar": "السباق التاسع عشر"
+     },
+     "date": "2025-04-11",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "IyNLcsbe2p4"
+      },
+      {
+       "number": 2,
+       "youtube_id": "XWs12ID-GJI"
+      },
+      {
+       "number": 3,
+       "youtube_id": "xdjvLuIOLEU"
+      },
+      {
+       "number": 4,
+       "youtube_id": "S-fztzSPb-s"
+      },
+      {
+       "number": 5,
+       "youtube_id": "SiYC_sqkCGU"
+      },
+      {
+       "number": 6,
+       "youtube_id": "0d1Dkxccpgg"
+      },
+      {
+       "number": 7,
+       "youtube_id": "MM0MmEv2_68"
+      },
+      {
+       "number": 8,
+       "youtube_id": "R82GH7INs1k"
+      },
+      {
+       "number": 9,
+       "youtube_id": "xTpxXuzO9Tg"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "final-meeting-20242025",
+     "name": {
+      "en": "Final Meeting",
+      "ar": "السباق الختامي"
+     },
+     "date": "2025-04-12",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "LYDOIihxAi0"
+      },
+      {
+       "number": 2,
+       "youtube_id": "_DprtNTmks4"
+      },
+      {
+       "number": 3,
+       "youtube_id": "LXX2_9FTsGI"
+      },
+      {
+       "number": 4,
+       "youtube_id": "drxHcFSkwVg"
+      },
+      {
+       "number": 5,
+       "youtube_id": "40zDVeTvdgE"
+      }
+     ],
+     "day_stream": null
+    }
+   ]
+  },
+  {
+   "slug": "season-20252026",
+   "name": {
+    "en": "2025/2026 Season",
+    "ar": "موسم سباقات 2025/2026"
+   },
+   "meetings": [
+    {
+     "slug": "1st-meeting-20252026",
+     "name": {
+      "en": "1st Meeting",
+      "ar": "السباق الأول"
+     },
+     "date": "2025-10-18",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "IWnWtkknawU"
+      },
+      {
+       "number": 2,
+       "youtube_id": "kUE9yYlHA0A"
+      },
+      {
+       "number": 3,
+       "youtube_id": "lQJOZC-2o_4"
+      },
+      {
+       "number": 4,
+       "youtube_id": "I3dYqisvkic"
+      },
+      {
+       "number": 5,
+       "youtube_id": "DjxyEhToSZU"
+      },
+      {
+       "number": 6,
+       "youtube_id": "l23h3ifNKIk"
+      },
+      {
+       "number": 7,
+       "youtube_id": "UUqFm_2xK4I"
+      },
+      {
+       "number": 8,
+       "youtube_id": "9ATXNdI6un8"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "2nd-meeting-20252026",
+     "name": {
+      "en": "2nd Meeting",
+      "ar": "السباق الثاني"
+     },
+     "date": "2025-10-24",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "d0xScIi5urg"
+      },
+      {
+       "number": 2,
+       "youtube_id": "Cm6q96ZUwMg"
+      },
+      {
+       "number": 3,
+       "youtube_id": "Cm4Qm0uqF14"
+      },
+      {
+       "number": 4,
+       "youtube_id": "yCQFwBwLIUM"
+      },
+      {
+       "number": 5,
+       "youtube_id": "rjP7G3Bb64Q"
+      },
+      {
+       "number": 6,
+       "youtube_id": "L9DdvyNjK7U"
+      },
+      {
+       "number": 7,
+       "youtube_id": "qznTGk2fAP4"
+      },
+      {
+       "number": 8,
+       "youtube_id": "Eq2lfp6Oykc"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "3rd-meeting-20252026",
+     "name": {
+      "en": "3rd Meeting",
+      "ar": "السباق الثالث"
+     },
+     "date": "2025-10-30",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "eKXmvAVs6BM"
+      },
+      {
+       "number": 2,
+       "youtube_id": "yLbMqWkWclw"
+      },
+      {
+       "number": 3,
+       "youtube_id": "-xl1UKbYEWw"
+      },
+      {
+       "number": 4,
+       "youtube_id": "3c9fxoK0GO0"
+      },
+      {
+       "number": 5,
+       "youtube_id": "D_zXmTU1H9k"
+      },
+      {
+       "number": 6,
+       "youtube_id": "djy5ZDBUmiI"
+      },
+      {
+       "number": 7,
+       "youtube_id": "fGm0xy2e7Ms"
+      },
+      {
+       "number": 8,
+       "youtube_id": "3k-o9ApC6Mk"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "4th-meeting-20252026",
+     "name": {
+      "en": "4th Meeting",
+      "ar": "السباق الرابع"
+     },
+     "date": "2025-11-08",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "JLoWzdF6LYg"
+      },
+      {
+       "number": 2,
+       "youtube_id": "sxfWCNT3F5E"
+      },
+      {
+       "number": 3,
+       "youtube_id": "vEEUbZxSiJI"
+      },
+      {
+       "number": 4,
+       "youtube_id": "RpcxPDhMZNw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "qFWsCYZvLKE"
+      },
+      {
+       "number": 6,
+       "youtube_id": "-77m40Din2Q"
+      },
+      {
+       "number": 7,
+       "youtube_id": "iYv-Y8WCVVI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "SGPE8Xo1JBQ"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "5th-meeting-20252026",
+     "name": {
+      "en": "5th Meeting",
+      "ar": "السباق الخامس"
+     },
+     "date": "2025-11-15",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "IXoJwT7Aalg"
+      },
+      {
+       "number": 2,
+       "youtube_id": "MK_8Gnu4-jg"
+      },
+      {
+       "number": 3,
+       "youtube_id": "DHpvequ3-HU"
+      },
+      {
+       "number": 4,
+       "youtube_id": "spJKGPcOmdE"
+      },
+      {
+       "number": 5,
+       "youtube_id": "RrHtYC-Sjgg"
+      },
+      {
+       "number": 6,
+       "youtube_id": "h5JpSeLSodo"
+      },
+      {
+       "number": 7,
+       "youtube_id": "AmuvK1vk6Bc"
+      },
+      {
+       "number": 8,
+       "youtube_id": "eghjfwZLCsM"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "6th-meeting-20252026",
+     "name": {
+      "en": "6th Meeting",
+      "ar": "السباق السادس"
+     },
+     "date": "2025-11-29",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "1w8ouH0Fu6Q"
+      },
+      {
+       "number": 2,
+       "youtube_id": "yxiIuoCLIIM"
+      },
+      {
+       "number": 3,
+       "youtube_id": "XyQaeJKhtQ4"
+      },
+      {
+       "number": 4,
+       "youtube_id": "SOvYoo8ijTU"
+      },
+      {
+       "number": 5,
+       "youtube_id": "qF84uVZ4iRo"
+      },
+      {
+       "number": 6,
+       "youtube_id": "Kv1_9feIFwQ"
+      },
+      {
+       "number": 7,
+       "youtube_id": "uYS1UTVjJyU"
+      },
+      {
+       "number": 8,
+       "youtube_id": "pho9MjK2hqE"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "7th-meeting-20252026",
+     "name": {
+      "en": "7th Meeting",
+      "ar": "السباق السابع"
+     },
+     "date": "2025-12-04",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "pemPdjQjR4E"
+      },
+      {
+       "number": 2,
+       "youtube_id": "lfRlIMaD9ps"
+      },
+      {
+       "number": 3,
+       "youtube_id": "nT3fDwQZap8"
+      },
+      {
+       "number": 4,
+       "youtube_id": "3w1Pfw8_RKE"
+      },
+      {
+       "number": 5,
+       "youtube_id": "eHm4sZJBlSQ"
+      },
+      {
+       "number": 6,
+       "youtube_id": "peA0Ant7vcg"
+      },
+      {
+       "number": 7,
+       "youtube_id": "dSr089XoOME"
+      },
+      {
+       "number": 8,
+       "youtube_id": "KKuo5oMx5Vk"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "8th-meeting-20252026",
+     "name": {
+      "en": "8th Meeting",
+      "ar": "السباق الثامن"
+     },
+     "date": "2025-12-12",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "8s-DQTQo7aw"
+      },
+      {
+       "number": 2,
+       "youtube_id": "zcu3MFefdEM"
+      },
+      {
+       "number": 3,
+       "youtube_id": "APUFi8Bzql0"
+      },
+      {
+       "number": 4,
+       "youtube_id": "wRVukRl0e1I"
+      },
+      {
+       "number": 5,
+       "youtube_id": "UWk1AI2JiAA"
+      },
+      {
+       "number": 6,
+       "youtube_id": "fGFheqZqI8c"
+      },
+      {
+       "number": 7,
+       "youtube_id": "0u8a2CnL_DI"
+      },
+      {
+       "number": 8,
+       "youtube_id": "0mUjEfTa59I"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "9th-meeting-20252026",
+     "name": {
+      "en": "9th Meeting",
+      "ar": "السباق التاسع"
+     },
+     "date": "2025-12-20",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "VOOeJvD3_kY"
+      },
+      {
+       "number": 2,
+       "youtube_id": "8JmUS9u3g8I"
+      },
+      {
+       "number": 3,
+       "youtube_id": "3Jj70sEoBww"
+      },
+      {
+       "number": 4,
+       "youtube_id": "vYXZelNUnEk"
+      },
+      {
+       "number": 5,
+       "youtube_id": "3gkSEf80gMw"
+      },
+      {
+       "number": 6,
+       "youtube_id": "k_LT8zGBz90"
+      },
+      {
+       "number": 7,
+       "youtube_id": "5HAfuaCRU-s"
+      },
+      {
+       "number": 8,
+       "youtube_id": "oAuxV3cN6Q0"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "10th-meeting-20252026",
+     "name": {
+      "en": "10th Meeting",
+      "ar": "السباق العاشر"
+     },
+     "date": "2025-12-26",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "beXGdeblXtk"
+      },
+      {
+       "number": 2,
+       "youtube_id": "zU8-TeXsetk"
+      },
+      {
+       "number": 3,
+       "youtube_id": "N6kUfb2LkKs"
+      },
+      {
+       "number": 4,
+       "youtube_id": "FJ0qahq5RQE"
+      },
+      {
+       "number": 5,
+       "youtube_id": "s6SGpqC5Mhw"
+      },
+      {
+       "number": 6,
+       "youtube_id": "dvjasesSK7M"
+      },
+      {
+       "number": 7,
+       "youtube_id": "V5cOB0CHGyw"
+      },
+      {
+       "number": 8,
+       "youtube_id": "3ZC7a2Xr5Fs"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "royal-cavalry-meeting-20252026",
+     "name": {
+      "en": "Royal Cavalry Meeting",
+      "ar": "سباق الخيالة السلطانية"
+     },
+     "date": "2026-01-07",
+     "races": [],
+     "day_stream": null
+    },
+    {
+     "slug": "11th-meeting-20252026",
+     "name": {
+      "en": "11th Meeting",
+      "ar": "السباق الحادي عشر"
+     },
+     "date": "2026-01-09",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "-P1j20p0f7I"
+      },
+      {
+       "number": 2,
+       "youtube_id": "zGH6BGpUE-0"
+      },
+      {
+       "number": 3,
+       "youtube_id": "rWJ8b4bLw68"
+      },
+      {
+       "number": 4,
+       "youtube_id": "E1su3q8ngqU"
+      },
+      {
+       "number": 5,
+       "youtube_id": "5KN8IvsS0S0"
+      },
+      {
+       "number": 6,
+       "youtube_id": "rxZfD5Ioxdk"
+      },
+      {
+       "number": 7,
+       "youtube_id": "tLhPAGxywp4"
+      },
+      {
+       "number": 8,
+       "youtube_id": "16jJKDeRVaQ"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "12th-meeting-20252026",
+     "name": {
+      "en": "12th Meeting",
+      "ar": "السباق الثاني عشر"
+     },
+     "date": "2026-01-15",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "qiSeVOD4_ws"
+      },
+      {
+       "number": 2,
+       "youtube_id": "Zq6pVIV-YsM"
+      },
+      {
+       "number": 3,
+       "youtube_id": "KmDBadN-2KQ"
+      },
+      {
+       "number": 4,
+       "youtube_id": "5MK3Q2idogc"
+      },
+      {
+       "number": 5,
+       "youtube_id": "WJ3fenAuGwE"
+      },
+      {
+       "number": 6,
+       "youtube_id": "7kZm3WT9rsU"
+      },
+      {
+       "number": 7,
+       "youtube_id": "c3BMq1l9lIM"
+      },
+      {
+       "number": 8,
+       "youtube_id": "8vnyVyMZyx0"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "13th-meeting-20252026",
+     "name": {
+      "en": "13th Meeting",
+      "ar": "السباق الثالث عشر"
+     },
+     "date": "2026-01-23",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "WKKp10WgjAU"
+      },
+      {
+       "number": 2,
+       "youtube_id": "WB4pMlN7IlE"
+      },
+      {
+       "number": 3,
+       "youtube_id": "JjoRK72vrOA"
+      },
+      {
+       "number": 4,
+       "youtube_id": "8Jitz3WmruA"
+      },
+      {
+       "number": 5,
+       "youtube_id": "lOdeg64na0E"
+      },
+      {
+       "number": 6,
+       "youtube_id": "ZaxwUC41xm4"
+      },
+      {
+       "number": 7,
+       "youtube_id": "tbZ5qZMZG9A"
+      },
+      {
+       "number": 8,
+       "youtube_id": "jaAgz8uMtYI"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "14th-meeting-20252026",
+     "name": {
+      "en": "14th Meeting",
+      "ar": "السباق الرابع عشر"
+     },
+     "date": "2026-01-29",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "2wNGHjWNHS0"
+      },
+      {
+       "number": 2,
+       "youtube_id": "QuMLFVHhorQ"
+      },
+      {
+       "number": 3,
+       "youtube_id": "d0sxWrJvV3w"
+      },
+      {
+       "number": 4,
+       "youtube_id": "lLPj1s56qqo"
+      },
+      {
+       "number": 5,
+       "youtube_id": "qu3L06AWMBk"
+      },
+      {
+       "number": 6,
+       "youtube_id": "fm96qvtGI5Q"
+      },
+      {
+       "number": 7,
+       "youtube_id": "cb2b4D-2RmY"
+      },
+      {
+       "number": 8,
+       "youtube_id": "V2-RY6OsLZU"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "15th-meeting-20252026",
+     "name": {
+      "en": "15th Meeting",
+      "ar": "السباق الخامس عشر"
+     },
+     "date": "2026-02-04",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "NitLHyEiJLc"
+      },
+      {
+       "number": 2,
+       "youtube_id": "juyLlqNrPo8"
+      },
+      {
+       "number": 3,
+       "youtube_id": "R0TtLQPQM10"
+      },
+      {
+       "number": 4,
+       "youtube_id": "TJA-IA9U5LQ"
+      },
+      {
+       "number": 5,
+       "youtube_id": "2LXmOrK9eic"
+      },
+      {
+       "number": 6,
+       "youtube_id": "3-RUP-sCnyk"
+      },
+      {
+       "number": 7,
+       "youtube_id": "Cb0eu7GtlkY"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "16th-meeting-20252026",
+     "name": {
+      "en": "16th Meeting",
+      "ar": "السباق السادس عشر"
+     },
+     "date": "2026-02-06",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "B_7wJfGOHN0"
+      },
+      {
+       "number": 2,
+       "youtube_id": "N0q0PBauOFU"
+      },
+      {
+       "number": 3,
+       "youtube_id": "1-2Gi3Hlj_0"
+      },
+      {
+       "number": 4,
+       "youtube_id": "_4dT-9UkBN0"
+      },
+      {
+       "number": 5,
+       "youtube_id": "dp85XXy5-vI"
+      },
+      {
+       "number": 6,
+       "youtube_id": "cnjusanD_xA"
+      },
+      {
+       "number": 7,
+       "youtube_id": "YKNbhbTY8E8"
+      },
+      {
+       "number": 8,
+       "youtube_id": "33OU7pZzbFY"
+      },
+      {
+       "number": 9,
+       "youtube_id": "TJdoZ6cEoPo"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "17th-meeting-20252026",
+     "name": {
+      "en": "17th Meeting",
+      "ar": "السباق السابع عشر"
+     },
+     "date": "2026-02-21",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "SfVnvRU7HvA"
+      },
+      {
+       "number": 2,
+       "youtube_id": "7QiCyRfG-Os"
+      },
+      {
+       "number": 3,
+       "youtube_id": "19hcatfM6s0"
+      },
+      {
+       "number": 4,
+       "youtube_id": "qvC1Noaj0BU"
+      },
+      {
+       "number": 5,
+       "youtube_id": "W0gyYI-c6iI"
+      },
+      {
+       "number": 6,
+       "youtube_id": "DEmCnxzU3Q8"
+      },
+      {
+       "number": 7,
+       "youtube_id": "LxRzXEEzUAk"
+      },
+      {
+       "number": 8,
+       "youtube_id": "5BuoyO3x9_w"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "18th-meeting-20252026",
+     "name": {
+      "en": "18th Meeting",
+      "ar": "السباق الثامن عشر"
+     },
+     "date": "2026-02-25",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "bC2nnf9Tvco"
+      },
+      {
+       "number": 2,
+       "youtube_id": "fy65Dtu17rQ"
+      },
+      {
+       "number": 3,
+       "youtube_id": "qSnd2UL7H60"
+      },
+      {
+       "number": 4,
+       "youtube_id": "A8KGHGx5qbg"
+      },
+      {
+       "number": 5,
+       "youtube_id": "t-FOcALRnbo"
+      },
+      {
+       "number": 6,
+       "youtube_id": "Ma0WlsLJBvg"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "20th-meeting-20252026",
+     "name": {
+      "en": "20th Meeting",
+      "ar": "السباق العشرون"
+     },
+     "date": "2026-03-14",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "qsw63EqTSx4"
+      },
+      {
+       "number": 2,
+       "youtube_id": "6rLhVxtpTHM"
+      },
+      {
+       "number": 3,
+       "youtube_id": "9WIEwRl2DP8"
+      },
+      {
+       "number": 4,
+       "youtube_id": "mqDLShwAQfw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "3afztj6qMNw"
+      },
+      {
+       "number": 6,
+       "youtube_id": "CZAPGB8CUwo"
+      },
+      {
+       "number": 7,
+       "youtube_id": "KiVQ7_0K0Is"
+      },
+      {
+       "number": 8,
+       "youtube_id": "TN3Zujr8uDE"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "19th-meeting-20252026",
+     "name": {
+      "en": "19th Meeting",
+      "ar": "السباق التاسع عشر"
+     },
+     "date": "2026-03-16",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "-eIcmTTpwDg"
+      },
+      {
+       "number": 2,
+       "youtube_id": "gPWnxxtX7Lo"
+      },
+      {
+       "number": 3,
+       "youtube_id": "xu6EHEq-j4g"
+      },
+      {
+       "number": 4,
+       "youtube_id": "YZUDoUSHGIA"
+      },
+      {
+       "number": 5,
+       "youtube_id": "yUb17ud5YHQ"
+      },
+      {
+       "number": 6,
+       "youtube_id": "VUd-04uNKpY"
+      },
+      {
+       "number": 7,
+       "youtube_id": "cbNh03clShw"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "21st-meeting-20252026",
+     "name": {
+      "en": "21st Meeting",
+      "ar": "السباق الحادي والعشرون"
+     },
+     "date": "2026-04-02",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "PivBq2u_csY"
+      },
+      {
+       "number": 2,
+       "youtube_id": "zQGVUX-QwEI"
+      },
+      {
+       "number": 4,
+       "youtube_id": "2GIU92MCvqU"
+      },
+      {
+       "number": 5,
+       "youtube_id": "Om66IcOG8Mo"
+      },
+      {
+       "number": 6,
+       "youtube_id": "jDKVKNENjxs"
+      },
+      {
+       "number": 7,
+       "youtube_id": "yaNP0wqfOzM"
+      },
+      {
+       "number": 8,
+       "youtube_id": "m0HA5ZCoyIc"
+      },
+      {
+       "number": 9,
+       "youtube_id": "dK1yQ1SF_w0"
+      }
+     ],
+     "day_stream": "df2UxUt0oeE"
+    },
+    {
+     "slug": "22nd-meeting-20252026",
+     "name": {
+      "en": "22nd Meeting",
+      "ar": "السباق الثاني والعشرون"
+     },
+     "date": "2026-04-03",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "D26kMgGHOXU"
+      },
+      {
+       "number": 2,
+       "youtube_id": "FtH6g-OyWj0"
+      },
+      {
+       "number": 3,
+       "youtube_id": "4ORK6ykzkZA"
+      },
+      {
+       "number": 4,
+       "youtube_id": "yys819IGhKI"
+      },
+      {
+       "number": 5,
+       "youtube_id": "yvLYL2dgw8w"
+      },
+      {
+       "number": 6,
+       "youtube_id": "wxfeDrJ3OFk"
+      },
+      {
+       "number": 7,
+       "youtube_id": "qmTSLmGvg0I"
+      },
+      {
+       "number": 8,
+       "youtube_id": "K59OHceaYKo"
+      },
+      {
+       "number": 9,
+       "youtube_id": "IEqC52Y2bSU"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "23rd-meeting-20252026",
+     "name": {
+      "en": "23rd Meeting",
+      "ar": "السباق الثالث والعشرون"
+     },
+     "date": "2026-04-09",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "GHmdixnUoHA"
+      },
+      {
+       "number": 2,
+       "youtube_id": "5Zv-TpRcFzA"
+      },
+      {
+       "number": 3,
+       "youtube_id": "Luq2t1P9mvw"
+      },
+      {
+       "number": 4,
+       "youtube_id": "xNf_M0tidFQ"
+      },
+      {
+       "number": 5,
+       "youtube_id": "dQdZooef3f8"
+      },
+      {
+       "number": 6,
+       "youtube_id": "9n6SxzFvMX8"
+      },
+      {
+       "number": 7,
+       "youtube_id": "pK7Df_iJTU8"
+      },
+      {
+       "number": 8,
+       "youtube_id": "0fNX77mm9EM"
+      },
+      {
+       "number": 9,
+       "youtube_id": "tJzDfAbDuFA"
+      },
+      {
+       "number": 10,
+       "youtube_id": "L4FxhNmscDE"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "24th-meeting-20252026",
+     "name": {
+      "en": "24th Meeting",
+      "ar": "السباق الرابع والعشرون"
+     },
+     "date": "2026-04-17",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "4dNWQlqpG3I"
+      },
+      {
+       "number": 2,
+       "youtube_id": "32ASTDtjuG0"
+      },
+      {
+       "number": 3,
+       "youtube_id": "5OoCMj430k0"
+      },
+      {
+       "number": 4,
+       "youtube_id": "JpUU0oVlIrw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "ojgvC9Fp7dI"
+      },
+      {
+       "number": 6,
+       "youtube_id": "qUKkgKiFr5A"
+      },
+      {
+       "number": 7,
+       "youtube_id": "dKGNvK00nAM"
+      },
+      {
+       "number": 8,
+       "youtube_id": "V9y0FkqI3G4"
+      },
+      {
+       "number": 9,
+       "youtube_id": "YFLvp5kLnJU"
+      }
+     ],
+     "day_stream": null
+    },
+    {
+     "slug": "final-meeting-20252026",
+     "name": {
+      "en": "Final Meeting",
+      "ar": "السباق الختامي"
+     },
+     "date": "2026-04-18",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "TR12ZTYNk78"
+      },
+      {
+       "number": 2,
+       "youtube_id": "es__DSd2vak"
+      },
+      {
+       "number": 3,
+       "youtube_id": "pJnvWuKfDVE"
+      },
+      {
+       "number": 4,
+       "youtube_id": "jVcU8P5zBuw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "y44NXkK9LYc"
+      }
+     ],
+     "day_stream": null
+    }
+   ]
+  },
+  {
+   "slug": "season-20262027",
+   "name": {
+    "en": "2026/2027 Season",
+    "ar": "موسم سباقات 2026/2027"
+   },
+   "meetings": [
+    {
+     "slug": "1st-meeting-20262027",
+     "name": {
+      "en": "1st Meeting",
+      "ar": "السباق الأول"
+     },
+     "date": "2026-10-17",
+     "races": [
+      {
+       "number": 1,
+       "youtube_id": "9D1PXodhsN0"
+      },
+      {
+       "number": 2,
+       "youtube_id": "uiHKOoupp-k"
+      },
+      {
+       "number": 3,
+       "youtube_id": "N6ynOsWr0uQ"
+      },
+      {
+       "number": 4,
+       "youtube_id": "6p_68yl_Zsw"
+      },
+      {
+       "number": 5,
+       "youtube_id": "4-5fxPWZfqs"
+      },
+      {
+       "number": 6,
+       "youtube_id": "xY_BLPlsXec"
+      },
+      {
+       "number": 7,
+       "youtube_id": "qZ8E-S4SO2w"
+      },
+      {
+       "number": 8,
+       "youtube_id": "RTmYb0rO5pY"
+      }
+     ],
+     "day_stream": "koYHbU1C8Pg"
+    }
+   ]
+  }
+ ],
+ "renamed_folders": {
+  "race-1-20262027": "1st-meeting-20262027"
+ }
+}

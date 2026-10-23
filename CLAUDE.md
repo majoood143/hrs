@@ -19,7 +19,7 @@ php artisan racing:warm       # pre-warm the racing handicap cache (not schedule
 php artisan form-builder:move-uploads-private [--dry-run]   # move old public form uploads to the private disk
 ```
 
-Scheduled in `routes/console.php` (production needs a `schedule:run` cron **and** a queue worker): `transfer-posts:expire` (00:05), `horse-sale-posts:expire` (00:10), `stables:generate-slots` (00:20), `stables:send-reminders` (hourly), `orders:expire-pending` and `orders:recover-late-payments` (every 5 min), `model:prune` for `CustomerOtp` (daily), `evolution:cleanup` (03:30, WhatsApp plugin history), `youtube:check` (every 15 min, watched YouTube channels).
+Scheduled in `routes/console.php` (production needs a `schedule:run` cron **and** a queue worker): `transfer-posts:expire` (00:05), `horse-sale-posts:expire` (00:10), `stables:generate-slots` (00:20), `stables:send-reminders` (hourly), `orders:expire-pending` and `orders:recover-late-payments` (every 5 min), `model:prune` for `CustomerOtp` (daily), `evolution:cleanup` (03:30, WhatsApp plugin history), `youtube:check` (every 15 min, watched YouTube channels), `racing:result-alerts` (every 10 min, race results to the admins by WhatsApp).
 
 The local tree is often `php artisan optimize`d: `bootstrap/cache/` holds cached config, routes **and Filament components** (`bootstrap/cache/filament/panels/*.php`). After adding a Filament page/resource, run `php artisan optimize` again (or `route:cache` + `filament:cache-components`): with a stale component cache the new page loads, but every click on it (actions, modals, downloads) answers **419 "page expired"**, because Livewire cannot find the component by name and reports that as a 419.
 
@@ -170,6 +170,19 @@ Other people's public channels (not ours, no permission needed): admins are told
 - `Services\YouTube\ChannelWatcher::check()` (from `youtube:check`, the admin "Check now" and adding a channel): new entries → inbox; **the first check of a channel only records what is there (no alert)**; Shorts → `skipped` on a channel that skips them (no API call for them); a video already in the library (`youtube_url` with that id) → `added`, no alert; an API failure still alerts from the feed and sets `last_error`; upcoming/live rows still in the feed are refreshed, **alerted once only**. One bilingual WhatsApp per channel and check (`Services\WhatsApp\NewYouTubeVideoAlert`, alert type `youtube_video` in `WhatsAppSettings::ALERTS`, log type `new_youtube_video`, at most 5 videos listed, times in Muscat), to the same admin numbers as the post alerts.
 - "Add to library" opens `VideoResource` create with `?youtube=<inbox id>` (`CreateVideo::$youtubeInboxId`, `YouTubeChannelVideo::libraryFormData()`: title/description in the language they are written in, Arabic letters → `ar`, the description as escaped `<p>`s, the channel's folder). Creating any video whose YouTube id is in the inbox marks that entry `added`.
 - Tests: `tests/Feature/YouTubeChannelsTest.php` (fakes the feed and the API; `Http::preventStrayRequests()`).
+
+### Race replays in the video library (`Database\Seeders\RhrcRaceVideosSeeder`)
+
+Flat Races (`flat-races`) → season (`season-20192020`) → one folder per race day (`10th-meeting-20192020`, `date` = the race day; 2017/18's have no suffix; special days `royal-meeting-…`, `1st-night-meeting-…`, `final-meeting-…`; the 17/18 and 18/19 finals are the `19th`/`20th` folders) → one video per race (`race-3-10th-meeting-20192020`, "race 3 - 10th Meeting" / "الشوط الثالث - السباق العاشر", `order` = race − 1), plus `full-race-day-…` (the club's whole-day stream) where race videos are missing. Data in `database/seeders/data/rhrc-race-videos.json` (2017/18 → 2026/27's first day), built on 2026-10-23 from the racing source (`RacingClient::raceDays()`/`raceDay()`: each race's replay link) and, where it has none, the club's channel `UCHi49Yuf_6HdxP7L-vukoIQ` (titles: race, meeting, date). Run in production with `php artisan db:seed --class=RhrcRaceVideosSeeder --force`; safe to rerun (folders by slug; a known video in the wrong meeting is moved, extra copies deleted; videos it does not know, added by hand, stay). Videos list by `order`, then newest (`Video::ordered()`, site and API).
+
+### Race results to the admins by WhatsApp (admin → CMS → Race results (WhatsApp))
+
+One bilingual WhatsApp per race to the admin numbers of General Settings → WhatsApp: the race (number, name, meeting, time/distance/breed, running time), the first 6 places (horse, margin, jockey, trainer; the winner's owner), the YouTube replay and the website's `/racing/results/{race}` link. Names come from the source in each language.
+
+- `Services\WhatsApp\RaceResultMessage` builds it from `RacingClient::meeting('results', …)` + `raceDetail('results', …)` (cells found by their links, not by the header, which differs per language). `Services\Racing\RaceResultAlerts`: `send()` (any race, recorded in `race_result_alerts`, one row per race: mode auto/manual, who, recipients, replay), `checkToday()`.
+- **Automatic** (`racing:result-alerts`, alert type `race_result` in `WhatsAppSettings::ALERTS`, log types `race_result` / `race_result_video`): only today's race day (`racing.timezone`); each race once its results are out; waits up to `racing.result_alert_video_wait` minutes (20) for the replay (race-day list, else the results page), then sends without it and follows up with the replay link when it appears.
+- **By hand**: `Filament\Pages\RaceResultsWhatsApp` (a table over array records, race day filter): preview, send / send again (choose numbers), send all not sent; works with the auto switch off.
+- Tests: `tests/Feature/RaceResultAlertsTest.php`.
 
 ### Media Library (`ardavan/filament-file-explorer`)
 

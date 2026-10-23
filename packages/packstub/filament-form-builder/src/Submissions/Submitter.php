@@ -100,7 +100,53 @@ class Submitter
             $data[$field->key] = $field->type->normalize($value, $field);
         }
 
+        $this->rejectRepeats($form, $data);
+
         return $data;
+    }
+
+    /**
+     * "Only one answer per value": refuse a value an earlier submission of the form already gave
+     * (compared by the type's uniqueKey(), so a phone number matches however it was typed).
+     *
+     * @param  array<string, mixed>  $data
+     *
+     * @throws ValidationException
+     */
+    protected function rejectRepeats(Form $form, array $data): void
+    {
+        $keys = $form->inputFields()
+            ->filter(fn (Field $field): bool => (bool) $field->option('unique') && $field->type->canBeUnique())
+            ->mapWithKeys(fn (Field $field): array => [$field->key => $field->type->uniqueKey($data[$field->key] ?? null, $field)])
+            ->filter();
+
+        if ($keys->isEmpty()) {
+            return;
+        }
+
+        $fields = $form->inputFields();
+        $repeated = [];
+
+        FormBuilder::submissionModel()::query()
+            ->where('form_id', $form->getKey())
+            ->select(['id', 'data'])
+            ->lazyById(500)
+            ->each(function (FormSubmission $submission) use ($keys, $fields, &$repeated): bool {
+                foreach ($keys as $key => $unique) {
+                    if (! isset($repeated[$key]) && $fields[$key]->type->uniqueKey($submission->value($key), $fields[$key]) === $unique) {
+                        $repeated[$key] = __('packstub-form-builder::form-builder.frontend.already_sent', [
+                            'attribute' => rtrim($fields[$key]->label, " :\u{00A0}"),
+                        ]);
+                    }
+                }
+
+                // stop reading once every value is known to be a repeat
+                return count($repeated) < $keys->count();
+            });
+
+        if ($repeated !== []) {
+            throw ValidationException::withMessages($repeated);
+        }
     }
 
     /**

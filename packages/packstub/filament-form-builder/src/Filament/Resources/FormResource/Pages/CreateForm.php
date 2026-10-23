@@ -7,6 +7,7 @@ use Filament\Forms\Components\Radio;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Str;
 use Packstub\FormBuilder\Filament\Resources\FormResource\Concerns\HasPreviewAction;
+use Packstub\FormBuilder\FormBuilder;
 use Packstub\FormBuilder\FormBuilderPlugin;
 use Packstub\FormBuilder\Support\FormTemplates;
 
@@ -16,7 +17,7 @@ class CreateForm extends CreateRecord
 
     protected function getHeaderActions(): array
     {
-        return [$this->templateAction(), $this->previewAction()];
+        return [$this->templateAction(), ...app(FormBuilder::class)->createActions(), $this->previewAction()];
     }
 
     /**
@@ -43,17 +44,37 @@ class CreateForm extends CreateRecord
                     ->descriptions(FormTemplates::descriptions())
                     ->required(),
             ])
-            ->action(function (array $data): void {
-                $state = $this->form->getRawState();
-                $state['fields'] = FormTemplates::fields((string) $data['template']);
+            ->action(fn (array $data) => $this->startWith(
+                FormTemplates::fields((string) $data['template']),
+                FormTemplates::name((string) $data['template']),
+            ));
+    }
 
-                if (blank($state['name']['en'] ?? null)) {
-                    $state['name'] = FormTemplates::name((string) $data['template']);
-                    $state['slug'] = filled($state['slug'] ?? null) ? $state['slug'] : Str::slug($state['name']['en'] ?? '');
-                }
+    /**
+     * Replace the fields with a ready-made set; the name (and the slug made from it) and any other
+     * attribute given (`closes_at`, `description`...) are filled only where nothing is typed yet.
+     *
+     * @param  array<int, array{type: string, data: array<string, mixed>}>  $fields
+     * @param  array<string, string>  $name  per language
+     * @param  array<string, mixed>  $attributes
+     */
+    public function startWith(array $fields, array $name, array $attributes = []): void
+    {
+        $state = $this->form->getRawState();
+        $state['fields'] = $fields;
 
-                $this->form->fill($state);
-            });
+        if (blank($state['name']['en'] ?? null)) {
+            $state['name'] = $name;
+            $state['slug'] = filled($state['slug'] ?? null) ? $state['slug'] : Str::slug($state['name']['en'] ?? '');
+        }
+
+        foreach ($attributes as $key => $value) {
+            if (blank($state[$key] ?? null)) {
+                $state[$key] = $value;
+            }
+        }
+
+        $this->form->fill($state);
     }
 
     public static function getResource(): string

@@ -86,6 +86,29 @@ abstract class FieldType
     }
 
     /**
+     * Whether the builder offers "Only one answer per value" for the type (an email or a phone
+     * number that may send the form once).
+     */
+    public function canBeUnique(): bool
+    {
+        return false;
+    }
+
+    /**
+     * The spelling two answers are compared by for "Only one answer per value"; null is never a repeat.
+     */
+    public function uniqueKey(mixed $value, Field $field): ?string
+    {
+        if (! is_scalar($value)) {
+            return null;
+        }
+
+        $key = mb_strtolower(trim((string) $value));
+
+        return $key === '' ? null : $key;
+    }
+
+    /**
      * A value => label list of choices the type supplies itself (queried
      * from the app, not entered in the builder). Null means the field's
      * own "choices" option, if any, is used instead.

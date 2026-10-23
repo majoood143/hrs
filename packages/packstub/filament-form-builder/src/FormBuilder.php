@@ -38,6 +38,9 @@ class FormBuilder
     /** @var array<int, \Closure> */
     protected array $submissionActions = [];
 
+    /** @var array<int, \Closure(): mixed> */
+    protected array $createActions = [];
+
     public function __construct(protected FieldTypeRegistry $types) {}
 
     /** @return class-string<Form> */
@@ -117,7 +120,7 @@ class FormBuilder
     public function forgetHooks(): static
     {
         $this->formTabs = $this->closedChecks = $this->beforeForm = $this->holdNotifications = [];
-        $this->resourcePages = $this->recordActions = $this->submissionActions = [];
+        $this->resourcePages = $this->recordActions = $this->submissionActions = $this->createActions = [];
 
         return $this;
     }
@@ -186,6 +189,26 @@ class FormBuilder
     public function recordActions(): array
     {
         return array_map(fn (\Closure $factory) => $factory(), $this->recordActions);
+    }
+
+    /**
+     * Add a header action to the new-form page, next to "Start from a template": a way of its
+     * own to start a form. The closure returns a Filament Action; its action can call the page's
+     * startWith() (CreateForm) to fill in the fields and, when still empty, the name and more.
+     *
+     * @param  \Closure(): mixed  $factory
+     */
+    public function registerCreateAction(\Closure $factory): static
+    {
+        $this->createActions[] = $factory;
+
+        return $this;
+    }
+
+    /** @return array<int, mixed> */
+    public function createActions(): array
+    {
+        return array_map(fn (\Closure $factory) => $factory(), $this->createActions);
     }
 
     /**

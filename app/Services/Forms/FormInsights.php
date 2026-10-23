@@ -31,7 +31,7 @@ class FormInsights
     public const PERIODS = ['all', 'today', 'this_week', 'this_month', 'last_month', 'this_year', 'custom'];
 
     /** The field types that can be charted. */
-    public const CHARTABLE = ['select', 'radio', 'conditional_radio', 'checkboxes', 'checkbox', 'nationality', 'number', 'date'];
+    public const CHARTABLE = ['select', 'radio', 'conditional_radio', 'race_winner', 'checkboxes', 'checkbox', 'nationality', 'number', 'date'];
 
     /** A number field with this many whole values or fewer gets one bar per value; otherwise ranges. */
     private const MAX_EXACT_NUMBERS = 15;
@@ -296,7 +296,7 @@ class FormInsights
         return $this->tally ??= Cache::remember($this->cacheKey(), self::CACHE_SECONDS, fn (): array => $this->count());
     }
 
-    /** Changes whenever a submission (or, with a status filter, an order) of the form is added or changed. */
+    /** Changes whenever a submission (or, with a status filter, an order) of the form is added or changed, or the chartable types do. */
     private function cacheKey(): string
     {
         $model = FormBuilder::submissionModel();
@@ -316,6 +316,8 @@ class FormInsights
             $this->form->updated_at?->toIso8601String(),
             $stamp?->c, $stamp?->m, $stamp?->u,
             $orders,
+            // a type made chartable is counted at once, not when the next submission arrives
+            self::CHARTABLE,
         ]));
     }
 
@@ -430,7 +432,8 @@ class FormInsights
 
     /**
      * The form's choices in their own order (zeros included), then answers that are no longer a
-     * choice (a choice deleted after people picked it), labelled with the stored value.
+     * choice (a choice deleted after people picked it), labelled as the type prints them (a race
+     * prediction's withdrawn horse by its name), else with the stored value.
      *
      * @param  array<string, int>  $counts
      * @return array<int, array{key: string, label: string, count: int, share: float}>
@@ -448,7 +451,7 @@ class FormInsights
         arsort($counts);
 
         foreach ($counts as $value => $count) {
-            $rows[] = ['key' => (string) $value, 'label' => (string) $value, 'count' => (int) $count, 'share' => $share((int) $count)];
+            $rows[] = ['key' => (string) $value, 'label' => $field->type->format((string) $value, $field) ?: (string) $value, 'count' => (int) $count, 'share' => $share((int) $count)];
         }
 
         return $rows;
