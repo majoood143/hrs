@@ -9,6 +9,7 @@ description: How WhatsApp messages work in this app (Evolution API via wallacema
 
 Every WhatsApp text this app sends contains **English first, then Arabic, in one message**, separated by `BilingualMessage::DIVIDER`. Build it with `App\Services\WhatsApp\BilingualMessage::make(fn () => …)`. The closure runs once inside each locale from `config('languages.available')`, so `__()` and locale-aware accessors (`$post->name`, `$city->name`) come out in the right language on their own. Never concatenate the two languages by hand, and never send one language only.
 
+- **One exception**: the race results (`Services\WhatsApp\RaceResultMessage`) go in Arabic only, as the admins asked, with a U+200F mark at the start of every line so WhatsApp right-aligns it (it sets each line's direction from its first letter). Do not extend the exception without being asked.
 - Texts live in `lang/en/whatsapp.php` and `lang/ar/whatsapp.php`. Add every key to **both** files, with the same placeholders.
 - Admin screen labels for WhatsApp live in `lang/{en,ar}/admin_whatsapp.php`.
 - Arabic wording follows the site's own terms (e.g. `البياطرة`, `خيول للبيع`, `لوحة النقل`). Check `lang/ar/<section>.php` before inventing one.

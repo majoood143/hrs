@@ -271,7 +271,7 @@ class RaceResultsWhatsApp extends Page implements HasTable
             $message = __('admin_race_results.unavailable');
         }
 
-        return new HtmlString('<div dir="auto" class="whitespace-pre-wrap rounded-lg bg-gray-50 p-4 text-sm dark:bg-white/5">'
+        return new HtmlString('<div dir="rtl" lang="ar" class="whitespace-pre-wrap text-start rounded-lg bg-gray-50 p-4 text-sm dark:bg-white/5">'
             .e($message ?? __('admin_race_results.no_results')).'</div>');
     }
 

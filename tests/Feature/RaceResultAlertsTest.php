@@ -113,24 +113,28 @@ class RaceResultAlertsTest extends TestCase
         Cache::forever('site_settings.all', $settings);
     }
 
-    public function test_the_message_has_the_race_the_first_six_places_the_replay_and_the_results_page(): void
+    public function test_the_message_is_arabic_right_to_left_with_the_first_six_places_the_replay_and_the_results_page(): void
     {
-        $built = app(RaceResultMessage::class)->build(9178, 'https://youtu.be/AAAAAAAAAAA');
+        $message = app(RaceResultMessage::class)->build(9178, 'https://youtu.be/AAAAAAAAAAA')['message'];
 
-        [$en, $ar] = explode(BilingualMessage::DIVIDER, $built['message']);
+        // Arabic only, as the admins asked
+        $this->assertStringNotContainsString(BilingualMessage::DIVIDER, $message);
+        $this->assertStringNotContainsString('Race results', $message);
+        $this->assertStringContainsString('نتائج السباق', $message);
 
-        $this->assertStringContainsString('Race results:', $en);
-        $this->assertStringContainsString('🥇 1. *', $en);
-        $this->assertStringContainsString('6️⃣ 6. *', $en);
-        $this->assertStringNotContainsString(' 7. *', $en);
-        $this->assertStringContainsString('Jockey:', $en);
-        $this->assertStringContainsString('Owner:', $en);
-        $this->assertStringContainsString(route('racing.meeting', ['page' => 'results', 'race' => 9178]), $en);
-        $this->assertStringContainsString('youtu', $en);
+        $this->assertStringContainsString('🥇 1. *', $message);
+        $this->assertStringContainsString('6️⃣ 6. *', $message);
+        $this->assertStringNotContainsString(' 7. *', $message);
+        $this->assertSame(6, substr_count($message, '🏇 الفارس: '));
+        $this->assertSame(6, substr_count($message, '🧑‍🏫 المدرب: '));
+        $this->assertSame(6, substr_count($message, '👤 المالك: '));
+        $this->assertStringContainsString('youtu', $message);
+        $this->assertStringContainsString(route('racing.meeting', ['page' => 'results', 'race' => 9178]), $message);
 
-        $this->assertStringContainsString('نتائج السباق', $ar);
-        $this->assertStringContainsString('الفارس:', $ar);
-        $this->assertStringContainsString(route('racing.meeting', ['page' => 'results', 'race' => 9178]), $ar);
+        // every line starts right to left, whatever its first character (emoji, number, Latin text, link)
+        foreach (array_filter(explode("\n", $message), fn (string $line) => $line !== '') as $line) {
+            $this->assertStringStartsWith(RaceResultMessage::RLM, $line);
+        }
     }
 
     public function test_a_race_without_results_has_no_message(): void
@@ -157,7 +161,7 @@ class RaceResultAlertsTest extends TestCase
         // no replay after the wait: 9177 goes without it
         Carbon::setTestNow(now()->addMinutes(config('racing.result_alert_video_wait') + 1));
         $this->assertSame(['sent' => 1, 'waiting' => 0, 'videos' => 0], $alerts->checkToday());
-        Queue::assertPushed(SendWhatsAppMessage::class, fn (SendWhatsAppMessage $job) => str_contains($job->message, 'not on YouTube yet'));
+        Queue::assertPushed(SendWhatsAppMessage::class, fn (SendWhatsAppMessage $job) => str_contains($job->message, __('whatsapp.race_result.no_replay', [], 'ar')));
         $this->assertNull(RaceResultAlert::firstWhere('race_id', 9177)->video_sent_at);
 
         // the replay comes later: one short follow-up, once

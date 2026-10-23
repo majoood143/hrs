@@ -24,9 +24,13 @@ return [
         'channel' => 'Channel',
         'channel_id' => 'Channel ID',
         'folder' => 'Default video folder',
-        'folder_helper' => 'Pre-selected when a video from this channel is added to the library.',
+        'folder_helper' => 'Pre-selected when a video from this channel is added to the library, and where videos added automatically go.',
         'skip_shorts' => 'Skip Shorts',
         'skip_shorts_helper' => 'No alert and no inbox entry for Shorts.',
+        'auto_add' => 'New videos',
+        'auto_add_helper' => 'Not on the first check, nor for live streams until they have ended. Videos the channel does not allow on other sites stay in the inbox. Without a YouTube API key a video is always added hidden, since it is not known whether it can play here.',
+        'notify' => 'WhatsApp alert',
+        'notify_helper' => 'Send the admins a WhatsApp alert for this channel\'s new videos (also needs the alert switched on in General Settings → WhatsApp).',
         'is_active' => 'Watching',
         'checked_at' => 'Last checked',
         'never_checked' => 'Not checked yet',
@@ -40,6 +44,17 @@ return [
         'embeddable' => 'Plays on other sites',
         'status' => 'Status',
         'notified_at' => 'Alert sent',
+    ],
+
+    'automation' => [
+        'heading' => 'Automation',
+        'description' => 'What happens when this channel posts a new video.',
+    ],
+
+    'auto_add' => [
+        'off' => 'Wait in the inbox',
+        'hidden' => 'Add to the library, hidden',
+        'publish' => 'Add to the library and publish',
     ],
 
     'kinds' => [
@@ -72,6 +87,7 @@ return [
         'added_body' => ':count recent video(s) are in the YouTube inbox. You will get a WhatsApp alert for new ones.',
         'checked' => ':channel checked',
         'checked_body' => ':found new, :alerted alerted.',
+        'auto_added_body' => ':count added to the video library.',
         'check_failed' => ':channel could not be checked',
         'checked_all' => 'Channels checked',
         'checked_all_body' => ':found new video(s) in all.',

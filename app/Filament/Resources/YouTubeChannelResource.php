@@ -19,9 +19,11 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -97,6 +99,8 @@ class YouTubeChannelResource extends Resource
                         ->options(fn () => VideoResource::folderOptions())
                         ->native(false)
                         ->searchable()
+                        // auto-added videos go in it
+                        ->required(fn (Get $get) => ($get('auto_add') ?? YouTubeChannel::AUTO_ADD_OFF) !== YouTubeChannel::AUTO_ADD_OFF)
                         ->columnSpanFull(),
 
                     Toggle::make('skip_shorts')
@@ -106,6 +110,36 @@ class YouTubeChannelResource extends Resource
 
                     Toggle::make('is_active')
                         ->label(__('admin_youtube.fields.is_active'))
+                        ->default(true),
+                ]),
+
+            Section::make(__('admin_youtube.automation.heading'))
+                ->description(__('admin_youtube.automation.description'))
+                ->icon('heroicon-o-bolt')
+                ->columnSpanFull()
+                ->schema([
+                    ToggleButtons::make('auto_add')
+                        ->label(__('admin_youtube.fields.auto_add'))
+                        ->helperText(__('admin_youtube.fields.auto_add_helper'))
+                        ->options(collect(YouTubeChannel::AUTO_ADD_MODES)->mapWithKeys(fn (string $mode) => [$mode => __('admin_youtube.auto_add.'.$mode)]))
+                        ->icons([
+                            YouTubeChannel::AUTO_ADD_OFF => 'heroicon-o-inbox-arrow-down',
+                            YouTubeChannel::AUTO_ADD_HIDDEN => 'heroicon-o-eye-slash',
+                            YouTubeChannel::AUTO_ADD_PUBLISH => 'heroicon-o-check-circle',
+                        ])
+                        ->colors([
+                            YouTubeChannel::AUTO_ADD_OFF => 'gray',
+                            YouTubeChannel::AUTO_ADD_HIDDEN => 'warning',
+                            YouTubeChannel::AUTO_ADD_PUBLISH => 'success',
+                        ])
+                        ->inline()
+                        ->required()
+                        ->default(YouTubeChannel::AUTO_ADD_OFF)
+                        ->live(),
+
+                    Toggle::make('notify')
+                        ->label(__('admin_youtube.fields.notify'))
+                        ->helperText(__('admin_youtube.fields.notify_helper'))
                         ->default(true),
                 ]),
         ]);
@@ -133,7 +167,8 @@ class YouTubeChannelResource extends Resource
                     ->label(__('admin_youtube.fields.folder'))
                     ->getStateUsing(fn (YouTubeChannel $record) => $record->folder?->path_label)
                     ->badge()
-                    ->color('gray'),
+                    ->color('gray')
+                    ->description(fn (YouTubeChannel $record) => $record->autoAdds() ? __('admin_youtube.auto_add.'.$record->auto_add) : null),
 
                 TextColumn::make('waiting_count')
                     ->label(__('admin_youtube.fields.waiting'))
@@ -190,6 +225,7 @@ class YouTubeChannelResource extends Resource
                     ->title(__(! $result['checked'] ? 'admin_youtube.notifications.check_failed' : 'admin_youtube.notifications.checked', ['channel' => $record->title]))
                     ->body(collect([
                         __('admin_youtube.notifications.checked_body', ['found' => $result['found'], 'alerted' => $result['alerted']]),
+                        $result['added'] > 0 ? __('admin_youtube.notifications.auto_added_body', ['count' => $result['added']]) : null,
                         YouTubeException::label($result['error']),
                     ])->filter()->implode(' '))
                     ->{$result['error'] ? 'warning' : 'success'}()

@@ -8,8 +8,8 @@ use App\Services\YouTube\YouTubeException;
 use Illuminate\Console\Command;
 
 /**
- * Reads every active watched YouTube channel's feed: new videos go to the admin inbox and the
- * admins get a WhatsApp alert (App\Services\YouTube\ChannelWatcher). Scheduled every 15 minutes.
+ * Reads every active watched YouTube channel's feed: new videos go to the admin inbox (or the
+ * library, per channel) and the admins get a WhatsApp alert (App\Services\YouTube\ChannelWatcher). Scheduled every 15 minutes.
  */
 class CheckYouTubeChannels extends Command
 {
@@ -26,7 +26,7 @@ class CheckYouTubeChannels extends Command
 
         foreach ($channels as $channel) {
             $result = $watcher->check($channel);
-            $line = "{$channel->title}: {$result['found']} new, {$result['alerted']} alerted";
+            $line = "{$channel->title}: {$result['found']} new, {$result['added']} added to the library, {$result['alerted']} alerted";
 
             $result['error']
                 ? $this->warn($line.' ('.YouTubeException::label($result['error']).')')

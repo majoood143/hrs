@@ -74,6 +74,7 @@ class YouTubeChannelsTest extends TestCase
         });
 
         (require database_path('migrations/2026_10_18_000001_create_youtube_channel_tables.php'))->up();
+        (require database_path('migrations/2026_10_23_000001_add_automation_to_youtube_channels.php'))->up();
 
         $this->folderId = DB::table('video_folders')->insertGetId([
             'name' => json_encode(['en' => 'Races', 'ar' => 'السباقات']), 'slug' => 'races',
@@ -254,7 +255,7 @@ class YouTubeChannelsTest extends TestCase
 
         $result = app(ChannelWatcher::class)->check($channel);
 
-        $this->assertSame(['checked' => true, 'found' => 2, 'alerted' => 2, 'error' => null], $result);
+        $this->assertSame(['checked' => true, 'found' => 2, 'added' => 0, 'alerted' => 2, 'error' => null], $result);
         Queue::assertPushed(SendWhatsAppMessage::class, 2);
         Queue::assertPushed(SendWhatsAppMessage::class, function (SendWhatsAppMessage $job) {
             [$en, $ar] = explode(BilingualMessage::DIVIDER, $job->message);
@@ -449,6 +450,129 @@ class YouTubeChannelsTest extends TestCase
 
         Http::assertNothingSent();
         $this->assertSame(0, YouTubeChannelVideo::query()->count());
+    }
+
+    // ── Adding to the library by itself and the per-channel alert ────────────
+
+    public function test_a_publishing_channel_puts_new_videos_in_the_library_in_every_language(): void
+    {
+        Queue::fake();
+        Video::query()->forceCreate(['folder_id' => $this->folderId, 'title' => ['en' => 'Taken'], 'slug' => 'final-race', 'youtube_url' => 'https://youtu.be/other000001']);
+        $channel = $this->watchedChannel(['auto_add' => 'publish']);
+        $this->fakeYouTube(self::feed([['vid0000000d', 'Final race'], ['vid0000000e', 'كأس السلطان']]), [
+            'vid0000000d' => [], 'vid0000000e' => [],
+        ]);
+
+        $result = app(ChannelWatcher::class)->check($channel);
+
+        $this->assertSame(2, $result['added']);
+        $this->assertSame(2, $result['alerted']);
+
+        $english = Video::query()->where('youtube_url', 'like', '%vid0000000d')->sole();
+        $this->assertTrue($english->is_active);
+        $this->assertSame($this->folderId, $english->folder_id);
+        $this->assertSame('final-race-2', $english->slug);
+        $this->assertSame(['en' => 'Final race', 'ar' => 'Final race'], $english->getTranslations('title'));
+        $this->assertStringContainsString('<p>First line<br>', (string) $english->getTranslation('description', 'ar'));
+
+        $arabic = Video::query()->where('youtube_url', 'like', '%vid0000000e')->sole();
+        $this->assertSame('vid0000000e', $arabic->slug);
+        $this->assertSame('كأس السلطان', $arabic->getTranslation('title', 'en'));
+
+        $this->assertSame(['added'], YouTubeChannelVideo::query()->distinct()->pluck('status')->all());
+        $this->assertSame($english->getKey(), YouTubeChannelVideo::query()->where('youtube_id', 'vid0000000d')->value('library_video_id'));
+
+        Queue::assertPushed(SendWhatsAppMessage::class, function (SendWhatsAppMessage $job) {
+            [$en, $ar] = explode(BilingualMessage::DIVIDER, $job->message);
+
+            return str_contains($en, 'Added to the video library and showing: ')
+                && str_contains($en, '/admin/videos/final-race-2/edit')
+                && ! str_contains($en, '/admin/youtube-inbox')
+                && str_contains($ar, 'أُضيف إلى مكتبة الفيديو وهو ظاهر');
+        });
+    }
+
+    public function test_only_videos_that_can_play_here_are_added_and_unknown_ones_stay_hidden(): void
+    {
+        Queue::fake();
+        $channel = $this->watchedChannel(['auto_add' => 'publish']);
+        $this->fakeYouTube(self::feed([['noembed0002', 'Not here'], ['soon0000002', 'Cup final']]), [
+            'noembed0002' => ['status' => ['embeddable' => false]],
+            'soon0000002' => ['snippet' => ['liveBroadcastContent' => 'upcoming'], 'contentDetails' => ['duration' => 'P0D']],
+        ]);
+
+        $this->assertSame(0, app(ChannelWatcher::class)->check($channel)['added']);
+        $this->assertSame(['noembed0002' => 'new', 'soon0000002' => 'new'], YouTubeChannelVideo::query()->orderBy('youtube_id')->pluck('status', 'youtube_id')->all());
+        $this->assertSame(0, Video::query()->count());
+        Queue::assertPushed(SendWhatsAppMessage::class, fn (SendWhatsAppMessage $job) => str_contains($job->message, '/admin/youtube-inbox'));
+
+        // the premiere has ended: added now, without a second alert
+        Queue::fake();
+        $this->fakeYouTube(self::feed([['soon0000002', 'Cup final']]), [
+            'soon0000002' => ['contentDetails' => ['duration' => 'PT1H']],
+        ]);
+
+        $this->assertSame(1, app(ChannelWatcher::class)->check($channel->fresh())['added']);
+        $this->assertTrue(Video::query()->sole()->is_active);
+        Queue::assertNothingPushed();
+
+        // no API key: whether it may play here is unknown, so it is added hidden
+        config(['services.youtube.key' => null]);
+        $this->fakeYouTube(self::feed([['vid0000000f', 'Unknown']]));
+
+        app(ChannelWatcher::class)->check($channel->fresh());
+
+        $this->assertFalse(Video::query()->where('youtube_url', 'like', '%vid0000000f')->sole()->is_active);
+        Queue::assertPushed(SendWhatsAppMessage::class, fn (SendWhatsAppMessage $job) => str_contains($job->message, 'hidden until you publish it'));
+    }
+
+    public function test_the_first_check_and_a_channel_without_folder_add_nothing(): void
+    {
+        $this->fakeYouTube(self::feed([['vid0000000g', 'Backlog']]), ['vid0000000g' => []]);
+
+        app(ChannelWatcher::class)->check($this->watchedChannel(['auto_add' => 'hidden', 'checked_at' => null]));
+
+        $this->assertSame('new', YouTubeChannelVideo::query()->sole()->status);
+
+        YouTubeChannel::query()->update(['video_folder_id' => null]);
+        $this->fakeYouTube(self::feed([['vid0000000h', 'No folder']]), ['vid0000000h' => []]);
+        Queue::fake();
+
+        app(ChannelWatcher::class)->check(YouTubeChannel::query()->sole());
+
+        $this->assertSame(0, Video::query()->count());
+    }
+
+    public function test_a_channel_with_the_alert_off_sends_nothing(): void
+    {
+        Queue::fake();
+        $this->fakeYouTube(self::feed([['vid0000000i', 'Quiet channel']]), ['vid0000000i' => []]);
+
+        $result = app(ChannelWatcher::class)->check($this->watchedChannel(['notify' => false, 'auto_add' => 'hidden']));
+
+        $this->assertSame(['added' => 1, 'alerted' => 0], ['added' => $result['added'], 'alerted' => $result['alerted']]);
+        $this->assertFalse(Video::query()->sole()->is_active);
+        $this->assertNull(YouTubeChannelVideo::query()->sole()->notified_at);
+        Queue::assertNothingPushed();
+    }
+
+    public function test_the_edit_page_sets_the_automation_and_needs_a_folder_for_it(): void
+    {
+        $this->actAsAdmin();
+        $channel = $this->watchedChannel(['video_folder_id' => null]);
+
+        Livewire::test(EditYouTubeChannel::class, ['record' => $channel->getKey()])
+            ->assertSchemaStateSet(['auto_add' => 'off', 'notify' => true])
+            ->fillForm(['auto_add' => 'publish', 'notify' => false])
+            ->call('save')
+            ->assertHasFormErrors(['video_folder_id' => 'required'])
+            ->fillForm(['video_folder_id' => $this->folderId])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $channel->refresh();
+        $this->assertSame('publish', $channel->auto_add);
+        $this->assertFalse($channel->notify);
     }
 
     // ── The inbox and "Add to library" ───────────────────────────────────────

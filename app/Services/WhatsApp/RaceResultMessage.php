@@ -4,11 +4,17 @@ namespace App\Services\WhatsApp;
 
 use App\Services\Racing\RacingClient;
 use App\Services\Racing\RacingUnavailableException;
+use App\Support\Locale;
+use Closure;
 
 /**
  * The admin WhatsApp text with one race's results, as on /racing/results/{race}: the race, the first
  * places (horse, margin, jockey, trainer; the winner's owner), the YouTube replay and the results page.
- * Names come from the source in each language, so the Arabic half has the Arabic names.
+ *
+ * Arabic only, as the admins asked (the one exception to BilingualMessage): the source's Arabic names,
+ * and every line starts with a right-to-left mark, since WhatsApp sets each line's direction from its
+ * first letter and lines starting with an emoji, a number or a Latin value (the source's "1600M ·
+ * Purebred Arabian", a link) would otherwise be left-aligned.
  */
 final class RaceResultMessage
 {
@@ -17,6 +23,11 @@ final class RaceResultMessage
 
     /** Places listed. */
     public const PLACES = 6;
+
+    public const LOCALE = 'ar';
+
+    /** U+200F RIGHT-TO-LEFT MARK */
+    public const RLM = "\u{200F}";
 
     private const MEDALS = ['1' => '🥇', '2' => '🥈', '3' => '🥉', '4' => '4️⃣', '5' => '5️⃣', '6' => '6️⃣'];
 
@@ -39,11 +50,11 @@ final class RaceResultMessage
         $race = $this->race($raceId, 'en');
         $videoUrl = $race['video_url'] ?? self::youTube($videoUrl);
 
-        $message = BilingualMessage::make(function (string $locale) use ($raceId, $videoUrl) {
-            $race = $this->race($raceId, $locale);
-            $detail = $this->racing->raceDetail('results', $raceId, $locale);
+        $message = $this->arabic(function () use ($raceId, $videoUrl) {
+            $race = $this->race($raceId, self::LOCALE);
+            $detail = $this->racing->raceDetail('results', $raceId, self::LOCALE);
 
-            return implode("\n", array_filter([
+            return array_filter([
                 '🏁 '.__('whatsapp.race_result.heading', ['race' => self::raceLabel($race)]),
                 $race['meeting'] ? '📍 '.$race['meeting'] : null,
                 ($race['info'] ?? []) !== [] ? '🕐 '.implode(' · ', $race['info']) : null,
@@ -53,7 +64,7 @@ final class RaceResultMessage
                 '',
                 $videoUrl ? '🎥 '.__('whatsapp.race_result.replay', ['link' => $videoUrl]) : '🎥 '.__('whatsapp.race_result.no_replay'),
                 '🔗 '.__('whatsapp.race_result.page', ['link' => self::pageUrl($raceId)]),
-            ], fn ($line) => $line !== null));
+            ], fn ($line) => $line !== null);
         });
 
         return ['message' => $message, 'video_url' => $videoUrl, 'name' => $race['title'] ?? null];
@@ -66,11 +77,11 @@ final class RaceResultMessage
      */
     public function videoFollowUp(int $raceId, string $videoUrl): string
     {
-        return BilingualMessage::make(fn (string $locale) => implode("\n", [
-            '🎥 '.__('whatsapp.race_result.video_heading', ['race' => self::raceLabel($this->race($raceId, $locale))]),
+        return $this->arabic(fn () => [
+            '🎥 '.__('whatsapp.race_result.video_heading', ['race' => self::raceLabel($this->race($raceId, self::LOCALE))]),
             $videoUrl,
             '🔗 '.__('whatsapp.race_result.page', ['link' => self::pageUrl($raceId)]),
-        ]));
+        ]);
     }
 
     /**
@@ -81,6 +92,15 @@ final class RaceResultMessage
     public function video(int $raceId): ?string
     {
         return $this->race($raceId, 'en')['video_url'];
+    }
+
+    /** @param  Closure(): list<string>  $lines  built in Arabic; each non-empty line gets a leading RLM */
+    private function arabic(Closure $lines): string
+    {
+        return implode("\n", array_map(
+            fn (string $line) => trim($line) === '' ? '' : self::RLM.$line,
+            Locale::within(self::LOCALE, $lines),
+        ));
     }
 
     public static function pageUrl(int $raceId): string
@@ -142,20 +162,24 @@ final class RaceResultMessage
             $horse = $cell('horse') ?? '—';
 
             $lines[] = (self::MEDALS[$place] ?? '▫️').' '.$place.'. *'.$horse.'*'.($margin !== '' ? ' ('.__('whatsapp.race_result.margin', ['value' => $margin]).')' : '');
-            $lines[] = '    '.implode(' · ', array_filter([
-                ($jockey = $cell('jockey')) ? __('whatsapp.race_result.jockey', ['name' => $jockey]) : null,
-                ($trainer = $cell('trainer')) ? __('whatsapp.race_result.trainer', ['name' => $trainer]) : null,
-            ]));
+            // the owners list follows the finishing order (its `n` is the place)
+            $owner = $owners->firstWhere('n', $place) ?? $owners->get($i);
 
-            if ($i === 0) {
-                $owner = $owners->firstWhere('n', $place) ?? $owners->first();
-
-                if ($owner) {
-                    $lines[] = '    '.__('whatsapp.race_result.owner', ['name' => $owner['name']]);
+            foreach ([
+                '🏇' => ['jockey', $cell('jockey')],
+                '🧑‍🏫' => ['trainer', $cell('trainer')],
+                '👤' => ['owner', $owner['name'] ?? null],
+            ] as $icon => [$key, $name]) {
+                if ($name !== null && $name !== '') {
+                    $lines[] = $icon.' '.__('whatsapp.race_result.'.$key, ['name' => $name]);
                 }
             }
+
+            $lines[] = '';
         }
 
-        return array_values(array_filter($lines, fn (string $line) => trim($line) !== ''));
+        array_pop($lines);
+
+        return $lines;
     }
 }

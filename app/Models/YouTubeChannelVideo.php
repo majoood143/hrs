@@ -81,6 +81,44 @@ class YouTubeChannelVideo extends Model
         ];
     }
 
+    /**
+     * Adds it to the channel's library folder by itself (the channel's `auto_add`). Unlike the
+     * New video form no admin writes the other language, so the title and description go in every
+     * language: a video with no English title would show untitled on the English site and app.
+     */
+    public function addToLibrary(bool $publish): Video
+    {
+        $form = $this->libraryFormData();
+        $everyLanguage = fn (string $value) => collect(config('languages.available', ['en' => [], 'ar' => []]))
+            ->map(fn () => $value)
+            ->all();
+        $description = reset($form['description']);
+
+        $video = Video::query()->create(array_filter([
+            'folder_id' => $form['folder_id'],
+            'title' => $everyLanguage($this->title),
+            'description' => $description === null ? null : $everyLanguage($description),
+            'slug' => self::uniqueSlug($form['slug']),
+            'youtube_url' => $form['youtube_url'],
+            'is_active' => $publish,
+        ], fn ($value) => $value !== null));
+
+        $this->forceFill(['status' => self::STATUS_ADDED, 'library_video_id' => $video->getKey()])->save();
+
+        return $video;
+    }
+
+    private static function uniqueSlug(string $slug): string
+    {
+        $candidate = $slug;
+
+        for ($n = 2; Video::query()->where('slug', $candidate)->exists(); $n++) {
+            $candidate = $slug.'-'.$n;
+        }
+
+        return $candidate;
+    }
+
     /** YouTube's plain-text description as escaped HTML paragraphs, or null. */
     private static function paragraphs(?string $text): ?string
     {

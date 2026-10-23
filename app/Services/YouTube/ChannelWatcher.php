@@ -13,18 +13,24 @@ use Throwable;
 
 /**
  * Checks one watched channel: new feed entries go to the inbox (youtube_channel_videos) and the
- * admins get one WhatsApp alert per channel listing them. The first check of a channel only records
- * what is already there (no alert for its 15 latest videos). Shorts are kept as `skipped` on a
- * channel that skips them, and a video already in the library is marked `added` without an alert.
- * Scheduled or live entries are refreshed while they are still in the feed, so the inbox shows
- * how they ended up; they are alerted once only.
+ * admins get one WhatsApp alert per channel listing them (unless the channel's `notify` is off).
+ * The first check of a channel only records what is already there (no alert and no auto-add for
+ * its 15 latest videos). Shorts are kept as `skipped` on a channel that skips them, and a video
+ * already in the library is marked `added` without an alert. Scheduled or live entries are
+ * refreshed while they are still in the feed, so the inbox shows how they ended up; they are
+ * alerted once only.
+ *
+ * On a channel with `auto_add`, a new video also goes into the library by itself (published, or
+ * hidden for an admin to publish). Not a scheduled or live one (added once it has ended), nor one
+ * the channel does not allow on other sites: those stay in the inbox. Without the API's answer
+ * on embedding, a video is added hidden even on a "publish" channel.
  */
 class ChannelWatcher
 {
     public function __construct(private readonly YouTubeClient $client) {}
 
     /**
-     * @return array{checked: bool, found: int, alerted: int, error: ?string} checked = the feed was read, found = new videos stored, error = the stored error, if any
+     * @return array{checked: bool, found: int, added: int, alerted: int, error: ?string} checked = the feed was read, found = new videos stored, added = put in the library by themselves, error = the stored error, if any
      */
     public function check(YouTubeChannel $channel): array
     {
@@ -33,7 +39,7 @@ class ChannelWatcher
         } catch (YouTubeException $e) {
             $channel->forceFill(['last_error' => $e->stored(), 'last_error_at' => now()])->save();
 
-            return ['checked' => false, 'found' => 0, 'alerted' => 0, 'error' => $e->stored()];
+            return ['checked' => false, 'found' => 0, 'added' => 0, 'alerted' => 0, 'error' => $e->stored()];
         }
 
         $firstCheck = $channel->checked_at === null;
@@ -61,11 +67,13 @@ class ChannelWatcher
         }
 
         $toAlert = new Collection;
+        $added = 0;
 
         foreach ($fresh as $entry) {
             $video = $this->store($channel, $entry, $details[$entry['youtube_id']] ?? null);
 
             if ($video !== null && ! $firstCheck && $video->status === YouTubeChannelVideo::STATUS_NEW) {
+                $added += (int) $this->autoAdd($channel, $video);
                 $toAlert->push($video);
             }
         }
@@ -73,6 +81,8 @@ class ChannelWatcher
         foreach ($stillLive as $id => $video) {
             if (isset($details[$id])) {
                 $video->forceFill(array_filter($details[$id], fn ($value) => $value !== null))->save();
+                // a stream that has ended: alerted when it was found, so only added now
+                $added += (int) $this->autoAdd($channel, $video);
             }
         }
 
@@ -84,7 +94,31 @@ class ChannelWatcher
 
         $alerted = $toAlert->isEmpty() ? 0 : $this->alert($channel, $toAlert);
 
-        return ['checked' => true, 'found' => count($fresh), 'alerted' => $alerted, 'error' => $error];
+        return ['checked' => true, 'found' => count($fresh), 'added' => $added, 'alerted' => $alerted, 'error' => $error];
+    }
+
+    /** Puts a new inbox video in the library when the channel says so; true when it was added. */
+    private function autoAdd(YouTubeChannel $channel, YouTubeChannelVideo $video): bool
+    {
+        if (! $channel->autoAdds()
+            || $video->status !== YouTubeChannelVideo::STATUS_NEW
+            || ! in_array($video->kind, ['video', 'short', 'stream'], true)
+            || $video->embeddable === false) {
+            return false;
+        }
+
+        try {
+            $video->setRelation('channel', $channel)->addToLibrary(
+                publish: $channel->auto_add === YouTubeChannel::AUTO_ADD_PUBLISH && $video->embeddable === true,
+            );
+        } catch (Throwable $e) {
+            // it stays in the inbox, to be added by hand
+            report($e);
+
+            return false;
+        }
+
+        return true;
     }
 
     /** The new row, or null when another check stored it first. */
@@ -128,7 +162,7 @@ class ChannelWatcher
     /** @param  Collection<int, YouTubeChannelVideo>  $videos */
     private function alert(YouTubeChannel $channel, Collection $videos): int
     {
-        if (! WhatsAppSettings::enabled() || ! WhatsAppSettings::alertEnabled(NewYouTubeVideoAlert::TYPE)) {
+        if (! $channel->notify || ! WhatsAppSettings::enabled() || ! WhatsAppSettings::alertEnabled(NewYouTubeVideoAlert::TYPE)) {
             return 0;
         }
 
