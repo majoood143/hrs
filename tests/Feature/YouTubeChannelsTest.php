@@ -358,8 +358,47 @@ class YouTubeChannelsTest extends TestCase
         Queue::assertPushed(SendWhatsAppMessage::class, fn (SendWhatsAppMessage $job) => str_contains($job->message, 'Still found'));
     }
 
+    public function test_when_the_feed_is_down_the_uploads_playlist_stands_in(): void
+    {
+        Queue::fake();
+        $channel = $this->watchedChannel();
+        $item = fn (string $id, string $title, string $privacy = 'public') => [
+            'snippet' => ['title' => $title, 'description' => 'About it', 'publishedAt' => '2026-10-18T10:05:00Z', 'thumbnails' => ['high' => ['url' => "https://i.ytimg.com/vi/{$id}/hqdefault.jpg"]]],
+            'contentDetails' => ['videoId' => $id, 'videoPublishedAt' => '2026-10-18T10:00:00Z'],
+            'status' => ['privacyStatus' => $privacy],
+        ];
+        Http::fake([
+            'www.youtube.com/feeds/*' => Http::response('', 404),
+            'www.googleapis.com/youtube/v3/playlistItems*playlistId=UUSH*' => Http::response(['items' => [$item('short000003', 'A short')]]),
+            'www.googleapis.com/youtube/v3/playlistItems*playlistId=UU*' => Http::response(['items' => [
+                $item('vid00000010', 'From the API'), $item('short000003', 'A short'), $item('private0001', 'Private video', 'private'),
+            ]]),
+            'www.googleapis.com/youtube/v3/videos*' => Http::response(self::details(['vid00000010' => []])),
+        ]);
+
+        $result = app(ChannelWatcher::class)->check($channel);
+
+        $this->assertTrue($result['checked']);
+        $this->assertSame(['short000003' => 'skipped', 'vid00000010' => 'new'], YouTubeChannelVideo::query()->orderBy('youtube_id')->pluck('status', 'youtube_id')->all());
+        $this->assertSame('About it', YouTubeChannelVideo::query()->where('youtube_id', 'vid00000010')->value('description'));
+        Queue::assertPushed(SendWhatsAppMessage::class, fn (SendWhatsAppMessage $job) => str_contains($job->message, 'From the API'));
+    }
+
+    public function test_a_channel_without_uploads_playlist_is_not_found(): void
+    {
+        $channel = $this->watchedChannel();
+        Http::fake([
+            'www.youtube.com/feeds/*' => Http::response('', 404),
+            'www.googleapis.com/youtube/v3/playlistItems*' => Http::response(['error' => ['code' => 404, 'errors' => [['reason' => 'playlistNotFound']]]], 404),
+        ]);
+
+        $this->assertFalse(app(ChannelWatcher::class)->check($channel)['checked']);
+        $this->assertSame('not_found|', $channel->fresh()->last_error);
+    }
+
     public function test_a_feed_that_cannot_be_read_is_recorded_on_the_channel(): void
     {
+        config(['services.youtube.key' => null]);
         $channel = $this->watchedChannel();
         Http::fake(['www.youtube.com/feeds/*' => Http::response('', 500)]);
 
@@ -367,7 +406,6 @@ class YouTubeChannelsTest extends TestCase
 
         $this->assertFalse($result['checked']);
         $this->assertSame('feed_failed|500', $channel->fresh()->last_error);
-        $this->assertStringNotContainsString(self::KEY, (string) $channel->fresh()->last_error);
     }
 
     public function test_videos_are_kept_but_not_sent_while_the_alert_is_off(): void

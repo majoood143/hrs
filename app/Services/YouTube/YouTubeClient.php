@@ -12,7 +12,8 @@ use SimpleXMLElement;
  * The only thing that talks to YouTube. A channel's public feed (free, no key; its last 15 uploads,
  * Shorts linked as /shorts/…) says what is new; the Data API (optional key, config
  * services.youtube.key; 1 quota unit per call of up to 50 videos) adds live/upcoming status,
- * duration and whether the video may be embedded.
+ * duration and whether the video may be embedded. When the feed fails and there is a key, the
+ * channel's uploads playlist stands in for it (YouTube's feeds answer 404 for every channel at times).
  */
 class YouTubeClient
 {
@@ -73,7 +74,15 @@ class YouTubeClient
      */
     public function feed(string $channelId): array
     {
-        $feed = $this->feedXml($channelId);
+        try {
+            $feed = $this->feedXml($channelId);
+        } catch (YouTubeException $e) {
+            if (! $this->hasKey()) {
+                throw $e;
+            }
+
+            return $this->uploads($channelId);
+        }
         $entries = [];
 
         foreach ($feed->entry as $entry) {
@@ -107,6 +116,59 @@ class YouTubeClient
         }
 
         return $entries;
+    }
+
+    /**
+     * The feed's entries from the Data API: the channel's uploads playlist (UU…) and its Shorts
+     * playlist (UUSH…, absent when the channel has none), 1 quota unit each.
+     *
+     * @return list<array{youtube_id: string, title: string, description: ?string, thumbnail_url: ?string, published_at: ?Carbon, is_short: bool}>
+     */
+    private function uploads(string $channelId): array
+    {
+        $suffix = substr($channelId, 2);
+        $items = $this->playlistItems('UU'.$suffix) ?? throw new YouTubeException('not_found');
+        $shorts = array_column($this->playlistItems('UUSH'.$suffix) ?? [], 'contentDetails');
+        $shortIds = array_flip(array_column($shorts, 'videoId'));
+        $entries = [];
+
+        foreach ($items as $item) {
+            $id = (string) ($item['contentDetails']['videoId'] ?? '');
+
+            // private and deleted videos stay in the playlist; the feed leaves them out
+            if ($id === '' || ($item['status']['privacyStatus'] ?? 'public') !== 'public') {
+                continue;
+            }
+
+            $snippet = $item['snippet'] ?? [];
+            $description = trim((string) ($snippet['description'] ?? ''));
+            $published = $item['contentDetails']['videoPublishedAt'] ?? $snippet['publishedAt'] ?? null;
+
+            $entries[] = [
+                'youtube_id' => $id,
+                'title' => trim((string) ($snippet['title'] ?? '')) ?: $id,
+                'description' => $description === '' ? null : $description,
+                'thumbnail_url' => $snippet['thumbnails']['high']['url'] ?? "https://i.ytimg.com/vi/{$id}/hqdefault.jpg",
+                'published_at' => $published ? Carbon::parse($published) : null,
+                'is_short' => isset($shortIds[$id]),
+            ];
+        }
+
+        return $entries;
+    }
+
+    /** A playlist's latest 15 items, or null when YouTube has no such playlist. */
+    private function playlistItems(string $playlistId): ?array
+    {
+        try {
+            return $this->api('playlistItems', ['part' => 'snippet,contentDetails,status', 'playlistId' => $playlistId, 'maxResults' => '15'])['items'] ?? [];
+        } catch (YouTubeException $e) {
+            if ($e->detail === 'playlistNotFound') {
+                return null;
+            }
+
+            throw $e;
+        }
     }
 
     /**
