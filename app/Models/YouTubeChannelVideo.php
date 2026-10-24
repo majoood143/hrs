@@ -82,13 +82,15 @@ class YouTubeChannelVideo extends Model
     }
 
     /**
-     * Adds it to the channel's library folder by itself (the channel's `auto_add`). Unlike the
-     * New video form no admin writes the other language, so the title and description go in every
-     * language: a video with no English title would show untitled on the English site and app.
+     * Adds it to the library without the New video form (the channel's `auto_add`, the inbox's
+     * bulk "Add to library"): in `$folderId`, else the channel's folder. Unlike the form no admin
+     * writes the other language, so the title and description go in every language: a video with
+     * no English title would show untitled on the English site and app.
      */
-    public function addToLibrary(bool $publish): Video
+    public function addToLibrary(bool $publish, ?int $folderId = null): Video
     {
         $form = $this->libraryFormData();
+        $form['folder_id'] = $folderId ?? $form['folder_id'];
         $everyLanguage = fn (string $value) => collect(config('languages.available', ['en' => [], 'ar' => []]))
             ->map(fn () => $value)
             ->all();

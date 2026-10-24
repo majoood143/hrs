@@ -82,6 +82,20 @@ return [
         'check_all' => 'Check all channels now',
     ],
 
+    'bulk_add' => [
+        'heading' => 'Add the selected videos to the library',
+        'description' => 'They are added as they are on YouTube: the title and description go in both languages, so translate them in the video library afterwards.',
+        'folder' => 'Video folder',
+        'folder_helper' => 'Leave empty to use each channel\'s default folder.',
+        'channel_folder' => 'Each channel\'s folder',
+        'publish' => 'Publish them now',
+        'publish_helper' => 'Off: added hidden, to check before publishing. Videos YouTube does not allow on other sites are always added hidden.',
+        'done' => ':count added to the video library',
+        'linked' => ':count were already in the library.',
+        'not_yet' => ':count live or scheduled stream(s) left in the inbox until they end.',
+        'no_folder' => ':count skipped: their channel has no default folder, choose one.',
+    ],
+
     'notifications' => [
         'added' => 'Watching :channel',
         'added_body' => ':count recent video(s) are in the YouTube inbox. You will get a WhatsApp alert for new ones.',

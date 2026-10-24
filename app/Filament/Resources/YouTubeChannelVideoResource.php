@@ -4,10 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\YouTubeChannelVideoResource\Pages\ListYouTubeChannelVideos;
 use App\Models\YouTubeChannelVideo;
+use App\Services\YouTube\ChannelWatcher;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\IconColumn;
@@ -18,8 +21,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
- * The YouTube inbox: videos found on the watched channels. Nothing is published from here: "Add
- * to library" opens the normal New video form filled in from YouTube (CreateVideo, ?youtube=).
+ * The YouTube inbox: videos found on the watched channels. "Add to library" on one video opens the
+ * normal New video form filled in from YouTube (CreateVideo, ?youtube=); the bulk "Add to library"
+ * adds the selected ones directly (YouTubeChannelVideo::addToLibrary, hidden unless asked).
  */
 class YouTubeChannelVideoResource extends Resource
 {
@@ -204,6 +208,37 @@ class YouTubeChannelVideoResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    BulkAction::make('add_to_library')
+                        ->label(__('admin_youtube.actions.add_to_library'))
+                        ->icon('heroicon-o-plus-circle')
+                        ->color('primary')
+                        ->visible(fn () => VideoResource::canCreate())
+                        ->authorizeIndividualRecords('update')
+                        ->modalIcon('heroicon-o-plus-circle')
+                        ->modalHeading(__('admin_youtube.bulk_add.heading'))
+                        ->modalDescription(__('admin_youtube.bulk_add.description'))
+                        ->modalSubmitActionLabel(__('admin_youtube.actions.add_to_library'))
+                        ->schema([
+                            Select::make('folder_id')
+                                ->label(__('admin_youtube.bulk_add.folder'))
+                                ->helperText(__('admin_youtube.bulk_add.folder_helper'))
+                                ->placeholder(__('admin_youtube.bulk_add.channel_folder'))
+                                ->options(fn () => VideoResource::folderOptions())
+                                ->native(false)
+                                ->searchable(),
+
+                            Toggle::make('publish')
+                                ->label(__('admin_youtube.bulk_add.publish'))
+                                ->helperText(__('admin_youtube.bulk_add.publish_helper'))
+                                ->default(false),
+                        ])
+                        ->deselectRecordsAfterCompletion()
+                        ->action(fn (Collection $records, array $data) => static::addToLibrary(
+                            $records->load('channel'),
+                            filled($data['folder_id'] ?? null) ? (int) $data['folder_id'] : null,
+                            (bool) ($data['publish'] ?? false),
+                        )),
+
                     BulkAction::make('ignore')
                         ->label(__('admin_youtube.actions.ignore'))
                         ->icon('heroicon-o-eye-slash')
@@ -219,6 +254,48 @@ class YouTubeChannelVideoResource extends Resource
             ->emptyStateIcon('heroicon-o-inbox')
             ->emptyStateHeading(__('admin_youtube.inbox.empty_heading'))
             ->emptyStateDescription(__('admin_youtube.inbox.empty_description'));
+    }
+
+    /**
+     * The bulk "Add to library": skips what is already there (linking a library video that plays
+     * the same YouTube id), live and scheduled streams (nothing to play yet) and videos with no
+     * folder to go in; a video YouTube keeps off other sites is added hidden even when publishing.
+     *
+     * @param  Collection<int, YouTubeChannelVideo>  $records
+     */
+    public static function addToLibrary(Collection $records, ?int $folderId, bool $publish): void
+    {
+        $added = $linked = $notYet = $noFolder = 0;
+
+        foreach ($records as $record) {
+            if ($record->status === YouTubeChannelVideo::STATUS_ADDED) {
+                continue;
+            }
+
+            if ($libraryId = ChannelWatcher::libraryVideoId($record->youtube_id)) {
+                $record->update(['status' => YouTubeChannelVideo::STATUS_ADDED, 'library_video_id' => $libraryId]);
+                $linked++;
+            } elseif (in_array($record->kind, ['live', 'upcoming'], true)) {
+                $notYet++;
+            } elseif (($folderId ?? $record->channel?->video_folder_id) === null) {
+                $noFolder++;
+            } else {
+                $record->addToLibrary($publish && $record->embeddable !== false, $folderId);
+                $added++;
+            }
+        }
+
+        $body = collect([
+            $linked > 0 ? __('admin_youtube.bulk_add.linked', ['count' => $linked]) : null,
+            $notYet > 0 ? __('admin_youtube.bulk_add.not_yet', ['count' => $notYet]) : null,
+            $noFolder > 0 ? __('admin_youtube.bulk_add.no_folder', ['count' => $noFolder]) : null,
+        ])->filter()->implode(' ');
+
+        Notification::make()
+            ->title(__('admin_youtube.bulk_add.done', ['count' => $added]))
+            ->body($body !== '' ? $body : null)
+            ->status($added > 0 || $linked > 0 ? 'success' : 'warning')
+            ->send();
     }
 
     public static function getPages(): array

@@ -654,4 +654,53 @@ class YouTubeChannelsTest extends TestCase
 
         $this->assertSame('ignored', $new->fresh()->status);
     }
+
+    public function test_the_inbox_adds_the_selected_videos_to_the_library_at_once(): void
+    {
+        $this->actAsAdmin();
+        $this->watchedChannel();
+        $plain = $this->storedVideo('vid0000000i', ['title' => 'Cup day', 'embeddable' => true]);
+        $noEmbed = $this->storedVideo('vid0000000j', ['title' => 'Kept on YouTube', 'embeddable' => false, 'status' => 'ignored']);
+        $live = $this->storedVideo('vid0000000k', ['title' => 'On air', 'kind' => 'live']);
+        $known = $this->storedVideo('vid0000000l', ['title' => 'Pasted before']);
+        $existing = Video::query()->forceCreate(['folder_id' => $this->folderId, 'title' => ['en' => 'Pasted'], 'slug' => 'pasted', 'youtube_url' => 'https://youtu.be/vid0000000l']);
+
+        Livewire::test(ListYouTubeChannelVideos::class)
+            ->filterTable('status', null)
+            ->selectTableRecords([$plain->getKey(), $noEmbed->getKey(), $live->getKey(), $known->getKey()])
+            ->callAction(TestAction::make('add_to_library')->table()->bulk(), data: ['publish' => true])
+            ->assertHasNoFormErrors()
+            ->assertNotified();
+
+        $video = Video::query()->where('youtube_url', 'like', '%vid0000000i')->sole();
+        $this->assertTrue($video->is_active);
+        $this->assertSame($this->folderId, $video->folder_id);
+        $this->assertSame(['en' => 'Cup day', 'ar' => 'Cup day'], $video->getTranslations('title'));
+        $this->assertSame($video->getKey(), $plain->fresh()->library_video_id);
+
+        $this->assertFalse(Video::query()->where('youtube_url', 'like', '%vid0000000j')->sole()->is_active);
+        $this->assertSame('added', $noEmbed->fresh()->status);
+        $this->assertSame('new', $live->fresh()->status);
+        $this->assertSame($existing->getKey(), $known->fresh()->library_video_id);
+        $this->assertSame(3, Video::query()->count());
+
+        // another folder, and a channel without one needs it
+        YouTubeChannel::query()->update(['video_folder_id' => null]);
+        $other = DB::table('video_folders')->insertGetId(['name' => json_encode(['en' => 'Other']), 'slug' => 'other', 'created_at' => now(), 'updated_at' => now()]);
+        $first = $this->storedVideo('vid0000000m', ['title' => 'Without folder']);
+
+        Livewire::test(ListYouTubeChannelVideos::class)
+            ->selectTableRecords([$first->getKey()])
+            ->callAction(TestAction::make('add_to_library')->table()->bulk());
+
+        $this->assertSame('new', $first->fresh()->status);
+
+        Livewire::test(ListYouTubeChannelVideos::class)
+            ->selectTableRecords([$first->getKey()])
+            ->callAction(TestAction::make('add_to_library')->table()->bulk(), data: ['folder_id' => $other]);
+
+        $added = Video::query()->where('youtube_url', 'like', '%vid0000000m')->sole();
+        $this->assertSame($other, $added->folder_id);
+        $this->assertFalse($added->is_active);
+    }
 }
