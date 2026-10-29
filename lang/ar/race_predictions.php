@@ -11,6 +11,7 @@ return [
     'hide_runners' => 'إخفاء',
     'prize_money' => 'الجوائز المالية',
     'jockey' => 'الفارس: :name',
+    'trainer' => 'المدرب: :name',
     'weight' => ':weight كغم',
     'gate' => 'البوابة :gate',
 ];

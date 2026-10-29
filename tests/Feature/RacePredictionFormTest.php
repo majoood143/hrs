@@ -82,6 +82,7 @@ class RacePredictionFormTest extends TestCase
         $this->assertSame('1', $race2['runners']['3125']['no']);
         $this->assertStringStartsWith('/img/OwnerColours/', $race2['runners']['3125']['image']);
         $this->assertNotEmpty($race2['runners']['3125']['jockey']['en']);
+        $this->assertNotEmpty($race2['runners']['3125']['trainer']['en']);
 
         // one entry per mobile number
         $this->assertTrue($data[1]['unique']);
@@ -146,7 +147,7 @@ class RacePredictionFormTest extends TestCase
         $this->assertStringContainsString(e(route('racing.image', ['p' => $form->fresh()->fields[3]['data']['runners']['3125']['image']])), $html);
         $this->assertStringContainsString('<span class="rw-runner__no">1</span>', $html);
         $this->assertStringContainsString('<bdi>S.s.r. Alfaseeh (OM)</bdi>', $html);
-        $this->assertMatchesRegularExpression('/Jockey: [^<]+ · [\d.]+ kg · Gate \d+/', $html);
+        $this->assertMatchesRegularExpression('/Jockey: [^<]+ · Trainer: [^<]+ · [\d.]+ kg · Gate \d+/', $html);
         $this->assertStringContainsString('Choose the winner', $html);
         // two race fields, one copy of the styles and the folding script
         $this->assertSame(1, substr_count($html, 'pick.open = false'));
@@ -192,6 +193,21 @@ class RacePredictionFormTest extends TestCase
         $this->assertSame('3125', $submission->value('race_2'));
         $field = Form::firstOrFail()->fieldList()->firstWhere('key', 'race_2');
         $this->assertSame('S.s.r. Alfaseeh (OM)', $field->type->format('3125', $field));
+    }
+
+    public function test_a_horse_deleted_by_hand_stays_deleted_when_the_runners_reload(): void
+    {
+        $form = $this->makePredictionForm();
+        $fields = $form->fields;
+        $fields[2]['data']['choices'] = array_values(array_filter($fields[2]['data']['choices'], fn (array $c): bool => $c['value'] !== '3125'));
+        $form->update(['fields' => $fields]);
+
+        app(RacePredictions::class)->reload($form->fresh());
+        $this->artisan('forms:reload-race-runners')->assertSuccessful();
+
+        $choices = Form::firstOrFail()->fieldList()->firstWhere('key', 'race_2')->choices();
+        $this->assertCount(18, $choices);
+        $this->assertArrayNotHasKey('3125', $choices);
     }
 
     public function test_reloading_follows_the_race_card_and_remembers_withdrawn_horses(): void

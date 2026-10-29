@@ -11,6 +11,7 @@ return [
     'hide_runners' => 'Hide',
     'prize_money' => 'Prize money',
     'jockey' => 'Jockey: :name',
+    'trainer' => 'Trainer: :name',
     'weight' => ':weight kg',
     'gate' => 'Gate :gate',
 ];

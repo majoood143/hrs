@@ -70,7 +70,7 @@ return [
     'select_country' => 'Select a country',
     'select_region' => 'Select a region',
     'step_of' => 'Step :current of :total',
-    'form_errors_title' => "Please fix the following before we can post this:",
+    'form_errors_title' => 'Please fix the following before we can post this:',
     'review_title' => 'Review & verify',
     'captcha_label' => 'Enter the code shown',
     'captcha_refresh' => 'Get a new code',

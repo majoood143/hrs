@@ -21,7 +21,7 @@ return [
         'runners_from_entries' => 'From the entries (the race card is not out yet), updated :time (Muscat time).',
         'reload' => 'Reload runners',
         'sync_runners' => 'Keep the runners in step with the race card',
-        'sync_runners_hint' => 'Every hour until the form closes, horses declared or withdrawn are added or removed. Turn it off to keep the list exactly as edited here.',
+        'sync_runners_hint' => 'Every hour until the form closes, horses declared or withdrawn are added or removed; horses you delete here stay deleted (pick the race again to get the full list back). Turn it off to keep the list exactly as edited here.',
         'no_runners' => 'No runners are published for this race yet.',
         'unavailable' => 'The racing site is not answering right now. Try again in a few minutes.',
     ],

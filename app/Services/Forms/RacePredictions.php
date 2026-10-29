@@ -143,6 +143,7 @@ class RacePredictions
                 $details[$id]['weight'] = $horse['weight'];
                 $details[$id]['image'] = $horse['image'];
                 $details[$id]['jockey'][$locale] = $horse['jockey'];
+                $details[$id]['trainer'][$locale] = $horse['trainer'];
             }
         }
 
@@ -304,6 +305,10 @@ class RacePredictions
             return $data;
         }
 
+        // horses the admin deleted from the list: on the race card last time, no longer among the choices
+        $removed = array_diff(array_map('strval', array_keys((array) ($data['runners'] ?? []))), array_column((array) ($data['choices'] ?? []), 'value'));
+        $runners['choices'] = array_values(array_filter($runners['choices'], fn (array $choice): bool => ! in_array($choice['value'], $removed, true)));
+
         $current = array_column($runners['choices'], 'value');
         $withdrawn = collect([...array_values((array) ($data['withdrawn'] ?? [])), ...array_values((array) ($data['choices'] ?? []))])
             ->filter(fn (mixed $row): bool => is_array($row) && filled($row['value'] ?? null) && ! in_array((string) $row['value'], $current, true))
@@ -401,7 +406,7 @@ class RacePredictions
     /**
      * The horses of one race page, in its order. The entries have no number, jockey, gate or silks yet.
      *
-     * @return list<array{id: int, name: string, no: ?string, gate: ?string, weight: ?string, jockey: ?string, image: ?string}>
+     * @return list<array{id: int, name: string, no: ?string, gate: ?string, weight: ?string, jockey: ?string, trainer: ?string, image: ?string}>
      *
      * @throws RacingUnavailableException
      */
@@ -429,6 +434,7 @@ class RacePredictions
                         'weight' => self::text($runner['weight'] ?? null),
                         // a claim is part of the jockey's name on the source: "Hamed Al Bulushi (2.0 kg)"
                         'jockey' => self::text($runner['jockey']['name'] ?? null),
+                        'trainer' => self::text($runner['trainer']['name'] ?? null),
                         'image' => self::text($runner['image'] ?? null),
                     ];
                 }
@@ -441,7 +447,8 @@ class RacePredictions
         foreach ($detail['table']['rows'] ?? [] as $row) {
             foreach ($row as $cell) {
                 if (($cell['link']['type'] ?? null) === 'horse' && (int) ($cell['link']['id'] ?? 0) > 0 && filled($cell['text'] ?? null)) {
-                    $horses[] = ['id' => (int) $cell['link']['id'], 'name' => trim((string) $cell['text']), 'no' => null, 'gate' => null, 'weight' => null, 'jockey' => null, 'image' => null];
+                    $horses[] = ['id' => (int) $cell['link']['id'], 'name' => trim((string) $cell['text']), 'no' => null, 'gate' => null, 'weight' => null, 'jockey' => null,
+                        'trainer' => self::text(collect($row)->firstWhere('link.type', 'trainer')['text'] ?? null), 'image' => null];
 
                     break;
                 }

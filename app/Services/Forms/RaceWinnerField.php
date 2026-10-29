@@ -120,7 +120,7 @@ class RaceWinnerField extends FieldType
                     static::loadRunners($get, $set, replace: true);
                 }),
             // kept with the field, never typed: where the runners came from and when, each runner's card
-            // (number, jockey, weight, gate, silks), the race card's header, and the horses withdrawn since
+            // (number, jockey, trainer, weight, gate, silks), the race card's header, and the horses withdrawn since
             Hidden::make('runners_from'),
             Hidden::make('runners_updated_at'),
             Hidden::make('runners')->default([]),
@@ -169,7 +169,7 @@ class RaceWinnerField extends FieldType
     }
 
     /**
-     * The race card's header, then one card per runner (silks, number, name, jockey, weight, gate).
+     * The race card's header, then one card per runner (silks, number, name, jockey, trainer, weight, gate).
      */
     public function view(): string
     {
@@ -189,7 +189,7 @@ class RaceWinnerField extends FieldType
     /**
      * What the race card says about one runner, in the current language (empty for a choice typed by hand).
      *
-     * @return array{no: ?string, gate: ?string, weight: ?string, jockey: ?string, image: ?string}
+     * @return array{no: ?string, gate: ?string, weight: ?string, jockey: ?string, trainer: ?string, image: ?string}
      */
     public static function runner(Field $field, string $value): array
     {
@@ -201,6 +201,7 @@ class RaceWinnerField extends FieldType
             'gate' => $row['gate'] ?? null,
             'weight' => $row['weight'] ?? null,
             'jockey' => is_array($row['jockey'] ?? null) ? Localized::value($row, 'jockey') : null,
+            'trainer' => is_array($row['trainer'] ?? null) ? Localized::value($row, 'trainer') : null,
             'image' => $row['image'] ?? null,
         ];
     }
@@ -208,13 +209,14 @@ class RaceWinnerField extends FieldType
     /**
      * "Jockey: Amur Al Rasbi · 60.0 kg · Gate 7", leaving out what is not known.
      *
-     * @param  array{gate: ?string, weight: ?string, jockey: ?string}  $runner
+     * @param  array{gate: ?string, weight: ?string, jockey: ?string, trainer: ?string}  $runner
      */
     public static function runnerLine(array $runner): string
     {
         return implode(' · ', array_filter([
             // a claim stays "(2.0 kg)" inside an Arabic name instead of turning into "(kg 2.0)"
             $runner['jockey'] ? __('race_predictions.jockey', ['name' => preg_replace('/\([\d.]+\s*kg\)/iu', "\u{2066}\$0\u{2069}", $runner['jockey'])]) : null,
+            $runner['trainer'] ? __('race_predictions.trainer', ['name' => $runner['trainer']]) : null,
             $runner['weight'] ? __('race_predictions.weight', ['weight' => $runner['weight']]) : null,
             $runner['gate'] ? __('race_predictions.gate', ['gate' => $runner['gate']]) : null,
         ]));
