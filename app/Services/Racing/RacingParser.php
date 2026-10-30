@@ -19,7 +19,7 @@ class RacingParser
 
     /**
      * @return array<string, array{headers: list<string>, rows: list<array{id: int, cells: list<string>}>}>
-     *         keyed by group (horse|owner|jockey|trainer); empty when nothing matched
+     *                                                                                                      keyed by group (horse|owner|jockey|trainer); empty when nothing matched
      */
     public function parseSearch(string $html): array
     {
@@ -68,7 +68,7 @@ class RacingParser
      *     pedigree: ?string,
      *     rating: ?array{value: string, label: string},
      *     facts: list<array{label: string, value: string, link: ?array{type: string, id: int}}>,
-     *     tabs: list<array{label: string, tables: list<array{headers: list<string>, rows: list<list<array{text: string, link: ?array{type: string, id: int}}>>}>, message: ?string}>
+     *     tabs: list<array{label: string, tables: list<array{headers: list<string>, rows: list<list<array{text: string, link: ?array{type: string, id: int}}>>}>, message: ?string, upcoming: bool}>
      * }|null null when the source has no such record (it answers 200 with an empty title)
      */
     public function parseProfile(string $html): ?array
@@ -167,7 +167,7 @@ class RacingParser
                 continue;
             }
 
-            $panel = $xp->query('//*[@id="' . $panelId . '"]')->item(0);
+            $panel = $xp->query('//*[@id="'.$panelId.'"]')->item(0);
 
             if (! $panel) {
                 continue;
@@ -184,6 +184,8 @@ class RacingParser
                 'label' => $this->text($label ?? $a),
                 'tables' => $tables,
                 'message' => $tables === [] ? ($this->text($panel) ?: null) : null,
+                // the tab of declared runs ("Upcoming Races" / a horse's "Declarations"), whatever its label's language
+                'upcoming' => in_array($panelId, ['tabPopRaceInfo_3', 'tabPopHorse_4'], true),
             ];
         }
 

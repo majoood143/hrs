@@ -5,6 +5,7 @@ namespace App\Services\Racing;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
@@ -59,9 +60,112 @@ class RacingClient
 
         $key = sprintf('racing:profile:%s:%d:%s', $entity, $id, $this->lang($locale));
 
-        return Cache::remember($key, config('racing.cache_ttl'), fn () => $this->parser->parseProfile(
+        $profile = Cache::remember($key, config('racing.cache_ttl'), fn () => $this->parser->parseProfile(
             $this->get("/pages/{$page}.cfm", ['type' => 'genInfo', $param => $id, 'racePageLink' => 'RaceResults'], $locale)
         ));
+
+        return $profile === null ? null : $this->withDeclaredRuns($profile, $entity, $id, $locale);
+    }
+
+    /**
+     * The source's upcoming tab stays empty until a race is run, even for a runner on today's card, so an
+     * empty one is filled from the declared runners `racing:warm --declared` keeps. Never fetched here:
+     * that takes a race card (~1 s) per race.
+     */
+    private function withDeclaredRuns(array $profile, string $entity, int $id, string $locale): array
+    {
+        $today = $this->today();
+        $runs = array_values(array_filter(
+            Cache::get($this->declaredKey($locale), []),
+            fn (array $run) => ($run['runner'][$entity]['id'] ?? null) === $id && $run['date'] >= $today,
+        ));
+
+        if ($runs === []) {
+            return $profile;
+        }
+
+        $profile['tabs'] = array_map(fn (array $tab) => ($tab['upcoming'] ?? false) && $tab['tables'] === []
+            ? ['tables' => [$this->declaredTable($runs, $entity, $locale)], 'message' => null] + $tab
+            : $tab, $profile['tabs']);
+
+        return $profile;
+    }
+
+    /** The declared runs as a profile table: date, time, race, the runner's other people, gate, weight. */
+    private function declaredTable(array $runs, string $entity, string $locale): array
+    {
+        $people = array_values(array_diff(['horse', 'jockey', 'trainer'], [$entity]));
+        $cell = fn (?string $text, ?array $link = null) => ['text' => (string) $text, 'link' => $link, 'title' => null];
+
+        return [
+            'headers' => array_map(fn (string $column) => __("racing.card_labels.{$column}", [], $locale), ['date', 'time', 'race', ...$people, 'gate', 'weight']),
+            'rows' => array_map(fn (array $run) => [
+                $cell(Carbon::parse($run['date'])->locale($locale)->translatedFormat('d M y')),
+                $cell($run['time']),
+                $cell($run['race']['name'], ['type' => 'race', 'id' => $run['race']['id']]),
+                ...array_map(fn (string $person) => isset($run['runner'][$person])
+                    ? $cell($run['runner'][$person]['name'], ['type' => $person, 'id' => $run['runner'][$person]['id']])
+                    : $cell(''), $people),
+                $cell($run['runner']['gate'] ?? null),
+                $cell($run['runner']['weight'] ?? null),
+            ], $runs),
+        ];
+    }
+
+    /**
+     * Every runner on the race cards of the next two race days (today's included) whose race has not been
+     * run yet, swapped into the cache for withDeclaredRuns(). For the scheduled `racing:warm --declared`.
+     *
+     * @return int runners cached
+     *
+     * @throws RacingUnavailableException
+     */
+    public function refreshDeclared(string $locale): int
+    {
+        $today = $this->today();
+        $runs = [];
+
+        // shortcut: only the season today falls in; meetings never straddle the late-September break
+        $days = array_slice(array_values(array_filter(array_keys($this->raceDaysOfSeasonOf($today)), fn (string $day) => $day >= $today)), 0, 2);
+
+        foreach ($days as $date) {
+            // ids from the source's own race list, so the card is safe to ask for
+            $races = array_values(array_filter($this->raceDay($date, $locale), fn (array $race) => $race['card'] && ! $race['results']));
+
+            if ($races === []) {
+                continue;
+            }
+
+            // the card's race names ("Ayn Athum Handicap"), like the source's Recent Results; the day list has the conditions
+            $titles = array_column($this->meeting('card', $races[0]['id'], $locale)['races'] ?? [], 'title', 'id');
+
+            foreach ($races as $race) {
+                foreach ($this->raceDetail('card', $race['id'], $locale)['runners'] ?? [] as $runner) {
+                    $runs[] = [
+                        'date' => $date,
+                        'time' => $race['time'],
+                        'race' => ['id' => $race['id'], 'name' => $titles[$race['id']] ?? $race['name']],
+                        'runner' => $runner,
+                    ];
+                }
+            }
+        }
+
+        // well past the 10-minute refresh, so a stopped scheduler drops the list instead of keeping it forever
+        Cache::put($this->declaredKey($locale), $runs, 1800);
+
+        return count($runs);
+    }
+
+    private function declaredKey(string $locale): string
+    {
+        return 'racing:declared:'.$this->lang($locale);
+    }
+
+    /** Today on the course, where race days are dated. */
+    private function today(): string
+    {
+        return now(config('racing.timezone'))->format('Y-m-d');
     }
 
     /**

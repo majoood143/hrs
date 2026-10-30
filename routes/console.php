@@ -32,6 +32,10 @@ Schedule::command('sanctum:prune-expired', ['--hours' => 24])->daily();
 // around a cold fetch as a safety net, e.g. right after a deploy).
 Schedule::command('racing:warm')->everyThirtyMinutes()->withoutOverlapping();
 
+// Profiles' upcoming races come from the race cards of the next race days (~1 s a card, so never
+// fetched while a visitor waits); kept fresh enough that a run moves to the results soon after it.
+Schedule::command('racing:warm', ['--declared'])->everyTenMinutes()->withoutOverlapping();
+
 // Race prediction forms still open follow the race card (declarations, scratched horses) until they close.
 Schedule::command('forms:reload-race-runners')->hourly()->withoutOverlapping();
 

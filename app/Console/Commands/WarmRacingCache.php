@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 
 class WarmRacingCache extends Command
 {
-    protected $signature = 'racing:warm';
+    protected $signature = 'racing:warm {--declared : Only the declared runners of the next race days, behind the profiles\' upcoming races}';
 
     protected $description = 'Refresh the racing lists (handicap ratings, and the statistics behind the Arabic name search) so visitors never wait for a cold cache';
 
@@ -17,6 +17,19 @@ class WarmRacingCache extends Command
         $failed = false;
 
         foreach (array_keys(config('languages.available')) as $locale) {
+            if ($this->option('declared')) {
+                try {
+                    $count = $racing->refreshDeclared($locale);
+
+                    $this->info("Declared runners ({$locale}): {$count} cached.");
+                } catch (RacingUnavailableException $e) {
+                    $this->error("Declared runners ({$locale}): {$e->getMessage()}");
+                    $failed = true;
+                }
+
+                continue;
+            }
+
             try {
                 $count = $racing->refreshHandicap('', '1', $locale);
 

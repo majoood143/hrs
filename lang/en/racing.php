@@ -80,6 +80,10 @@ return [
     'no_previous_runs' => 'No previous runs.',
 
     'card_labels' => [
+        'date' => 'Date',
+        'time' => 'Time',
+        'race' => 'Race',
+        'horse' => 'Horse',
         'no' => 'No',
         'gate' => 'Gate',
         'weight' => 'Weight (kg)',
