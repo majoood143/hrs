@@ -24,9 +24,9 @@ final class MobileFeatures
     /** Feature keys by admin group (the order the admin page shows them). */
     public const GROUPS = [
         'marketplace' => ['horses_for_sale', 'tools_for_sale'],
-        'directory' => ['stables', 'clinics', 'centers', 'shops', 'farriers', 'events', 'blog', 'videos'],
+        'directory' => ['stables', 'clinics', 'centers', 'shops', 'farriers', 'jockeys', 'events', 'blog', 'videos'],
         'transfer' => ['transfer_board'],
-        'posting' => ['post_horse', 'post_tool', 'post_farrier', 'post_transfer'],
+        'posting' => ['post_horse', 'post_tool', 'post_farrier', 'post_transfer', 'post_jockey'],
         'racing' => ['racing', 'silks'],
         'bookings' => ['bookings', 'stable_owner'],
         'other' => ['promos', 'contact_call', 'contact_whatsapp', 'language_switch'],

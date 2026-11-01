@@ -49,6 +49,34 @@ class DirectoryTest extends TestCase
             ->assertJsonPath('data.share_url', route('farriers.show', $cheap));
     }
 
+    public function test_jockeys_list_filter_by_type_and_show_the_racing_profile_only_once_checked(): void
+    {
+        $flat = $this->jockey(['en_name' => 'Hamed', 'types' => json_encode(['flat_racing']), 'racing_jockey_id' => 77]);
+        $both = $this->jockey(['en_name' => 'Said', 'types' => json_encode(['endurance', 'flat_racing']), 'racing_jockey_id' => 88, 'racing_verified' => true]);
+        $this->jockey(['en_name' => 'Waiting', 'status' => 'pending']);
+
+        $this->getJson('/api/v1/jockeys')
+            ->assertOk()
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.name', 'Said')
+            ->assertJsonPath('data.0.types.0', ['value' => 'endurance', 'label' => 'Endurance'])
+            ->assertJsonPath('data.0.racing_jockey_id', 88)
+            ->assertJsonPath('data.1.racing_jockey_id', null);
+
+        $this->assertSame([$both], $this->getJson('/api/v1/jockeys?type=endurance')->json('data.*.id'));
+        $this->assertSame([$both, $flat], $this->getJson('/api/v1/jockeys?type=flat_racing')->json('data.*.id'));
+        $this->getJson('/api/v1/jockeys?type=polo')->assertUnprocessable();
+
+        $this->getJson("/api/v1/jockeys/{$flat}", ['Accept-Language' => 'ar'])
+            ->assertOk()
+            ->assertJsonPath('data.name', 'حامد')
+            ->assertJsonPath('data.types.0.label', 'سباقات السرعة')
+            ->assertJsonPath('data.region.name', 'مسقط')
+            ->assertJsonPath('data.share_url', route('jockeys.show', $flat));
+
+        $this->getJson('/api/v1/jockeys/'.($both + 1))->assertNotFound();
+    }
+
     public function test_the_transfer_board_hides_past_dates_and_filters_like_the_website(): void
     {
         $soon = $this->transfer(['transfer_date' => now()->addDay()->toDateString(), 'price' => 80]);
@@ -175,6 +203,14 @@ class DirectoryTest extends TestCase
             'ar_name' => 'علي', 'years_experience' => 12, 'country_id' => $this->ids['oman'], 'region_id' => $this->ids['muscat'],
             'city_id' => $this->ids['seeb'], 'contact_number' => '99887766', 'status' => 'active',
             'description_en' => 'Long experience.', 'description_ar' => 'خبرة طويلة.',
+        ]);
+    }
+
+    private function jockey(array $values): int
+    {
+        return $this->row('jockeys', $values + [
+            'ar_name' => 'حامد', 'types' => json_encode(['other']), 'country_id' => $this->ids['oman'], 'region_id' => $this->ids['muscat'],
+            'city_id' => $this->ids['seeb'], 'contact_number' => '99887766', 'status' => 'active',
         ]);
     }
 

@@ -4,6 +4,7 @@ namespace Tests\Feature\Api\V1;
 
 use App\Events\PublicPostSubmitted;
 use App\Models\HorseSalePost;
+use App\Models\Jockey;
 use App\Models\ToolSalePost;
 use App\Models\TransferPost;
 use App\Support\Api\PostingLimit;
@@ -215,6 +216,30 @@ class PostingTest extends TestCase
 
         $this->assertSame('+96899887766', TransferPost::sole()->contact_number);
         Event::assertDispatchedTimes(PublicPostSubmitted::class, 3);
+    }
+
+    public function test_a_jockey_can_add_themselves_with_types_and_an_unchecked_racing_profile(): void
+    {
+        $token = $this->postingToken();
+
+        $this->postJson('/api/v1/jockeys', [
+            'posting_token' => $token, 'en_name' => 'Hamed', 'ar_name' => 'حامد', 'types' => ['polo'], 'city_id' => $this->ids['seeb'],
+        ])->assertUnprocessable()->assertJsonValidationErrors(['types.0']);
+
+        $this->post('/api/v1/jockeys', [
+            'posting_token' => $token, 'en_name' => 'Hamed', 'ar_name' => 'حامد', 'types' => ['flat_racing', 'endurance'],
+            'city_id' => $this->ids['seeb'], 'racing_jockey_id' => 77, 'cover_photo' => UploadedFile::fake()->image('hamed.jpg'),
+        ], ['Accept' => 'application/json'])
+            ->assertCreated()
+            ->assertJsonPath('data.types.1.value', 'endurance')
+            ->assertJsonPath('data.racing_jockey_id', null);
+
+        $jockey = Jockey::sole();
+        $this->assertSame('+96899887766', $jockey->contact_number);
+        $this->assertSame(77, $jockey->racing_jockey_id);
+        $this->assertFalse($jockey->racing_verified);
+        Storage::disk('public')->assertExists($jockey->cover_photo);
+        Event::assertDispatchedTimes(PublicPostSubmitted::class, 1);
     }
 
     public function test_posting_needs_a_valid_unexpired_token(): void

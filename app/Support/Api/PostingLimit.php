@@ -4,6 +4,7 @@ namespace App\Support\Api;
 
 use App\Models\Farrier;
 use App\Models\HorseSalePost;
+use App\Models\Jockey;
 use App\Models\ToolSalePost;
 use App\Models\TransferPost;
 use App\Support\MobileApp\MobilePosting;
@@ -31,7 +32,7 @@ final class PostingLimit
         $since = now()->subDay();
         $contact = self::contactNumber($phone);
 
-        $count = collect([HorseSalePost::class, ToolSalePost::class, Farrier::class, TransferPost::class])
+        $count = collect([HorseSalePost::class, ToolSalePost::class, Farrier::class, TransferPost::class, Jockey::class])
             ->sum(fn (string $model) => $model::query()->where('contact_number', $contact)->where('created_at', '>=', $since)->count());
 
         return $count >= self::perDay();

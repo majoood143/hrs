@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\FarrierController;
 use App\Http\Controllers\Api\V1\HomeController;
 use App\Http\Controllers\Api\V1\HorseForSaleController;
+use App\Http\Controllers\Api\V1\JockeyController;
 use App\Http\Controllers\Api\V1\LookupController;
 use App\Http\Controllers\Api\V1\Owner\OwnerAuthController;
 use App\Http\Controllers\Api\V1\Owner\OwnerBookingController;
@@ -58,6 +59,9 @@ Route::prefix('v1')
         Route::get('farriers', [FarrierController::class, 'index'])->name('farriers.index');
         Route::get('farriers/{id}', [FarrierController::class, 'show'])->whereNumber('id')->name('farriers.show');
 
+        Route::get('jockeys', [JockeyController::class, 'index'])->name('jockeys.index');
+        Route::get('jockeys/{id}', [JockeyController::class, 'show'])->whereNumber('id')->name('jockeys.show');
+
         Route::get('transfer-board', [TransferBoardController::class, 'index'])->name('transfer-board.index');
         Route::get('transfer-board/{id}', [TransferBoardController::class, 'show'])->whereNumber('id')->name('transfer-board.show');
 
@@ -92,12 +96,13 @@ Route::prefix('v1')
 
         // Posting from the app: a verified phone (code by WhatsApp, else SMS) instead of the site's captcha.
         // Each refused while its feature is off, the app is in maintenance or below the minimum version.
-        $anyPosting = EnsureMobileFeature::class.':post_horse,post_tool,post_farrier,post_transfer';
+        $anyPosting = EnsureMobileFeature::class.':post_horse,post_tool,post_farrier,post_transfer,post_jockey';
         Route::post('verification/request', [VerificationController::class, 'request'])->middleware([$anyPosting, 'throttle:api-codes'])->name('verification.request');
         Route::post('verification/verify', [VerificationController::class, 'verify'])->middleware([$anyPosting, 'throttle:api-codes'])->name('verification.verify');
         Route::post('horses-for-sale', [HorseForSaleController::class, 'store'])->middleware([EnsureMobileFeature::class.':post_horse', 'throttle:api-posting'])->name('horses-for-sale.store');
         Route::post('tools-for-sale', [ToolForSaleController::class, 'store'])->middleware([EnsureMobileFeature::class.':post_tool', 'throttle:api-posting'])->name('tools-for-sale.store');
         Route::post('farriers', [FarrierController::class, 'store'])->middleware([EnsureMobileFeature::class.':post_farrier', 'throttle:api-posting'])->name('farriers.store');
+        Route::post('jockeys', [JockeyController::class, 'store'])->middleware([EnsureMobileFeature::class.':post_jockey', 'throttle:api-posting'])->name('jockeys.store');
         Route::post('transfer-board', [TransferBoardController::class, 'store'])->middleware([EnsureMobileFeature::class.':post_transfer', 'throttle:api-posting'])->name('transfer-board.store');
 
         // Stable bookings: the website's booking engine. Reading is open; booking, paying for a package,

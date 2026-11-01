@@ -186,7 +186,7 @@ class AppStatusTest extends TestCase
         $this->postJson('/api/v1/tools-for-sale', [], self::IOS_1_0)->assertStatus(401);
         $this->postJson('/api/v1/verification/request', [], self::IOS_1_0)->assertStatus(422);
 
-        $this->settings(['mobile.features' => array_fill_keys(['post_horse', 'post_tool', 'post_farrier', 'post_transfer'], ['enabled' => false])]);
+        $this->settings(['mobile.features' => array_fill_keys(['post_horse', 'post_tool', 'post_farrier', 'post_transfer', 'post_jockey'], ['enabled' => false])]);
         $this->postJson('/api/v1/verification/request', ['phone' => '91234567'], self::IOS_1_0)->assertStatus(403);
 
         $this->settings(['mobile.updates' => ['ios' => ['min_version' => '1.1']]]);

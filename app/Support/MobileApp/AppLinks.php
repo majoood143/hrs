@@ -20,7 +20,7 @@ final class AppLinks
 
     /** The website paths' first segments the app has screens for; plus the homepage. */
     public const SECTIONS = [
-        'horses-for-sale', 'tools-for-sale', 'transfer-board', 'farriers',
+        'horses-for-sale', 'tools-for-sale', 'transfer-board', 'farriers', 'jockeys',
         'stables', 'clinics', 'centers', 'shops', 'events', 'blog', 'video-library', 'racing',
     ];
 

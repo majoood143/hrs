@@ -1320,6 +1320,8 @@ document.addEventListener('DOMContentLoaded', () => {
     horseSaleWizard();
     farrierWizard();
     toolSaleWizard();
+    // forms without a wizard (jockeys): the same country → region → city selects
+    document.querySelectorAll('[data-location-form]').forEach(initLocationCascades);
     eventsCalendar();
     raceWidget();
     racingSearch();

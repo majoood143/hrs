@@ -4,10 +4,12 @@ namespace App\Services\WhatsApp;
 
 use App\Filament\Resources\FarrierResource;
 use App\Filament\Resources\HorseSalePostResource;
+use App\Filament\Resources\JockeyResource;
 use App\Filament\Resources\ToolSalePostResource;
 use App\Filament\Resources\TransferPostResource;
 use App\Models\Farrier;
 use App\Models\HorseSalePost;
+use App\Models\Jockey;
 use App\Models\SiteSetting;
 use App\Models\ToolSalePost;
 use App\Models\TransferPost;
@@ -27,6 +29,7 @@ final class NewPostAlert
         HorseSalePost::class => ['type' => 'horse_sale_post', 'route' => 'horses-for-sale.show', 'resource' => HorseSalePostResource::class],
         ToolSalePost::class => ['type' => 'tool_sale_post', 'route' => 'tools-for-sale.show', 'resource' => ToolSalePostResource::class],
         Farrier::class => ['type' => 'farrier', 'route' => 'farriers.show', 'resource' => FarrierResource::class],
+        Jockey::class => ['type' => 'jockey', 'route' => 'jockeys.show', 'resource' => JockeyResource::class],
     ];
 
     /** The alert type (a WhatsAppSettings::ALERTS key), or null for a model that has no alert. */
@@ -89,6 +92,10 @@ final class NewPostAlert
                 __('whatsapp.fields.name', ['value' => $post->name]),
                 $post->price !== null ? self::price($post->price) : null,
             ]),
+            $post instanceof Jockey => [
+                __('whatsapp.fields.name', ['value' => $post->name]),
+                __('whatsapp.fields.riding_types', ['value' => collect($post->types)->map(fn (string $type) => Jockey::typeOptions()[$type] ?? $type)->join(app()->getLocale() === 'ar' ? '، ' : ', ')]),
+            ],
             default => [],
         };
     }

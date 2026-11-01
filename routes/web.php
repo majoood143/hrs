@@ -11,6 +11,7 @@ use App\Http\Controllers\Site\ClinicController;
 use App\Http\Controllers\Site\EventController;
 use App\Http\Controllers\Site\FarrierController;
 use App\Http\Controllers\Site\HorseForSaleController;
+use App\Http\Controllers\Site\JockeyController;
 use App\Http\Controllers\Site\OrderController;
 use App\Http\Controllers\Site\OrderDocumentController;
 use App\Http\Controllers\Site\PageController;
@@ -78,6 +79,11 @@ Route::get('/farriers/post', [FarrierController::class, 'create'])->name('farrie
 Route::post('/farriers/post', [FarrierController::class, 'store'])->middleware('throttle:10,1')->name('farriers.store');
 Route::get('/farriers/captcha', [FarrierController::class, 'captcha'])->name('farriers.captcha');
 Route::get('/farriers/{farrier}', [FarrierController::class, 'show'])->name('farriers.show');
+
+Route::get('/jockeys', [JockeyController::class, 'index'])->name('jockeys.index');
+Route::get('/jockeys/post', [JockeyController::class, 'create'])->name('jockeys.create');
+Route::post('/jockeys/post', [JockeyController::class, 'store'])->middleware('throttle:10,1')->name('jockeys.store');
+Route::get('/jockeys/{jockey}', [JockeyController::class, 'show'])->whereNumber('jockey')->name('jockeys.show');
 
 Route::get('/tools-for-sale', [ToolSaleController::class, 'index'])->name('tools-for-sale.index');
 Route::get('/tools-for-sale/post', [ToolSaleController::class, 'create'])->name('tools-for-sale.create');
@@ -183,7 +189,7 @@ Route::get('/promo/{ad}/go', [AdClickController::class, 'redirect'])->name('prom
 // this file, before packages that register their own routes later (in a booted() callback,
 // like dedoc/scramble's /docs/api) ever got a chance to match.
 Route::get('/{slug}', [PageController::class, 'show'])
-    ->where('slug', '^(?!admin|transportation|blog|transfer-board|horses-for-sale|stables|clinics|centers|shops|farriers|tools-for-sale|events|video-library|racing)[^/]+$')
+    ->where('slug', '^(?!admin|transportation|blog|transfer-board|horses-for-sale|stables|clinics|centers|shops|farriers|jockeys|tools-for-sale|events|video-library|racing)[^/]+$')
     ->name('page.show');
 
 Route::fallback(function () {

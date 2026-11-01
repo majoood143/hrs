@@ -15,6 +15,8 @@ trait PreparesMobileApiDirectory
 {
     protected function prepareDirectoryTables(): void
     {
+        (require database_path('migrations/2026_11_01_000001_create_jockeys_table.php'))->up();
+
         Schema::create('farriers', function (Blueprint $table) {
             $table->id();
             $table->string('en_name');

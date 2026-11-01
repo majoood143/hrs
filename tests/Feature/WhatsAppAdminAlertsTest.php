@@ -7,6 +7,7 @@ use App\Filament\Pages\Settings\GeneralSettings;
 use App\Jobs\SendWhatsAppMessage;
 use App\Models\City;
 use App\Models\HorseSalePost;
+use App\Models\Jockey;
 use App\Models\NotificationLog;
 use App\Models\SiteSetting;
 use App\Models\TransferPost;
@@ -188,6 +189,22 @@ class WhatsAppAdminAlertsTest extends TestCase
         $this->assertStringContainsString('2026-10-01', $en);
         $this->assertStringContainsString('من مسقط إلى صحار', $ar);
         $this->assertStringContainsString(route('transfer-board.show', 3), $en);
+    }
+
+    public function test_a_jockey_alert_lists_their_riding_types_in_each_language(): void
+    {
+        $this->alertsOn();
+
+        $post = (new Jockey)->forceFill([
+            'id' => 4, 'en_name' => 'Hamed', 'ar_name' => 'حامد', 'types' => ['flat_racing', 'endurance'],
+            'contact_number' => '91112222', 'status' => 'active',
+        ]);
+
+        [$en, $ar] = explode(BilingualMessage::DIVIDER, NewPostAlert::message($post));
+
+        $this->assertStringContainsString('Riding types: Flat racing, Endurance', $en);
+        $this->assertStringContainsString('أنواع الفروسية: سباقات السرعة، القدرة والتحمل', $ar);
+        $this->assertStringContainsString(route('jockeys.show', 4), $en);
     }
 
     // ── Sending through Evolution API ────────────────────────────────────────
