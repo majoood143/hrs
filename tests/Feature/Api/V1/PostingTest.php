@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\V1;
 
 use App\Events\PublicPostSubmitted;
+use App\Models\ContentReport;
 use App\Models\HorseSalePost;
 use App\Models\Jockey;
 use App\Models\ToolSalePost;
@@ -48,6 +49,7 @@ class PostingTest extends TestCase
             '2026_09_26_140451_create_whatsapp_instances_table',
             // after the directory tables: it changes the farriers' and transfers' status too
             '2026_10_13_000001_add_pending_status_to_public_posts',
+            '2026_11_01_000002_create_content_reports_table',
         ] as $migration) {
             (require database_path("migrations/{$migration}.php"))->up();
         }
@@ -328,13 +330,56 @@ class PostingTest extends TestCase
 
     public function test_a_broken_or_missing_posting_setting_means_no_review_and_five_a_day(): void
     {
-        $this->assertSame(['review' => false, 'daily_limit' => 5], MobilePosting::settings());
+        $this->assertSame(['review' => false, 'daily_limit' => 5, 'reviewer_phone' => null, 'reviewer_code' => null], MobilePosting::settings());
 
         $this->settings(['mobile.posting' => json_encode(['review' => 'yes', 'daily_limit' => 500])]);
-        $this->assertSame(['review' => true, 'daily_limit' => 5], MobilePosting::settings());
+        $this->assertSame(['review' => true, 'daily_limit' => 5, 'reviewer_phone' => null, 'reviewer_code' => null], MobilePosting::settings());
 
         $this->settings(['mobile.posting' => 'not json']);
         $this->assertSame('active', MobilePosting::newPostStatus());
+    }
+
+    // ── App review login and reports (App Store guidelines 2.1 and 1.2) ─────────
+
+    public function test_the_reviewer_phone_takes_its_fixed_code_and_nothing_is_sent(): void
+    {
+        // no channel can send at all: the reviewer still gets in, anyone else does not
+        $this->settings(['sms.driver' => '', 'whatsapp.codes' => false, 'mobile.posting' => json_encode(['reviewer_phone' => '90000001', 'reviewer_code' => '246810'])]);
+
+        $this->postJson('/api/v1/verification/request', ['phone' => '+968 9000 0001'])
+            ->assertOk()
+            ->assertJson(['channel' => 'sms', 'demo_code' => null]);
+        $this->postJson('/api/v1/verification/request', ['phone' => self::PHONE])->assertStatus(503);
+
+        $this->postJson('/api/v1/verification/verify', ['phone' => '90000001', 'code' => '111111'])->assertUnprocessable();
+        $this->postJson('/api/v1/verification/request', ['phone' => '90000001'])->assertOk();
+        $this->postJson('/api/v1/verification/verify', ['phone' => '90000001', 'code' => '246810'])->assertOk()->assertJsonStructure(['posting_token']);
+        $this->assertSame(0, DB::table('notification_logs')->count());
+
+        // a code that is not six digits switches it off
+        $this->settings(['sms.driver' => '', 'mobile.posting' => json_encode(['reviewer_phone' => '90000001', 'reviewer_code' => '12'])]);
+        $this->postJson('/api/v1/verification/request', ['phone' => '90000001'])->assertStatus(503);
+    }
+
+    public function test_a_visible_post_can_be_reported_once_per_address(): void
+    {
+        $horse = HorseSalePost::create([
+            'en_name' => 'Horse', 'ar_name' => 'حصان', 'type_id' => $this->ids['type'], 'gender_id' => $this->ids['gender'],
+            'country_id' => $this->ids['oman'], 'region_id' => $this->ids['muscat'], 'city_id' => $this->ids['seeb'],
+            'price' => 2000, 'cover_photo' => 'horse-sale/covers/a.jpg', 'contact_number' => '99887766', 'status' => 'active',
+        ]);
+        $report = ['section' => 'horses-for-sale', 'id' => $horse->id, 'reason' => 'fraud', 'details' => 'Asks for a deposit first.'];
+
+        $this->postJson('/api/v1/reports', $report)->assertCreated()->assertJsonStructure(['message']);
+        $this->postJson('/api/v1/reports', $report)->assertCreated();
+        $this->assertSame(1, ContentReport::query()->open()->count());
+        $this->assertSame(['horses-for-sale', $horse->id, 'fraud'], [ContentReport::sole()->section, ContentReport::sole()->post_id, ContentReport::sole()->reason]);
+
+        $this->postJson('/api/v1/reports', ['reason' => 'nonsense'] + $report)->assertUnprocessable()->assertJsonValidationErrors('reason');
+        $this->postJson('/api/v1/reports', ['section' => 'stables'] + $report)->assertUnprocessable()->assertJsonValidationErrors('section');
+
+        $horse->update(['status' => 'pending']);
+        $this->postJson('/api/v1/reports', $report)->assertNotFound();
     }
 
     private function settings(array $overrides = []): void

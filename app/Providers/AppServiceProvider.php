@@ -136,6 +136,7 @@ class AppServiceProvider extends ServiceProvider
         // Racing search asks the source each time; view counts are cheap but should not be inflated.
         RateLimiter::for('api-racing-search', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
         RateLimiter::for('api-views', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
+        RateLimiter::for('api-reports', fn (Request $request) => Limit::perHour(20)->by($request->ip()));
 
         // A stable owner's app token is a User token, which the admin API's guard would accept too:
         // it opens the owner endpoints only.

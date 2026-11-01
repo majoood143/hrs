@@ -9,6 +9,7 @@ use App\Models\SiteSetting;
 use App\Services\Sms\SmsManager;
 use App\Services\WhatsApp\BilingualMessage;
 use App\Services\WhatsApp\WhatsAppNotifier;
+use App\Support\MobileApp\MobilePosting;
 use App\Support\PhoneNumber;
 use App\Support\WhatsAppSettings;
 
@@ -83,6 +84,14 @@ class CustomerOtpService
 
         if ($phone === null) {
             return new OtpRequestResult(OtpRequestResult::INVALID_PHONE);
+        }
+
+        // The app-review login (admin → Mobile app → Posting): its fixed code, nothing sent.
+        if (($reviewerCode = MobilePosting::reviewerCode($phone)) !== null) {
+            CustomerOtp::query()->where('phone', $phone)->whereNull('consumed_at')->update(['consumed_at' => now()]);
+            CustomerOtp::create(['phone' => $phone, 'code_hash' => $this->hash($phone, $reviewerCode), 'expires_at' => now()->addMinutes(self::TTL_MINUTES), 'ip' => $ip]);
+
+            return new OtpRequestResult(OtpRequestResult::SENT, self::RESEND_SECONDS, null, self::CHANNEL_SMS);
         }
 
         $tryWhatsApp = $channel === self::CHANNEL_WHATSAPP && $this->whatsappAvailable();

@@ -3,8 +3,11 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\MobileApp\MobileAppSettings;
+use App\Filament\Resources\ContentReportResource;
+use App\Filament\Resources\ContentReportResource\Pages\ListContentReports;
 use App\Filament\Resources\MobileAnnouncementResource\Pages\CreateMobileAnnouncement;
 use App\Filament\Resources\MobileAnnouncementResource\Pages\ListMobileAnnouncements;
+use App\Models\ContentReport;
 use App\Models\MobileAnnouncement;
 use App\Models\SiteSetting;
 use App\Support\MobileApp\AppClient;
@@ -22,7 +25,7 @@ use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
 use Tests\TestCase;
 
-/** Admin → Mobile app: the settings page (features, updates, maintenance, posting) and the announcements. */
+/** Admin → Mobile app: the settings page (features, updates, maintenance, posting), the announcements and the reports. */
 class MobileAppAdminTest extends TestCase
 {
     protected function setUp(): void
@@ -45,6 +48,7 @@ class MobileAppAdminTest extends TestCase
             '2025_10_03_170349_add_event_column_to_activity_log_table',
             '2025_10_03_170350_add_batch_uuid_column_to_activity_log_table',
             '2026_10_13_120000_create_mobile_announcements_table',
+            '2026_11_01_000002_create_content_reports_table',
         ] as $migration) {
             (require database_path("migrations/{$migration}.php"))->up();
         }
@@ -107,15 +111,41 @@ class MobileAppAdminTest extends TestCase
             ->fillForm(['posting.daily_limit' => 0])
             ->call('save')
             ->assertHasFormErrors(['posting.daily_limit'])
-            ->fillForm(['posting.review' => true, 'posting.daily_limit' => 3])
+            ->fillForm(['posting.daily_limit' => 3, 'posting.reviewer_phone' => '90000001'])
+            ->call('save')
+            ->assertHasFormErrors(['posting.reviewer_code' => 'required'])
+            ->fillForm(['posting.reviewer_code' => '12ab'])
+            ->call('save')
+            ->assertHasFormErrors(['posting.reviewer_code'])
+            ->fillForm(['posting.review' => true, 'posting.daily_limit' => 3, 'posting.reviewer_code' => '246810'])
             ->call('save')
             ->assertHasNoFormErrors();
 
-        $this->assertSame(['review' => true, 'daily_limit' => 3], MobilePosting::settings());
+        $this->assertSame(['review' => true, 'daily_limit' => 3, 'reviewer_phone' => '90000001', 'reviewer_code' => '246810'], MobilePosting::settings());
+        $this->assertSame('246810', MobilePosting::reviewerCode('96890000001'));
+        $this->assertNull(MobilePosting::reviewerCode('96899887766'));
         $this->assertSame('pending', MobilePosting::newPostStatus());
 
         $log = DB::table('activity_log')->where('log_name', 'mobile_app')->sole();
         $this->assertTrue(json_decode($log->properties, true)['attributes']['posting']['review']);
+    }
+
+    public function test_reports_list_the_open_ones_and_can_be_marked_resolved(): void
+    {
+        $open = ContentReport::create(['section' => 'horses-for-sale', 'post_id' => 7, 'reason' => 'fraud', 'details' => 'Deposit first', 'status' => 'open']);
+        $done = ContentReport::create(['section' => 'jockeys', 'post_id' => 3, 'reason' => 'spam', 'status' => 'resolved']);
+
+        $this->assertSame('1', ContentReportResource::getNavigationBadge());
+        $this->assertStringEndsWith('/horse-sale-posts/7', (string) $open->adminUrl());
+
+        Livewire::test(ListContentReports::class)
+            ->assertSuccessful()
+            ->assertCanSeeTableRecords([$open])
+            ->assertCanNotSeeTableRecords([$done])
+            ->callTableAction('resolve', $open);
+
+        $this->assertSame('resolved', $open->fresh()->status);
+        $this->assertNull(ContentReportResource::getNavigationBadge());
     }
 
     public function test_the_website_links_tab_stores_the_apple_team_and_android_fingerprints(): void

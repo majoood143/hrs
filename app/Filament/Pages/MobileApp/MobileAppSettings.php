@@ -254,6 +254,21 @@ class MobileAppSettings extends Page implements HasForms
                         ->maxValue(MobilePosting::MAX_DAILY_LIMIT)
                         ->required(),
                 ]),
+            Section::make(__('admin_mobile_app.posting.reviewer'))
+                ->description(__('admin_mobile_app.posting.reviewer_help'))
+                ->columns(2)
+                ->schema([
+                    TextInput::make('posting.reviewer_phone')
+                        ->label(__('admin_mobile_app.fields.reviewer_phone'))
+                        ->placeholder('90000001')
+                        ->tel()
+                        ->maxLength(20)
+                        ->required(fn (Get $get): bool => filled($get('posting.reviewer_code'))),
+                    TextInput::make('posting.reviewer_code')
+                        ->label(__('admin_mobile_app.fields.reviewer_code'))
+                        ->regex('/^\d{6}$/')
+                        ->required(fn (Get $get): bool => filled($get('posting.reviewer_phone'))),
+                ]),
         ];
     }
 

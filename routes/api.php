@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\V1\Owner\OwnerBookingController;
 use App\Http\Controllers\Api\V1\Owner\OwnerScheduleController;
 use App\Http\Controllers\Api\V1\Owner\OwnerStableController;
 use App\Http\Controllers\Api\V1\RacingController;
+use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\ShopController;
 use App\Http\Controllers\Api\V1\SilksController;
 use App\Http\Controllers\Api\V1\StableController;
@@ -171,6 +172,8 @@ Route::prefix('v1')
         });
 
         Route::post('views/{section}/{key}', [ViewController::class, 'store'])->middleware('throttle:api-views')->name('views.store');
+        // Reporting a visitor post (App Store guideline 1.2), for an admin to look at.
+        Route::post('reports', [ReportController::class, 'store'])->middleware('throttle:api-reports')->name('reports.store');
 
         // An unknown API path is a JSON 404 here, never the website's fallback (CMS redirects, HTML 404).
         Route::any('{path}', fn () => abort(404))->where('path', '.*')->name('not-found');

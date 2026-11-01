@@ -9,6 +9,9 @@ return [
         'wrong' => 'That code is not right. Check it and try again.',
         'expired' => 'This code has expired or was tried too often. Ask for a new one.',
     ],
+    'reports' => [
+        'sent' => 'Thank you. We will look at this post within 24 hours.',
+    ],
     'posting' => [
         'verification_required' => 'Confirm your phone number to post.',
         'limit' => 'You can publish up to :count posts a day from the app. Please try again tomorrow.',

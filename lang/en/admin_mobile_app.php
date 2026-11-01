@@ -90,6 +90,8 @@ return [
 
     'posting' => [
         'help' => 'Posts from the app (horses and tools for sale, farriers, transfer board) by phones confirmed with a code. The website\'s own form is not affected.',
+        'reviewer' => 'App review login',
+        'reviewer_help' => 'For the App Store and Google Play reviewers: this phone number signs in and posts with the code below, and no code is sent to it. Give both in the store\'s review notes, and clear them once the app is approved (anyone who knows them can sign in as this number).',
     ],
 
     'images' => [
@@ -122,6 +124,8 @@ return [
     ],
 
     'fields' => [
+        'reviewer_phone' => 'Reviewer phone number',
+        'reviewer_code' => 'Reviewer code (6 digits)',
         'apple_team_id' => 'Apple Team ID',
         'apple_team_id_help' => '10 letters and digits, from developer.apple.com → Membership details, for the account that publishes the app.',
         'android_fingerprints' => 'App signing certificate SHA-256 fingerprints',
@@ -215,6 +219,34 @@ return [
         'scheduled' => 'Scheduled',
         'ended' => 'Ended',
         'off' => 'Off',
+    ],
+
+    'reports' => [
+        'label' => 'Report',
+        'plural' => 'Reports',
+        'reported_at' => 'Reported',
+        'section' => 'Post',
+        'reason' => 'Reason',
+        'details' => 'Details',
+        'resolve' => 'Mark resolved',
+        'sections' => [
+            'horses-for-sale' => 'Horse for sale',
+            'tools-for-sale' => 'Tool for sale',
+            'farriers' => 'Farrier',
+            'transfer-board' => 'Transfer',
+            'jockeys' => 'Jockey',
+        ],
+        'reasons' => [
+            'spam' => 'Spam',
+            'fraud' => 'Scam or fraud',
+            'offensive' => 'Offensive',
+            'wrong_info' => 'Wrong information',
+            'other' => 'Other',
+        ],
+        'statuses' => [
+            'open' => 'Open',
+            'resolved' => 'Resolved',
+        ],
     ],
 
     'announcements' => [
