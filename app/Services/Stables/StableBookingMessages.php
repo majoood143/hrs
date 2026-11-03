@@ -33,7 +33,7 @@ class StableBookingMessages
             'customer' => (string) ($order?->customer_name ?: __('orders.guest')),
             'phone' => (string) $order?->customer_phone,
             'payment' => $this->paymentLine($booking),
-            'total' => $order ? SiteSetting::formatCurrency((float) $order->total, 3) : '',
+            'total' => $order ? SiteSetting::formatCurrency((float) $order->total) : '',
             'url' => $order ? route('orders.show', $order->order_number) : url('/'),
             'panel' => $this->panelUrl($booking),
             'reason' => (string) $booking->cancellation_reason,
@@ -80,7 +80,7 @@ class StableBookingMessages
     private function paymentLine(StableBooking $booking): string
     {
         return match ($booking->payment_option) {
-            'at_stable' => __('stable_bookings.payment.at_stable', ['total' => SiteSetting::formatCurrency((float) $booking->order?->total, 3)]),
+            'at_stable' => __('stable_bookings.payment.at_stable', ['total' => SiteSetting::formatCurrency((float) $booking->order?->total)]),
             'free' => __('stable_bookings.payment.free'),
             'package' => __('stable_bookings.payment.package', ['reference' => (string) $booking->packagePurchase?->reference]),
             default => $booking->order?->isPaid()

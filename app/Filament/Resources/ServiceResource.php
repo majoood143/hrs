@@ -95,12 +95,12 @@ class ServiceResource extends Resource
                     ->toggleable(),
                 TextColumn::make('price')
                     ->label(__('admin_service.fields.price'))
-                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3))
+                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state))
                     ->summarize([
                         Average::make()
-                            ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state ?? 0, 3)),
+                            ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state ?? 0)),
                         Range::make()
-                            ->formatStateUsing(fn (array $state) => array_map(fn ($value) => SiteSetting::formatCurrencyHtml($value ?? 0, 3), $state)),
+                            ->formatStateUsing(fn (array $state) => array_map(fn ($value) => SiteSetting::formatCurrencyHtml($value ?? 0), $state)),
                     ])
                     ->sortable(),
                 IconColumn::make('is_active')

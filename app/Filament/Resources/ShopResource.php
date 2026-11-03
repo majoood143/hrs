@@ -155,11 +155,15 @@ class ShopResource extends Resource
                                         ->pluck(static::nameColumn(), 'id'))
                                     ->searchable()
                                     ->required(),
-                                TextInput::make('address')
-                                    ->label(__('admin_shop.fields.address'))
+                                TextInput::make('en_address')
+                                    ->label(__('admin_shop.fields.en_address'))
                                     ->maxLength(255)
-                                    ->hidden(fn (Get $get) => $get('is_online'))
-                                    ->columnSpanFull(),
+                                    ->hidden(fn (Get $get) => $get('is_online')),
+                                TextInput::make('ar_address')
+                                    ->label(__('admin_shop.fields.ar_address'))
+                                    ->maxLength(255)
+                                    ->extraInputAttributes(['dir' => 'rtl'])
+                                    ->hidden(fn (Get $get) => $get('is_online')),
                                 TextInput::make('map_link')
                                     ->label(__('admin_shop.fields.map_link'))
                                     ->url()

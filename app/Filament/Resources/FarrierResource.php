@@ -202,7 +202,7 @@ class FarrierResource extends Resource
                     ->sortable(),
                 TextColumn::make('price')
                     ->label(__('farriers.price'))
-                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3))
+                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state))
                     ->sortable(),
                 TextColumn::make('city.'.$name)
                     ->label(__('farriers.city'))

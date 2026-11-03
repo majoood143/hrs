@@ -1,7 +1,7 @@
 @php
     $field = 'mt-1 w-full rounded-xl border border-warm-200 bg-white px-4 py-2.5 text-sm text-warm-900 focus:border-warm-500 focus:outline-none';
     $label = 'block text-sm font-semibold text-warm-900';
-    $money = fn ($baisa) => \App\Models\SiteSetting::formatCurrencyHtml($baisa / 1000, 3);
+    $money = fn ($baisa) => \App\Models\SiteSetting::formatCurrencyHtml($baisa / 1000);
     $start = $slot->startsAt()->locale(app()->getLocale());
     $options = $settings->paymentOptions();
     $req = fn (string $name) => $settings->requiresRiderField($name);

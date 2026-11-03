@@ -37,7 +37,7 @@ class FormPaymentTab
                             ->label(__('admin_form_payment.service.label'))
                             ->helperText(__('admin_form_payment.service.helper'))
                             ->options(fn () => Service::query()->orderBy('name')->get()->mapWithKeys(fn (Service $service) => [
-                                $service->getKey() => $service->name.' · '.SiteSetting::formatCurrency($service->price, 3).($service->is_active ? '' : ' · '.__('admin_form_payment.service.inactive')),
+                                $service->getKey() => $service->name.' · '.SiteSetting::formatCurrency($service->price).($service->is_active ? '' : ' · '.__('admin_form_payment.service.inactive')),
                             ])->all())
                             ->placeholder(__('admin_form_payment.service.none'))
                             ->searchable()
@@ -55,10 +55,10 @@ class FormPaymentTab
                             return $quote->isFree()
                                 ? __('admin_form_payment.service.free')
                                 : __('admin_form_payment.service.quote', [
-                                    'price' => SiteSetting::formatCurrency($quote->price / 1000, 3),
-                                    'fee' => SiteSetting::formatCurrency($quote->fee / 1000, 3),
-                                    'vat' => SiteSetting::formatCurrency(($quote->vatOnPrice + $quote->vatOnFee) / 1000, 3),
-                                    'total' => SiteSetting::formatCurrency($quote->total() / 1000, 3),
+                                    'price' => SiteSetting::formatCurrency($quote->price / 1000),
+                                    'fee' => SiteSetting::formatCurrency($quote->fee / 1000),
+                                    'vat' => SiteSetting::formatCurrency(($quote->vatOnPrice + $quote->vatOnFee) / 1000),
+                                    'total' => SiteSetting::formatCurrency($quote->total() / 1000),
                                 ]);
                         })->visible($hasService),
                     ]),

@@ -1,6 +1,6 @@
 @php
     $selected = \Carbon\CarbonImmutable::parse($date)->locale(app()->getLocale());
-    $money = fn ($baisa) => \App\Models\SiteSetting::formatCurrencyHtml($baisa / 1000, 3);
+    $money = fn ($baisa) => \App\Models\SiteSetting::formatCurrencyHtml($baisa / 1000);
 @endphp
 
 <x-layouts.site :seo-title="$seoTitle" :seo-description="$seoDescription ?? null" :seo-image="$seoImage ?? null">
@@ -94,7 +94,7 @@
             <aside class="space-y-4">
                 <div class="card-warm p-5">
                     <p class="text-xs font-semibold uppercase tracking-wide text-warm-700">{{ __('stable_bookings.price') }}</p>
-                    <p class="mt-1 font-display text-2xl font-semibold text-warm-900">{!! \App\Models\SiteSetting::formatCurrencyHtml($offering->price, 3) !!}</p>
+                    <p class="mt-1 font-display text-2xl font-semibold text-warm-900">{!! \App\Models\SiteSetting::formatCurrencyHtml($offering->price) !!}</p>
                     <p class="text-sm text-warm-700">{{ __('stable_bookings.per_rider') }}</p>
 
                     @if($offering->max_riders > 1)
@@ -136,7 +136,7 @@
                                     <p class="font-semibold text-warm-900">{{ $package->name }}</p>
                                     <p class="text-sm text-warm-700">
                                         {{ trans_choice('stable_packages.sessions_count', $package->sessions, ['count' => $package->sessions]) }}
-                                        · {!! \App\Models\SiteSetting::formatCurrencyHtml($package->price, 3) !!}
+                                        · {!! \App\Models\SiteSetting::formatCurrencyHtml($package->price) !!}
                                     </p>
                                     @if($package->savingBaisa() > 0)
                                         <p class="text-xs font-semibold text-emerald-700">{{ __('stable_packages.saving', ['amount' => \App\Support\Money::format($package->savingBaisa())]) }}</p>

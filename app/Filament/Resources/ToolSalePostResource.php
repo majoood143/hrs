@@ -212,7 +212,7 @@ class ToolSalePostResource extends Resource
                     ->sortable(),
                 TextColumn::make('price')
                     ->label(__('tools-for-sale.price'))
-                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3))
+                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state))
                     ->description(fn (ToolSalePost $record): ?string => $record->price_negotiable ? __('tools-for-sale.price_negotiable') : null)
                     ->sortable(),
                 TextColumn::make('city.'.$name)

@@ -107,7 +107,7 @@ class StablePackageResource extends Resource
                 TextColumn::make('sessions')->label(__('stable_packages.fields.sessions'))->icon('heroicon-o-ticket'),
                 TextColumn::make('price')
                     ->label(__('stable_packages.fields.price'))
-                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3))
+                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state))
                     ->description(fn (StablePackage $record) => $record->savingBaisa() > 0 ? __('stable_packages.saving', ['amount' => Money::format($record->savingBaisa())]) : null),
                 TextColumn::make('validity_days')->label(__('stable_packages.fields.validity_days'))->suffix(' '.__('stable_packages.panel.days')),
                 TextColumn::make('sold_count')->label(__('stable_packages.panel.sold'))->description(fn (StablePackage $record) => __('stable_packages.panel.in_use', ['count' => $record->usable_count])),

@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use App\Filament\Resources\ServiceOrderResource;
 use App\Models\ServiceOrder;
+use App\Models\SiteSetting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -34,7 +35,7 @@ class ReviewerOrderMail extends Mailable
             'serviceName' => $this->order->serviceName(),
             'rows' => $this->order->submission?->formatted() ?? [],
             'adminUrl' => ServiceOrderResource::getUrl('view', ['record' => $this->order->getKey()]),
-            'total' => $this->order->currency.' '.number_format((float) $this->order->total, 3),
+            'total' => $this->order->currency.' '.SiteSetting::formatAmount((float) $this->order->total),
         ]);
     }
 }

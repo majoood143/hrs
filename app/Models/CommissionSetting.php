@@ -90,7 +90,7 @@ class CommissionSetting extends Model
     {
         return $this->commission_type === FeeType::Percentage
             ? rtrim(rtrim(number_format((float) $this->commission_value, 3), '0'), '.').'%'
-            : number_format((float) $this->commission_value, 3).' '.SiteSetting::currency()['code'];
+            : SiteSetting::formatAmount((float) $this->commission_value).' '.SiteSetting::currency()['code'];
     }
 
     public function getScopeNameAttribute(): string

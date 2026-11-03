@@ -47,7 +47,7 @@
                                         <div>
                                             <p class="font-semibold text-warm-900">{{ $offering->name }}</p>
                                             <p class="text-sm text-warm-700">
-                                                {!! \App\Models\SiteSetting::formatCurrencyHtml($offering->price, 3) !!} {{ __('stable_bookings.per_rider') }}
+                                                {!! \App\Models\SiteSetting::formatCurrencyHtml($offering->price) !!} {{ __('stable_bookings.per_rider') }}
                                                 · {{ trans_choice('stable_panel.units.minutes', $offering->duration_minutes, ['count' => $offering->duration_minutes]) }}
                                             </p>
                                         </div>

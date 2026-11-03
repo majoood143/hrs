@@ -168,7 +168,7 @@ class TransactionResource extends Resource
                     ->formatStateUsing(fn (?int $state): string => static::serviceOptions()[$state] ?? '—'),
                 TextColumn::make('amount')
                     ->label(static::label('amount'))
-                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3))
+                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state))
                     ->sortable(),
                 TextColumn::make('status')
                     ->label(static::label('status'))

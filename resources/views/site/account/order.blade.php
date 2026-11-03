@@ -26,7 +26,7 @@
                     <p class="mt-1 whitespace-pre-line">{{ $order->rejectionReason() }}</p>
                 @endif
                 @if($order->isPaid() && $order->refundableAmount() > 0)
-                    <p class="mt-2">{{ __('account.refund_due', ['amount' => \App\Models\SiteSetting::currency()['code'].' '.number_format($order->refundableAmount(), 3)]) }}</p>
+                    <p class="mt-2">{{ __('account.refund_due', ['amount' => \App\Models\SiteSetting::currency()['code'].' '.\App\Models\SiteSetting::formatAmount($order->refundableAmount())]) }}</p>
                 @endif
             </div>
         @endif
@@ -80,7 +80,7 @@
                 @foreach($order->refunds as $refund)
                     <li class="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
                         <span class="text-warm-700" dir="ltr">{{ $refund->created_at->format('Y-m-d') }}</span>
-                        <span class="font-semibold text-warm-900" dir="ltr">{{ $order->currency }} {{ number_format((float) $refund->amount, 3) }}</span>
+                        <span class="font-semibold text-warm-900" dir="ltr">{{ $order->currency }} {{ \App\Models\SiteSetting::formatAmount((float) $refund->amount) }}</span>
                     </li>
                 @endforeach
             </ul>

@@ -346,6 +346,19 @@
                             @endforeach
                         </ul>
                     @endif
+
+                    @if ($storeBadges = \App\Models\SiteSetting::appStoreBadges())
+                        <ul class="mt-5 flex flex-wrap items-center gap-3">
+                            @foreach ($storeBadges as $store)
+                                <li>
+                                    <a href="{{ $store['url'] }}" target="_blank" rel="noopener noreferrer">
+                                        <img src="{{ $store['image_url'] }}" alt="{{ $store['name'] }}"
+                                            class="h-10 w-auto" loading="lazy">
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
                 </div>
 
                 <div>

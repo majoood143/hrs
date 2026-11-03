@@ -176,7 +176,7 @@ class StableOfferingResource extends Resource
                     ->sortable(),
                 TextColumn::make('price')
                     ->label(__('stable_panel.fields.price_per_rider'))
-                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3))
+                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state))
                     ->sortable(),
                 TextColumn::make('duration_minutes')
                     ->label(__('stable_panel.fields.duration'))

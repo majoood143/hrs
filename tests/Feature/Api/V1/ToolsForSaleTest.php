@@ -36,6 +36,7 @@ class ToolsForSaleTest extends TestCase
             ->assertJsonPath('data.0.brand', 'Stübben')
             ->assertJsonPath('data.0.price', [
                 'amount' => '45.250',
+                'formatted' => '45.250',
                 'currency' => ['code' => 'OMR', 'symbol' => 'OMR', 'icon_url' => url('/storage/branding/rial.svg')],
             ])
             ->assertJsonPath('data.0.city.name', 'Seeb');

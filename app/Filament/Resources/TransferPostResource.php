@@ -218,7 +218,7 @@ class TransferPostResource extends Resource
                     ->sortable(),
                 TextColumn::make('price')
                     ->label(__('transportation.price'))
-                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3))
+                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state))
                     ->placeholder('—')
                     ->sortable(),
                 TextColumn::make('contact_number')

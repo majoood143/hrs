@@ -259,7 +259,7 @@ class Stable extends Model implements HasAvatar, HasName
 
         return $this->commission_type === FeeType::Percentage
             ? rtrim(rtrim(number_format((float) $this->commission_value, 3), '0'), '.').'%'
-            : SiteSetting::formatCurrency((float) $this->commission_value, 3);
+            : SiteSetting::formatCurrency((float) $this->commission_value);
     }
 
     public function getFilamentName(): string

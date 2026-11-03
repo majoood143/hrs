@@ -105,7 +105,7 @@ class ServiceFeeSetting extends Model
     {
         return $this->fee_type === FeeType::Percentage
             ? rtrim(rtrim(number_format((float) $this->fee_value, 3), '0'), '.').'%'
-            : number_format((float) $this->fee_value, 3).' '.SiteSetting::currency()['code'];
+            : SiteSetting::formatAmount((float) $this->fee_value).' '.SiteSetting::currency()['code'];
     }
 
     public function getScopeNameAttribute(): string

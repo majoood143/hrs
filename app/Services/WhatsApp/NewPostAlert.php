@@ -102,7 +102,7 @@ final class NewPostAlert
 
     private static function price(mixed $amount, bool $negotiable = false): string
     {
-        return __('whatsapp.fields.price', ['value' => SiteSetting::formatCurrency($amount ?? 0, 3)])
+        return __('whatsapp.fields.price', ['value' => SiteSetting::formatCurrency($amount ?? 0)])
             .($negotiable ? ' '.__('whatsapp.fields.negotiable') : '');
     }
 }

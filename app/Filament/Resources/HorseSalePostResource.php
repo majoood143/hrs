@@ -244,7 +244,7 @@ class HorseSalePostResource extends Resource
                     ->sortable(),
                 TextColumn::make('price')
                     ->label(__('horses-for-sale.price'))
-                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3))
+                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state))
                     ->description(fn (HorseSalePost $record): ?string => $record->price_negotiable ? __('horses-for-sale.price_negotiable') : null)
                     ->sortable(),
                 TextColumn::make('city.'.$name)

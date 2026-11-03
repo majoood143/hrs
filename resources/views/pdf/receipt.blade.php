@@ -2,7 +2,7 @@
     $align = $rtl ? 'right' : 'left';
     $opposite = $rtl ? 'left' : 'right';
     $code = $order->currency ?: 'OMR';
-    $money = fn ($amount) => $code.' '.number_format((float) $amount, 3);
+    $money = fn ($amount) => $code.' '.\App\Models\SiteSetting::formatAmount((float) $amount);
     $subtotal = (float) $order->price + (float) $order->fee_amount;
     $vat = (float) $order->vat_on_price + (float) $order->vat_on_fee;
     $rate = rtrim(rtrim(number_format((float) $order->vat_rate, 2), '0'), '.');

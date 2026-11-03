@@ -1,5 +1,5 @@
 @php
-    $money = fn ($baisa) => \App\Models\SiteSetting::formatCurrencyHtml($baisa / 1000, 3);
+    $money = fn ($baisa) => \App\Models\SiteSetting::formatCurrencyHtml($baisa / 1000);
 @endphp
 <x-layouts.site :seo-title="$seoTitle" :noindex="true">
     <div class="mx-auto max-w-2xl px-6 py-14">

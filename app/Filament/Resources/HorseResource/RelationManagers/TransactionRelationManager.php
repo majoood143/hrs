@@ -60,7 +60,7 @@ class TransactionRelationManager extends RelationManager
                 TextColumn::make('description')->label($label('description'))->limit(40),
                 TextColumn::make('amount')
                     ->label($label('amount'))
-                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3)),
+                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state)),
                 TextColumn::make('user.name')->label($label('created_by')),
                 TextColumn::make('created_at')->label($label('created_at'))->dateTime(),
             ])

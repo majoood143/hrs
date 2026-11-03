@@ -33,7 +33,7 @@ class DirectoryTest extends TestCase
             ->assertOk()
             ->assertJsonCount(2, 'data')
             ->assertJsonPath('data.0.name', 'Salim')
-            ->assertJsonPath('data.1.price', ['amount' => '15.000', 'currency' => ['code' => 'OMR', 'symbol' => 'OMR', 'icon_url' => null]])
+            ->assertJsonPath('data.1.price', ['amount' => '15.000', 'formatted' => '15.000', 'currency' => ['code' => 'OMR', 'symbol' => 'OMR', 'icon_url' => null]])
             ->assertJsonPath('data.1.specialty', 'Corrective shoeing');
 
         $this->assertSame([$cheap], $this->getJson('/api/v1/farriers?specialty=corrective')->json('data.*.id'));
@@ -136,12 +136,14 @@ class DirectoryTest extends TestCase
             'opening_hours' => json_encode(['mon' => ['closed' => false, 'opens_at' => '09:00', 'closes_at' => '17:00'], 'tue' => ['closed' => true]]),
             'is_online' => true, 'delivery_scope' => 'local', 'payment_options' => json_encode(['cash', 'card']),
             'en_description' => 'Saddles and bridles.', 'ar_description' => 'سروج ولجام.',
+            'en_address' => 'Al Khuwair', 'ar_address' => 'الخوير',
         ]);
 
         $response = $this->getJson('/api/v1/shops/tack', ['Accept-Language' => 'ar'])
             ->assertOk()
             ->assertJsonPath('data.name', 'متجر العدة')
             ->assertJsonPath('data.description', 'سروج ولجام.')
+            ->assertJsonPath('data.address', 'الخوير')
             ->assertJsonPath('data.region.name', 'مسقط')
             ->assertJsonPath('data.gallery_urls', [url('/storage/shops/a.jpg')])
             ->assertJsonPath('data.opening_hours.0', ['day' => 'mon', 'label' => __('shops.days.mon', [], 'ar'), 'closed' => false, 'opens_at' => '09:00', 'closes_at' => '17:00'])
@@ -155,6 +157,8 @@ class DirectoryTest extends TestCase
             ->assertJsonPath('data.share_url', route('shops.show', 'tack'));
 
         $this->assertCount(7, $response->json('data.opening_hours'));
+
+        $this->getJson('/api/v1/shops/tack', ['Accept-Language' => 'en'])->assertJsonPath('data.address', 'Al Khuwair');
     }
 
     public function test_stables_show_only_approved_ones_with_their_rating_and_visible_reviews(): void

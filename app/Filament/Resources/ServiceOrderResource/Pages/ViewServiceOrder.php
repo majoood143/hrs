@@ -216,7 +216,7 @@ class ViewServiceOrder extends ViewRecord
                     ->icon('heroicon-o-arrow-uturn-left')
                     ->color('warning')
                     ->modalHeading(__('admin_service_order.actions.refund'))
-                    ->modalDescription(fn (ServiceOrder $record): string => __('admin_service_order.actions.refund_desc', ['max' => SiteSetting::formatCurrency($record->refundableAmount(), 3)]))
+                    ->modalDescription(fn (ServiceOrder $record): string => __('admin_service_order.actions.refund_desc', ['max' => SiteSetting::formatCurrency($record->refundableAmount())]))
                     ->visible(fn (ServiceOrder $record): bool => $record->isPaid() && $record->refundableAmount() > 0)
                     ->schema(fn (ServiceOrder $record): array => [
                         TextInput::make('amount')
@@ -315,7 +315,7 @@ class ViewServiceOrder extends ViewRecord
 
     public function infolist(Schema $schema): Schema
     {
-        $money = fn ($state) => SiteSetting::formatCurrency($state, 3);
+        $money = fn ($state) => SiteSetting::formatCurrency($state);
 
         return $schema
             ->components([
@@ -340,7 +340,7 @@ class ViewServiceOrder extends ViewRecord
                             ->badge()
                             ->formatStateUsing(fn (PaymentStatus $state) => $state->label())
                             ->color(fn (PaymentStatus $state) => $state->color()),
-                        Text::make(fn (ServiceOrder $record): string => __('admin_service_order.fields.refund_due', ['amount' => SiteSetting::formatCurrency($record->refundableAmount(), 3)]))
+                        Text::make(fn (ServiceOrder $record): string => __('admin_service_order.fields.refund_due', ['amount' => SiteSetting::formatCurrency($record->refundableAmount())]))
                             ->color('danger')
                             ->weight('bold')
                             ->columnSpanFull()

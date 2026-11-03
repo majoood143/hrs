@@ -115,7 +115,7 @@ class StableBookingResource extends Resource
                             ->state(fn (StableBooking $record) => static::paymentLabel($record)),
                         TextEntry::make('order.total')
                             ->label(__('stable_panel.bookings.total'))
-                            ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3)),
+                            ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state)),
                         TextEntry::make('cancellation_reason')
                             ->label(__('stable_bookings.fields.reason'))
                             ->visible(fn (StableBooking $record) => $record->status === StableBookingStatus::Cancelled)

@@ -64,7 +64,12 @@ trait PreparesMobileApiDirectory
                 $table->foreignId('country_id')->nullable();
                 $table->foreignId('region_id')->nullable();
                 $table->foreignId('city_id')->nullable();
-                $table->string('address')->nullable();
+                if ($places === 'shops') {
+                    $table->string('en_address')->nullable();
+                    $table->string('ar_address')->nullable();
+                } else {
+                    $table->string('address')->nullable();
+                }
                 $table->string('map_link')->nullable();
                 $table->string('phone')->nullable();
                 $table->string('email')->nullable();

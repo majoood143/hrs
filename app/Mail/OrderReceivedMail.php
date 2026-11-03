@@ -38,7 +38,7 @@ class OrderReceivedMail extends Mailable
             'serviceName' => $this->order->serviceName(),
             'rtl' => app()->getLocale() === 'ar',
             'url' => route('orders.show', $this->order->order_number),
-            'money' => fn ($amount) => $this->order->currency.' '.number_format((float) $amount, 3),
+            'money' => fn ($amount) => $this->order->currency.' '.SiteSetting::formatAmount((float) $amount),
         ]);
     }
 

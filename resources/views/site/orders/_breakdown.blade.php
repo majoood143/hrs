@@ -1,5 +1,5 @@
 @php
-    $money = fn ($amount) => \App\Models\SiteSetting::currency()['code'].' '.number_format((float) $amount, 3);
+    $money = fn ($amount) => \App\Models\SiteSetting::currency()['code'].' '.\App\Models\SiteSetting::formatAmount((float) $amount);
     $vat = (float) $order->vat_on_price + (float) $order->vat_on_fee;
 @endphp
 

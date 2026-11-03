@@ -68,6 +68,9 @@ class GeneralSettings extends Page implements HasForms
             'currency_code' => SiteSetting::get('currency_code', 'OMR'),
             'currency_symbol' => SiteSetting::get('currency_symbol', 'OMR'),
             'currency_icon' => SiteSetting::get('currency_icon'),
+            'currency_decimals' => (string) SiteSetting::get('currency_decimals', 3),
+            'thousands_separator' => SiteSetting::get('thousands_separator', 'comma'),
+            'decimal_separator' => SiteSetting::get('decimal_separator', 'dot'),
 
             'contact_phone' => SiteSetting::get('contact_phone', ''),
             'contact_email' => SiteSetting::get('contact_email', ''),
@@ -127,6 +130,12 @@ class GeneralSettings extends Page implements HasForms
             'social_youtube_url' => SiteSetting::get('social_youtube_url', ''),
             'social_tiktok_url' => SiteSetting::get('social_tiktok_url', ''),
             'social_whatsapp_url' => SiteSetting::get('social_whatsapp_url', ''),
+            'store_app_store_url' => SiteSetting::get('store_app_store_url', ''),
+            'store_app_store_badge' => SiteSetting::get('store_app_store_badge'),
+            'store_play_store_url' => SiteSetting::get('store_play_store_url', ''),
+            'store_play_store_badge' => SiteSetting::get('store_play_store_badge'),
+            'store_huawei_url' => SiteSetting::get('store_huawei_url', ''),
+            'store_huawei_badge' => SiteSetting::get('store_huawei_badge'),
 
             'seo_meta_description' => SiteSetting::get('seo_meta_description', ''),
             'seo_og_image' => SiteSetting::get('seo_og_image'),
@@ -241,12 +250,42 @@ class GeneralSettings extends Page implements HasForms
                                                 ->required()
                                                 ->live()
                                                 ->native(false)
-                                                ->afterStateUpdated(fn ($state, $set) => $set('currency_symbol', $state)),
+                                                ->afterStateUpdated(function ($state, $set) {
+                                                    $set('currency_symbol', $state);
+                                                    // Rials and dinars have 1000 fils/baisa; the rest 100 cents.
+                                                    $set('currency_decimals', in_array($state, ['OMR', 'KWD', 'BHD'], true) ? '3' : '2');
+                                                }),
 
                                             TextInput::make('currency_symbol')
                                                 ->label(__('general_settings.fields.currency_symbol'))
                                                 ->required()
                                                 ->maxLength(10),
+                                        ]),
+
+                                        Grid::make(3)->schema([
+                                            Select::make('currency_decimals')
+                                                ->label(__('general_settings.fields.currency_decimals'))
+                                                ->options(['0' => '0 (2,300)', '1' => '1 (2,300.0)', '2' => '2 (2,300.00)', '3' => '3 (2,300.000)'])
+                                                ->required()
+                                                ->native(false),
+
+                                            Select::make('thousands_separator')
+                                                ->label(__('general_settings.fields.thousands_separator'))
+                                                ->options($separators = [
+                                                    'comma' => __('general_settings.fields.separator_comma'),
+                                                    'dot' => __('general_settings.fields.separator_dot'),
+                                                    'space' => __('general_settings.fields.separator_space'),
+                                                    'none' => __('general_settings.fields.separator_none'),
+                                                ])
+                                                ->different('decimal_separator')
+                                                ->required()
+                                                ->native(false),
+
+                                            Select::make('decimal_separator')
+                                                ->label(__('general_settings.fields.decimal_separator'))
+                                                ->options(array_intersect_key($separators, ['dot' => 1, 'comma' => 1]))
+                                                ->required()
+                                                ->native(false),
                                         ]),
 
                                         FileUpload::make('currency_icon')
@@ -624,6 +663,54 @@ class GeneralSettings extends Page implements HasForms
                                                 ->maxLength(255),
                                         ]),
                                     ]),
+
+                                Section::make(__('general_settings.sections.app_stores'))
+                                    ->description(__('general_settings.sections.app_stores_desc'))
+                                    ->schema([
+                                        Grid::make(3)->schema([
+                                            Grid::make(1)->schema([
+                                                TextInput::make('store_app_store_url')
+                                                    ->label(__('general_settings.fields.store_app_store_url'))
+                                                    ->url()
+                                                    ->maxLength(255),
+
+                                                FileUpload::make('store_app_store_badge')
+                                                    ->label(__('general_settings.fields.store_badge'))
+                                                    ->image()
+                                                    ->disk('public')
+                                                    ->directory('branding')
+                                                    ->visibility('public'),
+                                            ]),
+
+                                            Grid::make(1)->schema([
+                                                TextInput::make('store_play_store_url')
+                                                    ->label(__('general_settings.fields.store_play_store_url'))
+                                                    ->url()
+                                                    ->maxLength(255),
+
+                                                FileUpload::make('store_play_store_badge')
+                                                    ->label(__('general_settings.fields.store_badge'))
+                                                    ->image()
+                                                    ->disk('public')
+                                                    ->directory('branding')
+                                                    ->visibility('public'),
+                                            ]),
+
+                                            Grid::make(1)->schema([
+                                                TextInput::make('store_huawei_url')
+                                                    ->label(__('general_settings.fields.store_huawei_url'))
+                                                    ->url()
+                                                    ->maxLength(255),
+
+                                                FileUpload::make('store_huawei_badge')
+                                                    ->label(__('general_settings.fields.store_badge'))
+                                                    ->image()
+                                                    ->disk('public')
+                                                    ->directory('branding')
+                                                    ->visibility('public'),
+                                            ]),
+                                        ]),
+                                    ]),
                             ]),
 
                         Tab::make(__('general_settings.tabs.success_page'))
@@ -853,6 +940,9 @@ class GeneralSettings extends Page implements HasForms
             'currency_code' => 'text',
             'currency_symbol' => 'text',
             'currency_icon' => 'file',
+            'currency_decimals' => 'number',
+            'thousands_separator' => 'text',
+            'decimal_separator' => 'text',
             'site_logo' => 'file',
             'app_logo' => 'file',
             'favicon' => 'file',
@@ -883,6 +973,12 @@ class GeneralSettings extends Page implements HasForms
             'social_youtube_url' => 'text',
             'social_tiktok_url' => 'text',
             'social_whatsapp_url' => 'text',
+            'store_app_store_url' => 'text',
+            'store_app_store_badge' => 'file',
+            'store_play_store_url' => 'text',
+            'store_play_store_badge' => 'file',
+            'store_huawei_url' => 'text',
+            'store_huawei_badge' => 'file',
             'seo_meta_description' => 'text',
             'seo_og_image' => 'file',
             'google_tag_manager_id' => 'text',

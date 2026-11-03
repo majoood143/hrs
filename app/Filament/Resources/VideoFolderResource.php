@@ -170,7 +170,7 @@ class VideoFolderResource extends Resource
                     ->label(__('video_folders.navigation.subfolders'))
                     ->counts('children'),
             ])
-            ->defaultSort('order')
+            ->defaultSort('created_at', 'desc')
             ->modifyQueryUsing(fn (Builder $query) => $query->with('parent'))
             ->filters([
                 SelectFilter::make('parent_id')

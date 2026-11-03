@@ -44,7 +44,7 @@ class OrderRefundService
             $refundable = $this->refundable($locked);
 
             if ($baisa > $refundable) {
-                throw new RefundException(__('admin_service_order.refund.too_much', ['max' => SiteSetting::currency()['code'].' '.number_format($refundable / 1000, 3)]));
+                throw new RefundException(__('admin_service_order.refund.too_much', ['max' => SiteSetting::currency()['code'].' '.SiteSetting::formatAmount($refundable / 1000)]));
             }
 
             $refund = $locked->refunds()->create([

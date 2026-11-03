@@ -47,7 +47,8 @@ class Shop extends Model
         'country_id',
         'region_id',
         'city_id',
-        'address',
+        'en_address',
+        'ar_address',
         'map_link',
         'phone',
         'website_url',
@@ -149,6 +150,12 @@ class Shop extends Model
     public function getNameAttribute(): string
     {
         return app()->getLocale() === 'ar' ? $this->ar_name : $this->en_name;
+    }
+
+    /** Falls back to the English address while the Arabic one is empty. */
+    public function getAddressAttribute(): ?string
+    {
+        return app()->getLocale() === 'ar' ? ($this->ar_address ?: $this->en_address) : $this->en_address;
     }
 
     public function getDescriptionAttribute(): ?string

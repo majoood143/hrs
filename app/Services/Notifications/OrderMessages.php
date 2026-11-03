@@ -20,7 +20,7 @@ class OrderMessages
         ];
 
         $refund = $order->refunds()->reorder()->latest('id')->first();
-        $data['amount'] = $order->currency.' '.number_format((float) ($refund?->amount ?? 0), 3);
+        $data['amount'] = $order->currency.' '.SiteSetting::formatAmount((float) ($refund?->amount ?? 0));
 
         return match (true) {
             $type === OrderNotifier::COMPLETED => NotificationText::get('sms.completed', $data),

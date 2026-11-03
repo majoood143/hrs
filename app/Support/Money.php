@@ -7,10 +7,10 @@ use Illuminate\Support\HtmlString;
 
 class Money
 {
-    /** 11025 baisa as "OMR 11.025" (the site's currency code, three decimals). */
+    /** 11025 baisa as "OMR 11.025" (the site's currency code, General Settings number format). */
     public static function format(int $baisa, ?string $currency = null): string
     {
-        return ($currency ?? SiteSetting::currency()['code']).' '.number_format($baisa / 1000, 3);
+        return ($currency ?? SiteSetting::currency()['code']).' '.SiteSetting::formatAmount($baisa / 1000);
     }
 
     /**
@@ -23,7 +23,7 @@ class Money
     {
         $site = SiteSetting::currency();
         $code = $currency ?? $site['code'];
-        $amount = number_format($baisa / 1000, 3);
+        $amount = SiteSetting::formatAmount($baisa / 1000);
 
         if ($code === $site['code'] && $site['icon_url']) {
             return new HtmlString(
@@ -44,7 +44,7 @@ class Money
      */
     public static function formatPdfHtml(int $baisa, ?array $icon, ?string $currency = null): HtmlString
     {
-        $amount = number_format($baisa / 1000, 3);
+        $amount = SiteSetting::formatAmount($baisa / 1000);
 
         if ($icon) {
             return new HtmlString(

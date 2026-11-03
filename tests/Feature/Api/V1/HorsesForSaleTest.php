@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\V1;
 
 use App\Models\HorseSalePost;
+use App\Models\SiteSetting;
 use Illuminate\Support\Facades\DB;
 use Tests\Concerns\PreparesMobileApi;
 use Tests\TestCase;
@@ -47,6 +48,7 @@ class HorsesForSaleTest extends TestCase
             ->assertJsonPath('data.0.age_years', 3)
             ->assertJsonPath('data.0.price', [
                 'amount' => '1250.500',
+                'formatted' => '1,250.500',
                 'currency' => ['code' => 'OMR', 'symbol' => 'ر.ع.', 'icon_url' => null],
             ])
             ->assertJsonPath('data.0.price_negotiable', true)
@@ -55,6 +57,21 @@ class HorsesForSaleTest extends TestCase
             ->assertJsonPath('meta.total', 2)
             ->assertJsonPath('meta.per_page', 20)
             ->assertJsonStructure(['data', 'links' => ['first', 'last', 'prev', 'next'], 'meta' => ['current_page', 'last_page']]);
+    }
+
+    public function test_prices_are_written_the_way_general_settings_says(): void
+    {
+        $this->seedApiSettings(['currency_code' => 'EUR', 'currency_symbol' => '€', 'currency_decimals' => 2, 'thousands_separator' => 'dot', 'decimal_separator' => 'comma']);
+        $this->horse(['price' => '1250500.5']);
+
+        $this->getJson('/api/v1/horses-for-sale')
+            ->assertOk()
+            ->assertJsonPath('data.0.price.amount', '1250500.500')
+            ->assertJsonPath('data.0.price.formatted', '1.250.500,50');
+        $this->assertSame('€ 2.300,00', SiteSetting::formatCurrency(2300));
+
+        $this->seedApiSettings(['currency_decimals' => 0, 'thousands_separator' => 'space']);
+        $this->assertSame('1 250 501', SiteSetting::formatAmount('1250500.5'));
     }
 
     public function test_the_list_filters_like_the_website(): void

@@ -111,6 +111,28 @@ class SiteSetting extends Model
     }
 
     /**
+     * Store badges for the footer: only stores with both a link and a badge image.
+     *
+     * @return list<array{name: string, url: string, image_url: string}>
+     */
+    public static function appStoreBadges(): array
+    {
+        $stores = ['app_store' => 'App Store', 'play_store' => 'Google Play', 'huawei' => 'AppGallery'];
+        $badges = [];
+
+        foreach ($stores as $key => $name) {
+            $url = static::get("store_{$key}_url");
+            $badge = static::get("store_{$key}_badge");
+
+            if ($url && $badge) {
+                $badges[] = ['name' => $name, 'url' => $url, 'image_url' => Storage::disk('public')->url($badge)];
+            }
+        }
+
+        return $badges;
+    }
+
+    /**
      * Configured currency, with sane fallbacks so every consumer (Filament
      * resources, blade views, JS) reads from a single, already-defaulted place.
      *
@@ -128,9 +150,25 @@ class SiteSetting extends Model
         ];
     }
 
-    public static function formatCurrency(float|int|string $amount, int $decimals = 2): string
+    private const SEPARATORS = ['dot' => '.', 'comma' => ',', 'space' => ' ', 'none' => ''];
+
+    /**
+     * An amount for people to read, in General Settings' number format (decimal places, thousands
+     * and decimal separators), e.g. "2,300.000" or "2.300,00". Never for gateways or spreadsheets.
+     */
+    public static function formatAmount(float|int|string|null $amount): string
     {
-        return static::currency()['symbol'].' '.number_format((float) $amount, $decimals);
+        return number_format(
+            (float) $amount,
+            max(0, min(3, (int) static::get('currency_decimals', 3))),
+            self::SEPARATORS[static::get('decimal_separator', 'dot')] ?? '.',
+            self::SEPARATORS[static::get('thousands_separator', 'comma')] ?? ',',
+        );
+    }
+
+    public static function formatCurrency(float|int|string|null $amount): string
+    {
+        return static::currency()['symbol'].' '.static::formatAmount($amount);
     }
 
     /**
@@ -138,9 +176,9 @@ class SiteSetting extends Model
      * instead of the symbol text, when one is uploaded. Returned as an HtmlString so Blade (`{{ }}`)
      * and Filament (Stat/TextColumn) render it unescaped instead of printing the raw markup.
      */
-    public static function formatCurrencyHtml(float|int|string $amount, int $decimals = 2): HtmlString
+    public static function formatCurrencyHtml(float|int|string|null $amount): HtmlString
     {
-        return new HtmlString(static::currencyHtml()->toHtml().' '.e(number_format((float) $amount, $decimals)));
+        return new HtmlString(static::currencyHtml()->toHtml().' '.e(static::formatAmount($amount)));
     }
 
     /**

@@ -130,7 +130,7 @@ class ServiceFeeSettingResource extends Resource
                 TextColumn::make('formatted_value')
                     ->label(__('admin_service_fee_setting.columns.rate'))
                     ->formatStateUsing(fn ($state, ServiceFeeSetting $record) => $record->fee_type === FeeType::Fixed
-                        ? SiteSetting::formatCurrencyHtml($record->fee_value, 3)
+                        ? SiteSetting::formatCurrencyHtml($record->fee_value)
                         : $state)
                     ->badge(),
                 TextColumn::make('effective_from')

@@ -38,7 +38,7 @@
         @if($booking->payment_option === 'at_stable' && $booking->isActive())
             <p class="mt-4 flex gap-2 rounded-xl bg-sky-50 px-4 py-3 text-sm text-sky-900">
                 <x-heroicon-o-building-storefront class="h-5 w-5 shrink-0" aria-hidden="true" />
-                {{ __('stable_bookings.card.pay_at_stable', ['total' => \App\Models\SiteSetting::currency()['code'].' '.number_format((float) $order->total, 3)]) }}
+                {{ __('stable_bookings.card.pay_at_stable', ['total' => \App\Models\SiteSetting::currency()['code'].' '.\App\Models\SiteSetting::formatAmount((float) $order->total)]) }}
             </p>
         @endif
 

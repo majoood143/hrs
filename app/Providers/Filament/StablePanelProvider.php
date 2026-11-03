@@ -12,6 +12,7 @@ use App\Http\Middleware\LogAdminStableAccess;
 use App\Http\Middleware\SetLocale;
 use App\Models\SiteSetting;
 use App\Models\Stable;
+use Filament\FontProviders\GoogleFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -57,9 +58,14 @@ class StablePanelProvider extends PanelProvider
             ->brandName(fn () => SiteSetting::siteName())
             ->brandLogo(fn () => SiteSetting::appLogoUrl())
             ->favicon(fn () => SiteSetting::faviconUrl())
-            ->colors([
-                'primary' => Color::Amber,
-            ])
+            // General Settings → Branding, like the website: primary colour, body font, heading font
+            ->colors(fn () => ['primary' => Color::hex(SiteSetting::branding()['primary'])])
+            ->font(
+                fn () => config('fonts.'.SiteSetting::branding()['body_font'].'.label'),
+                url: fn () => 'https://fonts.googleapis.com/css2?family='.config('fonts.'.SiteSetting::branding()['heading_font'].'.google')
+                    .'&family='.config('fonts.'.SiteSetting::branding()['body_font'].'.google').'&display=swap',
+                provider: GoogleFontProvider::class,
+            )
             ->sidebarCollapsibleOnDesktop()
             ->discoverResources(in: app_path('Filament/Stable/Resources'), for: 'App\\Filament\\Stable\\Resources')
             ->discoverPages(in: app_path('Filament/Stable/Pages'), for: 'App\\Filament\\Stable\\Pages')
@@ -90,6 +96,11 @@ class StablePanelProvider extends PanelProvider
             ->plugins([
                 FilamentCaptcha::make(),
             ])
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn (): string => '<style>.fi-simple-header-heading,.fi-header-heading{font-family:\''
+                    .e(config('fonts.'.SiteSetting::branding()['heading_font'].'.label')).'\',var(--font-family)}</style>',
+            )
             ->renderHook(
                 PanelsRenderHook::BODY_START,
                 fn (): string => view('filament.stable.admin-banner')->render(),

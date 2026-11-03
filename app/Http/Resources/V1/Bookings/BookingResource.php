@@ -95,7 +95,7 @@ class BookingResource extends JsonResource
     {
         $order = $booking->order;
         $currency = SiteSetting::currency();
-        $total = trim(($currency['code'] ?? '').' '.number_format((float) $order?->total, 3));
+        $total = trim(($currency['code'] ?? '').' '.SiteSetting::formatAmount((float) $order?->total));
 
         return match (true) {
             $booking->payment_option === 'package' => __('stable_bookings.payment.package', ['reference' => (string) $booking->packagePurchase?->reference]),

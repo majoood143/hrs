@@ -41,7 +41,7 @@ class OfferingsRelationManager extends RelationManager
                     ->description(fn (StableOffering $record) => $record->type?->label()),
                 TextColumn::make('price')
                     ->label(__('admin_stable.offerings.price'))
-                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state, 3)),
+                    ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state)),
                 TextColumn::make('duration_minutes')
                     ->label(__('admin_stable.offerings.duration'))
                     ->suffix(' '.__('stable_panel.units.min')),

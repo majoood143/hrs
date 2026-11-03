@@ -29,7 +29,7 @@
                                 <p class="text-sm text-warm-700">{{ $order->serviceName() }} · <span dir="ltr">{{ $order->created_at->format('Y-m-d') }}</span></p>
                             </div>
                             <div class="text-end">
-                                <p class="font-semibold text-warm-900" dir="ltr">{{ \App\Models\SiteSetting::currency()['code'] }} {{ number_format((float) $order->total, 3) }}</p>
+                                <p class="font-semibold text-warm-900" dir="ltr">{{ \App\Models\SiteSetting::currency()['code'] }} {{ \App\Models\SiteSetting::formatAmount((float) $order->total) }}</p>
                                 <p class="text-xs font-semibold uppercase tracking-wide text-warm-700">{{ $order->status->label() }} · {{ $order->payment_status->label() }}</p>
                             </div>
                         </a>
