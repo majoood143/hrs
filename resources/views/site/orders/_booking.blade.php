@@ -57,6 +57,12 @@
         @endif
 
         <div class="mt-5 flex flex-wrap items-center gap-3">
+            @if($full && ($ticketUrl = app(\App\Services\Stables\BookingTicketPdf::class)->url($booking)))
+                <a href="{{ $ticketUrl }}" target="_blank" rel="noopener" class="btn-warm !py-2 text-sm">
+                    <x-heroicon-o-qr-code class="h-5 w-5" aria-hidden="true" />{{ __('booking_ticket.download') }}
+                </a>
+            @endif
+
             @if($booking->stable?->map_link && $booking->isActive())
                 <a href="{{ $booking->stable->map_link }}" target="_blank" rel="noopener" class="btn-warm-outline !py-2 text-sm">
                     <x-heroicon-o-map-pin class="h-5 w-5" aria-hidden="true" />{{ __('stable_bookings.directions') }}

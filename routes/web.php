@@ -6,6 +6,7 @@ use App\Http\Controllers\Site\AccountOrderController;
 use App\Http\Controllers\Site\AccountPackageController;
 use App\Http\Controllers\Site\AdClickController;
 use App\Http\Controllers\Site\AppLinksController;
+use App\Http\Controllers\Site\BookingTicketController;
 use App\Http\Controllers\Site\CenterController;
 use App\Http\Controllers\Site\ClinicController;
 use App\Http\Controllers\Site\EventController;
@@ -147,11 +148,15 @@ Route::prefix('payment')->name('payment.')->group(function () {
 // more segments, so none is shadowed by the /{slug} CMS page route below (and "bookings" stays
 // usable as a CMS slug for a landing page).
 Route::prefix('bookings')->name('bookings.')->group(function () {
+    Route::get('ticket/{reference}', [BookingTicketController::class, 'download'])->middleware(['signed', 'throttle:30,1'])->name('ticket');
     Route::get('search', [StableBookingController::class, 'search'])->middleware('throttle:120,1')->name('search');
     Route::get('slots/{slot}', [StableBookingController::class, 'create'])->whereNumber('slot')->name('create');
     Route::post('slots/{slot}', [StableBookingController::class, 'store'])->whereNumber('slot')->middleware('throttle:10,1')->name('store');
     Route::get('{stable}/{offering}', [StableBookingController::class, 'offering'])->whereNumber('offering')->name('offering');
 });
+
+// A booking ticket's QR code: the stable's staff land on its check-in, anyone else on a plain page.
+Route::get('/check-in/{reference}', [BookingTicketController::class, 'checkIn'])->middleware('throttle:60,1')->name('bookings.check-in');
 
 // Customers sign in with their phone and an SMS code. There is deliberately no single-segment
 // /account route: the /{slug} CMS page route below would compete with it, so every path has two segments.

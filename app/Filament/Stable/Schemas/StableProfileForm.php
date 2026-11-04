@@ -34,10 +34,12 @@ final class StableProfileForm
         return [
             TextInput::make('en_name')
                 ->label(__('stable_panel.fields.en_name'))
+                ->placeholder(__('stable_panel.placeholders.en_name'))
                 ->required()
                 ->maxLength(255),
             TextInput::make('ar_name')
                 ->label(__('stable_panel.fields.ar_name'))
+                ->placeholder(__('stable_panel.placeholders.ar_name'))
                 ->required()
                 ->maxLength(255)
                 ->extraInputAttributes(['dir' => 'rtl']),
@@ -50,10 +52,12 @@ final class StableProfileForm
         return [
             TextInput::make('phone')
                 ->label(__('stable_panel.fields.stable_phone'))
+                ->placeholder(__('stable_panel.placeholders.stable_phone'))
                 ->tel()
                 ->maxLength(32),
             TextInput::make('email')
                 ->label(__('stable_panel.fields.stable_email'))
+                ->placeholder(__('stable_panel.placeholders.stable_email'))
                 ->email()
                 ->maxLength(255),
         ];
@@ -65,6 +69,7 @@ final class StableProfileForm
         return [
             Select::make('country_id')
                 ->label(__('stable_panel.fields.country'))
+                ->placeholder(__('stable_panel.placeholders.country'))
                 ->options(fn () => Country::query()->public()->orderBy(self::nameColumn())->pluck(self::nameColumn(), 'id'))
                 ->default(fn () => Country::query()->public()->where('en_name', 'Oman')->value('id'))
                 ->searchable()
@@ -76,6 +81,7 @@ final class StableProfileForm
                 ->required(),
             Select::make('region_id')
                 ->label(__('stable_panel.fields.region'))
+                ->placeholder(__('stable_panel.placeholders.region'))
                 ->options(fn (Get $get) => Region::query()->where('country_id', $get('country_id'))->orderBy(self::nameColumn())->pluck(self::nameColumn(), 'id'))
                 ->searchable()
                 ->live()
@@ -83,14 +89,17 @@ final class StableProfileForm
                 ->required(),
             Select::make('city_id')
                 ->label(__('stable_panel.fields.city'))
+                ->placeholder(__('stable_panel.placeholders.city'))
                 ->options(fn (Get $get) => City::query()->where('region_id', $get('region_id'))->orderBy(self::nameColumn())->pluck(self::nameColumn(), 'id'))
                 ->searchable()
                 ->required(),
             TextInput::make('address')
                 ->label(__('stable_panel.fields.address'))
+                ->placeholder(__('stable_panel.placeholders.address'))
                 ->maxLength(255),
             TextInput::make('map_link')
                 ->label(__('stable_panel.fields.map_link'))
+                ->placeholder(__('stable_panel.placeholders.map_link'))
                 ->url()
                 ->rule('url:http,https')
                 ->maxLength(255),
@@ -100,7 +109,12 @@ final class StableProfileForm
     /** @return array<int, mixed> */
     public static function description(): array
     {
-        return PlaceFormFields::descriptions(__('stable_panel.fields.en_description'), __('stable_panel.fields.ar_description'));
+        [$en, $ar] = PlaceFormFields::descriptions(__('stable_panel.fields.en_description'), __('stable_panel.fields.ar_description'));
+
+        return [
+            $en->placeholder(__('stable_panel.placeholders.en_description')),
+            $ar->placeholder(__('stable_panel.placeholders.ar_description')),
+        ];
     }
 
     /** @return array<int, mixed> */
@@ -109,6 +123,7 @@ final class StableProfileForm
         return [
             Select::make('services')
                 ->label(__('stable_panel.fields.amenities'))
+                ->placeholder(__('stable_panel.placeholders.amenities'))
                 ->relationship('services', self::nameColumn())
                 ->getOptionLabelFromRecordUsing(fn (StableService $record) => $record->name)
                 ->multiple()

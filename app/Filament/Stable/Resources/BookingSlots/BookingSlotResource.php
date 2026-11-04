@@ -67,6 +67,7 @@ class BookingSlotResource extends Resource
             ->components([
                 Select::make('stable_offering_id')
                     ->label(__('stable_panel.fields.offering'))
+                    ->placeholder(__('stable_panel.placeholders.offering'))
                     ->relationship('offering', 'en_name')
                     ->getOptionLabelFromRecordUsing(fn (StableOffering $record) => $record->name)
                     ->required()
@@ -86,6 +87,7 @@ class BookingSlotResource extends Resource
                     ->disabledOn('edit'),
                 TextInput::make('capacity')
                     ->label(__('stable_panel.fields.capacity'))
+                    ->placeholder(__('stable_panel.placeholders.capacity'))
                     ->integer()
                     ->required()
                     ->minValue(fn (?BookingSlot $record) => max(1, $record?->bookedRiders() ?? 0))
@@ -95,6 +97,7 @@ class BookingSlotResource extends Resource
                         : null),
                 Select::make('trainer_id')
                     ->label(__('stable_panel.fields.trainer'))
+                    ->placeholder(__('stable_panel.placeholders.trainer'))
                     ->relationship('trainer', 'en_name', fn ($query) => $query->where('is_active', true))
                     ->getOptionLabelFromRecordUsing(fn (StableTrainer $record) => $record->name)
                     ->preload()
@@ -105,6 +108,7 @@ class BookingSlotResource extends Resource
                     ->default(true),
                 TextInput::make('notes')
                     ->label(__('stable_panel.fields.notes'))
+                    ->placeholder(__('stable_panel.placeholders.notes'))
                     ->maxLength(255)
                     ->columnSpanFull(),
             ]);

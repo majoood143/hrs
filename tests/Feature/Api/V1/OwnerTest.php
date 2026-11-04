@@ -9,8 +9,10 @@ use App\Models\StableBooking;
 use App\Models\StableOffering;
 use App\Models\User;
 use App\Services\Stables\SlotGenerator;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Tests\Concerns\PreparesStableBookings;
 use Tests\TestCase;
@@ -69,12 +71,16 @@ class OwnerTest extends TestCase
         return $this->postJson('/api/v1/owner/auth/login', ['email' => 'owner@example.com', 'password' => 'secret-password'])->assertOk()->json('token');
     }
 
-    private function customerBooks(string $phone = '92223333', int $riders = 1): string
+    private function customerBooks(string $phone = '92223333', int $riders = 1, ?string $pushToken = null): string
     {
         $this->stable->forceFill(['booking_settings' => ['payment_options' => ['at_stable']]])->save();
         $this->app['auth']->forgetGuards();
         $code = $this->postJson('/api/v1/auth/request', ['phone' => $phone, 'channel' => 'sms'])->json('demo_code');
         $token = $this->postJson('/api/v1/auth/verify', ['phone' => $phone, 'code' => $code])->json('token');
+
+        if ($pushToken) {
+            $this->as($token)->postJson('/api/v1/devices', ['token' => $pushToken])->assertOk();
+        }
 
         return $this->as($token)->postJson("/api/v1/bookings/slots/{$this->slot->id}", [
             'name' => 'Aisha',
@@ -101,6 +107,56 @@ class OwnerTest extends TestCase
         $this->as($answer->json('token'))->getJson('/api/v1/owner/me')->assertOk()->assertJsonPath('data.stables.0.approval.value', 'approved');
         $this->as($answer->json('token'))->postJson('/api/v1/owner/auth/logout')->assertOk();
         $this->as($answer->json('token'))->getJson('/api/v1/owner/me')->assertUnauthorized();
+    }
+
+    public function test_a_signed_in_phone_gets_booking_alerts_until_signing_out(): void
+    {
+        Http::fake(['exp.host/*' => Http::response(['data' => [['status' => 'ok', 'id' => 'T-1']]])]);
+        $token = $this->ownerToken();
+
+        $this->as($token)->postJson('/api/v1/owner/devices', ['token' => 'not-a-token'])->assertUnprocessable()->assertJsonValidationErrors('token');
+        $this->as($token)->withHeaders(['Accept-Language' => 'ar', 'X-App-Platform' => 'ios', 'X-App-Version' => '1.1.0'])
+            ->postJson('/api/v1/owner/devices', ['token' => 'ExponentPushToken[abc]'])->assertOk();
+        $this->assertDatabaseHas('mobile_devices', ['expo_token' => 'ExponentPushToken[abc]', 'platform' => 'ios', 'locale' => 'ar', 'user_id' => $this->owner->id]);
+
+        $reference = $this->customerBooks();
+
+        Http::assertSent(fn (Request $request) => $request->url() === 'https://exp.host/--/api/v2/push/send'
+            && $request[0]['to'] === 'ExponentPushToken[abc]'
+            && $request[0]['title'] === "حجز جديد {$reference}"
+            && $request[0]['data'] === ['path' => "/owner/bookings/{$reference}", 'stable' => 'desert-riders']
+            && $request[0]['channelId'] === 'bookings');
+        $this->assertSame('sent', DB::table('notification_logs')->where('channel', 'push')->value('status'));
+
+        // signed out: the phone stays known, but gets nothing
+        $this->as($token)->postJson('/api/v1/owner/auth/logout')->assertOk();
+        $this->assertNull(DB::table('mobile_devices')->value('owner_token_id'));
+        $this->customerBooks('92224444');
+        Http::assertSentCount(1);
+    }
+
+    public function test_the_customer_signed_in_on_a_phone_gets_their_booking_confirmed_there(): void
+    {
+        Http::fake(['exp.host/*' => Http::response(['data' => [['status' => 'ok']]])]);
+
+        $reference = $this->customerBooks(pushToken: 'ExponentPushToken[customer]');
+
+        Http::assertSent(fn (Request $request) => $request[0]['to'] === 'ExponentPushToken[customer]'
+            && $request[0]['title'] === "Booking {$reference} confirmed"
+            && $request[0]['data'] === ['path' => "/account/bookings/{$reference}"]);
+        $this->assertSame('sent', DB::table('notification_logs')->where('channel', 'push')->where('type', 'booking_confirmed')->value('status'));
+    }
+
+    public function test_a_phone_the_app_was_removed_from_is_forgotten(): void
+    {
+        Http::fake(['exp.host/*' => Http::response(['data' => [['status' => 'error', 'message' => 'gone', 'details' => ['error' => 'DeviceNotRegistered']]]])]);
+        $token = $this->ownerToken();
+        $this->as($token)->postJson('/api/v1/owner/devices', ['token' => 'ExponentPushToken[old]'])->assertOk();
+
+        $this->customerBooks();
+
+        $this->assertSame(0, DB::table('mobile_devices')->count());
+        $this->assertSame('skipped', DB::table('notification_logs')->where('channel', 'push')->value('status'));
     }
 
     public function test_a_phone_without_a_stable_account_is_told_so(): void

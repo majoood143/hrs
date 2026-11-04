@@ -159,6 +159,20 @@ return [
         'refund_note' => 'It was paid: a refund is due.',
     ],
 
+    // push notifications (title, then the text): to the stable's phones, then customer_* to the customer's
+    'push' => [
+        'confirmed_title' => 'New booking :reference',
+        'confirmed' => ':offering, :date :time, :riders. :customer. :payment.',
+        'cancelled_title' => 'Booking :reference cancelled',
+        'cancelled' => ':offering, :date :time, :riders.',
+        'customer_confirmed_title' => 'Booking :reference confirmed',
+        'customer_confirmed' => ':stable: :offering, :date :time, :riders.',
+        'customer_cancelled_title' => 'Booking :reference cancelled',
+        'customer_cancelled' => ':stable: :offering, :date :time.',
+        'customer_reminder_title' => 'See you soon at :stable',
+        'customer_reminder' => ':offering, :date :time.',
+    ],
+
     'mail' => [
         'customer_button' => 'View my booking',
         'stable_button' => 'Open your bookings',

@@ -45,6 +45,11 @@ return [
         'video_heading' => 'The replay is on YouTube: :race',
     ],
 
+    'booking_ticket' => [
+        'confirmed' => '✅ Your booking at :stable is confirmed: :offering, :date :time, :riders. :payment. Your ticket is attached: show its QR code at the stable to check in. Details: :url',
+        'reminder' => '⏰ See you tomorrow at :stable: :offering, :date :time. Your ticket is attached: show its QR code when you arrive.',
+    ],
+
     'post_types' => [
         'transfer_post' => 'Transfer board',
         'horse_sale_post' => 'Horses for sale',
@@ -54,6 +59,7 @@ return [
         'stable_registration' => 'New stable registrations',
         'youtube_video' => 'New YouTube videos (watched channels)',
         'race_result' => 'Race results (sent automatically once published)',
+        'booking_ticket' => 'Booking tickets to customers (PDF with the check-in QR code)',
     ],
 
     'transfer_kinds' => [

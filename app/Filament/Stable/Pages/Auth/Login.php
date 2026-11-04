@@ -45,10 +45,11 @@ class Login extends BaseLogin
                     ->inline()
                     ->grouped()
                     ->live(),
-                $this->getEmailFormComponent()->visible(fn (Get $get) => $get('method') !== 'phone'),
-                $this->getPasswordFormComponent()->visible(fn (Get $get) => $get('method') !== 'phone'),
+                $this->getEmailFormComponent()->placeholder(__('stable_panel.placeholders.email'))->visible(fn (Get $get) => $get('method') !== 'phone'),
+                $this->getPasswordFormComponent()->placeholder(__('stable_panel.placeholders.login_password'))->visible(fn (Get $get) => $get('method') !== 'phone'),
                 TextInput::make('phone')
                     ->label(__('stable_panel.fields.mobile'))
+                    ->placeholder(__('stable_panel.placeholders.mobile'))
                     ->helperText(__('account.phone_hint'))
                     ->tel()
                     ->required()
@@ -57,6 +58,7 @@ class Login extends BaseLogin
                     ->visible(fn (Get $get) => $get('method') === 'phone'),
                 TextInput::make('otp_code')
                     ->label(__('account.code_label'))
+                    ->placeholder(__('stable_panel.placeholders.code'))
                     ->required()
                     ->rule('digits:6')
                     ->extraInputAttributes(['inputmode' => 'numeric', 'autocomplete' => 'one-time-code'])

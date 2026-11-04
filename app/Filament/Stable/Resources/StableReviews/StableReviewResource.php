@@ -86,6 +86,7 @@ class StableReviewResource extends Resource
                     ->schema([
                         Textarea::make('reply')
                             ->label(__('stable_reviews.your_reply'))
+                            ->placeholder(__('stable_panel.placeholders.reply'))
                             ->helperText(__('stable_reviews.reply_hint'))
                             ->rows(4)
                             ->maxLength(1000),

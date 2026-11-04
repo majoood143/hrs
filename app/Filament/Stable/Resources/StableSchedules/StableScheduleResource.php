@@ -77,6 +77,7 @@ class StableScheduleResource extends Resource
                     ->schema([
                         Select::make('stable_offering_id')
                             ->label(__('stable_panel.fields.offering'))
+                            ->placeholder(__('stable_panel.placeholders.offering'))
                             ->relationship('offering', 'en_name')
                             ->getOptionLabelFromRecordUsing(fn (StableOffering $record) => $record->name)
                             ->required()
@@ -120,12 +121,14 @@ class StableScheduleResource extends Resource
                             ->afterOrEqual('valid_from'),
                         TextInput::make('capacity')
                             ->label(__('stable_panel.fields.capacity'))
+                            ->placeholder(__('stable_panel.placeholders.capacity'))
                             ->helperText(__('stable_panel.schedules.capacity_hint'))
                             ->integer()
                             ->minValue(1)
                             ->maxValue(200),
                         Select::make('trainer_id')
                             ->label(__('stable_panel.fields.trainer'))
+                            ->placeholder(__('stable_panel.placeholders.trainer'))
                             ->relationship('trainer', 'en_name', fn ($query) => $query->where('is_active', true))
                             ->getOptionLabelFromRecordUsing(fn (StableTrainer $record) => $record->name)
                             ->preload()

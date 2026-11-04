@@ -83,18 +83,22 @@ class StableOfferingResource extends Resource
                             ->inline(false),
                         TextInput::make('en_name')
                             ->label(__('stable_panel.fields.en_name'))
+                            ->placeholder(__('stable_panel.placeholders.offering_en_name'))
                             ->required()
                             ->maxLength(255),
                         TextInput::make('ar_name')
                             ->label(__('stable_panel.fields.ar_name'))
+                            ->placeholder(__('stable_panel.placeholders.offering_ar_name'))
                             ->required()
                             ->maxLength(255)
                             ->extraInputAttributes(['dir' => 'rtl']),
                         Textarea::make('en_description')
                             ->label(__('stable_panel.fields.en_description'))
+                            ->placeholder(__('stable_panel.placeholders.en_description'))
                             ->rows(4),
                         Textarea::make('ar_description')
                             ->label(__('stable_panel.fields.ar_description'))
+                            ->placeholder(__('stable_panel.placeholders.ar_description'))
                             ->rows(4)
                             ->extraInputAttributes(['dir' => 'rtl']),
                         FileUpload::make('photo')
@@ -110,6 +114,7 @@ class StableOfferingResource extends Resource
                     ->schema([
                         TextInput::make('price')
                             ->label(__('stable_panel.fields.price_per_rider'))
+                            ->placeholder(__('stable_panel.placeholders.price'))
                             ->helperText(__('stable_panel.offerings.price_hint'))
                             ->prefix(fn () => SiteSetting::currencyHtml())
                             ->numeric()
@@ -119,6 +124,7 @@ class StableOfferingResource extends Resource
                             ->required(),
                         TextInput::make('duration_minutes')
                             ->label(__('stable_panel.fields.duration'))
+                            ->placeholder(__('stable_panel.placeholders.duration'))
                             ->suffix(__('stable_panel.units.min'))
                             ->integer()
                             ->minValue(10)
@@ -134,6 +140,7 @@ class StableOfferingResource extends Resource
                             ->native(false),
                         TextInput::make('capacity')
                             ->label(__('stable_panel.fields.capacity'))
+                            ->placeholder(__('stable_panel.placeholders.capacity'))
                             ->helperText(__('stable_panel.offerings.capacity_hint'))
                             ->integer()
                             ->minValue(1)
@@ -143,6 +150,7 @@ class StableOfferingResource extends Resource
                             ->required(),
                         TextInput::make('min_riders')
                             ->label(__('stable_panel.fields.min_riders'))
+                            ->placeholder(__('stable_panel.placeholders.min_riders'))
                             ->integer()
                             ->minValue(1)
                             ->default(1)
@@ -150,6 +158,7 @@ class StableOfferingResource extends Resource
                             ->required(),
                         TextInput::make('max_riders')
                             ->label(__('stable_panel.fields.max_riders'))
+                            ->placeholder(__('stable_panel.placeholders.max_riders'))
                             ->helperText(__('stable_panel.offerings.max_riders_hint'))
                             ->integer()
                             ->minValue(1)

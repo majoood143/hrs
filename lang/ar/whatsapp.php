@@ -45,6 +45,11 @@ return [
         'video_heading' => 'إعادة السباق متاحة على يوتيوب: :race',
     ],
 
+    'booking_ticket' => [
+        'confirmed' => '✅ تم تأكيد حجزك في :stable: :offering، :date :time، :riders. :payment. التذكرة مرفقة: اعرض رمز QR في الإسطبل لتسجيل الحضور. التفاصيل: :url',
+        'reminder' => '⏰ نراك غدًا في :stable: :offering، :date :time. التذكرة مرفقة: اعرض رمز QR عند وصولك.',
+    ],
+
     'post_types' => [
         'transfer_post' => 'لوحة النقل',
         'horse_sale_post' => 'خيول للبيع',
@@ -54,6 +59,7 @@ return [
         'stable_registration' => 'تسجيل إسطبلات جديدة',
         'youtube_video' => 'فيديوهات يوتيوب جديدة (القنوات المتابعة)',
         'race_result' => 'نتائج السباقات (تُرسل تلقائيًا عند نشرها)',
+        'booking_ticket' => 'تذاكر الحجز للعملاء (PDF برمز QR لتسجيل الحضور)',
     ],
 
     'transfer_kinds' => [

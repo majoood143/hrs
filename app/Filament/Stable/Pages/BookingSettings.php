@@ -115,6 +115,7 @@ class BookingSettings extends Page implements HasForms
                                 ->live(),
                             TextInput::make('cancellation_hours')
                                 ->label(__('stable_panel.settings.cancellation_hours'))
+                                ->placeholder(__('stable_panel.placeholders.cancellation_hours'))
                                 ->helperText(__('stable_panel.settings.cancellation_hint'))
                                 ->suffix(__('stable_panel.units.hours_short'))
                                 ->integer()
@@ -156,6 +157,7 @@ class BookingSettings extends Page implements HasForms
                             ->schema([
                                 Select::make('payment_gateway')
                                     ->label(__('stable_panel.payments.gateway'))
+                                    ->placeholder(__('stable_panel.placeholders.gateway'))
                                     ->options(collect(StablePaymentAccount::gateways())->mapWithKeys(fn (string $g) => [$g => PaymentGateway::from($g)->label()]))
                                     ->required(fn (Get $get) => $get('payment_mode') === 'own')
                                     ->live()
@@ -175,7 +177,7 @@ class BookingSettings extends Page implements HasForms
                                             ->label(__('stable_panel.payments.fields.'.$key))
                                             ->password($secret)
                                             ->revealable($secret)
-                                            ->placeholder(fn () => $secret ? $this->maskedKey($gateway, $key) : null)
+                                            ->placeholder(fn () => ($secret ? $this->maskedKey($gateway, $key) : null) ?? __('stable_panel.placeholders.credential'))
                                             ->helperText($secret ? __('stable_panel.payments.secret_hint') : null)
                                             ->maxLength(500)
                                             ->extraInputAttributes(['dir' => 'ltr', 'autocomplete' => 'off']))->values()->all(),
@@ -199,11 +201,13 @@ class BookingSettings extends Page implements HasForms
                             ]))->all(),
                         Textarea::make('waiver_text.en')
                             ->label(__('stable_panel.settings.waiver_en'))
+                            ->placeholder(__('stable_panel.placeholders.waiver_en'))
                             ->rows(4)
                             ->required(fn (Get $get) => (bool) $get('rider_fields.waiver.show'))
                             ->visible(fn (Get $get) => (bool) $get('rider_fields.waiver.show')),
                         Textarea::make('waiver_text.ar')
                             ->label(__('stable_panel.settings.waiver_ar'))
+                            ->placeholder(__('stable_panel.placeholders.waiver_ar'))
                             ->rows(4)
                             ->extraInputAttributes(['dir' => 'rtl'])
                             ->visible(fn (Get $get) => (bool) $get('rider_fields.waiver.show')),
@@ -223,10 +227,12 @@ class BookingSettings extends Page implements HasForms
                             ->columnSpanFull(),
                         TextInput::make('alert_email')
                             ->label(__('stable_panel.settings.alert_email'))
+                            ->placeholder(__('stable_panel.placeholders.email'))
                             ->helperText(__('stable_panel.settings.alert_email_hint'))
                             ->email(),
                         TextInput::make('alert_phone')
                             ->label(__('stable_panel.settings.alert_phone'))
+                            ->placeholder(__('stable_panel.placeholders.mobile'))
                             ->helperText(__('stable_panel.settings.alert_phone_hint'))
                             ->tel(),
                     ]),

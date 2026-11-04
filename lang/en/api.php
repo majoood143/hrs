@@ -16,6 +16,16 @@ return [
         'verification_required' => 'Confirm your phone number to post.',
         'limit' => 'You can publish up to :count posts a day from the app. Please try again tomorrow.',
     ],
+    // push notifications about saved searches (the boards' "Tell me about new ones")
+    'push' => [
+        'new_horses' => 'New horse for sale',
+        'new_tools' => 'New tool for sale',
+        'all_horses' => 'All horses for sale',
+        'all_tools' => 'All tools for sale',
+        'up_to' => 'up to :price',
+        'search_limit' => 'You can keep up to :count saved searches. Remove one first.',
+    ],
+
     'account' => [
         'signed_out' => 'You are signed out.',
         'deleted' => 'Your account was deleted.',

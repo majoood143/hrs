@@ -12,7 +12,7 @@ use WallaceMartinss\FilamentEvolution\Models\WhatsappMessage;
 use WallaceMartinss\FilamentEvolution\Services\EvolutionClient;
 
 /**
- * Sends one WhatsApp text through the Evolution API (the filament-whatsapp-conector plugin) and
+ * Sends one WhatsApp text (or a file with a caption) through the Evolution API (the filament-whatsapp-conector plugin) and
  * writes the attempt to notification_logs (channel "whatsapp"), like SMS and email. Never throws.
  * A sent text is also kept in the plugin's whatsapp_messages (admin → WhatsApp messages), where
  * the MESSAGES_UPDATE webhooks then move it to delivered / read.
@@ -45,6 +45,21 @@ class WhatsAppNotifier
      */
     public function send(string $to, string $message, string $type, bool $sensitive = false): NotificationLog
     {
+        return $this->deliver($to, $message, $type, $sensitive, fn (WhatsappInstance $instance, string $phone) => $this->client->sendText($instance->name, $phone, $message));
+    }
+
+    /**
+     * One file (a booking ticket) with its caption. The bytes go as base64, so Evolution never has to
+     * reach this site to fetch it (it cannot while the site runs locally).
+     */
+    public function sendDocument(string $to, string $bytes, string $fileName, string $caption, string $type): NotificationLog
+    {
+        return $this->deliver($to, $caption, $type, false, fn (WhatsappInstance $instance, string $phone) => $this->client->sendDocument($instance->name, $phone, base64_encode($bytes), $fileName, $caption));
+    }
+
+    /** @param  callable(WhatsappInstance, string): array  $call  the Evolution request */
+    private function deliver(string $to, string $message, string $type, bool $sensitive, callable $call): NotificationLog
+    {
         $phone = PhoneNumber::normalize($to);
         $instance = null;
         $response = null;
@@ -61,7 +76,7 @@ class WhatsAppNotifier
             };
 
             if ($error === null) {
-                $response = $this->client->sendText($instance->name, $phone, $message);
+                $response = $call($instance, $phone);
                 $this->record($instance, $phone, $sensitive ? null : $message, $response);
             }
         } catch (Throwable $e) {

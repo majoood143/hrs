@@ -56,9 +56,9 @@ class StableHorseResource extends Resource
         return $schema
             ->columns(2)
             ->components([
-                TextInput::make('name')->label(__('stable_panel.fields.name'))->required()->maxLength(255),
+                TextInput::make('name')->label(__('stable_panel.fields.name'))->placeholder(__('stable_panel.placeholders.horse_name'))->required()->maxLength(255),
                 Toggle::make('is_active')->label(__('stable_panel.fields.is_active'))->default(true)->inline(false),
-                Textarea::make('notes')->label(__('stable_panel.fields.notes'))->rows(3)->columnSpanFull(),
+                Textarea::make('notes')->label(__('stable_panel.fields.notes'))->placeholder(__('stable_panel.placeholders.notes'))->rows(3)->columnSpanFull(),
                 FileUpload::make('photo')->label(__('stable_panel.fields.photo'))->image()->disk('public')->directory('stables/horses'),
             ]);
     }

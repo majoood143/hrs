@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Api\V1\Owner;
 
+use App\Http\Controllers\Api\V1\PushController;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\Owner\OwnerResource;
+use App\Models\MobileDevice;
 use App\Models\User;
 use App\Services\Auth\CustomerOtpService;
+use App\Support\MobileApp\AppClient;
 use App\Support\PhoneNumber;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -108,6 +111,32 @@ class OwnerAuthController extends Controller
         $request->user('owner_api')?->currentAccessToken()?->delete();
 
         return response()->json(['message' => __('api.account.signed_out')]);
+    }
+
+    /**
+     * Get booking alerts on this phone
+     *
+     * The phone's Expo push token (`ExponentPushToken[…]`), sent after signing in: new and cancelled
+     * bookings of the owner's stables are pushed to it, in the request's language, until this sign-in
+     * ends. A token already registered moves to this owner.
+     */
+    public function device(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'token' => PushController::TOKEN_RULE,
+        ]);
+        $client = AppClient::fromRequest($request);
+
+        MobileDevice::query()->updateOrCreate(['expo_token' => $data['token']], [
+            'platform' => $client->platform,
+            'app_version' => $client->version,
+            'locale' => app()->getLocale(),
+            'user_id' => $request->user('owner_api')->getKey(),
+            'owner_token_id' => $request->user('owner_api')->currentAccessToken()->getKey(),
+            'last_seen_at' => now(),
+        ]);
+
+        return response()->json(['message' => 'ok']);
     }
 
     /**

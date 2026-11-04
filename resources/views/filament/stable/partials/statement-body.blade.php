@@ -9,9 +9,9 @@
     $unmarked = \App\Services\Reports\StableStatement::unmarkedAtStable($statement->stable);
     $cards = [
         ['label' => __('stable_statement.cards.bookings'), 'value' => (string) $t['bookings'], 'hint' => trans_choice('stable_bookings.riders_count', $t['riders'], ['count' => $t['riders']]), 'icon' => 'heroicon-o-ticket'],
-        ['label' => __('stable_statement.cards.collected'), 'value' => $m($t['collected']), 'hint' => __('stable_statement.cards.collected_hint', ['ours' => $m($t['collected_by_us']), 'yours' => $m($t['collected_by_stable'])]), 'icon' => 'heroicon-o-banknotes'],
+        ['label' => __('stable_statement.cards.collected'), 'value' => $m($t['collected']), 'hint' => new \Illuminate\Support\HtmlString(__('stable_statement.cards.collected_hint', ['ours' => $m($t['collected_by_us']), 'yours' => $m($t['collected_by_stable'])])), 'icon' => 'heroicon-o-banknotes'],
         ['label' => __('stable_statement.cards.stable_share'), 'value' => $m($t['stable_share']), 'hint' => __('stable_statement.cards.stable_share_hint'), 'icon' => 'heroicon-o-home-modern'],
-        ['label' => __('stable_statement.cards.commission'), 'value' => $m($t['commission'] + $t['vat_on_commission']), 'hint' => __('stable_statement.cards.commission_hint', ['fee' => $m($t['fee'])]), 'icon' => 'heroicon-o-receipt-percent'],
+        ['label' => __('stable_statement.cards.commission'), 'value' => $m($t['commission'] + $t['vat_on_commission']), 'hint' => new \Illuminate\Support\HtmlString(__('stable_statement.cards.commission_hint', ['fee' => $m($t['fee'])])), 'icon' => 'heroicon-o-receipt-percent'],
     ];
 @endphp
 

@@ -29,6 +29,10 @@
 {{ __("stable_bookings.mail.{$audience}_refund") }}
 @endif
 
+@if($audience === 'customer' && $type === 'confirmed')
+{{ __('booking_ticket.mail_attached') }}
+@endif
+
 @if($audience === 'customer' && $type === 'confirmed' && filled($data['map']))
 [{{ __('stable_bookings.directions') }}]({{ $data['map'] }})
 @endif

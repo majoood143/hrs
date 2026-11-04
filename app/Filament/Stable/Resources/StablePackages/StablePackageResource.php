@@ -53,6 +53,7 @@ class StablePackageResource extends Resource
             ->components([
                 Select::make('stable_offering_id')
                     ->label(__('stable_panel.fields.offering'))
+                    ->placeholder(__('stable_panel.placeholders.offering'))
                     ->relationship('offering', 'en_name')
                     ->getOptionLabelFromRecordUsing(fn (StableOffering $record) => $record->name)
                     ->required()
@@ -60,12 +61,13 @@ class StablePackageResource extends Resource
                     ->native(false)
                     ->disabledOn('edit')
                     ->columnSpanFull(),
-                TextInput::make('en_name')->label(__('stable_panel.fields.en_name'))->required()->maxLength(255),
-                TextInput::make('ar_name')->label(__('stable_panel.fields.ar_name'))->required()->maxLength(255)->extraInputAttributes(['dir' => 'rtl']),
-                Textarea::make('en_description')->label(__('stable_panel.fields.en_description'))->rows(3),
-                Textarea::make('ar_description')->label(__('stable_panel.fields.ar_description'))->rows(3)->extraInputAttributes(['dir' => 'rtl']),
+                TextInput::make('en_name')->label(__('stable_panel.fields.en_name'))->placeholder(__('stable_panel.placeholders.package_en_name'))->required()->maxLength(255),
+                TextInput::make('ar_name')->label(__('stable_panel.fields.ar_name'))->placeholder(__('stable_panel.placeholders.package_ar_name'))->required()->maxLength(255)->extraInputAttributes(['dir' => 'rtl']),
+                Textarea::make('en_description')->label(__('stable_panel.fields.en_description'))->placeholder(__('stable_panel.placeholders.en_description'))->rows(3),
+                Textarea::make('ar_description')->label(__('stable_panel.fields.ar_description'))->placeholder(__('stable_panel.placeholders.ar_description'))->rows(3)->extraInputAttributes(['dir' => 'rtl']),
                 TextInput::make('sessions')
                     ->label(__('stable_packages.fields.sessions'))
+                    ->placeholder(__('stable_panel.placeholders.sessions'))
                     ->helperText(__('stable_packages.panel.sessions_hint'))
                     ->integer()
                     ->minValue(2)
@@ -73,6 +75,7 @@ class StablePackageResource extends Resource
                     ->required(),
                 TextInput::make('price')
                     ->label(__('stable_packages.fields.price'))
+                    ->placeholder(__('stable_panel.placeholders.price'))
                     ->helperText(__('stable_packages.panel.price_hint'))
                     ->prefix(fn () => SiteSetting::currencyHtml())
                     ->numeric()
@@ -81,6 +84,7 @@ class StablePackageResource extends Resource
                     ->required(),
                 TextInput::make('validity_days')
                     ->label(__('stable_packages.fields.validity_days'))
+                    ->placeholder(__('stable_panel.placeholders.validity_days'))
                     ->helperText(__('stable_packages.panel.validity_hint'))
                     ->suffix(__('stable_packages.panel.days'))
                     ->integer()

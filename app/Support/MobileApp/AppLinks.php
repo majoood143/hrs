@@ -21,7 +21,7 @@ final class AppLinks
     /** The website paths' first segments the app has screens for; plus the homepage. */
     public const SECTIONS = [
         'horses-for-sale', 'tools-for-sale', 'transfer-board', 'farriers', 'jockeys',
-        'stables', 'clinics', 'centers', 'shops', 'events', 'blog', 'video-library', 'racing',
+        'stables', 'clinics', 'centers', 'shops', 'events', 'blog', 'video-library', 'racing', 'check-in',
     ];
 
     public const TEAM_ID_PATTERN = '/^[A-Z0-9]{10}$/';

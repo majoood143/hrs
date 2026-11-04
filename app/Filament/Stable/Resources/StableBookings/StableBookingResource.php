@@ -298,6 +298,7 @@ class StableBookingResource extends Resource
             ->schema([
                 Textarea::make('reason')
                     ->label(__('stable_bookings.fields.reason'))
+                    ->placeholder(__('stable_panel.placeholders.cancel_reason'))
                     ->helperText(__('stable_panel.bookings.reason_hint'))
                     ->required()
                     ->maxLength(500),

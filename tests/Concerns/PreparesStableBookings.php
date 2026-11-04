@@ -93,6 +93,8 @@ trait PreparesStableBookings
             '2026_09_30_100006_create_stable_packages_tables',
             '2026_09_30_100007_create_stable_reviews_table',
             '2026_09_30_100008_add_reminded_at_to_stable_bookings',
+            // the owners' phones: every booking looks for one to push to
+            '2026_11_04_000001_create_mobile_devices_table',
         ] as $migration) {
             (require database_path("migrations/{$migration}.php"))->up();
         }

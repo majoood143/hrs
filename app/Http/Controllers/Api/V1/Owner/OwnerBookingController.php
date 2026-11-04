@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Owner;
 
 use App\Enums\StableBookingStatus;
+use App\Filament\Stable\Pages\CheckIn;
 use App\Http\Controllers\Api\V1\Concerns\PaginatesListings;
 use App\Http\Controllers\Api\V1\Owner\Concerns\FindsOwnerStable;
 use App\Http\Controllers\Controller;
@@ -10,6 +11,7 @@ use App\Http\Resources\V1\Owner\OwnerBookingResource;
 use App\Models\BookingSlot;
 use App\Models\Stable;
 use App\Models\StableBooking;
+use App\Models\User;
 use App\Services\Stables\BookingUnavailable;
 use App\Services\Stables\StableBookingActions;
 use Illuminate\Database\Eloquent\Builder;
@@ -77,6 +79,28 @@ class OwnerBookingController extends Controller
         }
 
         return OwnerBookingResource::collection($query->paginate($this->perPage($request))->withQueryString());
+    }
+
+    /**
+     * Find a scanned ticket
+     *
+     * A ticket's reference (or its QR code's `/check-in/{reference}` link) among all my stables'
+     * bookings, with the stable it is at (`stable.slug` for the other endpoints). 404 when it is at
+     * none of them.
+     */
+    public function lookup(Request $request, string $reference): OwnerBookingResource
+    {
+        /** @var User $user */
+        $user = $request->user('owner_api');
+        $reference = CheckIn::parse($reference);
+        $booking = StableBooking::query()
+            ->whereIn('stable_id', $user->stables()->pluck('stables.id'))
+            ->where('reference', $reference)
+            ->with('stable')
+            ->firstOrFail();
+
+        return OwnerBookingResource::make($this->find($request, (string) $booking->stable?->slug, (string) $reference))
+            ->additional(['stable' => ['slug' => (string) $booking->stable?->slug, 'name' => (string) $booking->stable?->name]]);
     }
 
     /** One of my stable's bookings */

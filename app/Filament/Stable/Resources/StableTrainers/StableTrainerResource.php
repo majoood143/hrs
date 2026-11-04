@@ -55,9 +55,9 @@ class StableTrainerResource extends Resource
         return $schema
             ->columns(2)
             ->components([
-                TextInput::make('en_name')->label(__('stable_panel.fields.en_name'))->required()->maxLength(255),
-                TextInput::make('ar_name')->label(__('stable_panel.fields.ar_name'))->maxLength(255)->extraInputAttributes(['dir' => 'rtl']),
-                TextInput::make('phone')->label(__('stable_panel.fields.phone'))->tel()->maxLength(32),
+                TextInput::make('en_name')->label(__('stable_panel.fields.en_name'))->placeholder(__('stable_panel.placeholders.trainer_en_name'))->required()->maxLength(255),
+                TextInput::make('ar_name')->label(__('stable_panel.fields.ar_name'))->placeholder(__('stable_panel.placeholders.trainer_ar_name'))->maxLength(255)->extraInputAttributes(['dir' => 'rtl']),
+                TextInput::make('phone')->label(__('stable_panel.fields.phone'))->placeholder(__('stable_panel.placeholders.mobile'))->tel()->maxLength(32),
                 Toggle::make('is_active')->label(__('stable_panel.fields.is_active'))->default(true)->inline(false),
                 FileUpload::make('photo')->label(__('stable_panel.fields.photo'))->image()->avatar()->disk('public')->directory('stables/trainers'),
             ]);

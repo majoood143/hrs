@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\V1\Owner\OwnerAuthController;
 use App\Http\Controllers\Api\V1\Owner\OwnerBookingController;
 use App\Http\Controllers\Api\V1\Owner\OwnerScheduleController;
 use App\Http\Controllers\Api\V1\Owner\OwnerStableController;
+use App\Http\Controllers\Api\V1\PushController;
 use App\Http\Controllers\Api\V1\RacingController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\ShopController;
@@ -149,6 +150,8 @@ Route::prefix('v1')
             Route::middleware(['auth:owner_api', EnsureStableOwner::class])->group(function () {
                 Route::post('auth/logout', [OwnerAuthController::class, 'logout'])->name('auth.logout');
                 Route::get('me', [OwnerAuthController::class, 'me'])->name('me');
+                Route::post('devices', [OwnerAuthController::class, 'device'])->middleware('throttle:api-owner')->name('devices.store');
+                Route::get('check-in/{reference}', [OwnerBookingController::class, 'lookup'])->middleware('throttle:api-owner')->name('check-in');
 
                 Route::prefix('stables/{slug}')->name('stables.')->group(function () {
                     Route::get('/', [OwnerStableController::class, 'show'])->name('show');
@@ -169,6 +172,16 @@ Route::prefix('v1')
                     });
                 });
             });
+        });
+
+        // Push notifications: any phone that allowed them (linked to the customer signed in on it), its list, opens.
+        Route::middleware('throttle:api-views')->group(function () {
+            Route::post('devices', [PushController::class, 'store'])->name('devices.store');
+            Route::get('push/inbox', [PushController::class, 'inbox'])->name('push.inbox');
+            Route::post('push/{campaign}/opened', [PushController::class, 'opened'])->whereNumber('campaign')->name('push.opened');
+            Route::get('push/searches', [PushController::class, 'searches'])->name('push.searches.index');
+            Route::post('push/searches', [PushController::class, 'saveSearch'])->name('push.searches.store');
+            Route::delete('push/searches/{id}', [PushController::class, 'deleteSearch'])->whereNumber('id')->name('push.searches.destroy');
         });
 
         Route::post('views/{section}/{key}', [ViewController::class, 'store'])->middleware('throttle:api-views')->name('views.store');

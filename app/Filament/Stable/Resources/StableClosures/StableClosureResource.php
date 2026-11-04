@@ -67,6 +67,7 @@ class StableClosureResource extends Resource
                     ->preload(),
                 TextInput::make('reason')
                     ->label(__('stable_panel.fields.reason'))
+                    ->placeholder(__('stable_panel.placeholders.closure_reason'))
                     ->maxLength(255),
             ]);
     }

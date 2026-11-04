@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Jobs\NotifySavedSearches;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -87,6 +88,13 @@ class HorseSalePost extends Model
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
+    }
+
+    protected static function booted(): void
+    {
+        // live now (posted without review, or approved): tell the phones with a matching saved search
+        static::created(fn (self $post) => NotifySavedSearches::whenLive($post, 'horses', true));
+        static::updated(fn (self $post) => NotifySavedSearches::whenLive($post, 'horses', false));
     }
 
     public function scopeVisible(Builder $query): Builder

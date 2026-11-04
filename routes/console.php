@@ -16,6 +16,9 @@ Schedule::command('horse-sale-posts:expire')->dailyAt('00:10');
 Schedule::command('stables:generate-slots')->dailyAt('00:20')->withoutOverlapping();
 Schedule::command('stables:send-reminders')->hourly()->withoutOverlapping();
 
+// Push campaigns set to go out at a time (admin → Mobile app → Notifications).
+Schedule::command('push:send-due')->everyMinute()->withoutOverlapping();
+
 // Unpaid service orders are cancelled after config('payments.pending_ttl_minutes'); a Thawani
 // session can still be paid for 24 hours afterwards, so recently cancelled ones are re-checked.
 Schedule::command('orders:expire-pending')->everyFiveMinutes()->withoutOverlapping();

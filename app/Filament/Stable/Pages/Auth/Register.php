@@ -51,11 +51,12 @@ class Register extends BaseRegister
                     ->icon('heroicon-o-user')
                     ->columns(2)
                     ->schema([
-                        $this->getNameFormComponent(),
-                        $this->getEmailFormComponent(),
+                        $this->getNameFormComponent()->placeholder(__('stable_panel.placeholders.name')),
+                        $this->getEmailFormComponent()->placeholder(__('stable_panel.placeholders.email')),
                         TextInput::make('phone')
                             ->label(__('stable_panel.fields.mobile'))
                             ->helperText(__('account.phone_hint'))
+                            ->placeholder(__('stable_panel.placeholders.mobile'))
                             ->tel()
                             ->required()
                             ->maxLength(20)
@@ -76,12 +77,13 @@ class Register extends BaseRegister
                         TextInput::make('otp_code')
                             ->label(__('account.code_label'))
                             ->helperText(__('stable_panel.register.code_hint'))
+                            ->placeholder(__('stable_panel.placeholders.code'))
                             ->required()
                             // a string: a code may start with 0, which a numeric field would drop
                             ->rule('digits:6')
                             ->extraInputAttributes(['inputmode' => 'numeric', 'autocomplete' => 'one-time-code']),
-                        $this->getPasswordFormComponent(),
-                        $this->getPasswordConfirmationFormComponent(),
+                        $this->getPasswordFormComponent()->placeholder(__('stable_panel.placeholders.password')),
+                        $this->getPasswordConfirmationFormComponent()->placeholder(__('stable_panel.placeholders.password_confirmation')),
                     ]),
                 Section::make(__('stable_panel.register.stable_section'))
                     ->icon('heroicon-o-home-modern')

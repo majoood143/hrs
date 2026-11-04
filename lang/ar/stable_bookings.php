@@ -158,6 +158,19 @@ return [
         'refund_note' => 'كان مدفوعًا: يجب استرداد المبلغ.',
     ],
 
+    'push' => [
+        'confirmed_title' => 'حجز جديد :reference',
+        'confirmed' => ':offering، :date :time، :riders. :customer. :payment.',
+        'cancelled_title' => 'أُلغي الحجز :reference',
+        'cancelled' => ':offering، :date :time، :riders.',
+        'customer_confirmed_title' => 'تأكد الحجز :reference',
+        'customer_confirmed' => ':stable: :offering، :date :time، :riders.',
+        'customer_cancelled_title' => 'أُلغي الحجز :reference',
+        'customer_cancelled' => ':stable: :offering، :date :time.',
+        'customer_reminder_title' => 'نراك قريبًا في :stable',
+        'customer_reminder' => ':offering، :date :time.',
+    ],
+
     'mail' => [
         'customer_button' => 'عرض حجزي',
         'stable_button' => 'افتح حجوزاتك',

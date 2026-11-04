@@ -6,11 +6,12 @@ use App\Enums\StableBookingStatus;
 use App\Jobs\SendStableBookingNotification;
 use App\Models\BookingSlot;
 use App\Models\StableBooking;
+use App\Support\WhatsAppSettings;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 
 /**
- * Reminds customers of tomorrow's session by SMS: confirmed bookings starting within the next day
+ * Reminds customers of tomorrow's session by SMS (and their ticket by WhatsApp): confirmed bookings starting within the next day
  * (and more than two hours away), once each, at stables that have reminders on. A booking whose
  * confirmation went out less than 12 hours ago waits for a later run, so the customer does not get
  * a reminder right on top of the confirmation.
@@ -52,6 +53,14 @@ class SendStableBookingReminders extends Command
 
                 $booking->forceFill(['reminded_at' => now()])->saveQuietly();
                 SendStableBookingNotification::dispatch($booking->getKey(), 'customer', 'sms', SendStableBookingNotification::REMINDER);
+
+                if (WhatsAppSettings::enabled() && WhatsAppSettings::alertEnabled('booking_ticket')) {
+                    SendStableBookingNotification::dispatch($booking->getKey(), 'customer', 'whatsapp', SendStableBookingNotification::REMINDER);
+                }
+
+                if (SendStableBookingNotification::pushDevices($booking, 'customer')->isNotEmpty()) {
+                    SendStableBookingNotification::dispatch($booking->getKey(), 'customer', 'push', SendStableBookingNotification::REMINDER);
+                }
                 $sent++;
             });
 

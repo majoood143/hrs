@@ -6,6 +6,7 @@ use App\Filament\Forms\RacePredictionActions;
 use App\Filament\Forms\SubmissionPdfActions;
 use App\Filament\Forms\ViewFormInsights;
 use App\Filament\RichEditor\TextDirectionPlugin;
+use App\Filament\Support\FieldPlaceholders;
 use App\Filament\Support\FormPaymentTab;
 use App\Http\Controllers\Api\V1\Owner\OwnerAuthController;
 use App\Models\Setting;
@@ -235,6 +236,8 @@ class AppServiceProvider extends ServiceProvider
 
             $input->mutateStateForValidationUsing($toAscii)->mutateDehydratedStateUsing($toAscii);
         });
+
+        FieldPlaceholders::register();
 
         FileUpload::configureUsing(function (FileUpload $fileUpload) {
             $fileUpload->saveUploadedFileUsing(function (FileUpload $component, TemporaryUploadedFile $file) {

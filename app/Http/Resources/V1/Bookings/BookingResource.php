@@ -8,6 +8,7 @@ use App\Http\Resources\V1\OptionResource;
 use App\Models\Customer;
 use App\Models\SiteSetting;
 use App\Models\StableBooking;
+use App\Services\Stables\BookingTicketPdf;
 use App\Services\Stables\StableBookingActions;
 use App\Services\Stables\StableReviews;
 use Illuminate\Http\Request;
@@ -68,6 +69,8 @@ class BookingResource extends JsonResource
             ] : null,
             /** The website's checkout, while the booking waits for payment; open it in a browser. */
             'pay_url' => $order?->isPayable() ? route('payment.start', $order->order_number) : null,
+            /** The ticket (PDF with the QR code the stable scans to check them in), once confirmed; a signed link good for a week. @var string|null */
+            'ticket_url' => app(BookingTicketPdf::class)->url($booking),
             'can_cancel' => app(StableBookingActions::class)->customerMayCancel($booking),
             /** The stable's rule, while the booking is confirmed; null otherwise. */
             'cancellation_policy' => $booking->status === StableBookingStatus::Confirmed
