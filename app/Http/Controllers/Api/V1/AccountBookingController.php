@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Enums\PaymentGateway;
 use App\Enums\StableBookingStatus;
 use App\Http\Controllers\Api\V1\Concerns\PaginatesListings;
 use App\Http\Controllers\Controller;
@@ -10,7 +9,6 @@ use App\Http\Resources\V1\Bookings\BookingResource;
 use App\Models\BookingSlot;
 use App\Models\Customer;
 use App\Models\StableBooking;
-use App\Services\Payments\Gateways\ThawaniGateway;
 use App\Services\Payments\PaymentGateways;
 use App\Services\Stables\BookingUnavailable;
 use App\Services\Stables\StableBookingActions;
@@ -19,10 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
-use Throwable;
 
 /**
  * The signed-in customer's own bookings (those whose order is theirs, guest bookings from their phone
@@ -70,21 +65,13 @@ class AccountBookingController extends Controller
      * While it waits for an online payment, Thawani is asked about it first (at most every few
      * seconds), so a booking paid in the checkout shows as paid as soon as the app reopens it.
      */
-    public function show(Request $request, string $reference, PaymentGateways $gateways, ThawaniGateway $thawani): BookingResource
+    public function show(Request $request, string $reference, PaymentGateways $gateways): BookingResource
     {
         $booking = $this->find($request, $reference);
-        $order = $booking->order;
 
-        // Thawani does not always send the browser back to our return page after a payment, and
-        // the app refetches this the moment its checkout browser closes: settle it like that page would.
-        if ($order && $order->isPayable() && $order->payment_method === PaymentGateway::Thawani && $order->payment_session_id
-            && Cache::add('api.thawani-check.'.$order->getKey(), true, 5)) {
-            try {
-                $gateways->bind($thawani, $order)->reconcile($order);
-                $booking->refresh();
-            } catch (Throwable $e) {
-                Log::warning('Thawani check on booking fetch failed', ['order' => $order->order_number, 'error' => $e->getMessage()]);
-            }
+        if ($booking->order) {
+            $gateways->settleFromThawani($booking->order);
+            $booking->refresh();
         }
 
         return BookingResource::make($booking);

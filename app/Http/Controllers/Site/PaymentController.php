@@ -49,6 +49,9 @@ class PaymentController extends Controller
             $request->session()->put(self::APP_RETURN.$order->order_number, $back);
         }
 
+        // back from Thawani's page (the back button, a reload) after paying there
+        $this->gateways->settleFromThawani($order);
+
         if (! $order->isPayable()) {
             return $this->toOrder($order);
         }
@@ -60,6 +63,8 @@ class PaymentController extends Controller
             'gateways' => $gateways,
             // the app's first visit: no second "Pay" tap when there is only one way to pay
             'autoStart' => $back !== null && count($gateways) === 1 && ! $request->session()->has('error'),
+            // the app's payment sheet has its own watch on the payment; a website visitor needs this page's
+            'watchesPayment' => ! $request->session()->has(self::APP_RETURN.$order->order_number),
             'seoTitle' => __('payments.checkout_title'),
             'noindex' => true,
         ]);
@@ -114,6 +119,16 @@ class PaymentController extends Controller
         return $redirect->post
             ? view('payments.redirect-post', ['redirect' => $redirect])
             : redirect()->away($redirect->url);
+    }
+
+    /** Asked every few seconds while the payment page is open: whether the customer can move on. */
+    public function status(string $order): JsonResponse
+    {
+        $order = $this->findOrder($order);
+
+        $this->gateways->settleFromThawani($order);
+
+        return response()->json(['settled' => ! $order->isPayable()]);
     }
 
     // ── Thawani ──────────────────────────────────────────────────────────────

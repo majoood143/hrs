@@ -132,6 +132,7 @@ Route::get('/racing/{entity}/{id}', [RacingController::class, 'profile'])
 // shadowed by the /{slug} CMS page route below.
 Route::get('/pay/{order}', [PaymentController::class, 'show'])->middleware('throttle:60,1')->name('payment.start');
 Route::post('/pay/{order}', [PaymentController::class, 'begin'])->middleware('throttle:20,1')->name('payment.begin');
+Route::get('/pay/{order}/status', [PaymentController::class, 'status'])->middleware('throttle:60,1')->name('payment.status');
 
 Route::prefix('payment')->name('payment.')->group(function () {
     Route::get('thawani/return', [PaymentController::class, 'thawaniReturn'])->name('thawani.return');

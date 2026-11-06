@@ -26,6 +26,50 @@
                     </button>
                 @endforeach
             </form>
+            @if($watchesPayment ?? false)
+                <div id="pay-waiting" class="mt-6 rounded-2xl border border-warm-200 bg-warm-50 px-4 py-3 text-sm text-warm-900" role="status" hidden>
+                    <p class="font-semibold">{{ __('payments.waiting_title') }}</p>
+                    <p class="mt-1">{{ __('payments.waiting_body') }}</p>
+                </div>
+                {{-- Thawani's page does not always send the customer back after a payment and cannot be framed: it opens in its own window while this page watches the order --}}
+                <script>
+                    (() => {
+                        const form = document.getElementById('pay-form');
+                        const waiting = document.getElementById('pay-waiting');
+                        const isSettled = () => fetch(@json(route('payment.status', $order->order_number)), { headers: { Accept: 'application/json' } })
+                            .then((response) => response.json()).then((status) => status.settled).catch(() => false);
+                        const moveOn = () => window.location.assign(@json(route('payment.start', $order->order_number)));
+
+                        // the browser's Back shows this page from its own cache, without asking the server
+                        window.addEventListener('pageshow', async () => { if (await isSettled()) moveOn(); });
+
+                        form.addEventListener('submit', (event) => {
+                            if (event.submitter?.value !== 'thawani') return;
+
+                            const payment = window.open('', 'thawani-checkout');
+
+                            // popups blocked: pay in this tab; coming back to this address settles the order
+                            if (!payment) return;
+
+                            form.target = 'thawani-checkout';
+                            setTimeout(() => { form.hidden = true; waiting.hidden = false; });
+
+                            const timer = setInterval(async () => {
+                                if (await isSettled()) {
+                                    clearInterval(timer);
+                                    payment.close();
+                                    moveOn();
+                                } else if (payment.closed) {
+                                    clearInterval(timer);
+                                    form.removeAttribute('target');
+                                    form.hidden = false;
+                                    waiting.hidden = true;
+                                }
+                            }, 4000);
+                        });
+                    })();
+                </script>
+            @endif
             @if($autoStart ?? false)
                 {{-- opened from the app with one way to pay: go straight on, the app already showed the total --}}
                 <script>document.getElementById('pay-form').querySelector('button[type=submit]').click();</script>

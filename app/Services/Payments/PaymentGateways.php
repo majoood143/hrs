@@ -11,6 +11,9 @@ use App\Services\Payments\Gateways\CcAvenueGateway;
 use App\Services\Payments\Gateways\DemoGateway;
 use App\Services\Payments\Gateways\NboGateway;
 use App\Services\Payments\Gateways\ThawaniGateway;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * The gateways a customer may pay with: ticked on the Payment Gateways settings page AND with
@@ -106,5 +109,25 @@ class PaymentGateways
             : null;
 
         return $gateway->forAccount($account);
+    }
+
+    /**
+     * Settles an order paid on Thawani's page, asking Thawani at most every few seconds. After a card
+     * payment that page can fail on its own request and never send the customer to success_url
+     * (its /pay/authorize answers 500 although the session is paid), so nothing may wait for that redirect.
+     */
+    public function settleFromThawani(ServiceOrder $order): void
+    {
+        if (! $order->isPayable() || $order->payment_method !== PaymentGateway::Thawani || ! $order->payment_session_id
+            || ! Cache::add('thawani-check.'.$order->getKey(), true, 3)) {
+            return;
+        }
+
+        try {
+            $this->bind(app(ThawaniGateway::class), $order)->reconcile($order);
+            $order->refresh();
+        } catch (Throwable $e) {
+            Log::warning('Thawani check failed', ['order' => $order->order_number, 'error' => $e->getMessage()]);
+        }
     }
 }

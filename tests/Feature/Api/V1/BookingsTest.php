@@ -361,9 +361,9 @@ class BookingsTest extends TestCase
 
         // the app's address is remembered when the checkout opens (the page itself is the website's)
         // with one way to pay, the app's visit goes straight on to it; a website visit still shows the button
-        $this->get(route('payment.start', $number))->assertDontSee("getElementById('pay-form')", false);
+        $this->get(route('payment.start', $number))->assertDontSee("button[type=submit]').click()", false);
         $this->withSession([])->get(route('payment.start', ['order' => $number, 'app_return' => 'muhra://checkout']))
-            ->assertSee("getElementById('pay-form')", false)
+            ->assertSee("button[type=submit]').click()", false)
             ->assertSee(__('payments.cards_note'));
         $this->assertSame('muhra://checkout', session('payment.app_return.'.$number));
 

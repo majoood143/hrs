@@ -8,6 +8,8 @@ return [
     'pay_button' => 'Pay with :gateway',
     'secure_note' => 'You will be taken to the payment provider\'s secure page. We never see or store your card details.',
     'cards_note' => 'We accept debit and credit cards (Visa and Mastercard).',
+    'waiting_title' => 'Waiting for your payment…',
+    'waiting_body' => 'Finish paying in the window that opened. This page moves on by itself once the payment is confirmed: please do not pay twice.',
     'no_gateways' => 'Online payment is not available right now. Please contact us with your order number.',
     'choose_gateway' => 'Please choose a payment method.',
     'could_not_start' => 'We could not start the payment. Please try again in a moment.',

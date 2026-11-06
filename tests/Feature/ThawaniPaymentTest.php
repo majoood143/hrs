@@ -231,6 +231,57 @@ class ThawaniPaymentTest extends TestCase
         $this->assertDatabaseHas('payment_gateway_logs', ['service_order_id' => $order->id, 'event' => 'cancel']);
     }
 
+    // ── Thawani's page never sent the customer back ──────────────────────────
+
+    public function test_the_status_check_settles_an_order_thawani_says_is_paid(): void
+    {
+        $this->fakeSession($this->sessionBody('paid'));
+        $order = $this->orderWithSession();
+
+        $this->getJson(route('payment.status', $order->order_number))->assertOk()->assertExactJson(['settled' => true]);
+
+        $this->assertSame(PaymentStatus::Paid, $order->refresh()->payment_status);
+    }
+
+    public function test_the_status_check_leaves_an_unpaid_order_alone_and_asks_thawani_at_most_every_few_seconds(): void
+    {
+        $this->fakeSession($this->sessionBody('unpaid'));
+        $order = $this->orderWithSession();
+
+        $this->getJson(route('payment.status', $order->order_number))->assertOk()->assertExactJson(['settled' => false]);
+        $this->getJson(route('payment.status', $order->order_number))->assertOk()->assertExactJson(['settled' => false]);
+
+        Http::assertSentCount(1);
+        $this->assertTrue($order->refresh()->isPayable());
+        $this->assertSame(PaymentStatus::Pending, $order->payment_status);
+    }
+
+    public function test_the_status_check_survives_thawani_being_down(): void
+    {
+        $this->fakeSession(['error' => 'down'], 500);
+        $order = $this->orderWithSession();
+
+        $this->getJson(route('payment.status', $order->order_number))->assertOk()->assertExactJson(['settled' => false]);
+    }
+
+    public function test_coming_back_to_the_checkout_after_paying_shows_the_order_not_the_pay_button(): void
+    {
+        $this->fakeSession($this->sessionBody('paid'));
+        $order = $this->orderWithSession();
+
+        $this->get(route('payment.start', $order->order_number))->assertRedirect(route('orders.show', $order->order_number));
+
+        $this->assertSame(PaymentStatus::Paid, $order->refresh()->payment_status);
+    }
+
+    public function test_the_website_checkout_watches_the_payment_window_but_the_apps_sheet_does_not(): void
+    {
+        $order = $this->makeOrder();
+
+        $this->get(route('payment.start', $order->order_number))->assertOk()->assertSee('thawani-checkout');
+        $this->get(route('payment.start', ['order' => $order->order_number, 'app_return' => 'muhra://checkout']))->assertOk()->assertDontSee('thawani-checkout');
+    }
+
     // ── Webhook ──────────────────────────────────────────────────────────────
 
     private function webhook(string $body, ?string $signature = null)
