@@ -71,6 +71,10 @@ class BookingResource extends JsonResource
             'pay_url' => $order?->isPayable() ? route('payment.start', $order->order_number) : null,
             /** The ticket (PDF with the QR code the stable scans to check them in), once confirmed; a signed link good for a week. @var string|null */
             'ticket_url' => app(BookingTicketPdf::class)->url($booking),
+            /** The ticket's QR code as a PNG data URI (what the stable scans at check-in), once confirmed. @var string|null */
+            'ticket_qr' => app(BookingTicketPdf::class)->qrDataUri($booking),
+            /** The receipt (PDF) in the request's language, once paid; a signed link good for a week. @var string|null */
+            'receipt_url' => app(BookingTicketPdf::class)->receiptUrl($booking, app()->getLocale()),
             'can_cancel' => app(StableBookingActions::class)->customerMayCancel($booking),
             /** The stable's rule, while the booking is confirmed; null otherwise. */
             'cancellation_policy' => $booking->status === StableBookingStatus::Confirmed

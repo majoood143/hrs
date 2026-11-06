@@ -17,7 +17,7 @@
         @if(count($gateways) === 0)
             <p class="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">{{ __('payments.no_gateways') }}</p>
         @else
-            <form method="POST" action="{{ route('payment.begin', $order->order_number) }}" class="mt-6 space-y-3">
+            <form method="POST" action="{{ route('payment.begin', $order->order_number) }}" class="mt-6 space-y-3" id="pay-form">
                 @csrf
                 <p class="text-sm font-semibold text-warm-900">{{ count($gateways) > 1 ? __('payments.pay_with') : __('payments.pay_securely') }}</p>
                 @foreach($gateways as $gateway)
@@ -26,8 +26,12 @@
                     </button>
                 @endforeach
             </form>
+            @if($autoStart ?? false)
+                {{-- opened from the app with one way to pay: go straight on, the app already showed the total --}}
+                <script>document.getElementById('pay-form').querySelector('button[type=submit]').click();</script>
+            @endif
         @endif
 
-        <p class="mt-6 text-xs text-warm-700">{{ __('payments.secure_note') }}</p>
+        <p class="mt-6 text-xs text-warm-700">{{ __('payments.cards_note') }} {{ __('payments.secure_note') }}</p>
     </div>
 </x-layouts.site>

@@ -70,6 +70,9 @@ class ThawaniPaymentTest extends TestCase
             return $request->method() === 'POST'
                 && $request->header('thawani-api-key') === ['sk_test']
                 && $request['client_reference_id'] === $order->order_number
+                && $request['mode'] === 'payment'
+                && $request['expire_in_minutes'] >= 30
+                && $request['metadata']['Customer name'] === $order->customer_name
                 && $request['products'][0]['unit_amount'] === 11025
                 && $request['products'][0]['quantity'] === 1
                 && str_contains($request['success_url'], 'payment/thawani/return?reference='.$order->order_number)

@@ -69,10 +69,19 @@ class ThawaniGateway implements Gateway
 
         $response = $this->createSession([
             'client_reference_id' => $order->order_number,
+            'mode' => 'payment',
             'products' => [['name' => $name, 'quantity' => 1, 'unit_amount' => $order->totalBaisa()]],
             'success_url' => route('payment.thawani.return', ['reference' => $order->order_number]),
             'cancel_url' => route('payment.thawani.cancel', ['reference' => $order->order_number]),
-            'metadata' => ['order_id' => (string) $order->getKey()],
+            // no later than our own hold on the order (Thawani's default is 24 hours, its minimum 30 minutes)
+            'expire_in_minutes' => max(30, (int) config('payments.pending_ttl_minutes', 30)),
+            // Thawani's production checklist asks for the customer's name, phone and email here
+            'metadata' => array_filter([
+                'order_id' => (string) $order->getKey(),
+                'Customer name' => (string) $order->customer_name,
+                'Contact number' => (string) $order->customer_phone,
+                'Email address' => (string) $order->customer_email,
+            ], fn (string $value) => $value !== ''),
         ], $order);
 
         $sessionId = $response['data']['session_id'] ?? null;
@@ -215,7 +224,7 @@ class ThawaniGateway implements Gateway
      * Verify an incoming webhook's HMAC-SHA256 signature. With no secret configured the
      * webhook is open, which is safe only because reconcile() re-fetches the session itself.
      */
-    public function verifyWebhookSignature(string $payload, string $signature): bool
+    public function verifyWebhookSignature(string $payload, string $signature, string $timestamp = ''): bool
     {
         $secret = $this->secret('webhook_secret');
 
@@ -223,6 +232,9 @@ class ThawaniGateway implements Gateway
             return true;
         }
 
-        return hash_equals(hash_hmac('sha256', $payload, $secret), $signature);
+        // Thawani signs "{body}-{thawani-timestamp header}"; the body alone when no timestamp is sent
+        $signed = $timestamp !== '' ? $payload.'-'.$timestamp : $payload;
+
+        return hash_equals(hash_hmac('sha256', $signed, $secret), $signature);
     }
 }

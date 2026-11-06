@@ -5,12 +5,15 @@ namespace App\Services\Stables;
 use App\Enums\StableBookingStatus;
 use App\Models\SiteSetting;
 use App\Models\StableBooking;
+use App\Services\Orders\OrderReceiptPdf;
 use App\Services\Pdf\MpdfFactory;
 use App\Services\Racing\RacingPdf;
 use App\Support\Locale;
 use App\Support\PdfText;
 use Illuminate\Support\Facades\URL;
 use Mpdf\Output\Destination;
+use Mpdf\QrCode\Output\Png;
+use Mpdf\QrCode\QrCode;
 
 /**
  * A confirmed booking's ticket: the site's logo, brand colour and fonts, the session, and a QR code
@@ -46,6 +49,26 @@ class BookingTicketPdf
     {
         return $this->available($booking)
             ? URL::temporarySignedRoute('bookings.ticket', now()->addDays(self::LINK_DAYS), ['reference' => $booking->reference])
+            : null;
+    }
+
+    /** The ticket's QR code alone (a PNG data URI), for the app's booking screen; null while there is no ticket. */
+    public function qrDataUri(StableBooking $booking): ?string
+    {
+        if (! $this->available($booking)) {
+            return null;
+        }
+
+        $png = (new Png)->output(new QrCode($this->checkInUrl($booking), 'M'), 360, [255, 255, 255], [0, 0, 0], 9);
+
+        return 'data:image/png;base64,'.base64_encode($png);
+    }
+
+    /** A signed link to the order's receipt (the account page's one needs the website sign-in), in that language; null until paid. */
+    public function receiptUrl(StableBooking $booking, string $locale): ?string
+    {
+        return $booking->order && app(OrderReceiptPdf::class)->available($booking->order)
+            ? URL::temporarySignedRoute('bookings.receipt', now()->addDays(self::LINK_DAYS), ['reference' => $booking->reference, 'lang' => $locale])
             : null;
     }
 

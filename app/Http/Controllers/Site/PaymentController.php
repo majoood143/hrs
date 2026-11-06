@@ -53,9 +53,13 @@ class PaymentController extends Controller
             return $this->toOrder($order);
         }
 
+        $gateways = $this->gateways->forOrder($order);
+
         return view('site.payments.checkout', [
             'order' => $order->loadMissing('service'),
-            'gateways' => $this->gateways->forOrder($order),
+            'gateways' => $gateways,
+            // the app's first visit: no second "Pay" tap when there is only one way to pay
+            'autoStart' => $back !== null && count($gateways) === 1 && ! $request->session()->has('error'),
             'seoTitle' => __('payments.checkout_title'),
             'noindex' => true,
         ]);
@@ -207,7 +211,7 @@ class PaymentController extends Controller
             $thawani = $this->gateways->bind($thawani, $order);
         }
 
-        if (! $thawani->verifyWebhookSignature($payload, (string) $request->header('thawani-signature', ''))) {
+        if (! $thawani->verifyWebhookSignature($payload, (string) $request->header('thawani-signature', ''), (string) $request->header('thawani-timestamp', ''))) {
             Log::warning('Thawani webhook: invalid signature');
 
             return response()->json(['message' => 'Invalid signature'], 401);

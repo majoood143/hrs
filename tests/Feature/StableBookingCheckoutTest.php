@@ -407,7 +407,10 @@ class StableBookingCheckoutTest extends TestCase
         // signed with our own secret: refused
         $this->call('POST', route('payment.thawani.webhook'), [], [], [], ['CONTENT_TYPE' => 'application/json', 'HTTP_THAWANI_SIGNATURE' => hash_hmac('sha256', $payload, 'wrong')], $payload)->assertStatus(401);
 
-        $this->call('POST', route('payment.thawani.webhook'), [], [], [], ['CONTENT_TYPE' => 'application/json', 'HTTP_THAWANI_SIGNATURE' => hash_hmac('sha256', $payload, 'wh_stable')], $payload)->assertOk();
+        // Thawani signs "{body}-{timestamp}": the body alone with the timestamp sent is refused
+        $headers = ['CONTENT_TYPE' => 'application/json', 'HTTP_THAWANI_TIMESTAMP' => '1733807121'];
+        $this->call('POST', route('payment.thawani.webhook'), [], [], [], $headers + ['HTTP_THAWANI_SIGNATURE' => hash_hmac('sha256', $payload, 'wh_stable')], $payload)->assertStatus(401);
+        $this->call('POST', route('payment.thawani.webhook'), [], [], [], $headers + ['HTTP_THAWANI_SIGNATURE' => hash_hmac('sha256', $payload.'-1733807121', 'wh_stable')], $payload)->assertOk();
 
         $this->assertTrue($order->refresh()->isPaid());
         $this->assertSame(StableBookingStatus::Confirmed, $order->stableBooking->status);

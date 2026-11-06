@@ -149,6 +149,7 @@ Route::prefix('payment')->name('payment.')->group(function () {
 // usable as a CMS slug for a landing page).
 Route::prefix('bookings')->name('bookings.')->group(function () {
     Route::get('ticket/{reference}', [BookingTicketController::class, 'download'])->middleware(['signed', 'throttle:30,1'])->name('ticket');
+    Route::get('receipt/{reference}', [BookingTicketController::class, 'receipt'])->middleware(['signed', 'throttle:30,1'])->name('receipt');
     Route::get('search', [StableBookingController::class, 'search'])->middleware('throttle:120,1')->name('search');
     Route::get('slots/{slot}', [StableBookingController::class, 'create'])->whereNumber('slot')->name('create');
     Route::post('slots/{slot}', [StableBookingController::class, 'store'])->whereNumber('slot')->middleware('throttle:10,1')->name('store');

@@ -6,8 +6,10 @@ use App\Filament\Stable\Pages\CheckIn;
 use App\Http\Controllers\Controller;
 use App\Models\StableBooking;
 use App\Models\User;
+use App\Services\Orders\OrderReceiptPdf;
 use App\Services\Stables\BookingTicketPdf;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -28,6 +30,21 @@ class BookingTicketController extends Controller
         return response($tickets->render($booking), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="'.$tickets->filename($booking).'"',
+            'X-Robots-Tag' => 'noindex',
+            'Cache-Control' => 'private, no-store',
+        ]);
+    }
+
+    /** The booking's receipt, from the signed link the app gets (`receipt_url`). */
+    public function receipt(Request $request, string $reference, OrderReceiptPdf $receipts): Response
+    {
+        $order = StableBooking::query()->where('reference', $reference)->firstOrFail()->order;
+
+        abort_unless($order && $receipts->available($order), 404);
+
+        return response($receipts->render($order, $request->query('lang')), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$receipts->filename($order).'"',
             'X-Robots-Tag' => 'noindex',
             'Cache-Control' => 'private, no-store',
         ]);

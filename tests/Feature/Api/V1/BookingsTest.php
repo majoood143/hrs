@@ -3,6 +3,7 @@
 namespace Tests\Feature\Api\V1;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentGateway;
 use App\Enums\PaymentStatus;
 use App\Enums\StableBookingStatus;
 use App\Models\BookingSlot;
@@ -16,6 +17,7 @@ use App\Models\StablePackagePurchase;
 use App\Models\User;
 use App\Services\Stables\SlotGenerator;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Tests\Concerns\PreparesStableBookings;
 use Tests\TestCase;
@@ -218,7 +220,9 @@ class BookingsTest extends TestCase
             ->assertJsonPath('data.status.value', 'pending')
             ->assertJsonPath('data.riders', 2)
             ->assertJsonPath('data.order.total.amount', '33.075')
-            ->assertJsonPath('data.can_cancel', true);
+            ->assertJsonPath('data.can_cancel', true)
+            ->assertJsonPath('data.ticket_qr', null)
+            ->assertJsonPath('data.receipt_url', null);
 
         $order = ServiceOrder::query()->sole();
         $this->assertSame(route('payment.start', $order->order_number), $booking->json('data.pay_url'));
@@ -356,7 +360,11 @@ class BookingsTest extends TestCase
         $number = ServiceOrder::query()->sole()->order_number;
 
         // the app's address is remembered when the checkout opens (the page itself is the website's)
-        $this->withSession([])->get(route('payment.start', ['order' => $number, 'app_return' => 'muhra://checkout']));
+        // with one way to pay, the app's visit goes straight on to it; a website visit still shows the button
+        $this->get(route('payment.start', $number))->assertDontSee("getElementById('pay-form')", false);
+        $this->withSession([])->get(route('payment.start', ['order' => $number, 'app_return' => 'muhra://checkout']))
+            ->assertSee("getElementById('pay-form')", false)
+            ->assertSee(__('payments.cards_note'));
         $this->assertSame('muhra://checkout', session('payment.app_return.'.$number));
 
         $this->post(route('payment.begin', $number), ['gateway' => 'demo']);
@@ -364,6 +372,30 @@ class BookingsTest extends TestCase
             ->assertRedirect('muhra://checkout?order='.$number.'&result=paid');
 
         $this->assertSame(StableBookingStatus::Confirmed, StableBooking::query()->sole()->status);
+    }
+
+    public function test_a_thawani_payment_shows_as_paid_even_when_the_return_page_is_never_reached(): void
+    {
+        $token = $this->signIn();
+        $this->as($token)->postJson("/api/v1/bookings/slots/{$this->slot->id}", $this->form());
+        $order = ServiceOrder::query()->sole();
+        $order->update(['payment_session_id' => 'sess_app', 'payment_method' => PaymentGateway::Thawani]);
+        $reference = StableBooking::query()->sole()->reference;
+
+        Http::fake(['*checkout/session/sess_app' => Http::response(['data' => [
+            'payment_status' => 'paid', 'total_amount' => $order->totalBaisa(), 'invoice' => 'INV-9',
+        ]])]);
+
+        $data = $this->as($token)->getJson("/api/v1/account/bookings/{$reference}")
+            ->assertOk()
+            ->assertJsonPath('data.status.value', 'confirmed')
+            ->assertJsonPath('data.pay_url', null)
+            ->json('data');
+
+        $this->assertStringStartsWith('data:image/png;base64,', $data['ticket_qr']);
+        // the receipt opens from its signed link, without the website's sign-in; never unsigned
+        $this->get($data['receipt_url'])->assertOk()->assertHeader('Content-Type', 'application/pdf');
+        $this->get(route('bookings.receipt', ['reference' => $reference, 'lang' => 'en']))->assertForbidden();
     }
 
     public function test_only_the_apps_own_addresses_are_returned_to(): void
