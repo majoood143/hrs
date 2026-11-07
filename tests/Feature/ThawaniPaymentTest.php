@@ -278,8 +278,8 @@ class ThawaniPaymentTest extends TestCase
     {
         $order = $this->makeOrder();
 
-        $this->get(route('payment.start', $order->order_number))->assertOk()->assertSee('thawani-checkout');
-        $this->get(route('payment.start', ['order' => $order->order_number, 'app_return' => 'muhra://checkout']))->assertOk()->assertDontSee('thawani-checkout');
+        $this->get(route('payment.start', $order->order_number))->assertOk()->assertSee('payment-checkout');
+        $this->get(route('payment.start', ['order' => $order->order_number, 'app_return' => 'muhra://checkout']))->assertOk()->assertDontSee('payment-checkout');
     }
 
     // ── Webhook ──────────────────────────────────────────────────────────────

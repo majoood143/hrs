@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\PushCampaign;
 use App\Models\PushDelivery;
 use App\Services\Push\ExpoPush;
+use App\Support\MobileApp\MobileAutoPush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -31,6 +32,13 @@ class SendPushCampaign implements ShouldQueue
         $campaign = PushCampaign::query()->find($this->campaignId);
 
         if (! $claimed || ! $campaign) {
+            return;
+        }
+
+        // automatic: the post may have been removed, or the section switched off, since it was queued
+        if ($campaign->source && ! MobileAutoPush::stillWanted($campaign)) {
+            $campaign->deleteQuietly();
+
             return;
         }
 

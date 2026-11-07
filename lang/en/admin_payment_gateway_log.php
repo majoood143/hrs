@@ -85,6 +85,6 @@ return [
 
     'empty_state' => [
         'heading' => 'No payment gateway logs yet',
-        'description' => 'Transactions with Thawani, NBO, and CCAvenue will appear here as they occur.',
+        'description' => 'Transactions with Thawani, OMPAY, NBO, and CCAvenue will appear here as they occur.',
     ],
 ];

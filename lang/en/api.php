@@ -2,6 +2,13 @@
 
 // Messages of the mobile app's API (/api/v1). The app shows them as they are.
 return [
+    'errors' => [
+        '401' => 'Please sign in to continue.',
+        '403' => 'You cannot do this.',
+        '404' => 'We could not find what you are looking for.',
+        '429' => 'Too many attempts. Please wait a moment and try again.',
+        '500' => 'The server could not answer right now. Please try again in a moment.',
+    ],
     'verification' => [
         'invalid_phone' => 'Enter a valid phone number, with the country code if it is not Omani.',
         'throttled' => 'Please wait :seconds seconds before asking for another code.',
@@ -20,6 +27,17 @@ return [
     'push' => [
         'new_horses' => 'New horse for sale',
         'new_tools' => 'New tool for sale',
+        'new_transfers' => 'New on the transfer board',
+        'new_farriers' => 'New farrier',
+        'new_jockeys' => 'New jockey',
+        'new_stables' => 'New stable',
+        'new_clinics' => 'New clinic',
+        'new_centers' => 'New center',
+        'new_shops' => 'New shop',
+        'new_events' => 'New event',
+        'new_blog' => 'New on the blog',
+        'new_videos' => 'New video',
+        'route_arrow' => ' → ',
         'all_horses' => 'All horses for sale',
         'all_tools' => 'All tools for sale',
         'up_to' => 'up to :price',

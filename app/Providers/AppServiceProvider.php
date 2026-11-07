@@ -23,6 +23,7 @@ use App\Services\SettingsService;
 use App\Support\Api\PostingToken;
 use App\Support\FormOrderSettings;
 use App\Support\ImageCompressor;
+use App\Support\MobileApp\MobileAutoPush;
 use App\Support\PhoneNumber;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Dedoc\Scramble\Scramble;
@@ -90,6 +91,8 @@ class AppServiceProvider extends ServiceProvider
         // long-lived worker (Octane, queue, the test suite rebuilding the app per test) never
         // serves a previous request's settings.
         SiteSetting::resetMemo();
+
+        MobileAutoPush::listen();
 
         // The rich editor's text-direction extension (npm run build:filament-plugins,
         // then php artisan filament:assets copies it to public/js/app).

@@ -62,7 +62,7 @@ class AccountBookingController extends Controller
     /**
      * One of my bookings
      *
-     * While it waits for an online payment, Thawani is asked about it first (at most every few
+     * While it waits for an online payment, the gateway is asked about it first (at most every few
      * seconds), so a booking paid in the checkout shows as paid as soon as the app reopens it.
      */
     public function show(Request $request, string $reference, PaymentGateways $gateways): BookingResource
@@ -70,7 +70,7 @@ class AccountBookingController extends Controller
         $booking = $this->find($request, $reference);
 
         if ($booking->order) {
-            $gateways->settleFromThawani($booking->order);
+            $gateways->settleFromGateway($booking->order);
             $booking->refresh();
         }
 

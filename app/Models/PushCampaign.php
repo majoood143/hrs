@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\MobileApp\AppClient;
+use App\Support\MobileApp\MobileAutoPush;
 use App\Support\MobileApp\MobileFeatures;
 use App\Support\MobileApp\MobileScreens;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,11 +27,11 @@ class PushCampaign extends Model
 
     public const STATUSES = ['draft', 'scheduled', 'sending', 'sent'];
 
-    /** A phone gets at most this many campaigns in 24 hours (booking alerts are not counted). */
+    /** A phone gets at most this many campaigns in 24 hours (booking alerts and automatic ones are not counted: MobileAutoPush::dailyCap()). */
     public const DAILY_CAP = 2;
 
     protected $fillable = [
-        'en_title', 'ar_title', 'en_body', 'ar_body', 'image_path',
+        'source', 'source_id', 'en_title', 'ar_title', 'en_body', 'ar_body', 'image_path',
         'action_type', 'action_screen', 'action_url',
         'audience', 'topic', 'platforms', 'locales', 'min_version', 'max_version', 'active_days',
         'status', 'scheduled_at', 'sent_at', 'recipients', 'accepted', 'opened', 'created_by',
@@ -84,9 +85,15 @@ class PushCampaign extends Model
     /** The phones it goes to now: the audience, the topic, the filters, the daily cap, and the tapped screen's feature. */
     public function devices(): Collection
     {
-        $feature = $this->action_type === MobileAnnouncement::ACTION_SCREEN ? MobileScreens::feature((string) $this->action_screen) : null;
+        $feature = $this->source
+            ? MobileAutoPush::feature($this->source)
+            : ($this->action_type === MobileAnnouncement::ACTION_SCREEN ? MobileScreens::feature((string) $this->action_screen) : null);
+        $automatic = $this->source !== null;
+        // a phone with a saved search that matches already got its own push about this post
+        $told = $automatic ? PushSavedSearch::deviceIdsFor($this->source, (int) $this->source_id) : [];
 
         return MobileDevice::query()
+            ->where('enabled', true)
             ->when($this->audience === 'customers', fn (Builder $q) => $q->whereNotNull('customer_token_id'))
             ->when($this->audience === 'owners', fn (Builder $q) => $q->whereNotNull('owner_token_id'))
             ->when($this->audience === 'guests', fn (Builder $q) => $q->whereNull('customer_token_id')->whereNull('owner_token_id'))
@@ -94,12 +101,14 @@ class PushCampaign extends Model
             ->when(! empty($this->platforms), fn (Builder $q) => $q->whereIn('platform', $this->platforms))
             ->when(! empty($this->locales), fn (Builder $q) => $q->whereIn('locale', $this->locales))
             ->when($this->active_days, fn (Builder $q) => $q->where('last_seen_at', '>=', now()->subDays($this->active_days)))
-            ->has('deliveries', '<', self::DAILY_CAP, 'and', fn (Builder $q) => $q->where('created_at', '>', now()->subDay()))
+            ->has('deliveries', '<', $automatic ? MobileAutoPush::dailyCap() : self::DAILY_CAP, 'and', fn (Builder $q) => $q
+                ->where('created_at', '>', now()->subDay())
+                ->whereHas('campaign', fn (Builder $c) => $automatic ? $c->whereNotNull('source') : $c->whereNull('source')))
             ->get()
-            ->filter(function (MobileDevice $device) use ($feature) {
+            ->filter(function (MobileDevice $device) use ($feature, $told) {
                 $client = new AppClient($device->platform, $device->app_version);
 
-                return $client->atLeast($this->min_version) && $client->atMost($this->max_version)
+                return ! in_array($device->getKey(), $told, true) && $client->atLeast($this->min_version) && $client->atMost($this->max_version)
                     && ($feature === null || MobileFeatures::enabledFor($feature, $client));
             })
             ->values();

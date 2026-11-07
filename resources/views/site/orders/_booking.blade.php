@@ -4,6 +4,9 @@
     $booking?->loadMissing(['slot', 'offering', 'stable']);
     $actions = app(\App\Services\Stables\StableBookingActions::class);
     $full ??= false;
+    $tickets = app(\App\Services\Stables\BookingTicketPdf::class);
+    // this page opens with the order number alone unless $full: the ticket then leaves the names out
+    $ticketUrl = $booking ? $tickets->url($booking, anonymous: ! $full) : null;
 @endphp
 
 @if($booking && $booking->slot)
@@ -31,6 +34,14 @@
             <li class="flex items-center gap-2"><x-heroicon-o-user-group class="h-5 w-5 text-warm-600" aria-hidden="true" />{{ trans_choice('stable_bookings.riders_count', $booking->riders, ['count' => $booking->riders]) }}</li>
         </ul>
 
+        @if($ticketUrl)
+            <div class="mt-5 flex flex-col items-center gap-2 rounded-xl border border-warm-200 bg-white p-4 text-center">
+                <img src="{{ $tickets->qrDataUri($booking) }}" width="176" height="176" alt="{{ __('booking_ticket.qr_label', ['reference' => $booking->reference]) }}">
+                <p class="font-mono text-sm font-semibold text-warm-900" dir="ltr">{{ $booking->reference }}</p>
+                <p class="text-sm text-warm-700">{{ __('booking_ticket.show_qr') }}</p>
+            </div>
+        @endif
+
         @if($full && $booking->riderNames())
             <p class="mt-3 text-sm text-warm-700">{{ $booking->riderNames() }}</p>
         @endif
@@ -57,9 +68,9 @@
         @endif
 
         <div class="mt-5 flex flex-wrap items-center gap-3">
-            @if($full && ($ticketUrl = app(\App\Services\Stables\BookingTicketPdf::class)->url($booking)))
-                <a href="{{ $ticketUrl }}" target="_blank" rel="noopener" class="btn-warm !py-2 text-sm">
-                    <x-heroicon-o-qr-code class="h-5 w-5" aria-hidden="true" />{{ __('booking_ticket.download') }}
+            @if($ticketUrl)
+                <a href="{{ $ticketUrl }}" download="{{ $tickets->filename($booking) }}" class="btn-warm !py-2 text-sm">
+                    <x-heroicon-o-arrow-down-tray class="h-5 w-5" aria-hidden="true" />{{ __('booking_ticket.download') }}
                 </a>
             @endif
 

@@ -89,25 +89,6 @@ class GeneralSettings extends Page implements HasForms
             'heading_font' => SiteSetting::get('heading_font', 'fraunces'),
             'body_font' => SiteSetting::get('body_font', 'inter'),
 
-            'min_tickets_per_booking' => (string) SiteSetting::get('min_tickets_per_booking', 1),
-            'max_tickets_per_booking' => (string) SiteSetting::get('max_tickets_per_booking', 10),
-            'max_attendee_age_years' => (string) SiteSetting::get('max_attendee_age_years', 75),
-            'pending_booking_expiry_minutes' => (string) SiteSetting::get('pending_booking_expiry_minutes', 15),
-
-            'show_email' => (bool) SiteSetting::get('show_email', true),
-            'show_phone' => (bool) SiteSetting::get('show_phone', true),
-            'show_date_of_birth' => (bool) SiteSetting::get('show_date_of_birth', true),
-            'show_gender' => (bool) SiteSetting::get('show_gender', true),
-            'show_nationality' => (bool) SiteSetting::get('show_nationality', true),
-            'show_identity_number' => (bool) SiteSetting::get('show_identity_number', true),
-            'show_slot_end_time' => (bool) SiteSetting::get('show_slot_end_time', true),
-
-            'checkin_date_restriction_enabled' => (bool) SiteSetting::get('checkin_date_restriction_enabled', false),
-            'checkin_date_restriction_mode' => SiteSetting::get('checkin_date_restriction_mode', 'block'),
-            'checkin_date_grace_days' => (string) SiteSetting::get('checkin_date_grace_days', 0),
-
-            'terms_en' => SiteSetting::get('terms_en', ''),
-            'terms_ar' => SiteSetting::get('terms_ar', ''),
             'terms_url_en' => SiteSetting::get('terms_url_en', ''),
             'terms_url_ar' => SiteSetting::get('terms_url_ar', ''),
             'privacy_url_en' => SiteSetting::get('privacy_url_en', ''),
@@ -427,126 +408,9 @@ class GeneralSettings extends Page implements HasForms
                                     ]),
                             ]),
 
-                        Tab::make(__('general_settings.tabs.booking_rules'))
-                            ->icon('heroicon-o-ticket')
-                            ->schema([
-                                Section::make(__('general_settings.sections.booking_rules'))
-                                    ->schema([
-                                        Grid::make(2)->schema([
-                                            TextInput::make('min_tickets_per_booking')
-                                                ->label(__('general_settings.fields.min_tickets_per_booking'))
-                                                ->numeric()
-                                                ->minValue(1)
-                                                ->required(),
-
-                                            TextInput::make('max_tickets_per_booking')
-                                                ->label(__('general_settings.fields.max_tickets_per_booking'))
-                                                ->numeric()
-                                                ->minValue(1)
-                                                ->maxValue(1000)
-                                                ->required(),
-
-                                            TextInput::make('max_attendee_age_years')
-                                                ->label(__('general_settings.fields.max_attendee_age_years'))
-                                                ->numeric()
-                                                ->minValue(1)
-                                                ->maxValue(120)
-                                                ->required(),
-
-                                            TextInput::make('pending_booking_expiry_minutes')
-                                                ->label(__('general_settings.fields.pending_booking_expiry_minutes'))
-                                                ->helperText(__('general_settings.fields.pending_booking_expiry_minutes_helper'))
-                                                ->numeric()
-                                                ->minValue(1)
-                                                ->required(),
-                                        ]),
-
-                                        Toggle::make('show_slot_end_time')
-                                            ->label(__('general_settings.fields.show_slot_end_time'))
-                                            ->helperText(__('general_settings.fields.show_slot_end_time_helper')),
-                                    ]),
-                            ]),
-
-                        Tab::make(__('general_settings.tabs.check_in'))
-                            ->icon('heroicon-o-qr-code')
-                            ->schema([
-                                Section::make(__('general_settings.sections.check_in'))
-                                    ->description(__('general_settings.sections.check_in_desc'))
-                                    ->schema([
-                                        Toggle::make('checkin_date_restriction_enabled')
-                                            ->label(__('general_settings.fields.checkin_date_restriction_enabled'))
-                                            ->helperText(__('general_settings.fields.checkin_date_restriction_enabled_helper'))
-                                            ->live(),
-
-                                        Grid::make(2)
-                                            ->schema([
-                                                Select::make('checkin_date_restriction_mode')
-                                                    ->label(__('general_settings.fields.checkin_date_restriction_mode'))
-                                                    ->helperText(__('general_settings.fields.checkin_date_restriction_mode_helper'))
-                                                    ->options([
-                                                        'block' => __('general_settings.fields.checkin_date_restriction_mode_block'),
-                                                        'warn' => __('general_settings.fields.checkin_date_restriction_mode_warn'),
-                                                    ])
-                                                    ->native(false)
-                                                    ->required(),
-
-                                                TextInput::make('checkin_date_grace_days')
-                                                    ->label(__('general_settings.fields.checkin_date_grace_days'))
-                                                    ->helperText(__('general_settings.fields.checkin_date_grace_days_helper'))
-                                                    ->numeric()
-                                                    ->minValue(0)
-                                                    ->maxValue(30)
-                                                    ->required(),
-                                            ])
-                                            ->visible(fn (Get $get) => (bool) $get('checkin_date_restriction_enabled')),
-                                    ]),
-                            ]),
-
-                        Tab::make(__('general_settings.tabs.attendee_fields'))
-                            ->icon('heroicon-o-user-circle')
-                            ->schema([
-                                Section::make(__('general_settings.sections.attendee_fields'))
-                                    ->description(__('general_settings.sections.attendee_fields_desc'))
-                                    ->schema([
-                                        Grid::make(3)->schema([
-                                            Toggle::make('show_email')
-                                                ->label(__('general_settings.fields.show_email')),
-
-                                            Toggle::make('show_phone')
-                                                ->label(__('general_settings.fields.show_phone')),
-
-                                            Toggle::make('show_date_of_birth')
-                                                ->label(__('general_settings.fields.show_date_of_birth')),
-
-                                            Toggle::make('show_gender')
-                                                ->label(__('general_settings.fields.show_gender')),
-
-                                            Toggle::make('show_nationality')
-                                                ->label(__('general_settings.fields.show_nationality')),
-
-                                            Toggle::make('show_identity_number')
-                                                ->label(__('general_settings.fields.show_identity_number')),
-                                        ]),
-                                    ]),
-                            ]),
-
                         Tab::make(__('general_settings.tabs.terms'))
                             ->icon('heroicon-o-document-text')
                             ->schema([
-                                Section::make(__('general_settings.fields.terms_en'))
-                                    ->schema([
-                                        RichEditor::make('terms_en')
-                                            ->label('')
-                                            ->fileAttachmentsDisk('public'),
-                                    ]),
-
-                                Section::make(__('general_settings.fields.terms_ar'))
-                                    ->schema([
-                                        RichEditor::make('terms_ar')
-                                            ->label('')
-                                            ->fileAttachmentsDisk('public'),
-                                    ]),
-
                                 Section::make(__('general_settings.sections.terms_url'))
                                     ->description(__('general_settings.sections.terms_url_desc'))
                                     ->schema([
@@ -954,14 +818,6 @@ class GeneralSettings extends Page implements HasForms
             'button_text_color' => 'color',
             'heading_font' => 'text',
             'body_font' => 'text',
-            'min_tickets_per_booking' => 'number',
-            'max_tickets_per_booking' => 'number',
-            'max_attendee_age_years' => 'number',
-            'pending_booking_expiry_minutes' => 'number',
-            'checkin_date_restriction_mode' => 'text',
-            'checkin_date_grace_days' => 'number',
-            'terms_en' => 'richtext',
-            'terms_ar' => 'richtext',
             'terms_url_en' => 'text',
             'terms_url_ar' => 'text',
             'privacy_url_en' => 'text',
@@ -998,14 +854,6 @@ class GeneralSettings extends Page implements HasForms
         }
 
         $booleans = [
-            'show_email',
-            'show_phone',
-            'show_date_of_birth',
-            'show_gender',
-            'show_nationality',
-            'show_identity_number',
-            'show_slot_end_time',
-            'checkin_date_restriction_enabled',
             'module_kiosk_enabled',
             'module_extra_services_enabled',
             'module_private_events_enabled',

@@ -487,6 +487,8 @@ class YouTubeChannelsTest extends TestCase
 
             return str_contains($en, 'Added to the video library and showing: ')
                 && str_contains($en, '/admin/videos/final-race-2/edit')
+                && str_contains($en, 'On the website: '.route('video-library.show', 'final-race-2'))
+                && str_contains($ar, 'على الموقع: '.route('video-library.show', 'final-race-2'))
                 && ! str_contains($en, '/admin/youtube-inbox')
                 && str_contains($ar, 'أُضيف إلى مكتبة الفيديو وهو ظاهر');
         });
@@ -523,7 +525,8 @@ class YouTubeChannelsTest extends TestCase
         app(ChannelWatcher::class)->check($channel->fresh());
 
         $this->assertFalse(Video::query()->where('youtube_url', 'like', '%vid0000000f')->sole()->is_active);
-        Queue::assertPushed(SendWhatsAppMessage::class, fn (SendWhatsAppMessage $job) => str_contains($job->message, 'hidden until you publish it'));
+        Queue::assertPushed(SendWhatsAppMessage::class, fn (SendWhatsAppMessage $job) => str_contains($job->message, 'hidden until you publish it')
+            && ! str_contains($job->message, '/video-library/watch/'));
     }
 
     public function test_the_first_check_and_a_channel_without_folder_add_nothing(): void

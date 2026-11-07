@@ -56,6 +56,11 @@ class PaymentGateways extends Page implements HasForms
                 'webhook_secret' => SecretSetting::get('thawani.webhook_secret'),
                 'test_mode' => (bool) SiteSetting::get('thawani.test_mode', true),
             ],
+            'ompay' => [
+                'api_key' => SecretSetting::get('ompay.api_key'),
+                'api_secret' => SecretSetting::get('ompay.api_secret'),
+                'test_mode' => (bool) SiteSetting::get('ompay.test_mode', true),
+            ],
             'nbo' => [
                 'tranportal_id' => SiteSetting::get('nbo.tranportal_id', ''),
                 'tranportal_password' => SecretSetting::get('nbo.tranportal_password'),
@@ -104,6 +109,7 @@ class PaymentGateways extends Page implements HasForms
                             ->label(__('payment_gateways.options.active_gateway'))
                             ->options(array_filter([
                                 'thawani' => __('payment_gateways.options.thawani'),
+                                'ompay' => __('payment_gateways.options.ompay'),
                                 'nbo' => __('payment_gateways.options.nbo'),
                                 'ccavenue' => __('payment_gateways.options.ccavenue'),
                                 // marks orders paid without money: never offered on a live site
@@ -185,6 +191,33 @@ class PaymentGateways extends Page implements HasForms
                             ->password()
                             ->revealable()
                             ->maxLength(255),
+                    ]),
+
+                Section::make(__('payment_gateways.sections.ompay'))
+                    ->description(__('payment_gateways.sections.ompay_desc'))
+                    ->visible(fn ($get) => in_array('ompay', (array) $get('enabled_gateways')))
+                    ->schema([
+                        Toggle::make('ompay.test_mode')
+                            ->label(__('payment_gateways.fields.test_mode'))
+                            ->helperText(__('payment_gateways.fields.ompay_test_mode_helper'))
+                            ->default(true)
+                            ->live(),
+
+                        Group::make([
+                            TextInput::make('ompay.api_key')
+                                ->label(__('payment_gateways.fields.api_key'))
+                                ->password()
+                                ->revealable()
+                                ->required(fn ($get) => in_array('ompay', (array) $get('enabled_gateways')))
+                                ->maxLength(255),
+
+                            TextInput::make('ompay.api_secret')
+                                ->label(__('payment_gateways.fields.api_secret'))
+                                ->password()
+                                ->revealable()
+                                ->required(fn ($get) => in_array('ompay', (array) $get('enabled_gateways')))
+                                ->maxLength(255),
+                        ])->columns(2),
                     ]),
 
                 Section::make(__('payment_gateways.sections.nbo'))
@@ -278,6 +311,7 @@ class PaymentGateways extends Page implements HasForms
     {
         $state = $this->form->getState();
         $thawani = $state['thawani'] ?? [];
+        $ompay = $state['ompay'] ?? [];
         $nbo = $state['nbo'] ?? [];
         $ccavenue = $state['ccavenue'] ?? [];
         $enabled = array_values($state['enabled_gateways'] ?? []);
@@ -289,6 +323,10 @@ class PaymentGateways extends Page implements HasForms
         SiteSetting::set('thawani.base_url', $thawani['base_url'] ?? '', 'text', null, 'payment_gateways');
         SecretSetting::set('thawani.webhook_secret', $thawani['webhook_secret'] ?? '', 'payment_gateways');
         SiteSetting::set('thawani.test_mode', ! empty($thawani['test_mode']), 'boolean', null, 'payment_gateways');
+
+        SecretSetting::set('ompay.api_key', $ompay['api_key'] ?? '', 'payment_gateways');
+        SecretSetting::set('ompay.api_secret', $ompay['api_secret'] ?? '', 'payment_gateways');
+        SiteSetting::set('ompay.test_mode', ! empty($ompay['test_mode']), 'boolean', null, 'payment_gateways');
 
         SiteSetting::set('nbo.tranportal_id', $nbo['tranportal_id'] ?? '', 'text', null, 'payment_gateways');
         SecretSetting::set('nbo.tranportal_password', $nbo['tranportal_password'] ?? '', 'payment_gateways');

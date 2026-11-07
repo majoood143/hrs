@@ -29,5 +29,7 @@
     "Or": "أو",
     "post a transfer offer or request": "انشر عرض أو طلب نقل",
     "Privacy Policy": "سياسة الخصوصية",
-    "Terms & Conditions": "الشروط والأحكام"
+    "Terms & Conditions": "الشروط والأحكام",
+    "(and :count more error)": "(وخطأ آخر)",
+    "(and :count more errors)": "(و:count أخطاء أخرى)"
 }

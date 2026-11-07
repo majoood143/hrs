@@ -25,6 +25,28 @@ class PushSavedSearch extends Model
         return $this->belongsTo(MobileDevice::class, 'mobile_device_id');
     }
 
+    /**
+     * The phones with a search on this board that this visible post matches, once each.
+     *
+     * @return list<int>
+     */
+    public static function deviceIdsFor(string $section, int $postId): array
+    {
+        if (! isset(self::SECTIONS[$section])) {
+            return [];
+        }
+
+        [$model] = self::SECTIONS[$section];
+
+        // shortcut: one query per saved search; group searches by filters if there are thousands
+        return self::query()->where('section', $section)->get()
+            ->filter(fn (self $search) => $model::query()->visible()->whereKey($postId)->filteredBy($search->filters)->exists())
+            ->pluck('mobile_device_id')
+            ->unique()
+            ->values()
+            ->all();
+    }
+
     /** "Arabian · Mare · Muscat · up to 5,000.000", in the current language. */
     public function label(): string
     {

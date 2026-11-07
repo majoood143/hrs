@@ -3,7 +3,8 @@
 return [
     'title' => 'Booking ticket',
     'filename' => 'ticket',
-    'download' => 'Booking ticket',
+    'download' => 'Download ticket (PDF)',
+    'qr_label' => 'QR code of booking :reference',
     'service' => 'Session',
     'date' => 'Date',
     'time' => 'Time',

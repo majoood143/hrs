@@ -16,6 +16,7 @@ return [
     'order_not_found' => 'We could not find this order.',
     'verify_failed' => 'An error occurred while verifying your payment. Please contact us: do not pay again.',
     'paid_but_unconfirmed' => 'Your payment was received, but we could not confirm this order automatically. Please contact us with your order number: do not pay again.',
+    'bank_unconfirmed' => 'The bank has not confirmed this payment yet. If you were charged, it will be confirmed or returned to you: please check with your bank or contact us before paying again.',
     'cancelled' => 'The payment was cancelled. You can try again.',
     'not_completed' => 'The payment was not completed. Please try again.',
     'redirecting' => 'Redirecting to the secure payment page…',

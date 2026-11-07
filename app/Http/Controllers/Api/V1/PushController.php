@@ -30,8 +30,9 @@ class PushController extends Controller
      * Register this phone
      *
      * Sent at every launch while notifications are allowed, with the topics the person left on
-     * (`news`, `offers`, `marketplace`, `events`, `racing`; leave `topics` out to keep them as they
-     * are, new phones take all). With a customer's bearer token, the customer's booking alerts come
+     * (`news`, `offers`, `marketplace`, `services`, `events`, `racing`; leave `topics` out to keep them
+     * as they are, new phones take all) and the app's main switch (`enabled`; false = nothing is pushed
+     * to this phone, booking alerts included; left out = as it is). With a customer's bearer token, the customer's booking alerts come
      * to this phone until that sign-in ends; without one, the phone is no longer the customer's.
      *
      * @unauthenticated
@@ -42,6 +43,7 @@ class PushController extends Controller
             'token' => self::TOKEN_RULE,
             'topics' => ['sometimes', 'array'],
             'topics.*' => ['string', 'in:'.implode(',', MobileDevice::TOPICS)],
+            'enabled' => ['sometimes', 'boolean'],
         ]);
         $client = AppClient::fromRequest($request);
         $customer = $request->user('customer_api');
@@ -53,7 +55,8 @@ class PushController extends Controller
             'customer_id' => $customer?->getKey(),
             'customer_token_id' => $customer?->currentAccessToken()?->getKey(),
             'last_seen_at' => now(),
-        ] + (array_key_exists('topics', $data) ? ['topics' => array_values(array_unique($data['topics']))] : []));
+        ] + (array_key_exists('topics', $data) ? ['topics' => array_values(array_unique($data['topics']))] : [])
+          + (array_key_exists('enabled', $data) ? ['enabled' => $data['enabled']] : []));
 
         return response()->json(['message' => 'ok']);
     }

@@ -39,6 +39,7 @@ trait ClassifiesGatewayOutcome
 
         return match ($gateway) {
             'thawani' => static::thawaniOutcome($payload),
+            'ompay' => static::ompayOutcome($payload),
             'nbo' => static::nboOutcome($payload),
             'ccavenue' => static::ccavenueOutcome($payload),
             'demo' => static::demoOutcome($payload),
@@ -57,6 +58,20 @@ trait ClassifiesGatewayOutcome
         return match (true) {
             $status === 'paid' => 'success',
             $status !== null => 'failed',
+            default => 'unknown',
+        };
+    }
+
+    private static function ompayOutcome(array $payload): string
+    {
+        if (array_key_exists('error', $payload)) {
+            return 'error';
+        }
+
+        return match ($payload['data']['status'] ?? null) {
+            'SUCCESSFUL' => 'success',
+            'FAILED' => 'failed',
+            'PENDING', 'PROCESSING' => 'pending',
             default => 'unknown',
         };
     }

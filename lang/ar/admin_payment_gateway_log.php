@@ -85,6 +85,6 @@ return [
 
     'empty_state' => [
         'heading' => 'لا توجد سجلات لبوابات الدفع بعد',
-        'description' => 'ستظهر هنا معاملات ثواني و NBO و CCAvenue فور حدوثها.',
+        'description' => 'ستظهر هنا معاملات ثواني و OMPAY و NBO و CCAvenue فور حدوثها.',
     ],
 ];

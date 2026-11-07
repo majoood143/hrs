@@ -8,8 +8,10 @@ use App\Models\PaymentGatewayLog;
 use App\Models\PaymentGatewaySession;
 use App\Models\ServiceOrder;
 use App\Models\StablePaymentAccount;
+use App\Services\Payments\Contracts\ChecksPayment;
 use App\Services\Payments\Gateways\CcAvenueGateway;
 use App\Services\Payments\Gateways\NboGateway;
+use App\Services\Payments\Gateways\OmpayGateway;
 use App\Services\Payments\Gateways\ThawaniGateway;
 use App\Services\Payments\OrderPaymentService;
 use App\Services\Payments\PaymentGateways;
@@ -50,7 +52,7 @@ class PaymentController extends Controller
         }
 
         // back from Thawani's page (the back button, a reload) after paying there
-        $this->gateways->settleFromThawani($order);
+        $this->gateways->settleFromGateway($order);
 
         if (! $order->isPayable()) {
             return $this->toOrder($order);
@@ -84,15 +86,17 @@ class PaymentController extends Controller
             return back()->with('error', __('payments.choose_gateway'));
         }
 
-        // Thawani mints a brand new session every time initiate() runs, overwriting the order's
-        // only payment_session_id column; a double-click, a back button or two tabs would
-        // otherwise orphan an earlier session that later turns out to have been paid. Ask
-        // Thawani about it first, since reconcile() is always safe to call and idempotent.
-        if ($gateway instanceof ThawaniGateway && $order->payment_session_id && $order->payment_method === PaymentGateway::Thawani) {
+        // A gateway mints a brand new session every time initiate() runs, overwriting the order's
+        // only payment_session_id column; a double-click, a back button, two tabs or switching
+        // gateway would otherwise orphan an earlier session that later turns out to have been paid.
+        // Ask about it first, since reconcile() is always safe to call and idempotent.
+        $previous = $order->payment_method && $order->payment_session_id ? $this->gateways->get($order->payment_method) : null;
+
+        if ($previous instanceof ChecksPayment) {
             try {
-                $gateway->reconcile($order);
+                $this->gateways->bind($previous, $order)->reconcile($order);
             } catch (Throwable $e) {
-                Log::warning('Thawani pre-check before re-initiating failed', ['order' => $order->order_number, 'error' => $e->getMessage()]);
+                Log::warning('Pre-check before re-initiating failed', ['order' => $order->order_number, 'gateway' => $order->payment_method->value, 'error' => $e->getMessage()]);
             }
 
             $order->refresh();
@@ -126,7 +130,7 @@ class PaymentController extends Controller
     {
         $order = $this->findOrder($order);
 
-        $this->gateways->settleFromThawani($order);
+        $this->gateways->settleFromGateway($order);
 
         return response()->json(['settled' => ! $order->isPayable()]);
     }
@@ -243,6 +247,47 @@ class PaymentController extends Controller
         }
 
         return response()->json(['message' => 'ok']);
+    }
+
+    // ── OMPAY ────────────────────────────────────────────────────────────────
+
+    /** OMPAY sends the customer back here however the payment ended; the link says nothing about how. */
+    public function ompayReturn(Request $request, OmpayGateway $ompay): RedirectResponse
+    {
+        $order = $this->orderFromReference($request);
+
+        if (! $order) {
+            return redirect('/')->with('error', __('payments.order_not_found'));
+        }
+
+        if ($order->isPaid()) {
+            return $this->toOrder($order);
+        }
+
+        try {
+            $status = $this->gateways->bind($ompay, $order)->reconcile($order);
+        } catch (Throwable $e) {
+            Log::error('OMPAY return: verification failed', ['order' => $order->order_number, 'error' => $e->getMessage()]);
+
+            return $this->toPayment($order, __('payments.verify_failed'));
+        }
+
+        if ($order->refresh()->isPaid()) {
+            return $this->toOrder($order);
+        }
+
+        if ($status === 'amount_mismatch') {
+            return $this->toOrder($order)->with('error', __('payments.paid_but_unconfirmed'));
+        }
+
+        // with the bank, or the bank never answered: they may have been charged, so never a plain "try again"
+        if ($status === 'processing' || $status === 'unconfirmed') {
+            return $this->toPayment($order, __('payments.bank_unconfirmed'));
+        }
+
+        $this->payments->markFailed($order, PaymentGateway::Ompay, $status);
+
+        return $this->toPayment($order, __('payments.not_completed'));
     }
 
     // ── NBO ──────────────────────────────────────────────────────────────────

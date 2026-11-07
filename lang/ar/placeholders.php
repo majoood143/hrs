@@ -173,6 +173,8 @@ return [
         'value' => 'قيمة الإعداد',
 
         // payment gateway keys
+        'api_key' => 'الصقه من لوحة بوابة الدفع',
+        'api_secret' => 'الصقه من لوحة بوابة الدفع',
         'secret_key' => 'الصقه من لوحة بوابة الدفع',
         'publishable_key' => 'الصقه من لوحة بوابة الدفع',
         'webhook_secret' => 'الصقه من لوحة بوابة الدفع',

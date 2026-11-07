@@ -139,6 +139,7 @@ Route::prefix('payment')->name('payment.')->group(function () {
     Route::get('thawani/cancel', [PaymentController::class, 'thawaniCancel'])->name('thawani.cancel');
     // Server-to-server callbacks below are excluded from CSRF in bootstrap/app.php.
     Route::post('thawani/webhook', [PaymentController::class, 'thawaniWebhook'])->name('thawani.webhook');
+    Route::get('ompay/return', [PaymentController::class, 'ompayReturn'])->name('ompay.return');
     Route::post('nbo/callback', [PaymentController::class, 'nboCallback'])->name('nbo.callback');
     Route::post('ccavenue/callback', [PaymentController::class, 'ccavenueCallback'])->name('ccavenue.callback');
     Route::get('demo/{order}', [PaymentController::class, 'demo'])->name('demo');

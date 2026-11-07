@@ -14,6 +14,7 @@ use App\Models\PushCampaign;
 use App\Models\User;
 use App\Services\Push\ExpoPush;
 use App\Support\MobileApp\AppVersion;
+use App\Support\MobileApp\MobileAutoPush;
 use App\Support\MobileApp\MobileScreens;
 use App\Support\PhoneNumber;
 use Filament\Actions\Action;
@@ -36,6 +37,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Throwable;
@@ -213,6 +215,12 @@ class PushCampaignResource extends Resource
                     ->label(__('admin_mobile_app.fields.title'))
                     ->searchable(['en_title', 'ar_title'])
                     ->wrap(),
+                TextColumn::make('source')
+                    ->label(__('admin_mobile_app.campaigns.fields.automatic'))
+                    ->badge()
+                    ->color('gray')
+                    ->formatStateUsing(fn (string $state) => __('admin_mobile_app.features.'.MobileAutoPush::feature($state)))
+                    ->placeholder('—'),
                 TextColumn::make('status')
                     ->label(__('admin_mobile_app.fields.status'))
                     ->badge()
@@ -260,6 +268,9 @@ class PushCampaignResource extends Resource
                 SelectFilter::make('status')
                     ->label(__('admin_mobile_app.fields.status'))
                     ->options(self::options('status', PushCampaign::STATUSES)),
+                TernaryFilter::make('source')
+                    ->label(__('admin_mobile_app.campaigns.fields.automatic'))
+                    ->nullable(),
             ])
             ->recordActions([
                 Action::make('send_now')
@@ -288,7 +299,7 @@ class PushCampaignResource extends Resource
                         ->action(fn (PushCampaign $record, array $data) => self::sendTest($record, (string) $data['test_phone'])),
                     EditAction::make(),
                     ReplicateAction::make()
-                        ->excludeAttributes(['status', 'scheduled_at', 'sent_at', 'recipients', 'accepted', 'opened'])
+                        ->excludeAttributes(['source', 'source_id', 'status', 'scheduled_at', 'sent_at', 'recipients', 'accepted', 'opened'])
                         ->beforeReplicaSaved(fn (PushCampaign $replica) => $replica->forceFill(['status' => 'draft', 'created_by' => auth()->id()])),
                     DeleteAction::make(),
                 ]),

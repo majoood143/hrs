@@ -12,6 +12,7 @@ use App\Models\MobileAnnouncement;
 use App\Models\SiteSetting;
 use App\Support\MobileApp\AppClient;
 use App\Support\MobileApp\AppLinks;
+use App\Support\MobileApp\MobileAutoPush;
 use App\Support\MobileApp\MobileFeatures;
 use App\Support\MobileApp\MobileMaintenance;
 use App\Support\MobileApp\MobilePosting;
@@ -102,6 +103,23 @@ class MobileAppAdminTest extends TestCase
             ->assertHasFormErrors(['updates.android.min_version', 'features.blog.min_version']);
 
         $this->assertNull(SiteSetting::get('mobile.updates'));
+    }
+
+    public function test_the_automatic_notifications_tab_switches_sections_and_sets_the_limit(): void
+    {
+        Livewire::test(MobileAppSettings::class)
+            ->assertFormSet(['auto_push.sections.farriers' => false, 'auto_push.daily_cap' => 3])
+            ->fillForm(['auto_push.daily_cap' => 0])
+            ->call('save')
+            ->assertHasFormErrors(['auto_push.daily_cap'])
+            ->fillForm(['auto_push.daily_cap' => 5, 'auto_push.sections.farriers' => true, 'auto_push.sections.videos' => true])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertTrue(MobileAutoPush::enabled('farriers'));
+        $this->assertTrue(MobileAutoPush::enabled('videos'));
+        $this->assertFalse(MobileAutoPush::enabled('horses'));
+        $this->assertSame(5, MobileAutoPush::dailyCap());
     }
 
     public function test_the_posting_tab_turns_on_review_and_sets_the_daily_limit(): void

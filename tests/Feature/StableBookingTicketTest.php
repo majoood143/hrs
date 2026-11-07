@@ -129,6 +129,34 @@ class StableBookingTicketTest extends TestCase
         $this->as($token)->getJson("/api/v1/account/bookings/{$reference}")->assertJsonPath('data.ticket_url', null);
     }
 
+    public function test_the_public_order_page_shows_the_code_and_an_anonymous_ticket(): void
+    {
+        [$reference] = $this->customerBooks();
+        $booking = $this->booking($reference);
+        $page = route('orders.show', $booking->order->order_number);
+        $tickets = app(BookingTicketPdf::class);
+
+        $this->app['auth']->forgetGuards();
+        $html = $this->get($page)->assertOk()->assertSee('data:image/png', false)->assertSee('Download ticket (PDF)')->assertDontSee('Rider 1')->getContent();
+
+        preg_match('/href="([^"]*bookings\/ticket[^"]*)"/', $html, $link);
+        $url = html_entity_decode($link[1]);
+        $this->assertStringContainsString('guest=1', $url);
+        $this->get($url)->assertOk()->assertHeader('Content-Type', 'application/pdf');
+        // the signature covers `guest`: it cannot be dropped to get the names
+        $this->get(str_replace('guest=1&', '', $url))->assertForbidden();
+
+        $anonymous = $tickets->html($booking, 'en', anonymous: true);
+        $this->assertStringContainsString('code="'.url('/check-in/'.$reference).'"', $anonymous);
+        $this->assertStringNotContainsString('Aisha', $anonymous);
+        $this->assertStringNotContainsString('Rider 1', $anonymous);
+        $this->assertStringContainsString('Rider 1', $tickets->html($booking, 'en'));
+        $this->assertStringStartsWith('%PDF', $tickets->render($booking, 'ar', anonymous: true));
+
+        $booking->forceFill(['status' => StableBookingStatus::Cancelled])->save();
+        $this->get($page)->assertOk()->assertDontSee('data:image/png', false)->assertDontSee('Download ticket (PDF)');
+    }
+
     public function test_the_confirmation_email_carries_the_ticket_and_the_stables_does_not(): void
     {
         Mail::fake();

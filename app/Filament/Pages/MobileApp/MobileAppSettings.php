@@ -5,6 +5,7 @@ namespace App\Filament\Pages\MobileApp;
 use App\Support\MobileApp\AppClient;
 use App\Support\MobileApp\AppLinks;
 use App\Support\MobileApp\AppVersion;
+use App\Support\MobileApp\MobileAutoPush;
 use App\Support\MobileApp\MobileFeatures;
 use App\Support\MobileApp\MobileImages;
 use App\Support\MobileApp\MobileMaintenance;
@@ -70,7 +71,7 @@ class MobileAppSettings extends Page implements HasForms
         $this->form->fill(self::currentState());
     }
 
-    /** @return array{features: array<string, mixed>, updates: array<string, mixed>, maintenance: array<string, mixed>, posting: array<string, mixed>, images: array<string, string|null>, links: array<string, mixed>} */
+    /** @return array{features: array<string, mixed>, updates: array<string, mixed>, maintenance: array<string, mixed>, posting: array<string, mixed>, auto_push: array<string, mixed>, images: array<string, string|null>, links: array<string, mixed>} */
     private static function currentState(): array
     {
         return [
@@ -78,6 +79,7 @@ class MobileAppSettings extends Page implements HasForms
             'updates' => MobileUpdates::settings(),
             'maintenance' => MobileMaintenance::settings(),
             'posting' => MobilePosting::settings(),
+            'auto_push' => MobileAutoPush::settings(),
             'images' => MobileImages::settings(),
             'links' => ['android_fingerprints' => implode("\n", AppLinks::settings()['android_fingerprints'])] + AppLinks::settings(),
         ];
@@ -101,6 +103,9 @@ class MobileAppSettings extends Page implements HasForms
                     Tab::make(__('admin_mobile_app.tabs.posting'))
                         ->icon('heroicon-o-shield-check')
                         ->schema($this->postingSections()),
+                    Tab::make(__('admin_mobile_app.tabs.auto_push'))
+                        ->icon('heroicon-o-bell-alert')
+                        ->schema($this->autoPushSections()),
                     Tab::make(__('admin_mobile_app.tabs.images'))
                         ->icon('heroicon-o-photo')
                         ->schema($this->imageSections()),
@@ -273,6 +278,29 @@ class MobileAppSettings extends Page implements HasForms
     }
 
     /** @return list<Section> */
+    private function autoPushSections(): array
+    {
+        return [
+            Section::make(__('admin_mobile_app.tabs.auto_push'))
+                ->description(__('admin_mobile_app.auto_push.help'))
+                ->columns(['default' => 1, 'md' => 3])
+                ->schema(array_map(fn (string $section) => Toggle::make("auto_push.sections.{$section}")
+                    ->label(__('admin_mobile_app.features.'.MobileAutoPush::feature($section))), array_keys(MobileAutoPush::SECTIONS))),
+            Section::make(__('admin_mobile_app.auto_push.limit'))
+                ->schema([
+                    TextInput::make('auto_push.daily_cap')
+                        ->label(__('admin_mobile_app.auto_push.daily_cap'))
+                        ->helperText(__('admin_mobile_app.auto_push.daily_cap_help'))
+                        ->placeholder(__('admin_mobile_app.auto_push.daily_cap_placeholder'))
+                        ->integer()
+                        ->minValue(1)
+                        ->maxValue(MobileAutoPush::MAX_DAILY_CAP)
+                        ->required(),
+                ]),
+        ];
+    }
+
+    /** @return list<Section> */
     private function imageSections(): array
     {
         return [
@@ -348,6 +376,7 @@ class MobileAppSettings extends Page implements HasForms
         MobileUpdates::save((array) ($state['updates'] ?? []));
         MobileMaintenance::save((array) ($state['maintenance'] ?? []));
         MobilePosting::save((array) ($state['posting'] ?? []));
+        MobileAutoPush::save((array) ($state['auto_push'] ?? []));
         MobileImages::save((array) ($state['images'] ?? []));
         AppLinks::save((array) ($state['links'] ?? []));
 

@@ -29,6 +29,7 @@ return [
         'not_embeddable' => '⚠️ The channel does not allow playing it on other sites, so it cannot play in the video library.',
         'more' => '…and :count more in the inbox.',
         'added' => '📚 Added to the video library and showing: :link',
+        'public' => '🌐 On the website: :link',
         'added_hidden' => '📚 Added to the video library, hidden until you publish it: :link',
         'inbox' => '🛠 Add to the video library: :link',
     ],

@@ -2,9 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Models\MobileDevice;
 use App\Models\PushSavedSearch;
-use App\Models\SiteSetting;
 use App\Services\Push\ExpoPush;
+use App\Support\MobileApp\MobileAutoPush;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
@@ -42,17 +43,11 @@ class NotifySavedSearches implements ShouldQueue
                 return;
             }
 
-            // shortcut: one query per saved search; group searches by filters if there are thousands
-            $devices = PushSavedSearch::query()->with('device')->where('section', $this->section)->get()
-                ->filter(fn (PushSavedSearch $search) => $model::query()->visible()->whereKey($post->getKey())->filteredBy($search->filters)->exists())
-                ->pluck('device')
-                ->filter()
-                ->unique('id')
-                ->values();
+            $devices = MobileDevice::query()->whereKey(PushSavedSearch::deviceIdsFor($this->section, $post->getKey()))->get();
 
             $push->send($devices, fn () => [
                 'title' => __('api.push.new_'.$this->section),
-                'body' => trim($post->name.' · '.SiteSetting::formatCurrency((float) $post->price), ' ·'),
+                'body' => MobileAutoPush::body($this->section, $post),
             ], ['path' => "/{$this->section}/{$post->getKey()}"]);
         } catch (Throwable $e) {
             report($e);

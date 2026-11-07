@@ -19,7 +19,8 @@ use Mpdf\QrCode\QrCode;
  * A confirmed booking's ticket: the site's logo, brand colour and fonts, the session, and a QR code
  * of its check-in link (`/check-in/{reference}`) that the stable scans to mark it attended. In the
  * customer's language, phone-sized. Sent with the confirmation (email, WhatsApp) and the reminder,
- * and downloadable from a signed link (website account, app).
+ * and downloadable from a signed link (website account, app). The public order page, which opens with
+ * the order number alone, links to an `anonymous` copy: same code, without the customer's and riders' names.
  */
 class BookingTicketPdf
 {
@@ -44,15 +45,18 @@ class BookingTicketPdf
         return route('bookings.check-in', $booking->reference);
     }
 
-    /** A signed download link, for the account pages and the app; null while there is no ticket. */
-    public function url(StableBooking $booking): ?string
+    /**
+     * A signed download link, for the account pages and the app; null while there is no ticket.
+     * The signature covers `guest`, so an anonymous link cannot be edited into the named ticket.
+     */
+    public function url(StableBooking $booking, bool $anonymous = false): ?string
     {
         return $this->available($booking)
-            ? URL::temporarySignedRoute('bookings.ticket', now()->addDays(self::LINK_DAYS), ['reference' => $booking->reference])
+            ? URL::temporarySignedRoute('bookings.ticket', now()->addDays(self::LINK_DAYS), ['reference' => $booking->reference] + ($anonymous ? ['guest' => 1] : []))
             : null;
     }
 
-    /** The ticket's QR code alone (a PNG data URI), for the app's booking screen; null while there is no ticket. */
+    /** The ticket's QR code alone (a PNG data URI), for the app's booking screen and the order pages; null while there is no ticket. */
     public function qrDataUri(StableBooking $booking): ?string
     {
         if (! $this->available($booking)) {
@@ -79,17 +83,18 @@ class BookingTicketPdf
         return in_array($locale, array_keys(config('languages.available', [])), true) ? $locale : 'en';
     }
 
-    public function html(StableBooking $booking, ?string $locale = null): string
+    public function html(StableBooking $booking, ?string $locale = null, bool $anonymous = false): string
     {
         $locale ??= $this->locale($booking);
         $booking->loadMissing(['slot.trainer', 'offering', 'stable.city', 'order', 'packagePurchase']);
 
-        return Locale::within($locale, function () use ($booking, $locale) {
+        return Locale::within($locale, function () use ($booking, $locale, $anonymous) {
             $rtl = $locale === 'ar';
             $branding = SiteSetting::branding();
 
             return view('pdf.booking-ticket', [
                 'booking' => $booking,
+                'anonymous' => $anonymous,
                 'data' => app(StableBookingMessages::class)->data($booking),
                 'locale' => $locale,
                 'rtl' => $rtl,
@@ -105,7 +110,7 @@ class BookingTicketPdf
         });
     }
 
-    public function render(StableBooking $booking, ?string $locale = null): string
+    public function render(StableBooking $booking, ?string $locale = null, bool $anonymous = false): string
     {
         $locale ??= $this->locale($booking);
         $siteName = SiteSetting::siteName();
@@ -124,7 +129,7 @@ class BookingTicketPdf
         $mpdf->SetAuthor($siteName);
         $mpdf->SetCreator($siteName);
         $mpdf->SetDirectionality($locale === 'ar' ? 'rtl' : 'ltr');
-        $mpdf->WriteHTML($this->html($booking, $locale));
+        $mpdf->WriteHTML($this->html($booking, $locale, $anonymous));
 
         return $mpdf->Output('', Destination::STRING_RETURN);
     }

@@ -13,6 +13,7 @@ return [
         'updates' => 'Updates',
         'maintenance' => 'Maintenance',
         'posting' => 'Posting',
+        'auto_push' => 'Automatic notifications',
         'images' => 'Services screen',
         'links' => 'Website links',
     ],
@@ -76,7 +77,7 @@ return [
         'silks' => 'Silks designer',
         'silks_help' => 'The racing silks designer in Directory.',
         'bookings' => 'Stable bookings',
-        'bookings_help' => 'Book riding sessions and lesson packages at stables, pay online (Thawani) and see or cancel bookings, after signing in with a phone number.',
+        'bookings_help' => 'Book riding sessions and lesson packages at stables, pay online and see or cancel bookings, after signing in with a phone number.',
         'stable_owner' => 'My stable (owners)',
         'stable_owner_help' => 'More → My stable: stable owners sign in (phone code or email and password) to see today\'s bookings, mark riders attended or no-show, call bookings off, close times or whole days, and see their income. Setup stays on the website\'s stable panel. Also refused by the server while off.',
     ],
@@ -92,6 +93,14 @@ return [
         'help' => 'Posts from the app (horses and tools for sale, farriers, transfer board) by phones confirmed with a code. The website\'s own form is not affected.',
         'reviewer' => 'App review login',
         'reviewer_help' => 'For the App Store and Google Play reviewers: this phone number signs in and posts with the code below, and no code is sent to it. Give both in the store\'s review notes, and clear them once the app is approved (anyone who knows them can sign in as this number).',
+    ],
+
+    'auto_push' => [
+        'help' => 'Switch a kind on and everyone with the app is notified, within a minute, of each new one that goes live (once per item; older items are not announced). Phones that turned that topic or all notifications off are skipped, and the messages appear under Notifications with their stats. Posts from visitors are announced as soon as they are live. The review setting in the Posting tab holds back posts from the app, but not those from the website\'s forms.',
+        'limit' => 'Daily limit',
+        'daily_cap' => 'Automatic notifications per phone in 24 hours',
+        'daily_cap_help' => 'Beyond this a phone gets nothing more that day, though the messages still show for other phones. Campaigns you write count separately. 1 to 20.',
+        'daily_cap_placeholder' => 'e.g. 3',
     ],
 
     'images' => [
@@ -270,6 +279,7 @@ return [
             'sending' => 'When',
         ],
         'fields' => [
+            'automatic' => 'Automatic',
             'image_help' => 'Optional, shown in the app\'s notifications list (not in the phone\'s banner).',
             'action_type' => 'Tap opens',
             'action_screen_help' => 'Phones where that part of the app is switched off do not get it.',
@@ -299,6 +309,7 @@ return [
             'news' => 'News and updates',
             'offers' => 'Offers',
             'marketplace' => 'Horses and tools for sale',
+            'services' => 'Horse services and transfers',
             'events' => 'Events',
             'racing' => 'Racing',
         ],

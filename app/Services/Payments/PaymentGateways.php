@@ -6,10 +6,12 @@ use App\Enums\PaymentGateway;
 use App\Models\ServiceOrder;
 use App\Models\SiteSetting;
 use App\Models\StablePaymentAccount;
+use App\Services\Payments\Contracts\ChecksPayment;
 use App\Services\Payments\Contracts\Gateway;
 use App\Services\Payments\Gateways\CcAvenueGateway;
 use App\Services\Payments\Gateways\DemoGateway;
 use App\Services\Payments\Gateways\NboGateway;
+use App\Services\Payments\Gateways\OmpayGateway;
 use App\Services\Payments\Gateways\ThawaniGateway;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -27,6 +29,7 @@ class PaymentGateways
             PaymentGateway::Thawani => ThawaniGateway::class,
             PaymentGateway::Nbo => NboGateway::class,
             PaymentGateway::CcAvenue => CcAvenueGateway::class,
+            PaymentGateway::Ompay => OmpayGateway::class,
             PaymentGateway::Demo => DemoGateway::class,
         });
     }
@@ -112,22 +115,28 @@ class PaymentGateways
     }
 
     /**
-     * Settles an order paid on Thawani's page, asking Thawani at most every few seconds. After a card
-     * payment that page can fail on its own request and never send the customer to success_url
-     * (its /pay/authorize answers 500 although the session is paid), so nothing may wait for that redirect.
+     * Settles an order paid on a gateway's page, asking the gateway at most every few seconds. Nothing may
+     * wait for the customer to be sent back: after a card payment Thawani's page can fail on its own request
+     * and never go to success_url (its /pay/authorize answers 500 although the session is paid), and OMPAY
+     * says outright that the browser may never return.
      */
-    public function settleFromThawani(ServiceOrder $order): void
+    public function settleFromGateway(ServiceOrder $order): void
     {
-        if (! $order->isPayable() || $order->payment_method !== PaymentGateway::Thawani || ! $order->payment_session_id
-            || ! Cache::add('thawani-check.'.$order->getKey(), true, 3)) {
+        if (! $order->isPayable() || ! $order->payment_method || ! $order->payment_session_id) {
+            return;
+        }
+
+        $gateway = $this->get($order->payment_method);
+
+        if (! $gateway instanceof ChecksPayment || ! Cache::add('payment-check.'.$order->getKey(), true, 3)) {
             return;
         }
 
         try {
-            $this->bind(app(ThawaniGateway::class), $order)->reconcile($order);
+            $this->bind($gateway, $order)->reconcile($order);
             $order->refresh();
         } catch (Throwable $e) {
-            Log::warning('Thawani check failed', ['order' => $order->order_number, 'error' => $e->getMessage()]);
+            Log::warning('Payment check failed', ['order' => $order->order_number, 'gateway' => $order->payment_method->value, 'error' => $e->getMessage()]);
         }
     }
 }

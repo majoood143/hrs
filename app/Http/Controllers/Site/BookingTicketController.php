@@ -21,13 +21,13 @@ use Illuminate\View\View;
  */
 class BookingTicketController extends Controller
 {
-    public function download(string $reference, BookingTicketPdf $tickets): Response
+    public function download(Request $request, string $reference, BookingTicketPdf $tickets): Response
     {
         $booking = StableBooking::query()->where('reference', $reference)->firstOrFail();
 
         abort_unless($tickets->available($booking), 404);
 
-        return response($tickets->render($booking), 200, [
+        return response($tickets->render($booking, anonymous: $request->boolean('guest')), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="'.$tickets->filename($booking).'"',
             'X-Robots-Tag' => 'noindex',

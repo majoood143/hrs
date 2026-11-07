@@ -7,6 +7,7 @@ use App\Models\PaymentGatewayLog;
 use App\Models\PaymentGatewaySession;
 use App\Models\ServiceOrder;
 use App\Services\Payments\Concerns\UsesPaymentAccount;
+use App\Services\Payments\Contracts\ChecksPayment;
 use App\Services\Payments\Contracts\Gateway;
 use App\Services\Payments\OrderPaymentService;
 use App\Services\Payments\PaymentRedirect;
@@ -21,7 +22,7 @@ use RuntimeException;
  * Thawani's page, and every path back (browser return, webhook, sweeps) settles the order by
  * asking Thawani for the session again, never by trusting what the request claims.
  */
-class ThawaniGateway implements Gateway
+class ThawaniGateway implements ChecksPayment, Gateway
 {
     use UsesPaymentAccount;
 

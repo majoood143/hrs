@@ -3,7 +3,8 @@
 return [
     'title' => 'تذكرة الحجز',
     'filename' => 'ticket',
-    'download' => 'تذكرة الحجز',
+    'download' => 'تحميل التذكرة (PDF)',
+    'qr_label' => 'رمز QR للحجز :reference',
     'service' => 'الحصة',
     'date' => 'التاريخ',
     'time' => 'الوقت',

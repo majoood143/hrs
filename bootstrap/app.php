@@ -1,11 +1,17 @@
 <?php
 
 use App\Http\Middleware\PreventRequestsDuringMaintenance;
+use App\Http\Middleware\SetApiLocale;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance as BasePreventRequestsDuringMaintenance;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -39,4 +45,16 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions): void {
         // The API answers errors (404, 422, 429…) as JSON whatever the client's Accept header says.
         $exceptions->shouldRenderJsonWhen(fn ($request) => $request->is('api/*') || $request->expectsJson());
+
+        // The app shows `message`, and Laravel's own are English ("Unauthenticated.", "Server Error",
+        // "No query results for model…"). The API's translated messages never arrive here as exceptions.
+        $exceptions->respond(function (Response $response, Throwable $e, Request $request) {
+            if (! $request->is('api/v1/*') || ! $response instanceof JsonResponse || $e instanceof ValidationException || $e instanceof HttpResponseException) {
+                return $response;
+            }
+
+            $status = in_array($response->getStatusCode(), [401, 403, 404, 429], true) ? $response->getStatusCode() : 500;
+
+            return $response->setData(['message' => __("api.errors.{$status}", locale: SetApiLocale::resolve($request))] + $response->getData(true));
+        });
     })->create();

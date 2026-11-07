@@ -13,16 +13,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class MobileDevice extends Model
 {
     /** What campaigns are about; a phone takes all of them unless it turned some off in the app. */
-    public const TOPICS = ['news', 'offers', 'marketplace', 'events', 'racing'];
+    public const TOPICS = ['news', 'offers', 'marketplace', 'services', 'events', 'racing'];
 
     protected $fillable = [
-        'expo_token', 'platform', 'app_version', 'locale', 'topics',
+        'expo_token', 'platform', 'app_version', 'locale', 'topics', 'enabled',
         'user_id', 'owner_token_id', 'customer_id', 'customer_token_id', 'last_seen_at',
     ];
 
     protected function casts(): array
     {
-        return ['topics' => 'array', 'last_seen_at' => 'datetime'];
+        return ['topics' => 'array', 'enabled' => 'boolean', 'last_seen_at' => 'datetime'];
     }
 
     /** The phones these stable owners/staff are signed in on (signed out = the token is gone). */

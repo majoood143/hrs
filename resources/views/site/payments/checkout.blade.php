@@ -31,7 +31,7 @@
                     <p class="font-semibold">{{ __('payments.waiting_title') }}</p>
                     <p class="mt-1">{{ __('payments.waiting_body') }}</p>
                 </div>
-                {{-- Thawani's page does not always send the customer back after a payment and cannot be framed: it opens in its own window while this page watches the order --}}
+                {{-- Thawani's and OMPAY's pages may not send the customer back after a payment and cannot be framed: they open in their own window while this page watches the order --}}
                 <script>
                     (() => {
                         const form = document.getElementById('pay-form');
@@ -44,14 +44,14 @@
                         window.addEventListener('pageshow', async () => { if (await isSettled()) moveOn(); });
 
                         form.addEventListener('submit', (event) => {
-                            if (event.submitter?.value !== 'thawani') return;
+                            if (!['thawani', 'ompay'].includes(event.submitter?.value)) return;
 
-                            const payment = window.open('', 'thawani-checkout');
+                            const payment = window.open('', 'payment-checkout');
 
                             // popups blocked: pay in this tab; coming back to this address settles the order
                             if (!payment) return;
 
-                            form.target = 'thawani-checkout';
+                            form.target = 'payment-checkout';
                             setTimeout(() => { form.hidden = true; waiting.hidden = false; });
 
                             const timer = setInterval(async () => {

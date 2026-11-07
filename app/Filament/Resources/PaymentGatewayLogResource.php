@@ -96,6 +96,7 @@ class PaymentGatewayLogResource extends Resource
                     ->sortable()
                     ->colors([
                         'info' => 'thawani',
+                        'success' => 'ompay',
                         'warning' => 'nbo',
                         'primary' => 'ccavenue',
                         'gray' => 'demo',

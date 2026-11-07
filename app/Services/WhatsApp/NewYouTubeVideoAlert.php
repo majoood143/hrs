@@ -12,7 +12,8 @@ use Illuminate\Support\Collection;
  * The admin WhatsApp alert for new videos on a watched YouTube channel: one message per channel
  * and check, each video with its kind, length or start time and link, then the admin inbox where
  * it is added to the video library by hand. A video the channel added to the library by itself
- * (`auto_add`) links to it there instead, saying whether it still has to be published.
+ * (`auto_add`) links to it there instead, saying whether it still has to be published, and to
+ * its public page once it is showing.
  */
 final class NewYouTubeVideoAlert
 {
@@ -57,20 +58,24 @@ final class NewYouTubeVideoAlert
             $kind,
             $video->embeddable === false ? __('whatsapp.youtube.not_embeddable') : null,
             '🔗 https://youtu.be/'.$video->youtube_id,
-            self::libraryLine($video),
+            ...self::libraryLines($video),
         ]));
     }
 
-    private static function libraryLine(YouTubeChannelVideo $video): ?string
+    /** @return list<string> */
+    private static function libraryLines(YouTubeChannelVideo $video): array
     {
         $library = $video->status === YouTubeChannelVideo::STATUS_ADDED ? $video->libraryVideo : null;
 
         if ($library === null) {
-            return null;
+            return [];
         }
 
-        return __($library->is_active ? 'whatsapp.youtube.added' : 'whatsapp.youtube.added_hidden', [
-            'link' => VideoResource::getUrl('edit', ['record' => $library], panel: 'admin'),
-        ]);
+        $edit = VideoResource::getUrl('edit', ['record' => $library], panel: 'admin');
+
+        // a hidden video's public page is a 404
+        return $library->is_active
+            ? [__('whatsapp.youtube.added', ['link' => $edit]), __('whatsapp.youtube.public', ['link' => route('video-library.show', $library->slug)])]
+            : [__('whatsapp.youtube.added_hidden', ['link' => $edit])];
     }
 }

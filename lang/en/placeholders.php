@@ -174,6 +174,8 @@ return [
         'value' => 'The setting value',
 
         // payment gateway keys
+        'api_key' => 'Paste it from the gateway dashboard',
+        'api_secret' => 'Paste it from the gateway dashboard',
         'secret_key' => 'Paste it from the gateway dashboard',
         'publishable_key' => 'Paste it from the gateway dashboard',
         'webhook_secret' => 'Paste it from the gateway dashboard',

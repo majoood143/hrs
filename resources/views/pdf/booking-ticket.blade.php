@@ -9,7 +9,7 @@
         : (string) $d($text));
     $place = collect([$stable?->address, $stable?->city?->name])->filter()->implode(', ');
     // each name on its own: one Arabic name would otherwise turn the whole list around
-    $names = collect($booking->riders_data ?? [])->pluck('name')->filter()->map(fn ($name) => $v($name)->toHtml())->implode(', ');
+    $names = $anonymous ? '' : collect($booking->riders_data ?? [])->pluck('name')->filter()->map(fn ($name) => $v($name)->toHtml())->implode(', ');
 @endphp
 <!DOCTYPE html>
 <html lang="{{ $locale }}" dir="{{ $rtl ? 'rtl' : 'ltr' }}">
@@ -73,7 +73,7 @@
             @if($slot?->trainer)
                 <tr><td class="label">{{ __('booking_ticket.trainer') }}</td><td class="value">{{ $v($slot->trainer->name) }}</td></tr>
             @endif
-            @if($booking->order?->customer_name)
+            @if(! $anonymous && $booking->order?->customer_name)
                 <tr><td class="label">{{ __('booking_ticket.customer') }}</td><td class="value">{{ $v($booking->order->customer_name) }}</td></tr>
             @endif
             <tr><td class="label">{{ __('booking_ticket.payment') }}</td><td class="value">{{ $data['payment'] }}</td></tr>

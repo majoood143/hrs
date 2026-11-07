@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Http;
 /**
  * Push notifications through Expo's push service (it hands them to Apple and Google). Each phone
  * gets the text in its own language; a phone the app was removed from (DeviceNotRegistered) is
- * forgotten.
+ * forgotten; a phone with the app's main switch off gets nothing.
  */
 class ExpoPush
 {
@@ -27,7 +27,7 @@ class ExpoPush
         $accepted = [];
 
         // Expo takes at most 100 messages a request
-        foreach ($devices->chunk(100) as $chunk) {
+        foreach ($devices->reject(fn (MobileDevice $device) => $device->enabled === false)->chunk(100) as $chunk) {
             $chunk = $chunk->values();
             $messages = $chunk->map(fn (MobileDevice $device) => Locale::within($device->locale, $message) + [
                 'to' => $device->expo_token,
