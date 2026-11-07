@@ -25,7 +25,7 @@ use Throwable;
  * owner's language; WhatsApp in English then Arabic, like every WhatsApp here; a push in each phone's
  * language, to the customer or the owners and staff signed in on it in the app; to the customer, WhatsApp
  * carries their ticket). Never throws,
- * logs every attempt, and sends each message once.
+ * logs every attempt, and sends each message once unless an admin asks for it again.
  */
 class SendStableBookingNotification implements ShouldQueue
 {
@@ -49,6 +49,7 @@ class SendStableBookingNotification implements ShouldQueue
         public readonly string $audience,
         public readonly string $channel,
         public readonly string $type,
+        public readonly bool $force = false,
     ) {}
 
     public function logType(): string
@@ -60,7 +61,7 @@ class SendStableBookingNotification implements ShouldQueue
     {
         $booking = StableBooking::query()->with(['order', 'stable', 'slot', 'offering'])->find($this->bookingId);
 
-        if (! $booking || $this->alreadySent($booking)) {
+        if (! $booking || (! $this->force && $this->alreadySent($booking))) {
             return;
         }
 

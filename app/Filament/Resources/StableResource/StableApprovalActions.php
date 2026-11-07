@@ -9,10 +9,15 @@ use App\Models\SiteSetting;
 use App\Models\Stable;
 use App\Models\User;
 use App\Services\Stables\StableApproval;
+use App\Services\Stables\StableSalesReports;
+use App\Support\StableBookingSettings;
 use Filament\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Support\Facades\Gate;
@@ -118,6 +123,57 @@ final class StableApprovalActions
                 app(StableApproval::class)->setCommission($record, FeeType::from($data['commission_type']), $data['commission_value']);
 
                 Notification::make()->success()->title(__('admin_stable.approval.commission_saved'))->send();
+            });
+    }
+
+    /** The scheduled sales report to the stable's owners: on or off, the channels, daily or on a weekday, and the time. */
+    public static function salesReport(): Action
+    {
+        return Action::make('stableSalesReport')
+            ->label(__('admin_stable.sales_report.action'))
+            ->icon('heroicon-o-chart-bar')
+            ->color('gray')
+            ->visible(fn (Stable $record) => self::allowed($record) && $record->owners()->exists())
+            ->fillForm(fn (Stable $record) => StableSalesReports::settings($record))
+            ->modalDescription(__('admin_stable.sales_report.description'))
+            ->schema([
+                Toggle::make('enabled')
+                    ->label(__('admin_stable.sales_report.enabled'))
+                    ->live(),
+                CheckboxList::make('channels')
+                    ->label(__('admin_stable.sales_report.channels'))
+                    ->helperText(__('admin_stable.sales_report.channels_hint'))
+                    ->options(collect(StableBookingSettings::ALERT_CHANNELS)->mapWithKeys(fn (string $c) => [$c => __('stable_panel.settings.channels.'.$c)]))
+                    ->required()
+                    ->visible(fn (Get $get) => (bool) $get('enabled')),
+                Radio::make('frequency')
+                    ->label(__('admin_stable.sales_report.frequency'))
+                    ->options([
+                        'daily' => __('admin_stable.sales_report.daily'),
+                        'weekly' => __('admin_stable.sales_report.weekly'),
+                    ])
+                    ->required()
+                    ->live()
+                    ->visible(fn (Get $get) => (bool) $get('enabled')),
+                Select::make('weekday')
+                    ->label(__('admin_stable.sales_report.weekday'))
+                    ->options(collect(Stable::DAYS)->mapWithKeys(fn (string $day) => [$day => __('stable_panel.days.'.$day)]))
+                    ->required()
+                    ->native(false)
+                    ->visible(fn (Get $get) => $get('enabled') && $get('frequency') === 'weekly'),
+                Select::make('time')
+                    ->label(__('admin_stable.sales_report.time'))
+                    ->helperText(__('admin_stable.sales_report.time_hint'))
+                    ->options(collect(range(0, 23))->mapWithKeys(fn (int $hour) => [sprintf('%02d:00', $hour) => sprintf('%02d:00', $hour)]))
+                    ->required()
+                    ->native(false)
+                    ->visible(fn (Get $get) => (bool) $get('enabled')),
+            ])
+            ->action(function (Stable $record, array $data): void {
+                // hidden fields are not in $data: switching it off keeps the rest for next time
+                $record->forceFill(['sales_report' => [...StableSalesReports::settings($record), ...$data]])->save();
+
+                Notification::make()->success()->title(__('admin_stable.sales_report.saved'))->send();
             });
     }
 

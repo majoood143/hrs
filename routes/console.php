@@ -15,6 +15,7 @@ Schedule::command('horse-sale-posts:expire')->dailyAt('00:10');
 // Stable bookings: weekly schedules become dated slots up to each stable's booking window.
 Schedule::command('stables:generate-slots')->dailyAt('00:20')->withoutOverlapping();
 Schedule::command('stables:send-reminders')->hourly()->withoutOverlapping();
+Schedule::command('stables:send-sales-reports')->hourly()->withoutOverlapping();
 
 // Push campaigns set to go out at a time (admin → Mobile app → Notifications).
 Schedule::command('push:send-due')->everyMinute()->withoutOverlapping();

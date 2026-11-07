@@ -62,6 +62,7 @@ class Stable extends Model implements HasAvatar, HasName
         'commission_type' => FeeType::class,
         'commission_value' => 'decimal:3',
         'booking_settings' => 'array',
+        'sales_report' => 'array',
     ];
 
     protected $attributes = [
@@ -297,6 +298,6 @@ class Stable extends Model implements HasAvatar, HasName
     /** @return list<string> */
     protected function stableActivityAttributes(): array
     {
-        return ['en_name', 'ar_name', 'slug', 'country_id', 'region_id', 'city_id', 'address', 'map_link', 'en_description', 'ar_description', 'cover_photo', 'gallery', 'opening_hours', 'is_active', 'phone', 'email', 'approval_status', 'commission_type', 'commission_value', 'booking_settings', 'rejection_reason'];
+        return ['en_name', 'ar_name', 'slug', 'country_id', 'region_id', 'city_id', 'address', 'map_link', 'en_description', 'ar_description', 'cover_photo', 'gallery', 'opening_hours', 'is_active', 'phone', 'email', 'approval_status', 'commission_type', 'commission_value', 'booking_settings', 'sales_report', 'rejection_reason'];
     }
 }

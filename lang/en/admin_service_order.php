@@ -60,11 +60,17 @@ return [
     ],
 
     'action_groups' => [
+        'booking' => 'Booking',
         'documents' => 'Documents',
         'more' => 'More',
     ],
 
     'actions' => [
+        'download_ticket' => 'Download ticket',
+        'payment_link' => 'Open the payment page',
+        'check_payment' => 'Check payment at the gateway',
+        'cancel_booking_desc' => 'For the stable. The customer and the stable are told, with your reason.',
+        'cancel_booking_paid_desc' => 'For the stable. It is paid: the customer and the stable are told, with your reason, and a refund becomes due.',
         'replace_document' => 'Replace a document',
         'replace_document_desc' => 'Swaps the file. The customer\'s download link stays the same and now gives the new file.',
         'document' => 'Document',
@@ -129,6 +135,8 @@ return [
     ],
 
     'notification_types' => [
+        'booking_confirmed' => 'Booking confirmed, with the ticket',
+        'booking_cancelled' => 'Booking cancelled',
         'order_rejected' => 'Request rejected',
         'order_refunded' => 'Refund processed',
         'stage_review' => 'Awaiting review (reviewers)',
@@ -140,6 +148,8 @@ return [
     ],
 
     'notifications' => [
+        'payment_settled' => 'The gateway confirmed it: the order is settled.',
+        'payment_not_confirmed' => 'The gateway has not confirmed a payment for this order.',
         'document_replaced' => 'The document was replaced.',
         'document_deleted' => 'The document was deleted.',
         'document_missing' => 'That document no longer exists.',

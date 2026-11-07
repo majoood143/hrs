@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentGateway;
 use App\Enums\PaymentStatus;
+use App\Filament\Resources\ServiceOrderResource\OrderActions;
 use App\Filament\Resources\ServiceOrderResource\Pages\ListServiceOrders;
 use App\Filament\Resources\ServiceOrderResource\Pages\ViewServiceOrder;
 use App\Models\ServiceOrder;
@@ -22,7 +23,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * Orders customers placed for a service, with their money breakdown and payment trail.
- * Read-only for now: creating and deleting an order is not something an admin does by hand.
+ * Creating and deleting an order is not something an admin does by hand; what they can do is in OrderActions.
  */
 class ServiceOrderResource extends Resource
 {
@@ -171,6 +172,20 @@ class ServiceOrderResource extends Resource
                         ->modalCancelActionLabel(__('admin_service_order.actions.close'))
                         ->modalWidth('lg')
                         ->slideOver(),
+                    ActionGroup::make([
+                        OrderActions::markAttended(),
+                        OrderActions::markNoShow(),
+                        OrderActions::cancelBooking(),
+                    ])->dropdown(false),
+                    ActionGroup::make([
+                        OrderActions::refund(),
+                        OrderActions::resend(),
+                        OrderActions::receipt(),
+                        OrderActions::ticket(),
+                        OrderActions::paymentLink(),
+                        OrderActions::checkPayment(),
+                        OrderActions::paymentLogs(),
+                    ])->dropdown(false),
                 ]),
             ]);
     }

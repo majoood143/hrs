@@ -25,19 +25,29 @@ class SendStableBookingNotifications
         $this->dispatch($event->booking, SendStableBookingNotification::CANCELLED);
     }
 
-    private function dispatch(StableBooking $booking, string $type): void
+    /** @return list<string> the channels a message was queued on */
+    public function notifyCustomer(StableBooking $booking, string $type, bool $force = false): array
     {
         $order = $booking->order;
 
-        // the customer: SMS always (a booking needs a phone), email when there is one
-        foreach (array_filter(['sms' => (bool) $order?->customer_phone, 'email' => (bool) $order?->customer_email]) as $channel => $_) {
-            SendStableBookingNotification::dispatch($booking->getKey(), 'customer', $channel, $type)->afterCommit();
+        // SMS always (a booking needs a phone), email when there is one, and their ticket by WhatsApp
+        // while the site's WhatsApp and its "Booking tickets" alert are on
+        $channels = array_keys(array_filter([
+            'sms' => (bool) $order?->customer_phone,
+            'email' => (bool) $order?->customer_email,
+            'whatsapp' => $type === SendStableBookingNotification::CONFIRMED && $order?->customer_phone && WhatsAppSettings::enabled() && WhatsAppSettings::alertEnabled('booking_ticket'),
+        ]));
+
+        foreach ($channels as $channel) {
+            SendStableBookingNotification::dispatch($booking->getKey(), 'customer', $channel, $type, $force)->afterCommit();
         }
 
-        // their ticket by WhatsApp, while the site's WhatsApp and its "Booking tickets" alert are on
-        if ($type === SendStableBookingNotification::CONFIRMED && $order?->customer_phone && WhatsAppSettings::enabled() && WhatsAppSettings::alertEnabled('booking_ticket')) {
-            SendStableBookingNotification::dispatch($booking->getKey(), 'customer', 'whatsapp', $type)->afterCommit();
-        }
+        return $channels;
+    }
+
+    private function dispatch(StableBooking $booking, string $type): void
+    {
+        $this->notifyCustomer($booking, $type);
 
         // and a push to whoever is signed in on a phone: the customer, and the stable's owners and staff
         foreach (['customer', 'stable'] as $audience) {

@@ -124,12 +124,19 @@ return [
     ],
 
     'sms' => [
+        'sales_report' => 'تقرير مبيعات :stable (:period): الحجوزات :bookings، ما دفعه العملاء :collected، حصتك :share.',
         'payout' => 'دفعنا لك :amount عن :stable بتاريخ :date. اطّلع على كشف حسابك في لوحة إسطبلك.',
         'receipt' => 'استلمنا دفعتك بقيمة :amount عن :stable بتاريخ :date. شكرًا لك.',
     ],
 
     'mail' => [
         'button' => 'افتح كشف حسابك',
+        'sales_report' => [
+            'subject' => 'تقرير مبيعات :stable: :period',
+            'heading' => 'تقرير مبيعات :stable',
+            'intro' => 'الفترة: :period.',
+            'refunded' => 'المسترد',
+        ],
         'payout' => [
             'subject' => 'دفعنا لك :amount',
             'heading' => 'دفعنا لك :amount',

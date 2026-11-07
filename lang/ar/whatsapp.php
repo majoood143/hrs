@@ -51,6 +51,8 @@ return [
         'reminder' => '⏰ نراك غدًا في :stable: :offering، :date :time. التذكرة مرفقة: اعرض رمز QR عند وصولك.',
     ],
 
+    'stable_sales_report' => "📊 تقرير مبيعات :stable\n:period\nالحجوزات: :bookings\nما دفعه العملاء: :collected\nحصتك: :share\nكشف الحساب: :url",
+
     'post_types' => [
         'transfer_post' => 'لوحة النقل',
         'horse_sale_post' => 'خيول للبيع',
@@ -61,6 +63,7 @@ return [
         'youtube_video' => 'فيديوهات يوتيوب جديدة (القنوات المتابعة)',
         'race_result' => 'نتائج السباقات (تُرسل تلقائيًا عند نشرها)',
         'booking_ticket' => 'تذاكر الحجز للعملاء (PDF برمز QR لتسجيل الحضور)',
+        'stable_sales_report' => 'تقارير المبيعات لملّاك الإسطبلات (تُضبط في كل إسطبل)',
     ],
 
     'transfer_kinds' => [

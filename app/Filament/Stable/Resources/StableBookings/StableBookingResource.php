@@ -259,7 +259,7 @@ class StableBookingResource extends Resource
         };
     }
 
-    private static function sessionDue(StableBooking $record): bool
+    public static function sessionDue(StableBooking $record): bool
     {
         return $record->slot && $record->slot->date->toDateString() <= BookingSlot::today();
     }

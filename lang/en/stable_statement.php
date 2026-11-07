@@ -124,12 +124,19 @@ return [
     ],
 
     'sms' => [
+        'sales_report' => 'Sales report for :stable (:period): :bookings bookings, customers paid :collected, your share :share.',
         'payout' => 'We paid you :amount for :stable on :date. See your statement in your stable panel.',
         'receipt' => 'We received your payment of :amount for :stable on :date. Thank you.',
     ],
 
     'mail' => [
         'button' => 'Open your statement',
+        'sales_report' => [
+            'subject' => 'Sales report for :stable: :period',
+            'heading' => 'Sales report for :stable',
+            'intro' => 'Period: :period.',
+            'refunded' => 'Refunded',
+        ],
         'payout' => [
             'subject' => 'We paid you :amount',
             'heading' => 'We paid you :amount',

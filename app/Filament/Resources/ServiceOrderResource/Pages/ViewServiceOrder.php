@@ -8,17 +8,14 @@ use App\Enums\PaymentStatus;
 use App\Enums\StableBookingStatus;
 use App\Filament\Concerns\HasExportActions;
 use App\Filament\Resources\ServiceOrderResource;
+use App\Filament\Resources\ServiceOrderResource\OrderActions;
 use App\Filament\Resources\StableResource;
 use App\Models\OrderDocument;
 use App\Models\OrderStage;
 use App\Models\ServiceOrder;
 use App\Models\SiteSetting;
-use App\Services\Notifications\OrderNotifier;
 use App\Services\Orders\OrderDocumentService;
-use App\Services\Orders\OrderReceiptPdf;
-use App\Services\Orders\OrderRefundService;
 use App\Services\Orders\OrderWorkflow;
-use App\Services\Orders\RefundException;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\FileUpload;
@@ -211,85 +208,24 @@ class ViewServiceOrder extends ViewRecord
                 ->dropdownPlacement('bottom-end'),
 
             ActionGroup::make([
-                Action::make('refund')
-                    ->label(__('admin_service_order.actions.refund'))
-                    ->icon('heroicon-o-arrow-uturn-left')
-                    ->color('warning')
-                    ->modalHeading(__('admin_service_order.actions.refund'))
-                    ->modalDescription(fn (ServiceOrder $record): string => __('admin_service_order.actions.refund_desc', ['max' => SiteSetting::formatCurrency($record->refundableAmount())]))
-                    ->visible(fn (ServiceOrder $record): bool => $record->isPaid() && $record->refundableAmount() > 0)
-                    ->schema(fn (ServiceOrder $record): array => [
-                        TextInput::make('amount')
-                            ->label(__('admin_service_order.actions.refund_amount'))
-                            ->numeric()
-                            ->step(0.001)
-                            ->minValue(0.001)
-                            ->maxValue($record->refundableAmount())
-                            ->default($record->refundableAmount())
-                            ->required(),
-                        Select::make('method')
-                            ->label(__('admin_service_order.actions.refund_method'))
-                            ->options(['gateway' => __('admin_service_order.refund.methods.gateway'), 'manual' => __('admin_service_order.refund.methods.manual')])
-                            ->default('gateway')
-                            ->native(false)
-                            ->required(),
-                        TextInput::make('reference')->label(__('admin_service_order.actions.refund_reference'))->maxLength(255),
-                        Textarea::make('reason')->label(__('admin_service_order.actions.refund_reason'))->rows(2),
-                    ])
-                    ->action(function (array $data, ServiceOrder $record): void {
-                        try {
-                            app(OrderRefundService::class)->record($record, (int) round((float) $data['amount'] * 1000), $data['reason'] ?? null, auth()->id(), $data['method'], $data['reference'] ?? null);
-                        } catch (RefundException $e) {
-                            Notification::make()->title(__('admin_service_order.notifications.refund_failed'))->body($e->getMessage())->danger()->send();
+                OrderActions::markAttended(),
+                OrderActions::markNoShow(),
+                OrderActions::cancelBooking(),
+            ])
+                ->label(__('admin_service_order.action_groups.booking'))
+                ->icon('heroicon-o-ticket')
+                ->color('gray')
+                ->button()
+                ->dropdownPlacement('bottom-end'),
 
-                            return;
-                        }
-
-                        $this->record->refresh();
-                        Notification::make()->title(__('admin_service_order.notifications.refunded'))->success()->send();
-                    }),
-
-                Action::make('resend')
-                    ->label(__('admin_service_order.actions.resend'))
-                    ->icon('heroicon-o-paper-airplane')
-                    ->color('gray')
-                    ->modalHeading(__('admin_service_order.actions.resend'))
-                    ->modalDescription(__('admin_service_order.actions.resend_desc'))
-                    ->visible(fn (ServiceOrder $record): bool => $record->isPaid() || $record->isFree())
-                    ->schema(fn (ServiceOrder $record): array => [
-                        Select::make('type')
-                            ->label(__('admin_service_order.actions.resend_type'))
-                            ->options(array_filter([
-                                OrderNotifier::RECEIVED => __('admin_service_order.notification_types.order_received'),
-                                OrderNotifier::COMPLETED => $record->status === OrderStatus::Completed ? __('admin_service_order.notification_types.order_completed') : null,
-                            ]))
-                            ->default(OrderNotifier::RECEIVED)
-                            ->required()
-                            ->native(false),
-                    ])
-                    ->action(function (array $data, ServiceOrder $record): void {
-                        $channels = app(OrderNotifier::class)->notify($record, $data['type'], force: true);
-                        $this->record->refresh();
-
-                        $channels === []
-                            ? Notification::make()->title(__('admin_service_order.notifications.resend_none'))->warning()->send()
-                            : Notification::make()->title(__('admin_service_order.notifications.resent', ['channels' => implode(' + ', array_map('strtoupper', $channels))]))->success()->send();
-                    }),
-
-                Action::make('receipt')
-                    ->label(__('admin_service_order.actions.receipt'))
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->color('gray')
-                    ->visible(fn (ServiceOrder $record): bool => app(OrderReceiptPdf::class)->available($record))
-                    ->action(function (ServiceOrder $record) {
-                        $receipts = app(OrderReceiptPdf::class);
-
-                        return response()->streamDownload(
-                            fn () => print ($receipts->render($record)),
-                            $receipts->filename($record),
-                            ['Content-Type' => 'application/pdf'],
-                        );
-                    }),
+            ActionGroup::make([
+                OrderActions::refund(),
+                OrderActions::resend(),
+                OrderActions::receipt(),
+                OrderActions::ticket(),
+                OrderActions::paymentLink(),
+                OrderActions::checkPayment(),
+                OrderActions::paymentLogs(),
             ])
                 ->label(__('admin_service_order.action_groups.more'))
                 ->icon('heroicon-o-ellipsis-horizontal')

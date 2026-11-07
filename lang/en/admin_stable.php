@@ -29,6 +29,21 @@ return [
         'inactive' => 'Inactive',
     ],
 
+    'sales_report' => [
+        'action' => 'Sales report',
+        'description' => 'Sends the owners a summary of this stable\'s sales, with the same figures as its statement. Daily covers yesterday; weekly covers the 7 days before the chosen day.',
+        'enabled' => 'Send the sales report',
+        'channels' => 'Send by',
+        'channels_hint' => 'To each owner\'s email and phone. WhatsApp also needs General Settings → WhatsApp switched on.',
+        'frequency' => 'How often',
+        'daily' => 'Daily',
+        'weekly' => 'Weekly',
+        'weekday' => 'Day of the week',
+        'time' => 'Time',
+        'time_hint' => 'Oman time. It goes out within the hour after this time.',
+        'saved' => 'Sales report settings saved',
+    ],
+
     'approval' => [
         'pending_badge' => 'Stables waiting for approval',
         'approve' => 'Approve',

@@ -20,6 +20,7 @@ class ViewStable extends ViewRecord
         return [
             StableApprovalActions::openPanel(),
             ...StableApprovalActions::all(),
+            StableApprovalActions::salesReport(),
             EditAction::make(),
         ];
     }

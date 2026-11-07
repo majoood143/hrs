@@ -51,6 +51,8 @@ return [
         'reminder' => '⏰ See you tomorrow at :stable: :offering, :date :time. Your ticket is attached: show its QR code when you arrive.',
     ],
 
+    'stable_sales_report' => "📊 Sales report for :stable\n:period\nBookings: :bookings\nCustomers paid: :collected\nYour share: :share\nStatement: :url",
+
     'post_types' => [
         'transfer_post' => 'Transfer board',
         'horse_sale_post' => 'Horses for sale',
@@ -61,6 +63,7 @@ return [
         'youtube_video' => 'New YouTube videos (watched channels)',
         'race_result' => 'Race results (sent automatically once published)',
         'booking_ticket' => 'Booking tickets to customers (PDF with the check-in QR code)',
+        'stable_sales_report' => 'Sales reports to stable owners (set on each stable)',
     ],
 
     'transfer_kinds' => [

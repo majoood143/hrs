@@ -12,7 +12,7 @@ use App\Models\SiteSetting;
 final class WhatsAppSettings
 {
     /** Alert types that can be switched on/off one by one; all on until an admin says otherwise. */
-    public const ALERTS = ['transfer_post', 'horse_sale_post', 'tool_sale_post', 'farrier', 'jockey', 'stable_registration', 'youtube_video', 'race_result', 'booking_ticket'];
+    public const ALERTS = ['transfer_post', 'horse_sale_post', 'tool_sale_post', 'farrier', 'jockey', 'stable_registration', 'youtube_video', 'race_result', 'booking_ticket', 'stable_sales_report'];
 
     public static function enabled(): bool
     {

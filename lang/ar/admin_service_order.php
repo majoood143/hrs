@@ -60,11 +60,17 @@ return [
     ],
 
     'action_groups' => [
+        'booking' => 'الحجز',
         'documents' => 'المستندات',
         'more' => 'المزيد',
     ],
 
     'actions' => [
+        'download_ticket' => 'تحميل التذكرة',
+        'payment_link' => 'فتح صفحة الدفع',
+        'check_payment' => 'التحقق من الدفع لدى البوابة',
+        'cancel_booking_desc' => 'نيابة عن الإسطبل. سيتم إبلاغ العميل والإسطبل مع ذكر السبب.',
+        'cancel_booking_paid_desc' => 'نيابة عن الإسطبل. الحجز مدفوع: سيتم إبلاغ العميل والإسطبل مع ذكر السبب، ويصبح الاسترداد مستحقًا.',
         'replace_document' => 'استبدال مستند',
         'replace_document_desc' => 'يستبدل الملف. يبقى رابط التحميل عند العميل كما هو ويعطيه الملف الجديد.',
         'document' => 'المستند',
@@ -129,6 +135,8 @@ return [
     ],
 
     'notification_types' => [
+        'booking_confirmed' => 'تأكيد الحجز مع التذكرة',
+        'booking_cancelled' => 'إلغاء الحجز',
         'order_rejected' => 'رفض الطلب',
         'order_refunded' => 'معالجة الاسترداد',
         'stage_review' => 'بانتظار المراجعة (للمراجعين)',
@@ -140,6 +148,8 @@ return [
     ],
 
     'notifications' => [
+        'payment_settled' => 'أكدت البوابة العملية: تمت تسوية الطلب.',
+        'payment_not_confirmed' => 'لم تؤكد البوابة أي دفعة لهذا الطلب.',
         'document_replaced' => 'تم استبدال المستند.',
         'document_deleted' => 'تم حذف المستند.',
         'document_missing' => 'هذا المستند لم يعد موجوداً.',
