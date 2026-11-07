@@ -489,6 +489,59 @@ function lightbox() {
     });
 }
 
+// Plays a YouTube link (a[data-youtube-id]) in a <dialog> on the page, so visitors stay on the site.
+// Listens on the document: the race widget swaps its links in without a reload. Without JS the link opens YouTube.
+function youtubeModal() {
+    if (typeof HTMLDialogElement === 'undefined') return;
+
+    let dialog;
+
+    const build = () => {
+        dialog = document.createElement('dialog');
+        dialog.className = 'm-0 h-full max-h-none w-full max-w-none bg-transparent p-0 backdrop:bg-black/90';
+        dialog.innerHTML = `
+            <div class="relative flex h-full w-full items-center justify-center p-4 sm:p-10" data-video-stage>
+                <div class="aspect-video max-h-full w-full max-w-5xl overflow-hidden rounded-2xl bg-black shadow-2xl" data-video-frame></div>
+                <button type="button" data-video-close class="absolute end-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur transition hover:bg-white/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                </button>
+            </div>`;
+        document.body.appendChild(dialog);
+
+        dialog.querySelector('[data-video-close]').addEventListener('click', () => dialog.close());
+        dialog.addEventListener('click', (event) => {
+            if (event.target === dialog || event.target.hasAttribute('data-video-stage')) dialog.close();
+        });
+        // Removing the player is what stops the sound.
+        dialog.addEventListener('close', () => {
+            document.documentElement.style.overflow = '';
+            dialog.querySelector('[data-video-frame]').replaceChildren();
+        });
+    };
+
+    document.addEventListener('click', (event) => {
+        const link = event.target.closest?.('a[data-youtube-id]');
+        if (!link) return;
+        event.preventDefault();
+        if (!dialog) build();
+
+        const params = new URLSearchParams({ autoplay: 1, playsinline: 1, rel: 0, hl: document.documentElement.lang });
+        const iframe = document.createElement('iframe');
+        iframe.className = 'h-full w-full';
+        iframe.title = link.textContent.trim();
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+        iframe.allowFullscreen = true;
+        // YouTube refuses embeds that send no referrer (error 153).
+        iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+        iframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(link.dataset.youtubeId)}?${params}`;
+
+        dialog.querySelector('[data-video-close]').setAttribute('aria-label', link.dataset.closeLabel ?? 'Close');
+        dialog.querySelector('[data-video-frame]').replaceChildren(iframe);
+        dialog.showModal();
+        document.documentElement.style.overflow = 'hidden';
+    });
+}
+
 function passportReveal() {
     document.querySelectorAll('[data-reveal-passport]').forEach((button) => {
         button.addEventListener('click', () => {
@@ -1313,6 +1366,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mobileMenu();
     contactReveal();
     lightbox();
+    youtubeModal();
     passportReveal();
     copyLink();
     printButtons();

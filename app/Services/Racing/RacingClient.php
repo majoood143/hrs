@@ -181,6 +181,11 @@ class RacingClient
      */
     public function raceInfo(int $raceId): array
     {
+        // the source's ids are 32-bit: above that it answers with a JSON error string, not "no such race"
+        if ($raceId > 2147483647) {
+            return ['exists' => false, 'entries' => 0, 'results' => 0, 'declarations' => 0, 'page' => ''];
+        }
+
         return Cache::remember("racing:raceinfo:{$raceId}", config('racing.cache_ttl'), function () use ($raceId) {
             $data = json_decode(trim($this->get('/components/race.cfc', ['method' => 'getRaceLink', 'raceID' => $raceId])), true);
 
@@ -578,16 +583,27 @@ class RacingClient
     /** @throws RacingUnavailableException */
     private function get(string $path, array $query, ?string $locale = null, ?int $timeout = null): string
     {
-        try {
-            $response = $this->request($timeout)->get($path, $locale === null ? $query : $query + ['lang' => $this->lang($locale)]);
-        } catch (ConnectionException $e) {
-            throw new RacingUnavailableException('Racing source unreachable: '.$e->getMessage(), 0, $e);
+        // under load the source answers some requests with an HTTP 200 "showError()" page; the same request works moments later
+        for ($attempt = 1; $attempt <= 3; $attempt++) {
+            if ($attempt > 1) {
+                usleep(300_000);
+            }
+
+            try {
+                $response = $this->request($timeout)->get($path, $locale === null ? $query : $query + ['lang' => $this->lang($locale)]);
+            } catch (ConnectionException $e) {
+                throw new RacingUnavailableException('Racing source unreachable: '.$e->getMessage(), 0, $e);
+            }
+
+            if ($response->failed()) {
+                throw new RacingUnavailableException('Racing source responded with HTTP '.$response->status());
+            }
+
+            if (! str_contains($response->body(), 'showError')) {
+                return $response->body();
+            }
         }
 
-        if ($response->failed()) {
-            throw new RacingUnavailableException('Racing source responded with HTTP '.$response->status());
-        }
-
-        return $response->body();
+        throw new RacingUnavailableException('Racing source kept answering with its error page: '.$path.' '.($query['method'] ?? $query['page'] ?? ''));
     }
 }

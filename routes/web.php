@@ -115,13 +115,13 @@ Route::get('/racing/{entity}/{id}/pdf', [RacingPdfController::class, 'profile'])
     ->name('racing.profile.pdf');
 Route::get('/racing/{page}/{race}/pdf', [RacingPdfController::class, 'race'])
     ->whereIn('page', ['results', 'entries', 'card', 'form-guide'])
-    ->whereNumber('race')
+    ->where('race', '[0-9]{1,10}')
     ->middleware('throttle:30,1')
     ->name('racing.meeting.pdf');
-Route::get('/racing/race/{race}', [RacingRaceController::class, 'race'])->whereNumber('race')->name('racing.race');
+Route::get('/racing/race/{race}', [RacingRaceController::class, 'race'])->where('race', '[0-9]{1,10}')->name('racing.race');
 Route::get('/racing/{page}/{race?}', [RacingRaceController::class, 'show'])
     ->whereIn('page', ['results', 'entries', 'card', 'form-guide'])
-    ->whereNumber('race')
+    ->where('race', '[0-9]{1,10}')
     ->name('racing.meeting');
 Route::get('/racing/{entity}/{id}', [RacingController::class, 'profile'])
     ->whereIn('entity', ['horse', 'owner', 'jockey', 'trainer'])

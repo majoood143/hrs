@@ -28,6 +28,8 @@ class RacingRaceTest extends TestCase
             ->assertSee('National Museum 51st National Day Cup')
             ->assertSee('1:51:15')
             ->assertSee('https://www.youtube.com/watch?v=1DFTS1ySgIY', false)
+            // played in the page's modal (site.js youtubeModal)
+            ->assertSee('data-youtube-id="1DFTS1ySgIY"', false)
             // horses, trainers, jockeys and owners inside the table all link to their own pages
             ->assertSee('/racing/horse/3216', false)
             ->assertSee('/racing/trainer/176', false)
@@ -115,6 +117,21 @@ class RacingRaceTest extends TestCase
         $this->assertSame(0, $this->sentCount('page=Race'));
         $this->assertSame(0, $this->sentCount('Details.cfm'));
         $this->assertGreaterThan(0, $this->sentCount('method=getRaceLink'));
+    }
+
+    public function test_a_race_id_too_big_for_the_source_is_a_404_without_calling_it(): void
+    {
+        // the source answers these with a JSON error string, which used to be logged as the source being down
+        Http::fake();
+
+        foreach (['2147483648', '99999999999', '9223372036854775807', '9223372036854775808', '99999999999999999999999'] as $id) {
+            $this->get("/racing/results/{$id}")->assertNotFound();
+            $this->get("/racing/race/{$id}")->assertNotFound();
+            $this->get("/racing/results/{$id}/pdf")->assertNotFound();
+            $this->getJson("/api/v1/racing/races/results/{$id}")->assertNotFound();
+        }
+
+        Http::assertNothingSent();
     }
 
     public function test_bad_urls_are_404_without_calling_the_source(): void

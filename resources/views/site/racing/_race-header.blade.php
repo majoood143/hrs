@@ -42,7 +42,10 @@
                 @endif
 
                 @if($race['video_url'])
-                    <a href="{{ $race['video_url'] }}" target="_blank" rel="noopener noreferrer" class="btn-warm-outline w-full !px-5 !py-2 text-sm md:w-auto">
+                    <a href="{{ $race['video_url'] }}" target="_blank" rel="noopener noreferrer"
+                       @if($youtubeId = \App\Support\YouTube::videoId($race['video_url'])) data-youtube-id="{{ $youtubeId }}" data-close-label="{{ __('racing.close_replay') }}" @endif
+                       class="btn-warm-outline w-full !px-5 !py-2 text-sm md:w-auto">
+                        <x-heroicon-o-play-circle class="h-5 w-5" aria-hidden="true" />
                         {{ __('racing.watch_replay') }}
                     </a>
                 @endif

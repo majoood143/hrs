@@ -121,6 +121,7 @@ An external ColdFusion racing site (`https://iframe.rhrc.om`, `RACING_BASE_URL`;
   - The source's "Local"/"Non-Local" handicap labels look inverted; that's upstream.
 - PDFs: mPDF with the bundled Cairo font (static cuts in `resources/fonts/cairo/`; mPDF can't use variable fonts — see the README there), black/white/gray only (a test enforces it for racing), QR code to the page URL. Use `PdfText::dir()` around values so Latin-in-Arabic text isn't bidi-flipped. mPDF can't do Tailwind/flex, so PDF views are plain tables.
 - Print/PDF/share toolbar (`x-racing.tools`) appears on profile and race pages only.
+- **Replays play on our page, never by sending visitors to YouTube**: a YouTube link with `data-youtube-id` + `data-close-label` (race header `_race-header`, race widget) opens the `<dialog>` of `youtubeModal()` in `resources/js/site.js` (`youtube-nocookie` embed; closing removes the player, which stops the sound). The `href` stays the YouTube URL only as the no-JS fallback; a link that is not YouTube stays a plain link. Any new replay link gets the same attributes. The app plays them in-app (`components/youtube-player.tsx`).
 
 ### Racing silks designer (CMS block `silks_designer`)
 

@@ -136,6 +136,7 @@
                                             <div class="mt-3 flex flex-wrap gap-2 sm:ps-17">
                                                 @foreach(array_intersect_key($buttons, $links) as $key => $icon)
                                                     <a href="{{ $links[$key] }}" @if(in_array($key, ['video', 'photo'], true)) target="_blank" rel="noopener noreferrer" @endif
+                                                       @if($key === 'video' && ($youtubeId = \App\Support\YouTube::videoId($links[$key]))) data-youtube-id="{{ $youtubeId }}" data-close-label="{{ __('racing.close_replay') }}" @endif
                                                        class="inline-flex min-h-10 items-center gap-1.5 rounded-full border px-3.5 text-sm font-semibold transition active:scale-95
                                                               {{ $key === 'results' ? 'border-warm-600 bg-warm-600 text-white hover:bg-warm-800' : 'border-warm-200 bg-white text-warm-800 hover:border-warm-500 hover:text-warm-900 active:bg-warm-100' }}">
                                                         <svg class="h-4 w-4 shrink-0" aria-hidden="true"><use href="#rw-{{ $icon }}"/></svg>

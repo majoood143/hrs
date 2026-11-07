@@ -92,7 +92,7 @@ Route::prefix('v1')
             Route::get('calendar', 'calendar')->name('calendar');
             Route::get('days/{date}', 'day')->where('date', '\d{4}-\d{2}-\d{2}')->name('day');
             Route::get('handicap', 'handicap')->name('handicap');
-            Route::get('races/{page}/{race?}', 'meeting')->whereIn('page', ['results', 'entries', 'card', 'form-guide'])->whereNumber('race')->name('meeting');
+            Route::get('races/{page}/{race?}', 'meeting')->whereIn('page', ['results', 'entries', 'card', 'form-guide'])->where('race', '[0-9]{1,10}')->name('meeting');
             Route::get('{entity}/{id}', 'profile')->whereIn('entity', ['horse', 'owner', 'jockey', 'trainer'])->whereNumber('id')->name('profile');
         });
 

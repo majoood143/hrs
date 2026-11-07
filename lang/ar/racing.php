@@ -72,6 +72,7 @@ return [
     'race_n' => 'السباق :n',
     'races_in_meeting' => 'سباقات هذا الاجتماع',
     'watch_replay' => 'مشاهدة إعادة السباق',
+    'close_replay' => 'إغلاق إعادة السباق',
     'prize_money' => 'الجوائز',
     'owners' => 'الملاك',
     'overweights' => 'وزن زائد',

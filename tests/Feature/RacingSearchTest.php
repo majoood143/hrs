@@ -3,6 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\SiteSetting;
+use App\Services\Racing\RacingClient;
+use App\Services\Racing\RacingSearchType;
+use App\Services\Racing\RacingUnavailableException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
@@ -146,6 +149,30 @@ class RacingSearchTest extends TestCase
         Http::fake(['*' => Http::response('boom', 500)]);
 
         $this->get('/racing/search?q=al+qous&type=1')->assertOk()->assertSee('temporarily unavailable');
+    }
+
+    public function test_the_sources_error_page_is_retried(): void
+    {
+        Http::fakeSequence()
+            ->push('<script>showError()</script>')
+            ->push(file_get_contents(base_path('tests/Fixtures/racing/day_2026-10-17.json')));
+
+        $this->assertCount(8, app(RacingClient::class)->raceDay('2026-10-17', 'en'));
+
+        Http::assertSentCount(2);
+    }
+
+    public function test_a_lasting_error_page_is_an_outage_not_an_empty_search(): void
+    {
+        Http::fake(['*' => Http::response(file_get_contents(base_path('tests/Fixtures/racing/calendar_error.html')))]);
+
+        $this->expectException(RacingUnavailableException::class);
+
+        try {
+            app(RacingClient::class)->search('al qous', RacingSearchType::Horse, 'en');
+        } finally {
+            Http::assertSentCount(3);
+        }
     }
 
     public function test_results_are_cached(): void

@@ -92,8 +92,8 @@ class RacingWidgetTest extends TestCase
             $this->assertStringContainsString('href="' . url("/racing/{$page}/9822") . '"', $html);
         }
 
-        // video links go straight out to the source's YouTube URL, in a new tab and without leaking the opener
-        $this->assertMatchesRegularExpression('#<a href="https://youtu\.be/[^"]+"\s+target="_blank" rel="noopener noreferrer"#', $html);
+        // video links play in the page's modal; the source's YouTube URL stays as the no-JS fallback, without leaking the opener
+        $this->assertMatchesRegularExpression('#<a href="https://youtu\.be/[^"]+"\s+target="_blank" rel="noopener noreferrer"\s+data-youtube-id="[^"]{11}"#', $html);
         $this->assertStringNotContainsString('appear here once they are published', $html);
     }
 

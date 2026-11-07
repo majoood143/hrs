@@ -72,6 +72,7 @@ return [
     'race_n' => 'Race :n',
     'races_in_meeting' => 'Races in this meeting',
     'watch_replay' => 'Watch replay',
+    'close_replay' => 'Close replay',
     'prize_money' => 'Prize money',
     'owners' => 'Owners',
     'overweights' => 'Overweights',
