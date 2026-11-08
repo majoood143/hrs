@@ -8,6 +8,8 @@
         'title' => $event->title,
         'description' => $event->description,
         'date' => $event->date->toDateString(),
+        'endDate' => $event->lastDay()->toDateString(),
+        'daysLabel' => $event->isMultiDay() ? $event->date->translatedFormat('j F').' – '.$event->end_date->translatedFormat('j F Y') : null,
         'startTime' => \Illuminate\Support\Carbon::parse($event->start_time)->format('H:i'),
         'endTime' => \Illuminate\Support\Carbon::parse($event->end_time)->format('H:i'),
         'startLabel' => \Illuminate\Support\Carbon::parse($event->start_time)->format('g:i A'),

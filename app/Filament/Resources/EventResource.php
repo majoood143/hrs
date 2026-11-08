@@ -24,14 +24,18 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Filament\Support\Colors\Color;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Carbon;
 
 class EventResource extends Resource
 {
     protected static ?string $model = Event::class;
+
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-calendar-days';
+
     protected static ?int $navigationSort = 82;
 
     public static function getNavigationGroup(): ?string
@@ -57,6 +61,7 @@ class EventResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema
+            ->columns(1)
             ->components([
                 Section::make(__('events.sections.details'))
                     ->schema([
@@ -73,10 +78,16 @@ class EventResource extends Resource
                                 ->extraInputAttributes(['dir' => 'rtl']),
                         ]),
 
-                        Grid::make(3)->schema([
+                        Grid::make(2)->schema([
                             DatePicker::make('date')
                                 ->label(__('events.fields.date'))
                                 ->required()
+                                ->native(false),
+
+                            DatePicker::make('end_date')
+                                ->label(__('events.fields.end_date'))
+                                ->helperText(__('events.fields.end_date_helper'))
+                                ->afterOrEqual('date')
                                 ->native(false),
 
                             TimePicker::make('start_time')
@@ -91,7 +102,10 @@ class EventResource extends Resource
                                 ->rules([
                                     fn (Get $get): \Closure => function (string $attribute, $value, \Closure $fail) use ($get) {
                                         $start = $get('start_time');
-                                        if ($start && $value && $value <= $start) {
+                                        $endDate = $get('end_date');
+                                        // on a later day, any end time is after the start
+                                        $sameDay = blank($endDate) || $endDate === $get('date');
+                                        if ($sameDay && $start && $value && $value <= $start) {
                                             $fail(__('events.validation.end_after_start'));
                                         }
                                     },
@@ -141,14 +155,12 @@ class EventResource extends Resource
 
                 Section::make(__('events.sections.description'))
                     ->schema([
-                        Grid::make(2)->schema([
-                            RichEditor::make('description.en')
-                                ->label(__('events.fields.description_en')),
+                        RichEditor::make('description.en')
+                            ->label(__('events.fields.description_en')),
 
-                            RichEditor::make('description.ar')
-                                ->label(__('events.fields.description_ar'))
-                                ->extraInputAttributes(['dir' => 'rtl']),
-                        ]),
+                        RichEditor::make('description.ar')
+                            ->label(__('events.fields.description_ar'))
+                            ->extraInputAttributes(['dir' => 'rtl']),
                     ]),
             ]);
     }
@@ -169,23 +181,34 @@ class EventResource extends Resource
                     ->date()
                     ->sortable(),
 
+                TextColumn::make('end_date')
+                    ->label(__('events.columns.end_date'))
+                    ->date()
+                    ->placeholder('—')
+                    ->sortable(),
+
                 TextColumn::make('time')
                     ->label(__('events.columns.time'))
-                    ->getStateUsing(fn (Event $record) => \Illuminate\Support\Carbon::parse($record->start_time)->format('g:i A')
-                        .' - '.\Illuminate\Support\Carbon::parse($record->end_time)->format('g:i A')),
+                    ->getStateUsing(fn (Event $record) => Carbon::parse($record->start_time)->format('g:i A')
+                        .' - '.Carbon::parse($record->end_time)->format('g:i A')),
 
                 TextColumn::make('category')
                     ->label(__('events.columns.category'))
                     ->badge()
                     ->formatStateUsing(fn (Event $record) => $record->categoryLabel())
-                    ->color(fn (Event $record) => \Filament\Support\Colors\Color::hex($record->categoryColor())),
+                    ->color(fn (Event $record) => Color::hex($record->categoryColor())),
 
                 TextColumn::make('link')
                     ->label(__('events.columns.link'))
                     ->limit(30)
                     ->placeholder('—'),
+
+                TextColumn::make('created_at')
+                    ->label(__('events.columns.created_at'))
+                    ->dateTime()
+                    ->sortable(),
             ])
-            ->defaultSort('date', 'asc')
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('category_id')
                     ->label(__('events.filters.category'))

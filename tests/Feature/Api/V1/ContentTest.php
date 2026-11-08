@@ -22,6 +22,24 @@ class ContentTest extends TestCase
         $this->prepareDirectoryTables();
     }
 
+    public function test_a_multi_day_event_is_listed_until_its_last_day(): void
+    {
+        $running = $this->event(['date' => now()->subDay()->toDateString(), 'end_date' => now()->addDay()->toDateString()]);
+        $finished = $this->event(['date' => now()->subDays(3)->toDateString(), 'end_date' => now()->subDay()->toDateString()]);
+        $sameDay = $this->event(['date' => now()->toDateString(), 'end_date' => now()->toDateString()]);
+
+        $this->getJson('/api/v1/events')
+            ->assertOk()
+            ->assertJsonPath('data.*.id', [$running, $sameDay])
+            ->assertJsonPath('data.0.end_date', now()->addDay()->toDateString())
+            ->assertJsonPath('data.1.end_date', null);
+
+        // a period that only touches the event's later days still finds it
+        $this->assertSame([$finished, $running], $this->getJson('/api/v1/events?from='.now()->subDay()->toDateString().'&to='.now()->subDay()->toDateString())->json('data.*.id'));
+
+        $this->getJson('/api/v1/home')->assertJsonPath('data.events.0.id', $running);
+    }
+
     public function test_events_list_upcoming_ones_in_date_order_by_default(): void
     {
         $racing = $this->row('event_categories', ['en_name' => 'Racing', 'ar_name' => 'سباقات', 'color' => '#c00000', 'order' => 1]);

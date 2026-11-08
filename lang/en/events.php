@@ -13,7 +13,9 @@ return [
     'fields' => [
         'title_en' => 'Title (English)',
         'title_ar' => 'Title (Arabic)',
-        'date' => 'Date',
+        'date' => 'Start Date',
+        'end_date' => 'End Date',
+        'end_date_helper' => 'Only for events of more than one day; leave empty for a one-day event.',
         'start_time' => 'Start Time',
         'end_time' => 'End Time',
         'category' => 'Category',
@@ -29,10 +31,12 @@ return [
     ],
     'columns' => [
         'title' => 'Title',
-        'date' => 'Date',
+        'date' => 'Start Date',
+        'end_date' => 'End Date',
         'time' => 'Time',
         'category' => 'Category',
         'link' => 'Link',
+        'created_at' => 'Created',
     ],
     'filters' => [
         'category' => 'Category',

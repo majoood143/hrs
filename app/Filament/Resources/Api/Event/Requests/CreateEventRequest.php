@@ -17,6 +17,7 @@ class CreateEventRequest extends FormRequest
             'title' => 'sometimes',
             'description' => 'sometimes',
             'date' => 'sometimes|date',
+            'end_date' => 'sometimes|nullable|date|after_or_equal:date',
             'start_time' => 'sometimes',
             'end_time' => 'sometimes',
             'category_id' => 'sometimes',

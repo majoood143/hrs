@@ -22,7 +22,7 @@ class EventController extends Controller
     /**
      * List events
      *
-     * Date order. Without `from`, past events are left out.
+     * Date order. `from` and `to` match every event running in that period. Without `from`, finished events are left out.
      *
      * @unauthenticated
      */
@@ -42,7 +42,7 @@ class EventController extends Controller
         return EventResource::collection(
             Event::query()
                 ->with('category')
-                ->whereDate('date', '>=', $filters['from'] ?? now()->toDateString())
+                ->endingFrom($filters['from'] ?? now()->toDateString())
                 ->when($filters['to'] ?? null, fn ($q, $to) => $q->whereDate('date', '<=', $to))
                 ->when($filters['category_id'] ?? null, fn ($q, $id) => $q->where('category_id', $id))
                 ->orderBy('date')

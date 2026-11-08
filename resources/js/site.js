@@ -1139,7 +1139,7 @@ function eventsCalendar() {
 
     function eventsForDate(dateStr) {
         return events
-            .filter((ev) => ev.date === dateStr && matchesFilter(ev))
+            .filter((ev) => ev.date <= dateStr && dateStr <= ev.endDate && matchesFilter(ev))
             .sort((a, b) => a.startTime.localeCompare(b.startTime));
     }
 
@@ -1262,11 +1262,15 @@ function eventsCalendar() {
                 const posted = ev.postedLabel
                     ? `<span class="inline-flex items-center gap-1">${ICON_CALENDAR}<span>${escapeHtml(i18n.posted)} ${escapeHtml(ev.postedLabel)}</span></span>`
                     : '';
+                const days = ev.daysLabel
+                    ? `<div class="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-warm-800">${ICON_CALENDAR}<span>${escapeHtml(ev.daysLabel)}</span></div>`
+                    : '';
                 return `<div class="drawer-event cursor-pointer rounded-xl border border-warm-200 p-3" data-id="${ev.id}">
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2 text-sm font-semibold text-warm-900">${icon}<span>${escapeHtml(ev.title)}</span></div>
                         <span class="text-xs text-warm-600">${ev.startLabel} - ${ev.endLabel}</span>
                     </div>
+                    ${days}
                     ${desc}
                     <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-warm-600">
                         <span class="inline-block rounded-full px-2 py-0.5 text-white" style="background:${ev.categoryColor}">${escapeHtml(ev.categoryLabel)}</span>

@@ -24,8 +24,15 @@ class EventResource extends JsonResource
             'description' => $this->description ?: null,
             /** `Y-m-d`. */
             'date' => $this->date?->toDateString(),
-            /** `H:i`. */
+            /**
+             * `Y-m-d`, the last day of a multi-day event; null for a one-day event.
+             *
+             * @var string|null
+             */
+            'end_date' => $this->isMultiDay() ? $this->end_date->toDateString() : null,
+            /** `H:i`, on the first day. */
             'start_time' => Carbon::parse($this->start_time)->format('H:i'),
+            /** `H:i`, on the last day. */
             'end_time' => Carbon::parse($this->end_time)->format('H:i'),
             'category' => $this->category ? new EventCategoryResource($this->category) : null,
             /** Absolute; a site page or an outside link. */

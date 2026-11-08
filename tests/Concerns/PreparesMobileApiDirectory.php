@@ -132,6 +132,7 @@ trait PreparesMobileApiDirectory
             $table->json('title');
             $table->json('description')->nullable();
             $table->date('date');
+            $table->date('end_date')->nullable();
             $table->time('start_time');
             $table->time('end_time');
             $table->foreignId('category_id')->nullable();
