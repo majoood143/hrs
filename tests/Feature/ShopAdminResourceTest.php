@@ -102,4 +102,13 @@ class ShopAdminResourceTest extends TestCase
             ->assertHasFormErrors(['website_url'])
             ->assertHasNoFormErrors(['instagram_url']);
     }
+
+    public function test_the_list_switch_turns_a_shop_on_and_off(): void
+    {
+        $this->shop->update(['is_active' => true]);
+
+        Livewire::test(ListShops::class)->call('updateTableColumnState', 'is_active', (string) $this->shop->getKey(), false);
+
+        $this->assertFalse((bool) $this->shop->refresh()->is_active);
+    }
 }

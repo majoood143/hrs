@@ -21,14 +21,15 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
@@ -250,9 +251,9 @@ final class DirectoryPlaceSchema
                     ->label($label('services'))
                     ->badge()
                     ->separator(','),
-                IconColumn::make('is_active')
+                ToggleColumn::make('is_active')
                     ->label($label('is_active'))
-                    ->boolean()
+                    ->disabled(fn (Model $record): bool => ! Gate::allows('update', $record))
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label($label('created_at'))

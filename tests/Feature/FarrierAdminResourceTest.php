@@ -83,4 +83,17 @@ class FarrierAdminResourceTest extends TestCase
 
         $this->assertSame('Salim Farrier', $this->farrier->refresh()->en_name);
     }
+
+    public function test_the_list_switch_turns_a_farrier_on_and_off_but_not_a_pending_one(): void
+    {
+        $id = (string) $this->farrier->getKey();
+        $page = Livewire::test(ListFarriers::class);
+
+        $page->call('updateTableColumnState', 'is_active', $id, false);
+        $this->assertSame('inactive', $this->farrier->refresh()->status);
+
+        $this->farrier->update(['status' => 'pending']);
+        $page->call('updateTableColumnState', 'is_active', $id, true);
+        $this->assertSame('pending', $this->farrier->refresh()->status);
+    }
 }

@@ -71,4 +71,42 @@ class JockeyAdminResourceTest extends TestCase
         $this->assertSame(['flat_racing', 'endurance'], $this->jockey->types);
         $this->assertSame(77, $this->jockey->verified_racing_id);
     }
+
+    public function test_the_list_switch_changes_the_status_but_not_of_a_pending_post(): void
+    {
+        $id = (string) $this->jockey->getKey();
+        $page = Livewire::test(ListJockeys::class);
+
+        $page->call('updateTableColumnState', 'is_active', $id, true);
+        $this->assertSame('pending', $this->jockey->refresh()->status);
+
+        $this->jockey->update(['status' => 'active']);
+
+        $page->call('updateTableColumnState', 'is_active', $id, false);
+        $this->assertSame('inactive', $this->jockey->refresh()->status);
+
+        $page->call('updateTableColumnState', 'is_active', $id, true);
+        $this->assertSame('active', $this->jockey->refresh()->status);
+    }
+
+    public function test_the_status_button_switches_the_status_and_save_keeps_it(): void
+    {
+        $page = Livewire::test(EditJockey::class, ['record' => $this->jockey->getKey()])
+            ->assertActionHidden('toggleStatus')
+            ->callAction('approvePost')
+            ->assertFormSet(['status' => 'active'])
+            ->assertActionVisible('toggleStatus')
+            ->fillForm(['en_name' => 'Unsaved Name'])
+            ->callAction('toggleStatus')
+            ->assertFormSet(['status' => 'inactive', 'en_name' => 'Unsaved Name']);
+
+        $this->assertSame('inactive', $this->jockey->refresh()->status);
+        $this->assertSame('Hamed Rider', $this->jockey->en_name);
+
+        $page->call('save')->assertHasNoFormErrors();
+
+        $this->jockey->refresh();
+        $this->assertSame('inactive', $this->jockey->status);
+        $this->assertSame('Unsaved Name', $this->jockey->en_name);
+    }
 }

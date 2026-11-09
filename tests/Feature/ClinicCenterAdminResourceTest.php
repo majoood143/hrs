@@ -110,4 +110,15 @@ class ClinicCenterAdminResourceTest extends TestCase
             ->call('save')
             ->assertHasFormErrors(['website_url']);
     }
+
+    public function test_the_list_switch_turns_clinics_and_centers_on_and_off(): void
+    {
+        foreach ([[ListClinics::class, $this->clinic], [ListCenters::class, $this->center]] as [$page, $place]) {
+            $place->update(['is_active' => true]);
+
+            Livewire::test($page)->call('updateTableColumnState', 'is_active', (string) $place->getKey(), false);
+
+            $this->assertFalse((bool) $place->refresh()->is_active);
+        }
+    }
 }

@@ -77,6 +77,9 @@ return [
         'dressage' => 'Dressage',
         'other' => 'Other',
     ],
+    'activate' => 'Activate',
+    'deactivate' => 'Deactivate',
+    'status_now' => 'Status changed to: :status',
     'statuses' => [
         'active' => 'Active',
         'inactive' => 'Inactive',

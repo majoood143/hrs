@@ -34,6 +34,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -280,9 +281,9 @@ class ShopResource extends Resource
                     ->label(__('admin_shop.fields.online'))
                     ->boolean()
                     ->sortable(),
-                IconColumn::make('is_active')
+                ToggleColumn::make('is_active')
                     ->label(__('admin_shop.fields.is_active'))
-                    ->boolean()
+                    ->disabled(fn (Shop $record): bool => ! static::canEdit($record))
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label(__('admin_shop.fields.created_at'))

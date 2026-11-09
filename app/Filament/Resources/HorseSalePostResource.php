@@ -264,6 +264,7 @@ class HorseSalePostResource extends Resource
                         default => 'gray',
                     })
                     ->sortable(),
+                PendingPosts::activeToggle(HorseSalePost::statusOptions()['active'], 'cancelled'),
                 TextColumn::make('created_at')
                     ->label(__('admin_horse_sale_post.fields.created_at'))
                     ->dateTime()

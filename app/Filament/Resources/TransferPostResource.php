@@ -235,6 +235,7 @@ class TransferPostResource extends Resource
                         default => 'gray',
                     })
                     ->sortable(),
+                PendingPosts::activeToggle(TransferPost::statusOptions()['active'], 'cancelled'),
                 TextColumn::make('created_at')
                     ->label(__('admin_transfer_post.fields.created_at'))
                     ->dateTime()

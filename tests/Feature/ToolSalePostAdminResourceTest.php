@@ -84,4 +84,25 @@ class ToolSalePostAdminResourceTest extends TestCase
 
         $this->assertSame('English Saddle', $this->post->refresh()->en_name);
     }
+
+    public function test_the_list_switch_turns_a_post_on_and_off_but_leaves_other_statuses_alone(): void
+    {
+        $post = $this->post;
+        $id = (string) $post->getKey();
+        $page = Livewire::test(ListToolSalePosts::class);
+
+        $post->update(['status' => 'active']);
+        $page->call('updateTableColumnState', 'is_active', $id, false);
+        $this->assertSame('cancelled', $post->refresh()->status);
+
+        $page->call('updateTableColumnState', 'is_active', $id, true);
+        $this->assertSame('active', $post->refresh()->status);
+
+        // this test's table has no `pending`; that case is covered on the horses board
+        foreach (['sold', 'expired'] as $locked) {
+            $post->update(['status' => $locked]);
+            $page->call('updateTableColumnState', 'is_active', $id, true);
+            $this->assertSame($locked, $post->refresh()->status);
+        }
+    }
 }

@@ -113,4 +113,16 @@ class StableAdminResourceTest extends TestCase
         $this->assertSame('1', StableResource::getNavigationBadge());
         $this->assertSame('warning', StableResource::getNavigationBadgeColor());
     }
+
+    public function test_the_list_switch_turns_a_stable_on_and_off_and_leaves_its_approval_alone(): void
+    {
+        $this->stable->update(['is_active' => true]);
+        $approval = $this->stable->approval_status;
+
+        Livewire::test(ListStables::class)->call('updateTableColumnState', 'is_active', (string) $this->stable->getKey(), false);
+
+        $this->stable->refresh();
+        $this->assertFalse((bool) $this->stable->is_active);
+        $this->assertSame($approval, $this->stable->approval_status);
+    }
 }

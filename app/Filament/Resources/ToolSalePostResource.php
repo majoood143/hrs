@@ -232,6 +232,7 @@ class ToolSalePostResource extends Resource
                         default => 'gray',
                     })
                     ->sortable(),
+                PendingPosts::activeToggle(ToolSalePost::statusOptions()['active'], 'cancelled'),
                 TextColumn::make('created_at')
                     ->label(__('admin_tool_sale_post.fields.created_at'))
                     ->dateTime()

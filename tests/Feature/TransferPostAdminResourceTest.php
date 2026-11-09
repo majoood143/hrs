@@ -109,4 +109,24 @@ class TransferPostAdminResourceTest extends TestCase
         $cityQueries = collect(DB::getQueryLog())->filter(fn (array $query) => str_contains($query['query'], 'from "cities"'));
         $this->assertLessThanOrEqual(2, $cityQueries->count());
     }
+
+    public function test_the_list_switch_turns_a_post_on_and_off_but_leaves_other_statuses_alone(): void
+    {
+        $post = $this->transfer();
+        $id = (string) $post->getKey();
+        $page = Livewire::test(ListTransferPosts::class);
+
+        $post->update(['status' => 'active']);
+        $page->call('updateTableColumnState', 'is_active', $id, false);
+        $this->assertSame('cancelled', $post->refresh()->status);
+
+        $page->call('updateTableColumnState', 'is_active', $id, true);
+        $this->assertSame('active', $post->refresh()->status);
+
+        foreach (['expired', 'pending'] as $locked) {
+            $post->update(['status' => $locked]);
+            $page->call('updateTableColumnState', 'is_active', $id, true);
+            $this->assertSame($locked, $post->refresh()->status);
+        }
+    }
 }

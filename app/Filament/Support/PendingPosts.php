@@ -5,6 +5,7 @@ namespace App\Filament\Support;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Notifications\Notification;
+use Filament\Tables\Columns\ToggleColumn;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
@@ -35,6 +36,19 @@ final class PendingPosts
 
                 Notification::make()->success()->title(__('admin_pending_posts.approved', ['count' => 1]))->send();
             });
+    }
+
+    /**
+     * The list's on/off switch: `active` or the board's "off" status. Any other status stays locked: a
+     * pending post goes live through Approve, and a switch must not undo sold or expired.
+     */
+    public static function activeToggle(string $label, string $off = 'inactive'): ToggleColumn
+    {
+        return ToggleColumn::make('is_active')
+            ->label($label)
+            ->getStateUsing(fn (Model $record): bool => $record->getAttribute('status') === 'active')
+            ->updateStateUsing(fn (Model $record, bool $state) => $record->update(['status' => $state ? 'active' : $off]))
+            ->disabled(fn (Model $record): bool => ! in_array($record->getAttribute('status'), ['active', $off], true) || ! Gate::allows('update', $record));
     }
 
     /** Approves the pending posts among the selected ones (the others are left as they are). */

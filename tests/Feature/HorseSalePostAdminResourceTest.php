@@ -139,4 +139,24 @@ class HorseSalePostAdminResourceTest extends TestCase
         $this->assertSame('sold', $sold->refresh()->status);
         $this->assertSame('active', $pending->refresh()->status);
     }
+
+    public function test_the_list_switch_turns_a_post_on_and_off_but_leaves_other_statuses_alone(): void
+    {
+        $post = $this->post;
+        $id = (string) $post->getKey();
+        $page = Livewire::test(ListHorseSalePosts::class);
+
+        $post->update(['status' => 'active']);
+        $page->call('updateTableColumnState', 'is_active', $id, false);
+        $this->assertSame('cancelled', $post->refresh()->status);
+
+        $page->call('updateTableColumnState', 'is_active', $id, true);
+        $this->assertSame('active', $post->refresh()->status);
+
+        foreach (['sold', 'expired', 'pending'] as $locked) {
+            $post->update(['status' => $locked]);
+            $page->call('updateTableColumnState', 'is_active', $id, true);
+            $this->assertSame($locked, $post->refresh()->status);
+        }
+    }
 }

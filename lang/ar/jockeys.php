@@ -77,6 +77,9 @@ return [
         'dressage' => 'الترويض',
         'other' => 'أخرى',
     ],
+    'activate' => 'تفعيل',
+    'deactivate' => 'إلغاء التفعيل',
+    'status_now' => 'تم تغيير الحالة إلى: :status',
     'statuses' => [
         'active' => 'نشط',
         'inactive' => 'غير نشط',

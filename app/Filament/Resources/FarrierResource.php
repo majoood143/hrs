@@ -208,16 +208,7 @@ class FarrierResource extends Resource
                     ->label(__('farriers.city'))
                     ->description(fn (Farrier $record): string => (string) $record->country?->{$name})
                     ->searchable(['en_name', 'ar_name']),
-                TextColumn::make('status')
-                    ->label(__('farriers.status'))
-                    ->badge()
-                    ->formatStateUsing(fn (string $state): string => Farrier::statusOptions()[$state] ?? $state)
-                    ->color(fn (string $state): string => match ($state) {
-                        'active' => 'success',
-                        PendingPosts::STATUS => 'warning',
-                        default => 'gray',
-                    })
-                    ->sortable(),
+                PendingPosts::activeToggle(Farrier::statusOptions()['active']),
                 TextColumn::make('created_at')
                     ->label(__('admin_farrier.fields.created_at'))
                     ->dateTime()

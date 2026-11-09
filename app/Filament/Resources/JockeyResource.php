@@ -221,16 +221,7 @@ class JockeyResource extends Resource
                 IconColumn::make('racing_verified')
                     ->label(__('jockeys.tabs.racing'))
                     ->boolean(),
-                TextColumn::make('status')
-                    ->label(__('jockeys.status'))
-                    ->badge()
-                    ->formatStateUsing(fn (string $state): string => Jockey::statusOptions()[$state] ?? $state)
-                    ->color(fn (string $state): string => match ($state) {
-                        'active' => 'success',
-                        PendingPosts::STATUS => 'warning',
-                        default => 'gray',
-                    })
-                    ->sortable(),
+                PendingPosts::activeToggle(Jockey::statusOptions()['active']),
                 TextColumn::make('created_at')
                     ->label(__('jockeys.created_at'))
                     ->dateTime()
