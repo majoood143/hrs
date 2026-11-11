@@ -138,7 +138,7 @@ class PlaceResource extends JsonResource
         $open = app(SlotFinder::class)->between($today, $horizon, 1, ['stable_id' => $stable->getKey()]);
 
         return [
-            'offerings' => $stable->offerings()->active()->orderBy('price')->get()
+            'offerings' => $stable->offerings()->active()->with('service')->orderBy('price')->get()
                 ->map(fn (StableOffering $offering) => [
                     'offering' => OfferingResource::make($offering),
                     /** The first day with an open time for one rider; null when none is open. */

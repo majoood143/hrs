@@ -2,14 +2,15 @@
 
 namespace App\Filament\Stable\Resources\StableOfferings;
 
-use App\Enums\StableOfferingType;
 use App\Filament\Stable\Resources\StableOfferings\Pages\CreateStableOffering;
 use App\Filament\Stable\Resources\StableOfferings\Pages\EditStableOffering;
 use App\Filament\Stable\Resources\StableOfferings\Pages\ListStableOfferings;
 use App\Models\SiteSetting;
 use App\Models\StableOffering;
+use App\Models\StableService;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -24,7 +25,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-/** What the stable sells by the slot. Riding training for now. */
+/** What the stable sells by the slot; its type is one of the stable's ticked, bookable services. */
 class StableOfferingResource extends Resource
 {
     protected static ?string $model = StableOffering::class;
@@ -62,6 +63,22 @@ class StableOfferingResource extends Resource
             ->all();
     }
 
+    /**
+     * The bookable services the stable has ticked in its profile, plus the offering's own (so editing
+     * a switched-off one never drops it; switching it on needs a ticked one). @return array<int, string>
+     */
+    public static function serviceOptions(?StableOffering $record = null): array
+    {
+        return StableService::query()
+            ->where(fn ($q) => $q
+                ->where(fn ($q) => $q->bookable()->whereHas('stables', fn ($q) => $q->whereKey(Filament::getTenant()?->getKey())))
+                ->when($record?->stable_service_id, fn ($q, $id) => $q->orWhere('id', $id)))
+            ->get()
+            ->sortBy('name')
+            ->mapWithKeys(fn (StableService $service) => [$service->id => $service->name])
+            ->all();
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -70,13 +87,14 @@ class StableOfferingResource extends Resource
                     ->icon('heroicon-o-information-circle')
                     ->columns(2)
                     ->schema([
-                        Select::make('type')
+                        Select::make('stable_service_id')
                             ->label(__('stable_panel.fields.type'))
-                            ->options(StableOfferingType::options())
-                            ->default(StableOfferingType::RidingTraining->value)
+                            ->options(fn (?StableOffering $record, Get $get) => static::serviceOptions($get('is_active') ? null : $record))
+                            ->helperText(__('stable_panel.offerings.type_hint'))
                             ->required()
                             ->native(false),
                         Toggle::make('is_active')
+                            ->live()
                             ->label(__('stable_panel.fields.is_active'))
                             ->helperText(__('stable_panel.offerings.active_hint'))
                             ->default(true)
@@ -172,6 +190,7 @@ class StableOfferingResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with('service'))
             ->columns([
                 ImageColumn::make('photo')
                     ->label('')
@@ -180,7 +199,7 @@ class StableOfferingResource extends Resource
                 TextColumn::make('en_name')
                     ->label(__('stable_panel.fields.name'))
                     ->formatStateUsing(fn (StableOffering $record) => $record->name)
-                    ->description(fn (StableOffering $record) => $record->type?->label())
+                    ->description(fn (StableOffering $record) => $record->service?->name)
                     ->searchable(['en_name', 'ar_name'])
                     ->sortable(),
                 TextColumn::make('price')

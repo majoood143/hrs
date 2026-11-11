@@ -42,7 +42,7 @@
                                 <li class="card-warm flex flex-col gap-3 p-5">
                                     <div class="flex items-start gap-3">
                                         <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warm-50 text-warm-600 ring-4 ring-warm-100">
-                                            <x-dynamic-component :component="$offering->type->icon()" class="h-5 w-5" aria-hidden="true" />
+                                            <x-heroicon-o-academic-cap class="h-5 w-5" aria-hidden="true" />
                                         </span>
                                         <div>
                                             <p class="font-semibold text-warm-900">{{ $offering->name }}</p>

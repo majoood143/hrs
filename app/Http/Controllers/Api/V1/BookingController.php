@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Enums\StableOfferingType;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\Bookings\BookingResource;
 use App\Http\Resources\V1\Bookings\BookingStableResource;
@@ -14,6 +13,7 @@ use App\Models\BookingSlot;
 use App\Models\Customer;
 use App\Models\StableOffering;
 use App\Models\StablePackagePurchase;
+use App\Models\StableService;
 use App\Services\Stables\BookingUnavailable;
 use App\Services\Stables\CreateStableBooking;
 use App\Services\Stables\SlotFinder;
@@ -55,7 +55,8 @@ class BookingController extends Controller
             'riders' => ['nullable', 'integer', 'min:1', 'max:'.StableBookingForm::MAX_RIDERS],
             'region_id' => ['nullable', 'integer'],
             'city_id' => ['nullable', 'integer'],
-            'type' => ['nullable', Rule::enum(StableOfferingType::class)],
+            /** A bookable service's id, from `types`. */
+            'type' => ['nullable', 'integer'],
             'time' => ['nullable', Rule::in(SlotFinder::TIMES_OF_DAY)],
         ]);
 
@@ -66,7 +67,7 @@ class BookingController extends Controller
         $filters = [
             'region_id' => $data['region_id'] ?? null,
             'city_id' => $data['city_id'] ?? null,
-            'type' => $data['type'] ?? null,
+            'type' => isset($data['type']) ? (int) $data['type'] : null,
             'time' => $data['time'] ?? null,
         ];
 
@@ -96,7 +97,8 @@ class BookingController extends Controller
                     'slots' => SlotResource::collection($offeringSlots),
                 ])->values()->all(),
             ])->values()->all(),
-            'types' => collect(StableOfferingType::options())->map(fn (string $label, string $value) => OptionResource::of($value, $label))->values()->all(),
+            /** The bookable services (admin → Stable Services), for the `type` filter. */
+            'types' => collect(StableService::bookableOptions())->map(fn (string $label, int $value) => OptionResource::of((string) $value, $label))->values()->all(),
             'times' => collect(SlotFinder::TIMES_OF_DAY)->map(fn (string $time) => OptionResource::of($time, __('stable_bookings.search.times.'.$time)))->all(),
         ]);
     }

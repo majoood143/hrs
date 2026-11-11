@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "836c933c3d40a8aa318218e6cf6fe2f5",
+    "content-hash": "80510c6fd21027f6fc8f639f5060f5ce",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -1672,87 +1672,6 @@
             "time": "2025-10-17T16:34:55+00:00"
         },
         {
-            "name": "ffhs/filament-package_ffhs_approvals",
-            "version": "2.1.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/ffhs/filament-package_ffhs_approvals.git",
-                "reference": "e0c206e3520f7ae4500307bb67bc4e83800d5b1c"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/ffhs/filament-package_ffhs_approvals/zipball/e0c206e3520f7ae4500307bb67bc4e83800d5b1c",
-                "reference": "e0c206e3520f7ae4500307bb67bc4e83800d5b1c",
-                "shasum": ""
-            },
-            "require": {
-                "filament/filament": "^4.0",
-                "laravel/framework": "^11|^12.0",
-                "php": "^8.2",
-                "spatie/laravel-package-tools": "^1.15.0",
-                "spatie/laravel-permission": "^6.21"
-            },
-            "require-dev": {
-                "larastan/larastan": "^3.0",
-                "laravel/pint": "^1.0",
-                "nunomaduro/collision": "^8.0",
-                "orchestra/testbench": "^9.9",
-                "pestphp/pest": "^3.7",
-                "pestphp/pest-plugin-arch": "^3.0",
-                "pestphp/pest-plugin-laravel": "^3.0",
-                "phpstan/extension-installer": "^1.1",
-                "phpstan/phpstan-deprecation-rules": "^2.0",
-                "phpstan/phpstan-phpunit": "^2.0",
-                "spatie/laravel-ray": "^1.26"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "aliases": {
-                        "Approvals": "Ffhs\\Approvals\\Facades\\Approvals"
-                    },
-                    "providers": [
-                        "Ffhs\\Approvals\\ApprovalsServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Ffhs\\Approvals\\": "src/",
-                    "Ffhs\\Approvals\\Database\\Factories\\": "database/factories/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Kromer Luc",
-                    "email": "luc.kromer@ffhs.ch",
-                    "role": "Developer"
-                },
-                {
-                    "name": "Matthew Ballou",
-                    "email": "mballou@kirschbaumdevelopment.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "This is my package filament-package_ffhs_approvals",
-            "homepage": "https://github.com/ffhs/filament-package_ffhs_approvals",
-            "keywords": [
-                "ffhs",
-                "filament-package_ffhs_approvals",
-                "kirschbaum-development",
-                "laravel"
-            ],
-            "support": {
-                "issues": "https://github.com/ffhs/filament-package_ffhs_approvals/issues",
-                "source": "https://github.com/ffhs/filament-package_ffhs_approvals"
-            },
-            "time": "2026-02-26T10:32:28+00:00"
-        },
-        {
             "name": "filament/actions",
             "version": "v4.12.8",
             "source": {
@@ -3222,80 +3141,6 @@
                 }
             ],
             "time": "2026-07-22T15:00:50+00:00"
-        },
-        {
-            "name": "jaocero/radio-deck",
-            "version": "v1.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/199ocero/radio-deck.git",
-                "reference": "453d25f14a2666dddfa025ab0ada7edf0d47ee25"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/199ocero/radio-deck/zipball/453d25f14a2666dddfa025ab0ada7edf0d47ee25",
-                "reference": "453d25f14a2666dddfa025ab0ada7edf0d47ee25",
-                "shasum": ""
-            },
-            "require": {
-                "filament/forms": "^3.0 | ^4.0",
-                "illuminate/contracts": "^10.0 | ^11.0 | ^12.0",
-                "php": "^8.1",
-                "spatie/laravel-package-tools": "^1.15.0"
-            },
-            "require-dev": {
-                "nunomaduro/collision": "^7.9",
-                "orchestra/testbench": "^8.0 | ^9.0",
-                "pestphp/pest": "^2.0",
-                "pestphp/pest-plugin-arch": "^2.0",
-                "pestphp/pest-plugin-laravel": "^2.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "JaOcero\\RadioDeck\\RadioDeckServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "JaOcero\\RadioDeck\\": "src/",
-                    "JaOcero\\RadioDeck\\Database\\Factories\\": "database/factories/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Jay-Are Ocero",
-                    "email": "199ocero@gmail.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Turn filament default radio button into a selectable card with icons, title and description.",
-            "homepage": "https://github.com/jaocero/radio-deck",
-            "keywords": [
-                "filament-form",
-                "filament-plugin",
-                "filamentphp",
-                "jaocero",
-                "laravel",
-                "radio-deck"
-            ],
-            "support": {
-                "issues": "https://github.com/jaocero/radio-deck/issues",
-                "source": "https://github.com/jaocero/radio-deck"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/jaocero",
-                    "type": "github"
-                }
-            ],
-            "time": "2025-08-22T00:45:45+00:00"
         },
         {
             "name": "kirschbaum-development/eloquent-power-joins",

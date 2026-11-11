@@ -488,8 +488,22 @@ class StableBookingCheckoutTest extends TestCase
             ->assertSee('Free cancellation online up to 24 hours');
     }
 
+    public function test_a_guest_signs_in_before_booking_and_nothing_is_booked_or_sent(): void
+    {
+        $this->get(route('bookings.create', ['slot' => $this->slot->id, 'riders' => 1]))->assertRedirect(route('account.login'));
+
+        $this->post(route('bookings.store', $this->slot), [
+            'riders_count' => 1, 'name' => 'Spam', 'phone' => '91112222', 'payment_option' => 'at_stable',
+            'riders' => [['name' => 'X', 'age' => 9, 'level' => 'beginner']],
+        ])->assertRedirect(route('account.login'));
+
+        $this->assertSame(0, StableBooking::query()->count());
+    }
+
     public function test_the_form_books_and_sends_the_customer_to_pay(): void
     {
+        $this->actingAs(Customer::create(['phone' => '96891234567', 'name' => 'Aisha', 'phone_verified_at' => now()]), 'customer');
+
         $this->get(route('bookings.create', ['slot' => $this->slot->id, 'riders' => 2]))
             ->assertOk()
             ->assertSee('Rider 2')
@@ -498,7 +512,8 @@ class StableBookingCheckoutTest extends TestCase
         $response = $this->post(route('bookings.store', $this->slot), [
             'riders_count' => 2,
             'name' => 'Aisha',
-            'phone' => '9123 4567',
+            // a typed number is ignored: the booking goes to the confirmed sign-in phone
+            'phone' => '9999 0000',
             'email' => 'aisha@example.com',
             'payment_option' => 'online',
             'riders' => [
@@ -515,12 +530,15 @@ class StableBookingCheckoutTest extends TestCase
         // paying with the demo gateway confirms it and shows the booking on the order page
         $this->post(route('payment.begin', $order->order_number), ['gateway' => 'demo']);
         $this->post(route('payment.demo.decide', $order->order_number), ['decision' => 'approve']);
-        $this->get(route('orders.show', $order->order_number))->assertOk()->assertSee('Confirmed')->assertSee($order->stableBooking->reference);
+        // a signed-in customer's order page is the one in their account
+        $this->get(route('orders.show', $order->order_number))->assertRedirect(route('account.orders.show', $order->order_number));
+        $this->get(route('account.orders.show', $order->order_number))->assertOk()->assertSee('Confirmed')->assertSee($order->stableBooking->reference);
     }
 
     public function test_the_form_asks_only_what_the_stable_chose(): void
     {
         $this->settings(['rider_fields' => ['weight' => ['show' => true, 'required' => true], 'age' => ['show' => false, 'required' => false]]]);
+        $this->actingAs(Customer::create(['phone' => '96891234567', 'name' => 'Aisha', 'phone_verified_at' => now()]), 'customer');
 
         $this->post(route('bookings.store', $this->slot), [
             'riders_count' => 1,

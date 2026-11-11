@@ -12,6 +12,7 @@ use App\Models\Stable;
 use App\Models\StableBooking;
 use App\Models\StableOffering;
 use App\Models\StableSchedule;
+use App\Models\StableService;
 use App\Models\User;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -94,6 +95,7 @@ trait PreparesStableBookings
             '2026_09_30_100007_create_stable_reviews_table',
             '2026_09_30_100008_add_reminded_at_to_stable_bookings',
             '2026_11_07_000003_add_sales_report_to_stables',
+            '2026_11_10_100000_link_stable_offerings_to_services',
             // the owners' phones: every booking looks for one to push to
             '2026_11_04_000001_create_mobile_devices_table',
             '2026_11_07_000001_add_enabled_to_mobile_devices',
@@ -165,8 +167,15 @@ trait PreparesStableBookings
         return $stable->refresh();
     }
 
+    /** By default under "Riding Lessons", bookable and ticked by the stable (as the migration leaves every offering). */
     protected function makeOffering(Stable $stable, array $attributes = []): StableOffering
     {
+        if (! array_key_exists('stable_service_id', $attributes)) {
+            $lessons = StableService::query()->firstOrCreate(['en_name' => 'Riding Lessons'], ['ar_name' => 'دروس ركوب الخيل', 'is_bookable' => true]);
+            $stable->services()->syncWithoutDetaching([$lessons->id]);
+            $attributes['stable_service_id'] = $lessons->id;
+        }
+
         return StableOffering::create($attributes + [
             'stable_id' => $stable->id,
             'en_name' => 'Beginner lesson',

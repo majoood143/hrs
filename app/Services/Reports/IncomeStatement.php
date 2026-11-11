@@ -4,6 +4,7 @@ namespace App\Services\Reports;
 
 use App\Enums\PaymentGateway;
 use App\Enums\PaymentStatus;
+use App\Models\BookingSlot;
 use App\Models\Service;
 use App\Models\ServiceOrder;
 use Carbon\CarbonImmutable;
@@ -36,7 +37,9 @@ class IncomeStatement
     /** The first and last day of a named period ("custom" takes the two dates given). */
     public static function period(string $period, ?string $from = null, ?string $to = null, ?CarbonInterface $today = null): array
     {
-        $today = CarbonImmutable::instance($today ?? now());
+        // days run midnight to midnight in Muscat, not UTC (a payment at 02:00 on the 1st is not last month's)
+        $zone = BookingSlot::timezone();
+        $today = CarbonImmutable::instance($today ?? now())->setTimezone($zone);
 
         [$start, $end] = match ($period) {
             'today' => [$today, $today],
@@ -44,8 +47,8 @@ class IncomeStatement
             'last_month' => [$today->subMonthNoOverflow()->startOfMonth(), $today->subMonthNoOverflow()->endOfMonth()],
             'this_year' => [$today->startOfYear(), $today->endOfYear()],
             'custom' => [
-                filled($from) ? CarbonImmutable::parse($from) : $today->startOfMonth(),
-                filled($to) ? CarbonImmutable::parse($to) : $today,
+                filled($from) ? CarbonImmutable::parse($from, $zone) : $today->startOfMonth(),
+                filled($to) ? CarbonImmutable::parse($to, $zone) : $today,
             ],
             default => [$today->startOfMonth(), $today->endOfMonth()],
         };
@@ -65,7 +68,8 @@ class IncomeStatement
     {
         return $this->rows ??= ServiceOrder::query()
             ->whereIn('payment_status', [PaymentStatus::Paid->value, PaymentStatus::Refunded->value])
-            ->whereBetween('paid_at', [$this->from, $this->to])
+            // stored in the app's zone (UTC): a Muscat bound is written out as UTC, or the day shifts 4 hours
+            ->whereBetween('paid_at', [$this->from->setTimezone(config('app.timezone')), $this->to->setTimezone(config('app.timezone'))])
             // money a stable took itself (its own gateway) never reached this account: phase 3's
             // stable statements cover what those stables owe us
             ->where(fn ($query) => $query->whereNull('collected_by')->orWhere('collected_by', '!=', 'stable'))

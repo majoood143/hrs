@@ -56,7 +56,7 @@ return [
         'contact' => 'How we reach you',
         'your_name' => 'Your name',
         'email' => 'Email (optional)',
-        'phone_hint' => 'Your confirmation comes by SMS. Sign in with this number later to see or cancel the booking.',
+        'phone_hint' => 'The number you signed in with. Your confirmation comes to it by SMS.',
         'payment' => 'How you pay',
         'waiver' => 'Waiver',
         'waiver_accept' => 'I have read and accept the waiver for every rider in this booking.',

@@ -464,6 +464,21 @@ class ThawaniPaymentTest extends TestCase
         $this->assertSame(1, $order->events->where('type', 'paid')->count());
     }
 
+    public function test_a_refunded_order_stays_refunded_when_the_return_link_is_opened_again(): void
+    {
+        $this->fakeSession($this->sessionBody('paid'));
+        $order = $this->orderWithSession();
+        $paidAt = now()->subDay()->startOfSecond();
+        $order->update(['status' => OrderStatus::Cancelled, 'payment_status' => PaymentStatus::Refunded, 'paid_at' => $paidAt, 'cancelled_at' => now(), 'cancellation_source' => 'admin']);
+
+        $this->get(route('payment.thawani.return', ['reference' => $order->order_number]));
+
+        $order->refresh();
+        $this->assertSame(PaymentStatus::Refunded, $order->payment_status);
+        $this->assertTrue($paidAt->equalTo($order->paid_at));
+        $this->assertEmpty($order->meta['needs_refund'] ?? null);
+    }
+
     public function test_a_payment_flagged_for_a_refund_is_flagged_only_once(): void
     {
         $order = $this->orderWithSession();

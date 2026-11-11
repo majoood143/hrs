@@ -17,7 +17,7 @@ class SlotFinder
     public const TIMES_OF_DAY = ['morning', 'afternoon', 'evening'];
 
     /**
-     * @param  array{region_id?: ?int, city_id?: ?int, type?: ?string, stable_id?: ?int, offering_id?: ?int, time?: ?string}  $filters
+     * @param  array{region_id?: ?int, city_id?: ?int, type?: ?int, stable_id?: ?int, offering_id?: ?int, time?: ?string}  $filters
      * @return Collection<int, BookingSlot> sorted by date and time
      */
     public function between(string $from, string $to, int $riders = 1, array $filters = []): Collection
@@ -26,7 +26,7 @@ class SlotFinder
 
         return BookingSlot::query()
             ->withBookedRiders()
-            ->with(['offering', 'stable.city', 'stable.region', 'trainer'])
+            ->with(['offering.service', 'stable.city', 'stable.region', 'trainer'])
             ->whereBetween('date', [$from, $to])
             ->where('is_open', true)
             ->when($filters['offering_id'] ?? null, fn (Builder $q, $id) => $q->where('stable_offering_id', $id))
@@ -35,7 +35,7 @@ class SlotFinder
                 ->where('is_active', true)
                 ->where('min_riders', '<=', $riders)
                 ->where('max_riders', '>=', $riders)
-                ->when($filters['type'] ?? null, fn (Builder $q, $type) => $q->where('type', $type)))
+                ->when($filters['type'] ?? null, fn (Builder $q, $type) => $q->where('stable_service_id', $type)))
             ->whereHas('stable', fn (Builder $q) => $q
                 ->active()
                 ->whereNotNull('commission_type')

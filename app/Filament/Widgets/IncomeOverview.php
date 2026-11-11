@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\BookingSlot;
 use App\Services\Reports\IncomeStatement;
 use App\Support\Money;
 use Carbon\CarbonImmutable;
@@ -38,7 +39,7 @@ class IncomeOverview extends StatsOverviewWidget
         $today = IncomeStatement::forPeriod('today')->totals();
         $totals = $month->totals();
 
-        $recent = new IncomeStatement(CarbonImmutable::now()->subDays(13)->startOfDay(), CarbonImmutable::now()->endOfDay());
+        $recent = new IncomeStatement(CarbonImmutable::now(BookingSlot::timezone())->subDays(13)->startOfDay(), CarbonImmutable::now(BookingSlot::timezone())->endOfDay());
         $days = $recent->byDay();
 
         return [

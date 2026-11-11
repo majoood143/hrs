@@ -26,6 +26,9 @@ class StableStatement
     /** @var Collection<int, StableLedgerRow>|null */
     private ?Collection $allRows = null;
 
+    /** @var Collection<int, StableLedgerRow>|null */
+    private ?Collection $periodRows = null;
+
     public function __construct(
         public readonly Stable $stable,
         public readonly CarbonImmutable $from,
@@ -42,7 +45,7 @@ class StableStatement
     /** Everything up to now, for the stable's current balance. */
     public static function allTime(Stable $stable): self
     {
-        return new self($stable, CarbonImmutable::create(2000), CarbonImmutable::now()->endOfDay());
+        return new self($stable, CarbonImmutable::create(2000, 1, 1, 0, 0, 0, BookingSlot::timezone()), CarbonImmutable::now(BookingSlot::timezone())->endOfDay());
     }
 
     /** @return Builder<ServiceOrder> the orders that carry money between a stable (null: every stable) and us */
@@ -62,21 +65,47 @@ class StableStatement
             ->with(['stableBooking.offering', 'stableBooking.slot']);
     }
 
-    /** @return Collection<int, StableLedgerRow> every row up to the end of the period, oldest first */
+    /**
+     * Every row up to the end of the period, oldest first: only the opening balance needs them.
+     * shortcut: loads the stable's whole history (the all-time balance too); fine for thousands of
+     * orders per stable, keep a stored running balance once a stable has tens of thousands.
+     *
+     * @return Collection<int, StableLedgerRow>
+     */
     private function rowsUpToEnd(): Collection
     {
-        return $this->allRows ??= static::ordersQuery($this->stable)
-            ->get()
-            ->map(fn (ServiceOrder $order) => StableLedgerRow::fromOrder($order))
+        return $this->allRows ??= $this->ledger(static::ordersQuery($this->stable))
             ->filter(fn (StableLedgerRow $row) => $row->date->lte($this->to))
-            ->sortBy(fn (StableLedgerRow $row) => $row->date->getTimestamp().'-'.str_pad((string) $row->orderId, 10, '0', STR_PAD_LEFT))
             ->values();
     }
 
-    /** @return Collection<int, StableLedgerRow> */
+    /** @return Collection<int, StableLedgerRow> the period's rows, oldest first */
     public function rows(): Collection
     {
-        return $this->rowsUpToEnd()->filter(fn (StableLedgerRow $row) => $row->date->gte($this->from))->values();
+        if ($this->allRows !== null) {
+            return $this->allRows->filter(fn (StableLedgerRow $row) => $row->date->gte($this->from))->values();
+        }
+
+        // a row's date is its paid, attended, completed or created time (StableLedgerRow::fromOrder): one of
+        // them falls in the period, so the database narrows to those orders and the exact date decides
+        $range = [$this->from->setTimezone(config('app.timezone')), $this->to->setTimezone(config('app.timezone'))];
+
+        return $this->periodRows ??= $this->ledger(static::ordersQuery($this->stable)->where(fn (Builder $q) => $q
+            ->whereBetween('paid_at', $range)
+            ->orWhereBetween('completed_at', $range)
+            ->orWhereBetween('created_at', $range)
+            ->orWhereHas('stableBooking', fn (Builder $b) => $b->whereBetween('attended_at', $range))))
+            ->filter(fn (StableLedgerRow $row) => $row->date->betweenIncluded($this->from, $this->to))
+            ->values();
+    }
+
+    /** @return Collection<int, StableLedgerRow> oldest first */
+    private function ledger(Builder $orders): Collection
+    {
+        return $orders->get()
+            ->map(fn (ServiceOrder $order) => StableLedgerRow::fromOrder($order))
+            ->sortBy(fn (StableLedgerRow $row) => $row->date->getTimestamp().'-'.str_pad((string) $row->orderId, 10, '0', STR_PAD_LEFT))
+            ->values();
     }
 
     /** @return Collection<int, StableSettlement> */

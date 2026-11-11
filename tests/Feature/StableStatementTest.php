@@ -170,6 +170,19 @@ class StableStatementTest extends TestCase
         $this->assertSame('We owe the stable OMR 18.500.', app(StableStatementExport::class)->balanceSentence($october->closing()));
     }
 
+    public function test_the_months_rows_come_by_their_payment_day_without_the_older_history(): void
+    {
+        Carbon::setTestNow('2026-09-20 05:30:00');
+        $this->paidBooking(1);                              // booked and paid in September
+        $late = $this->booking(1);                          // booked in September…
+
+        Carbon::setTestNow('2026-10-04 05:30:00');
+        app(OrderPaymentService::class)->applyPaid($late->order, PaymentGateway::Demo, 'D-late');   // …paid in October
+
+        // rows() first, as the dashboard asks: the narrowed query, not the whole history
+        $this->assertSame([$late->order->id], $this->month()->rows()->pluck('orderId')->all());
+    }
+
     public function test_the_statement_downloads_as_pdf_and_csv(): void
     {
         $this->paidBooking(2);

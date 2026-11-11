@@ -247,7 +247,7 @@ class StablePackagesAndReviewsTest extends TestCase
             'riders_count' => 1, 'name' => 'Aisha', 'phone' => '91234567',
             'payment_option' => 'package', 'package_purchase_id' => $purchase->id,
             'riders' => [['name' => 'Omar', 'age' => 9, 'level' => 'beginner']],
-        ])->assertSessionHasErrors('payment_option');
+        ])->assertRedirect(route('account.login'));
 
         $this->assertSame(5, $purchase->sessionsLeft());
     }

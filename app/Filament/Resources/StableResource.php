@@ -199,7 +199,8 @@ class StableResource extends Resource
                                     ->multiple()
                                     ->searchable()
                                     ->preload()
-                                    ->required(),
+                                    ->required()
+                                    ->rule(StableProfileForm::keepsOfferedServices()),
                             ])->icon('heroicon-o-wrench-screwdriver'),
                         Tab::make(__('stable_panel.profile.tabs.hours'))
                             ->schema(StableProfileForm::openingHours())

@@ -34,12 +34,7 @@ use App\Http\Controllers\Api\V1\ViewController;
 use App\Http\Middleware\EnsureMobileFeature;
 use App\Http\Middleware\EnsureStableOwner;
 use App\Http\Middleware\SetApiLocale;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
 
 // The mobile app's API (public reads; posting with a verified phone; bookings with a signed-in customer). Never the admin API (/api/{panel}/*).
 Route::prefix('v1')

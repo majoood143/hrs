@@ -249,6 +249,18 @@ class RacingSearchTest extends TestCase
         }
     }
 
+    public function test_an_image_is_fetched_from_the_source_once_then_served_from_the_cache(): void
+    {
+        $this->fakeSource();
+        $url = '/racing/image?p='.urlencode('/img/OwnerColours/basil masoud kasbi.jpg');
+
+        $first = $this->get($url)->assertOk()->getContent();
+        $this->get($url)->assertOk()->assertHeader('Content-Type', 'image/jpeg');
+
+        $this->assertSame($first, $this->get($url)->getContent());
+        Http::assertSentCount(1);
+    }
+
     public function test_racing_is_not_swallowed_by_the_cms_catch_all_route(): void
     {
         $this->assertSame('racing.search', app('router')->getRoutes()->match(\Illuminate\Http\Request::create('/racing/search'))->getName());

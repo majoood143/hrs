@@ -127,8 +127,28 @@ final class StableProfileForm
                 ->relationship('services', self::nameColumn())
                 ->getOptionLabelFromRecordUsing(fn (StableService $record) => $record->name)
                 ->multiple()
-                ->preload(),
+                ->preload()
+                ->rule(self::keepsOfferedServices()),
         ];
+    }
+
+    /** The services select's rule: a service one of the stable's active offerings is sold under stays ticked. */
+    public static function keepsOfferedServices(): \Closure
+    {
+        return fn (?Stable $record) => function (string $attribute, mixed $value, \Closure $fail) use ($record): void {
+            if (! $record?->exists) {
+                return;
+            }
+
+            $missing = StableService::query()
+                ->whereIn('id', $record->offerings()->where('is_active', true)->select('stable_service_id'))
+                ->whereNotIn('id', (array) $value)
+                ->get();
+
+            if ($missing->isNotEmpty()) {
+                $fail(__('stable_panel.offerings.service_in_use', ['services' => $missing->pluck('name')->join(app()->getLocale() === 'ar' ? '، ' : ', ')]));
+            }
+        };
     }
 
     /** @return array<int, mixed> */

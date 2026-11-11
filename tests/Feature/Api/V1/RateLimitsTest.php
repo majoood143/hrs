@@ -41,6 +41,18 @@ class RateLimitsTest extends TestCase
         }
     }
 
+    public function test_public_reads_are_limited_per_phone_not_per_carrier_address(): void
+    {
+        foreach (range(1, 120) as $i) {
+            $this->fromAddress('10.0.0.1')->getJson('/api/v1/app-config', ['Authorization' => 'Bearer phone-a'])->assertOk();
+        }
+        $this->fromAddress('10.0.0.1')->getJson('/api/v1/app-config', ['Authorization' => 'Bearer phone-a'])->assertStatus(429);
+
+        // another phone, and a signed-out one, behind the same carrier address still get through
+        $this->fromAddress('10.0.0.1')->getJson('/api/v1/app-config', ['Authorization' => 'Bearer phone-b'])->assertOk();
+        $this->fromAddress('10.0.0.1')->getJson('/api/v1/app-config')->assertOk();
+    }
+
     public function test_the_visitors_address_is_used_only_behind_a_trusted_proxy(): void
     {
         $this->fromAddress('10.0.0.1')->getJson('/api/v1/lookups', ['X-Forwarded-For' => '203.0.113.9']);

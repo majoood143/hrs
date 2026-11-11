@@ -24,7 +24,8 @@ class OfferingResource extends JsonResource
             'name' => (string) $offering->name,
             /** @var string|null */
             'description' => $offering->description,
-            'type' => OptionResource::of($offering->type->value, $offering->type->label()),
+            /** The admin stable service it is booked under. */
+            'type' => $offering->service ? OptionResource::of((string) $offering->service->id, $offering->service->name) : null,
             /** @var string|null */
             'photo_url' => $offering->photo_url,
             /** Per rider, before the service fee and VAT. */

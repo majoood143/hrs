@@ -36,7 +36,8 @@ class OrderPaymentService
 
     public function decidePaidAction(ServiceOrder $order): string
     {
-        if ($order->isPaid()) {
+        // a refunded order was paid once already: a replayed return link or webhook must not make it paid again
+        if ($order->isPaid() || $order->payment_status === PaymentStatus::Refunded || $order->paid_at !== null) {
             return self::ACTION_NONE;
         }
 

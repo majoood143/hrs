@@ -132,11 +132,20 @@ class PaymentGateways
             return;
         }
 
+        // the 3 s spacing above can run out while a slow gateway still answers: never two checks at once
+        $running = Cache::lock('payment-check-running.'.$order->getKey(), 60);
+
+        if (! $running->get()) {
+            return;
+        }
+
         try {
             $this->bind($gateway, $order)->reconcile($order);
             $order->refresh();
         } catch (Throwable $e) {
             Log::warning('Payment check failed', ['order' => $order->order_number, 'gateway' => $order->payment_method->value, 'error' => $e->getMessage()]);
+        } finally {
+            $running->release();
         }
     }
 }

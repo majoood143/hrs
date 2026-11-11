@@ -124,7 +124,7 @@ class AppConfigTest extends TestCase
     {
         $response = $this->get('/api/v1/app-config')
             ->assertOk()
-            ->assertHeader('X-RateLimit-Limit', '120');
+            ->assertHeader('X-RateLimit-Limit', '600'); // signed out: the per-address cap (AppServiceProvider)
 
         $this->assertStringContainsString('Accept-Language', (string) $response->headers->get('Vary'));
         $this->assertEmpty($response->headers->getCookies(), 'the API never starts a session');

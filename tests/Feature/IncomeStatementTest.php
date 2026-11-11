@@ -243,6 +243,17 @@ class IncomeStatementTest extends TestCase
         $this->assertSame([$first->id, $last->id], $rows->pluck('orderId')->all());
     }
 
+    public function test_days_and_months_follow_muscat_time_not_utc(): void
+    {
+        // 02:00 on 1 October in Muscat is 22:00 on 30 September in UTC
+        $this->paid('2026-09-30 22:00:00');
+
+        $this->assertCount(0, IncomeStatement::forPeriod('custom', '2026-09-01', '2026-09-30')->rows());
+        $october = IncomeStatement::forPeriod('custom', '2026-10-01', '2026-10-31');
+        $this->assertCount(1, $october->rows());
+        $this->assertNotEmpty(array_filter($october->byDay()->get('2026-10-01')));
+    }
+
     public function test_unpaid_free_and_cancelled_orders_carry_no_money(): void
     {
         $this->paid();

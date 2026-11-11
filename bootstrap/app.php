@@ -35,7 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Only the customer pages use the plain "auth" middleware (the admin panels have their own);
         // send a signed-out customer to the phone sign-in, and come back to the page they asked for.
-        $middleware->redirectGuestsTo(fn ($request) => $request->is('account/*') ? route('account.login') : url('/admin/login'));
+        $middleware->redirectGuestsTo(fn ($request) => $request->is('account/*', 'bookings/*') ? route('account.login') : url('/admin/login'));
 
         $middleware->replace(
             BasePreventRequestsDuringMaintenance::class,

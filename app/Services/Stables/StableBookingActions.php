@@ -10,6 +10,7 @@ use App\Jobs\SendStableBookingNotification;
 use App\Models\ServiceOrder;
 use App\Models\StableBooking;
 use App\Services\Payments\OrderPaymentService;
+use App\Services\Payments\PaymentGateways;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -85,6 +86,13 @@ class StableBookingActions
     /** @throws BookingUnavailable */
     public function cancelByCustomer(StableBooking $booking): StableBooking
     {
+        // "waiting for payment" may be stale (Thawani often never sends the customer back): ask the
+        // gateway first, so a paid booking is cancelled under the paid rules, not dropped as unpaid
+        if ($booking->status === StableBookingStatus::Pending && $booking->order) {
+            app(PaymentGateways::class)->settleFromGateway($booking->order);
+            $booking->refresh();
+        }
+
         if (! $this->customerMayCancel($booking)) {
             throw new BookingUnavailable(__('stable_bookings.errors.cannot_cancel'));
         }

@@ -208,7 +208,8 @@ class VatOnCommissionTest extends TestCase
         $header = collect($rows)->first(fn ($r) => ($r[0] ?? null) === __('statement.service'));
         $this->assertSame(__('statement.commission_and_vat'), $header[4]);
         $orderRow = collect($rows)->first(fn ($r) => ($r[1] ?? null) === $order->order_number);
-        $this->assertSame(['2026-09-24 10:00', $order->order_number, '11.025', '0.500', '0.025', '1.050', '0.000', '1.575'], $orderRow);
+        // paid 10:00 UTC: the CSV shows Muscat time
+        $this->assertSame(['2026-09-24 14:00', $order->order_number, '11.025', '0.500', '0.025', '1.050', '0.000', '1.575'], $orderRow);
         $this->assertSame('0.050', collect($rows)->first(fn ($r) => ($r[0] ?? null) === __('statement.vat_on_commission'))[1]);
         $this->assertSame('1.575', collect($rows)->first(fn ($r) => ($r[0] ?? null) === __('statement.due_to_us'))[1]);
     }

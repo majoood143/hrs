@@ -111,7 +111,8 @@
                         </div>
                         <div>
                             <label for="phone" class="{{ $label }}">{{ __('account.phone_label') }} *</label>
-                            <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" value="{{ old('phone', $customer?->phone) }}" required maxlength="20" placeholder="9123 4567" class="{{ $field }}" dir="ltr">
+                            {{-- the confirmed sign-in phone: bookings always go to it --}}
+                            <input id="phone" type="tel" value="{{ $customer->phone }}" readonly class="{{ $field }} bg-warm-50" dir="ltr">
                             <p class="mt-1 text-xs text-warm-700">{{ __('stable_bookings.form.phone_hint') }}</p>
                         </div>
                         <div>

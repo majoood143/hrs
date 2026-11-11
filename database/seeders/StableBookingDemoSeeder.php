@@ -123,8 +123,6 @@ class StableBookingDemoSeeder extends Seeder
     /** @return list<array<string, mixed>> */
     private function stables(): array
     {
-        $riding = ['type' => 'riding_training'];
-
         return [
             [
                 'slug' => 'demo-al-rahba-riding-club',
@@ -147,11 +145,11 @@ class StableBookingDemoSeeder extends Seeder
                 ],
                 'trainers' => [['Coach Hamed', 'المدرب حامد'], ['Coach Laila', 'المدربة ليلى']],
                 'offerings' => [
-                    $riding + ['en_name' => 'Beginner group lesson', 'ar_name' => 'حصة جماعية للمبتدئين', 'en_description' => 'Your first steps in the saddle: mounting, walking and trotting in the arena, in a small group.', 'ar_description' => 'خطواتك الأولى على السرج: الركوب والمشي والخبب في الميدان ضمن مجموعة صغيرة.', 'price' => 12, 'duration_minutes' => 60, 'capacity' => 4, 'max_riders' => 2,
+                    ['en_name' => 'Beginner group lesson', 'ar_name' => 'حصة جماعية للمبتدئين', 'en_description' => 'Your first steps in the saddle: mounting, walking and trotting in the arena, in a small group.', 'ar_description' => 'خطواتك الأولى على السرج: الركوب والمشي والخبب في الميدان ضمن مجموعة صغيرة.', 'price' => 12, 'duration_minutes' => 60, 'capacity' => 4, 'max_riders' => 2,
                         'schedule' => [[0, 2, 4, 6], ['08:00', '16:30', '18:00']]],
-                    $riding + ['en_name' => 'Private lesson', 'ar_name' => 'حصة خاصة', 'en_description' => 'One rider, one instructor: work on your position, transitions or first canter at your own pace.', 'ar_description' => 'راكب واحد ومدرب واحد: حسّن جلستك وانتقالاتك أو ابدأ الكانتر بالسرعة التي تناسبك.', 'price' => 25, 'duration_minutes' => 45, 'capacity' => 1, 'max_riders' => 1,
+                    ['en_name' => 'Private lesson', 'ar_name' => 'حصة خاصة', 'en_description' => 'One rider, one instructor: work on your position, transitions or first canter at your own pace.', 'ar_description' => 'راكب واحد ومدرب واحد: حسّن جلستك وانتقالاتك أو ابدأ الكانتر بالسرعة التي تناسبك.', 'price' => 25, 'duration_minutes' => 45, 'capacity' => 1, 'max_riders' => 1,
                         'schedule' => [[0, 1, 2, 3, 4], ['07:00', '17:00']]],
-                    $riding + ['en_name' => 'Beach ride', 'ar_name' => 'جولة على الشاطئ', 'en_description' => 'An early-morning ride along the beach for riders who can already trot confidently.', 'ar_description' => 'جولة صباحية على الشاطئ للراكبين القادرين على الخبب بثقة.', 'price' => 30, 'duration_minutes' => 90, 'capacity' => 6, 'max_riders' => 3, 'booking_cutoff_minutes' => 720,
+                    ['en_name' => 'Beach ride', 'ar_name' => 'جولة على الشاطئ', 'en_description' => 'An early-morning ride along the beach for riders who can already trot confidently.', 'ar_description' => 'جولة صباحية على الشاطئ للراكبين القادرين على الخبب بثقة.', 'price' => 30, 'duration_minutes' => 90, 'capacity' => 6, 'max_riders' => 3, 'booking_cutoff_minutes' => 720,
                         'schedule' => [[5, 6], ['06:30']]],
                 ],
                 'packages' => [['Beginner group lesson', 'Five group lessons', 'خمس حصص جماعية', 5, 50, 60], ['Private lesson', 'Ten private lessons', 'عشر حصص خاصة', 10, 210, 90]],
@@ -173,9 +171,9 @@ class StableBookingDemoSeeder extends Seeder
                 ],
                 'trainers' => [['Coach Aisha', 'المدربة عائشة']],
                 'offerings' => [
-                    $riding + ['en_name' => 'Kids pony ride', 'ar_name' => 'جولة الأطفال على المهر', 'en_description' => 'A led pony ride for children aged 3 to 8, with a helper walking beside every pony.', 'ar_description' => 'جولة مقودة على المهر للأطفال من 3 إلى 8 سنوات، مع مرافق يمشي بجانب كل مهر.', 'price' => 6, 'duration_minutes' => 30, 'capacity' => 6, 'max_riders' => 3,
+                    ['en_name' => 'Kids pony ride', 'ar_name' => 'جولة الأطفال على المهر', 'en_description' => 'A led pony ride for children aged 3 to 8, with a helper walking beside every pony.', 'ar_description' => 'جولة مقودة على المهر للأطفال من 3 إلى 8 سنوات، مع مرافق يمشي بجانب كل مهر.', 'price' => 6, 'duration_minutes' => 30, 'capacity' => 6, 'max_riders' => 3,
                         'schedule' => [[4, 5, 6], ['09:00', '10:00', '16:00', '17:00']]],
-                    $riding + ['en_name' => 'Junior riding school', 'ar_name' => 'مدرسة الفروسية للناشئين', 'en_description' => 'Weekly lessons for 8 to 14 year olds: grooming, tacking up and riding on their own.', 'ar_description' => 'حصص أسبوعية للأعمار من 8 إلى 14 سنة: العناية بالخيل وتجهيزها والركوب باستقلالية.', 'price' => 15, 'duration_minutes' => 60, 'capacity' => 5, 'max_riders' => 2,
+                    ['en_name' => 'Junior riding school', 'ar_name' => 'مدرسة الفروسية للناشئين', 'en_description' => 'Weekly lessons for 8 to 14 year olds: grooming, tacking up and riding on their own.', 'ar_description' => 'حصص أسبوعية للأعمار من 8 إلى 14 سنة: العناية بالخيل وتجهيزها والركوب باستقلالية.', 'price' => 15, 'duration_minutes' => 60, 'capacity' => 5, 'max_riders' => 2,
                         'schedule' => [[0, 2, 4], ['16:00', '17:30']]],
                 ],
                 'packages' => [['Junior riding school', 'Junior term (8 lessons)', 'فصل الناشئين (8 حصص)', 8, 100, 60]],
@@ -196,9 +194,9 @@ class StableBookingDemoSeeder extends Seeder
                 ],
                 'trainers' => [['Guide Musallam', 'المرشد مسلّم']],
                 'offerings' => [
-                    $riding + ['en_name' => 'Desert sunset ride', 'ar_name' => 'جولة الغروب في الصحراء', 'en_description' => 'Two hours across the dunes, ending with Omani coffee as the sun goes down.', 'ar_description' => 'ساعتان عبر الكثبان تنتهيان بالقهوة العُمانية مع غروب الشمس.', 'price' => 35, 'duration_minutes' => 120, 'capacity' => 8, 'max_riders' => 4,
+                    ['en_name' => 'Desert sunset ride', 'ar_name' => 'جولة الغروب في الصحراء', 'en_description' => 'Two hours across the dunes, ending with Omani coffee as the sun goes down.', 'ar_description' => 'ساعتان عبر الكثبان تنتهيان بالقهوة العُمانية مع غروب الشمس.', 'price' => 35, 'duration_minutes' => 120, 'capacity' => 8, 'max_riders' => 4,
                         'schedule' => [[3, 4, 5, 6], ['16:30']]],
-                    $riding + ['en_name' => 'Introduction to riding', 'ar_name' => 'مقدمة في ركوب الخيل', 'en_description' => 'A gentle first lesson for adults who have never ridden before.', 'ar_description' => 'حصة أولى هادئة للبالغين الذين لم يركبوا الخيل من قبل.', 'price' => 0, 'duration_minutes' => 30, 'capacity' => 3, 'max_riders' => 1,
+                    ['en_name' => 'Introduction to riding', 'ar_name' => 'مقدمة في ركوب الخيل', 'en_description' => 'A gentle first lesson for adults who have never ridden before.', 'ar_description' => 'حصة أولى هادئة للبالغين الذين لم يركبوا الخيل من قبل.', 'price' => 0, 'duration_minutes' => 30, 'capacity' => 3, 'max_riders' => 1,
                         'schedule' => [[6], ['10:00']]],
                 ],
                 'packages' => [],
@@ -237,6 +235,8 @@ class StableBookingDemoSeeder extends Seeder
         ])->save();
 
         $stable->members()->attach($owner->id, ['role' => 'owner']);
+        $lessons = StableService::query()->firstOrCreate(['en_name' => 'Riding Lessons'], ['ar_name' => 'دروس ركوب الخيل']);
+        $lessons->update(['is_bookable' => true]);
         $stable->services()->sync(StableService::query()->whereIn('en_name', ['Riding Lessons', 'Training'])->pluck('id'));
 
         $trainers = collect($data['trainers'])->map(fn (array $names) => StableTrainer::create(['stable_id' => $stable->id, 'en_name' => $names[0], 'ar_name' => $names[1]]));
@@ -245,7 +245,7 @@ class StableBookingDemoSeeder extends Seeder
             [$weekdays, $times] = $offeringData['schedule'];
             unset($offeringData['schedule']);
 
-            $offering = StableOffering::create($offeringData + ['stable_id' => $stable->id, 'photo' => $i === 0 ? $cover : null]);
+            $offering = StableOffering::create($offeringData + ['stable_id' => $stable->id, 'stable_service_id' => $lessons->id, 'photo' => $i === 0 ? $cover : null]);
             StableSchedule::create([
                 'stable_id' => $stable->id,
                 'stable_offering_id' => $offering->id,

@@ -16,10 +16,6 @@ return [
         'suspended' => 'Suspended',
     ],
 
-    'offering_types' => [
-        'riding_training' => 'Riding training',
-    ],
-
     'booking_status' => [
         'pending' => 'Awaiting payment',
         'confirmed' => 'Confirmed',
@@ -86,6 +82,8 @@ return [
     'offerings' => [
         'label' => 'Service',
         'plural' => 'Services',
+        'type_hint' => 'The services ticked in your stable profile that the admin allows for booking. Missing one? Tick it in your profile, or ask us to allow it.',
+        'service_in_use' => 'Some of your active services have the type :services. Switch them off or change their type first.',
         'sections' => [
             'details' => 'Service details',
             'places' => 'Price and places',

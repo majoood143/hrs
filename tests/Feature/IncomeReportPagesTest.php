@@ -163,7 +163,8 @@ class IncomeReportPagesTest extends TestCase
         $this->assertSame('9.500', $find(__('statement.client_keeps'))[1]);
         $this->assertSame('Horse passport', $find('Horse passport')[0]);
         $orderRow = collect($rows)->first(fn ($row) => ($row[1] ?? null) === $order->order_number);
-        $this->assertSame(['2026-09-24 10:00', $order->order_number, '11.025', '0.500', '0.025', '1.000', '0.000', '1.525'], $orderRow);
+        // paid 10:00 UTC: the CSV shows Muscat time
+        $this->assertSame(['2026-09-24 14:00', $order->order_number, '11.025', '0.500', '0.025', '1.000', '0.000', '1.525'], $orderRow);
     }
 
     public function test_the_csv_follows_the_chosen_language_and_names_the_filters(): void

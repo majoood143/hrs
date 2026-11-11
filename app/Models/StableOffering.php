@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\StableOfferingType;
 use App\Models\Concerns\LogsStableActivity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * Something a stable sells by the slot, e.g. a riding lesson. The price is per rider; capacity is the
+ * Something a stable sells by the slot, e.g. a riding lesson. Its type is a bookable admin stable
+ * service the stable has ticked (`service`). The price is per rider; capacity is the
  * default number of riders per slot (1 makes it a private lesson). Bookings close
  * booking_cutoff_minutes before a slot starts.
  */
@@ -21,7 +21,7 @@ class StableOffering extends Model
 
     protected $fillable = [
         'stable_id',
-        'type',
+        'stable_service_id',
         'en_name',
         'ar_name',
         'en_description',
@@ -37,7 +37,6 @@ class StableOffering extends Model
     ];
 
     protected $attributes = [
-        'type' => 'riding_training',
         'min_riders' => 1,
         'max_riders' => 1,
         'booking_cutoff_minutes' => 60,
@@ -47,7 +46,6 @@ class StableOffering extends Model
     protected function casts(): array
     {
         return [
-            'type' => StableOfferingType::class,
             'price' => 'decimal:3',
             'duration_minutes' => 'integer',
             'capacity' => 'integer',
@@ -61,6 +59,11 @@ class StableOffering extends Model
     public function stable(): BelongsTo
     {
         return $this->belongsTo(Stable::class);
+    }
+
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(StableService::class, 'stable_service_id');
     }
 
     public function schedules(): HasMany
@@ -96,6 +99,6 @@ class StableOffering extends Model
     /** @return list<string> */
     protected function stableActivityAttributes(): array
     {
-        return ['type', 'en_name', 'ar_name', 'en_description', 'ar_description', 'photo', 'price', 'duration_minutes', 'capacity', 'min_riders', 'max_riders', 'booking_cutoff_minutes', 'is_active'];
+        return ['stable_service_id', 'en_name', 'ar_name', 'en_description', 'ar_description', 'photo', 'price', 'duration_minutes', 'capacity', 'min_riders', 'max_riders', 'booking_cutoff_minutes', 'is_active'];
     }
 }

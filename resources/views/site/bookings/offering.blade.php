@@ -13,8 +13,8 @@
         <div class="mt-6 grid gap-8 lg:grid-cols-3">
             <div class="lg:col-span-2">
                 <p class="section-eyebrow flex items-center gap-1.5">
-                    <x-dynamic-component :component="$offering->type->icon()" class="h-4 w-4" aria-hidden="true" />
-                    {{ $offering->type->label() }}
+                    <x-heroicon-o-academic-cap class="h-4 w-4" aria-hidden="true" />
+                    {{ $offering->service?->name }}
                 </p>
                 <h1 class="mt-2 font-display text-3xl font-semibold text-warm-900">{{ $offering->name }}</h1>
                 <p class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-warm-700">

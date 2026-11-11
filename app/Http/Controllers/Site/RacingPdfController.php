@@ -86,7 +86,7 @@ class RacingPdfController extends Controller
                 'page' => $page,
                 'meeting' => $meeting,
                 'selected' => $selected,
-                'detail' => $detail,
+                'detail' => $this->withSilks($detail),
             ], $title, route('racing.meeting', ['page' => $page, 'race' => $race]), $locale),
         );
 
@@ -121,6 +121,19 @@ class RacingPdfController extends Controller
         }
 
         return $image ? 'data:'.$image['type'].';base64,'.base64_encode($image['body']) : null;
+    }
+
+    /** The card and form guide show each runner's owner silks; owners with several runners share one fetch. */
+    private function withSilks(array $detail): array
+    {
+        $images = [];
+
+        foreach ($detail['runners'] ?? [] as $i => $runner) {
+            $path = $runner['image'] ?? null;
+            $detail['runners'][$i]['silks'] = $path === null ? null : ($images[$path] ??= $this->image($path));
+        }
+
+        return $detail;
     }
 
     private function download(string $bytes, string $name, string $fallback): Response

@@ -160,7 +160,7 @@
                                 <div class="p-5">
                                     <div class="flex flex-wrap items-baseline justify-between gap-2">
                                         <a href="{{ route('bookings.offering', ['stable' => $stable->slug, 'offering' => $offering->id, 'date' => $date, 'riders' => $riders]) }}" class="flex items-center gap-2 font-semibold text-warm-900 hover:underline">
-                                            <x-dynamic-component :component="$offering->type->icon()" class="h-5 w-5 text-warm-600" aria-hidden="true" />
+                                            <x-heroicon-o-academic-cap class="h-5 w-5 text-warm-600" aria-hidden="true" />
                                             {{ $offering->name }}
                                         </a>
                                         <p class="text-sm text-warm-700">

@@ -2,6 +2,7 @@
 
 namespace App\Services\Reports;
 
+use App\Models\BookingSlot;
 use App\Models\ServiceOrder;
 use App\Services\Orders\OrderMoney;
 use Carbon\CarbonImmutable;
@@ -42,7 +43,8 @@ final class IncomeRow
         return new self(
             orderId: $order->getKey(),
             orderNumber: $order->order_number,
-            paidAt: CarbonImmutable::instance($order->paid_at),
+            // in Muscat time, so days and months group by the local calendar
+            paidAt: CarbonImmutable::instance($order->paid_at)->setTimezone(BookingSlot::timezone()),
             serviceId: $order->service_id,
             formId: $order->form_id,
             gateway: $order->payment_method?->value,

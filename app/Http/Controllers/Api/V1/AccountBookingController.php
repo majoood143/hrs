@@ -124,7 +124,7 @@ class AccountBookingController extends Controller
         return StableBooking::query()
             ->whereHas('order', fn (Builder $q) => $q->where('customer_id', $this->customer($request)->getKey()))
             // places left come with the slots, not one query per booking
-            ->with(['slot' => fn ($q) => $q->withBookedRiders(), 'slot.offering', 'offering', 'stable.region', 'stable.city', 'order', 'review', 'packagePurchase.package']);
+            ->with(['slot' => fn ($q) => $q->withBookedRiders(), 'slot.offering', 'offering.service', 'stable.region', 'stable.city', 'order', 'review', 'packagePurchase.package']);
     }
 
     private function find(Request $request, string $reference): StableBooking

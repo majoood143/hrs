@@ -100,7 +100,7 @@ Route::get('/video-library/watch/{slug}', [VideoLibraryController::class, 'show'
 Route::get('/video-library/{slug}', [VideoLibraryController::class, 'folder'])->name('video-library.folder');
 
 Route::get('/racing/search', [RacingController::class, 'search'])->name('racing.search');
-Route::get('/racing/image', [RacingController::class, 'image'])->name('racing.image');
+Route::get('/racing/image', [RacingController::class, 'image'])->middleware('throttle:300,1')->name('racing.image');
 Route::get('/racing/calendar', [RacingCalendarController::class, 'index'])->name('racing.calendar');
 Route::get('/racing/widget', RacingWidgetController::class)->middleware('throttle:120,1')->name('racing.widget');
 // the silks designer block's drawing as a file (two segments, so no clash with the /{slug} CMS route)
@@ -153,8 +153,9 @@ Route::prefix('bookings')->name('bookings.')->group(function () {
     Route::get('ticket/{reference}', [BookingTicketController::class, 'download'])->middleware(['signed', 'throttle:30,1'])->name('ticket');
     Route::get('receipt/{reference}', [BookingTicketController::class, 'receipt'])->middleware(['signed', 'throttle:30,1'])->name('receipt');
     Route::get('search', [StableBookingController::class, 'search'])->middleware('throttle:120,1')->name('search');
-    Route::get('slots/{slot}', [StableBookingController::class, 'create'])->whereNumber('slot')->name('create');
-    Route::post('slots/{slot}', [StableBookingController::class, 'store'])->whereNumber('slot')->middleware('throttle:10,1')->name('store');
+    // booking needs the phone sign-in (as in the app): a typed number would let anyone fill a stable and text strangers
+    Route::get('slots/{slot}', [StableBookingController::class, 'create'])->whereNumber('slot')->middleware('auth:customer')->name('create');
+    Route::post('slots/{slot}', [StableBookingController::class, 'store'])->whereNumber('slot')->middleware(['auth:customer', 'throttle:10,1'])->name('store');
     Route::get('{stable}/{offering}', [StableBookingController::class, 'offering'])->whereNumber('offering')->name('offering');
 });
 

@@ -298,7 +298,7 @@ class StableInsights
         $row = StableReview::query()
             ->visible()
             ->when($this->stable, fn (Builder $q, Stable $stable) => $q->where('stable_id', $stable->getKey()))
-            ->whereBetween('created_at', [$this->from, $this->to])
+            ->whereBetween('created_at', [$this->from->setTimezone(config('app.timezone')), $this->to->setTimezone(config('app.timezone'))])
             ->selectRaw('avg(rating) as average, count(*) as total')
             ->first();
 

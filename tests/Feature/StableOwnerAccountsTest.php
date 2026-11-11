@@ -22,6 +22,7 @@ use App\Models\CustomerOtp;
 use App\Models\NotificationLog;
 use App\Models\Stable;
 use App\Models\StableOffering;
+use App\Models\StableService;
 use App\Models\User;
 use App\Services\Auth\CustomerOtpService;
 use App\Services\Stables\StableApproval;
@@ -277,10 +278,13 @@ class StableOwnerAccountsTest extends TestCase
             ->assertSee('My lesson')
             ->assertDontSee('Their lesson');
 
+        $lessons = StableService::query()->create(['en_name' => 'Riding Lessons', 'ar_name' => 'دروس ركوب الخيل', 'is_bookable' => true]);
+        $mine->services()->attach($lessons);
+
         // a new record lands in the current stable
         Livewire::test(CreateStableOffering::class)
             ->fillForm([
-                'type' => 'riding_training',
+                'stable_service_id' => $lessons->id,
                 'en_name' => 'Private lesson',
                 'ar_name' => 'حصة خاصة',
                 'price' => 25,

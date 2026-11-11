@@ -20,6 +20,7 @@ use App\Support\MobileApp\MobileUpdates;
 use Filament\Facades\Filament;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
@@ -183,8 +184,18 @@ class MobileAppAdminTest extends TestCase
         Livewire::test(MobileAppSettings::class)->assertFormSet(['links.android_fingerprints' => $fingerprint]);
     }
 
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+
+        parent::tearDown();
+    }
+
     public function test_an_admin_can_create_an_announcement_and_one_that_cannot_be_closed_needs_a_button(): void
     {
+        // the start below is in the future only before 20 October 2026
+        Carbon::setTestNow('2026-10-10 08:00:00');
+
         $form = [
             'en_title' => 'New: tools', 'ar_title' => 'جديد: الأدوات',
             'action_type' => 'none', 'platforms' => ['ios', 'android'], 'frequency' => 'once', 'priority' => 1,

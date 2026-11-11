@@ -25,7 +25,7 @@ class BookingResource extends JsonResource
     public function toArray(Request $request): array
     {
         $booking = $this->resource;
-        $booking->loadMissing(['slot', 'offering', 'stable.region', 'stable.city', 'order', 'review', 'packagePurchase.package']);
+        $booking->loadMissing(['slot', 'offering.service', 'stable.region', 'stable.city', 'order', 'review', 'packagePurchase.package']);
         $order = $booking->order;
         $slot = $booking->slot;
         $customer = $request->user('customer_api');

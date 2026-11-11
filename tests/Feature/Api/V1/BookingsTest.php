@@ -398,6 +398,27 @@ class BookingsTest extends TestCase
         $this->get(route('bookings.receipt', ['reference' => $reference, 'lang' => 'en']))->assertForbidden();
     }
 
+    public function test_cancelling_a_booking_thawani_has_been_paid_for_asks_thawani_first(): void
+    {
+        // the slot is two days off: past a 72-hour free-cancellation window
+        $this->settings(['cancellation_hours' => 72]);
+        $token = $this->signIn();
+        $this->as($token)->postJson("/api/v1/bookings/slots/{$this->slot->id}", $this->form());
+        $order = ServiceOrder::query()->sole();
+        $order->update(['payment_session_id' => 'sess_paid', 'payment_method' => PaymentGateway::Thawani]);
+        $reference = StableBooking::query()->sole()->reference;
+
+        Http::fake(['*checkout/session/sess_paid' => Http::response(['data' => [
+            'payment_status' => 'paid', 'total_amount' => $order->totalBaisa(), 'invoice' => 'INV-7',
+        ]])]);
+
+        // the screen still says "waiting for payment", but the customer has paid: the paid rules apply
+        $this->as($token)->postJson("/api/v1/account/bookings/{$reference}/cancel")->assertStatus(409);
+
+        $this->assertSame(StableBookingStatus::Confirmed, StableBooking::query()->sole()->status);
+        $this->assertTrue($order->refresh()->isPaid());
+    }
+
     public function test_only_the_apps_own_addresses_are_returned_to(): void
     {
         $this->settings(['payment_options' => ['at_stable']]);

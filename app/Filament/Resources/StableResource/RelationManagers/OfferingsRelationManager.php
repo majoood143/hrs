@@ -34,11 +34,12 @@ class OfferingsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with('service'))
             ->recordTitleAttribute('en_name')
             ->columns([
                 TextColumn::make('name')
                     ->label(__('admin_stable.offerings.name'))
-                    ->description(fn (StableOffering $record) => $record->type?->label()),
+                    ->description(fn (StableOffering $record) => $record->service?->name),
                 TextColumn::make('price')
                     ->label(__('admin_stable.offerings.price'))
                     ->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state)),

@@ -126,7 +126,8 @@ class ThawaniGateway implements ChecksPayment, Gateway
      */
     public function getSession(string $sessionId, ?ServiceOrder $order = null): array
     {
-        $response = Http::withHeaders(['thawani-api-key' => $this->secretKey()])
+        // short: customers wait on this (returns, the app's polling); a slow Thawani must not hold every worker
+        $response = Http::connectTimeout(3)->timeout(8)->withHeaders(['thawani-api-key' => $this->secretKey()])
             ->get("{$this->baseUrl()}/checkout/session/{$sessionId}");
 
         PaymentGatewayLog::log($order, 'thawani', 'get_session', ['session_id' => $sessionId], $response->json() ?? ['raw' => $response->body()], $response->status());

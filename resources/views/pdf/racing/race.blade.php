@@ -66,6 +66,7 @@
             <thead><tr>
                 <th>{{ __('racing.card_labels.no') }}</th>
                 <th>{{ __('racing.card_labels.gate') }}</th>
+                <th></th>
                 <th>{{ __('racing.handicap.columns.horse') }}</th>
                 <th>{{ __('racing.card_labels.record') }}</th>
                 <th>{{ __('racing.card_labels.owner') }}</th>
@@ -78,6 +79,7 @@
                     <tr>
                         <td>{{ $runner['no'] }}</td>
                         <td>{{ $runner['gate'] }}</td>
+                        <td style="width: 10mm;">@if($runner['silks'])<img src="{{ $runner['silks'] }}" width="9mm" height="9mm" alt="">@endif</td>
                         <td>@include('pdf.racing._entity', ['type' => 'horse', 'entity' => $runner['horse']])<br><span class="muted small">@foreach($runner['meta'] as $part){{ $d($part) }}@unless($loop->last) · @endunless @endforeach</span></td>
                         <td><span dir="ltr">{{ $runner['record'] }}</span></td>
                         <td>@include('pdf.racing._entity', ['type' => 'owner', 'entity' => $runner['owner']])</td>
@@ -92,7 +94,7 @@
 
     @if($page === 'form-guide')
         @foreach($detail['runners'] as $runner)
-            <h3>@if($runner['no']){{ $runner['no'] }}. @endif@include('pdf.racing._entity', ['type' => 'horse', 'entity' => $runner['horse']])</h3>
+            <h3>@if($runner['silks'])<img src="{{ $runner['silks'] }}" width="8mm" height="8mm" alt="" style="vertical-align: middle;"> @endif@if($runner['no']){{ $runner['no'] }}. @endif@include('pdf.racing._entity', ['type' => 'horse', 'entity' => $runner['horse']])</h3>
             <p class="small muted">
                 @php
                     $line = array_filter([

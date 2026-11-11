@@ -105,8 +105,17 @@ class AppServiceProvider extends ServiceProvider
             return $user?->hasRole('super_admin') ?? false;
         });
 
-        // The mobile app's public API (/api/v1): per device IP, generous enough for scrolling lists.
-        RateLimiter::for('api-public', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
+        // The mobile app's public API (/api/v1): per phone (its sign-in or push token) when it sends one,
+        // since a mobile carrier puts many phones behind one address, and a roomier cap per address
+        // on top, so made-up tokens cannot get around it.
+        RateLimiter::for('api-public', function (Request $request) {
+            $device = $request->bearerToken() ?: $request->header('X-Push-Token');
+
+            return array_filter([
+                $device ? Limit::perMinute(120)->by('device:'.sha1($device)) : null,
+                Limit::perMinute(600)->by('ip:'.$request->ip()),
+            ]);
+        });
 
         // Asking for and checking codes, and the owners' password sign-in: per address (roomy: a mobile
         // carrier puts many phones behind one) and per phone or email, which no change of address resets.

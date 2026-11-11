@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers\Site;
 
-use App\Enums\StableOfferingType;
 use App\Http\Controllers\Controller;
 use App\Models\BookingSlot;
 use App\Models\Country;
 use App\Models\SiteSetting;
 use App\Models\Stable;
 use App\Models\StableOffering;
+use App\Models\StableService;
 use App\Services\Stables\BookingUnavailable;
 use App\Services\Stables\CreateStableBooking;
 use App\Services\Stables\SlotFinder;
 use App\Services\Stables\StableBookingPricing;
 use App\Services\Stables\StablePackages;
-use App\Support\PhoneNumber;
 use App\Support\Seo;
 use App\Support\StableBookingForm;
 use App\Support\StableBookingSettings;
@@ -48,7 +47,7 @@ class StableBookingController extends Controller
         $filters = [
             'region_id' => $request->integer('region_id') ?: null,
             'city_id' => $request->integer('city_id') ?: null,
-            'type' => StableOfferingType::tryFrom((string) $request->query('type'))?->value,
+            'type' => $request->integer('type') ?: null,
             'time' => in_array($request->query('time'), SlotFinder::TIMES_OF_DAY, true) ? $request->query('time') : null,
         ];
 
@@ -79,7 +78,7 @@ class StableBookingController extends Controller
             }),
             'nextDate' => $slots->isEmpty() ? $this->finder->nextAvailableDate($date, $riders, $filters) : null,
             'regions' => $countries->flatMap->region,
-            'types' => StableOfferingType::options(),
+            'types' => StableService::bookableOptions(),
         ]);
     }
 
@@ -148,17 +147,13 @@ class StableBookingController extends Controller
         $count = $this->riders($request->input('riders_count'));
         $quote = $slot->offering ? $this->pricing->quote($slot->offering, $count, $slot->stable) : null;
 
+        // the route asks for the sign-in: the booking goes to the phone the code confirmed
         $customer = Auth::guard('customer')->user();
-        $data = $request->validate([
-            ...StableBookingForm::rules($settings, $count, $quote?->isFree() ?? true, (bool) $customer),
-            'phone' => ['required', 'string', 'max:20', function (string $attribute, mixed $value, \Closure $fail): void {
-                $phone = PhoneNumber::normalize($value);
-
-                if ($phone === null || strlen($phone) < 10 || strlen($phone) > 15) {
-                    $fail(__('account.phone_invalid'));
-                }
-            }],
-        ], [], StableBookingForm::attributeNames($count));
+        $data = $request->validate(
+            StableBookingForm::rules($settings, $count, $quote?->isFree() ?? true, true),
+            [],
+            StableBookingForm::attributeNames($count),
+        );
 
         $riders = StableBookingForm::riders($data, $count, $settings);
 
@@ -168,10 +163,9 @@ class StableBookingController extends Controller
             $booking = $bookings->handle($slot, $riders, [
                 'name' => $data['name'],
                 'email' => $data['email'] ?? null,
-                'phone' => $data['phone'],
+                'phone' => $customer->phone,
                 'locale' => app()->getLocale(),
-                // a package is the signed-in customer's own, whatever number they typed
-                'customer_id' => $customer && ($withPackage || PhoneNumber::normalize($data['phone']) === $customer->phone) ? $customer->getKey() : null,
+                'customer_id' => $customer->getKey(),
             ], $data['payment_option'] ?? CreateStableBooking::ONLINE, $withPackage ? (int) ($data['package_purchase_id'] ?? 0) : null);
         } catch (BookingUnavailable $e) {
             return back()->withInput()->with('error', $e->getMessage());

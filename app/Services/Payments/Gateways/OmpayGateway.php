@@ -62,7 +62,8 @@ class OmpayGateway implements ChecksPayment, Gateway
     private function call(string $path, string $event, array $params, ServiceOrder $order): array
     {
         /** @var Response $response */
-        $response = Http::timeout(30)
+        // a status inquiry is short (customers wait on it, up to ATTEMPTS_CHECKED in a row); starting a payment may take longer
+        $response = Http::connectTimeout(3)->timeout($path === 'inquiry' ? 8 : 30)
             ->withHeaders(['OMPAY-API-Key' => $this->secret('api_key'), 'OMPAY-API-Secret' => $this->secret('api_secret')])
             ->post("{$this->baseUrl()}/transactions/{$path}", $params);
 

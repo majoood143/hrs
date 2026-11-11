@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\BookingSlot;
 use App\Services\Reports\IncomeStatement;
 use Carbon\CarbonImmutable;
 use Filament\Widgets\ChartWidget;
@@ -49,7 +50,7 @@ class IncomeChart extends ChartWidget
     protected function getData(): array
     {
         $days = in_array($this->filter, ['7', '30', '90'], true) ? (int) $this->filter : 30;
-        $byDay = (new IncomeStatement(CarbonImmutable::now()->subDays($days - 1)->startOfDay(), CarbonImmutable::now()->endOfDay()))->byDay();
+        $byDay = (new IncomeStatement(CarbonImmutable::now(BookingSlot::timezone())->subDays($days - 1)->startOfDay(), CarbonImmutable::now(BookingSlot::timezone())->endOfDay()))->byDay();
 
         return [
             'datasets' => [

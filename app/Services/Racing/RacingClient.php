@@ -559,11 +559,24 @@ class RacingClient
             return null;
         }
 
-        $response = $this->request()->get($path);
+        // kept a day (a race card shows the same silks to everyone); a miss for a few minutes, so a
+        // broken image does not send every visitor to the source either
+        $key = 'racing:image:'.md5($path);
+        $cached = Cache::get($key);
 
-        return $response->successful() && str_starts_with((string) $response->header('Content-Type'), 'image/')
+        if ($cached !== null) {
+            return $cached === false ? null : ['body' => base64_decode($cached['body']), 'type' => $cached['type']];
+        }
+
+        $response = $this->request()->get($path);
+        $image = $response->successful() && str_starts_with((string) $response->header('Content-Type'), 'image/')
             ? ['body' => $response->body(), 'type' => $response->header('Content-Type')]
             : null;
+
+        // base64: the database cache stores text
+        Cache::put($key, $image ? ['body' => base64_encode($image['body']), 'type' => $image['type']] : false, $image ? now()->addDay() : now()->addMinutes(5));
+
+        return $image;
     }
 
     /** The source keeps language in its session, so it is sent explicitly on every call. */

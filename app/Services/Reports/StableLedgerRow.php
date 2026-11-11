@@ -3,6 +3,7 @@
 namespace App\Services\Reports;
 
 use App\Enums\PaymentStatus;
+use App\Models\BookingSlot;
 use App\Models\ServiceOrder;
 use App\Services\Orders\OrderMoney;
 use Carbon\CarbonImmutable;
@@ -69,7 +70,8 @@ final class StableLedgerRow
             service: (string) ($booking?->offering?->name ?? $order->serviceName()),
             sessionDate: $booking?->slot?->date?->toDateString(),
             riders: (int) ($booking?->riders ?? 0),
-            date: CarbonImmutable::instance($date),
+            // in Muscat time, so days and months group by the local calendar
+            date: CarbonImmutable::instance($date)->setTimezone(BookingSlot::timezone()),
             kind: $kind,
             total: $baisa($order->total),
             price: $baisa($order->price),

@@ -7,6 +7,7 @@ use App\Services\Racing\RacingPdf;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
 use Tests\Concerns\FakesRacingSource;
@@ -154,6 +155,21 @@ class RacingExportTest extends TestCase
         foreach (['results', 'entries', 'card', 'form-guide'] as $page) {
             $this->assertPdf($this->get("/racing/{$page}/9178/pdf"));
             $this->assertPdf($this->get("/racing/{$page}/9178/pdf?lang=ar"));
+        }
+    }
+
+    public function test_the_card_and_form_guide_pdfs_fetch_each_owners_silks_once(): void
+    {
+        foreach (['card', 'form-guide'] as $page) {
+            $before = count(Http::recorded());
+
+            $this->assertPdf($this->get("/racing/{$page}/9178/pdf"));
+
+            $paths = collect(Http::recorded())->slice($before)->map(fn ($r) => urldecode(parse_url($r[0]->url(), PHP_URL_PATH)))
+                ->filter(fn ($path) => str_contains($path, '/img/OwnerColours/'));
+
+            $this->assertNotEmpty($paths, $page);
+            $this->assertSame($paths->unique()->count(), $paths->count(), $page);
         }
     }
 
