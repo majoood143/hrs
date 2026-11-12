@@ -8,6 +8,7 @@ use App\Filament\Resources\CityResource\Pages\ListCities;
 use App\Filament\Resources\CityResource\Pages\ViewCity;
 use App\Filament\Resources\CityResource\RelationManagers\HorseRelationManager;
 use App\Filament\Support\InUseDeleteActions;
+use App\Filament\Support\LocationFields;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Region;
@@ -53,17 +54,6 @@ class CityResource extends Resource
         return __('admin_city.navigation.plural');
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        return (string) static::$model::count();
-    }
-
-    /** `ar_name` in the Arabic admin, else `en_name`. */
-    private static function nameColumn(): string
-    {
-        return app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
-    }
-
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -80,7 +70,7 @@ class CityResource extends Resource
                 // Only narrows the regions offered: a city stores its region, not its country.
                 Select::make('country_id')
                     ->label(__('admin_locations.fields.country'))
-                    ->options(fn () => Country::query()->orderBy(static::nameColumn())->pluck(static::nameColumn(), 'id'))
+                    ->options(fn () => Country::query()->orderBy(LocationFields::nameColumn())->pluck(LocationFields::nameColumn(), 'id'))
                     ->searchable()
                     ->live()
                     ->afterStateHydrated(function (Select $component, ?City $record): void {
@@ -95,8 +85,8 @@ class CityResource extends Resource
                     ->label(__('admin_locations.fields.region'))
                     ->options(fn (Get $get) => Region::query()
                         ->where('country_id', $get('country_id'))
-                        ->orderBy(static::nameColumn())
-                        ->pluck(static::nameColumn(), 'id'))
+                        ->orderBy(LocationFields::nameColumn())
+                        ->pluck(LocationFields::nameColumn(), 'id'))
                     ->searchable()
                     ->required(),
             ]);
@@ -104,7 +94,7 @@ class CityResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $name = static::nameColumn();
+        $name = LocationFields::nameColumn();
 
         return $table
             ->columns([

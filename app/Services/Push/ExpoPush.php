@@ -4,6 +4,7 @@ namespace App\Services\Push;
 
 use App\Models\MobileDevice;
 use App\Support\Locale;
+use Illuminate\Http\Client\HttpClientException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 
@@ -36,7 +37,14 @@ class ExpoPush
                 'channelId' => $channel,
             ])->all();
 
-            $tickets = Http::acceptJson()->timeout(15)->post(self::URL, $messages)->throw()->json('data', []);
+            try {
+                $tickets = Http::acceptJson()->timeout(15)->post(self::URL, $messages)->throw()->json('data', []);
+            } catch (HttpClientException $e) {
+                // one failed batch must not drop the others (nor the phones already accepted)
+                report($e);
+
+                continue;
+            }
 
             foreach ($tickets as $i => $ticket) {
                 if (($ticket['status'] ?? null) === 'ok') {

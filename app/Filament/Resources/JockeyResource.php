@@ -6,12 +6,10 @@ use App\Filament\Resources\JockeyResource\Pages\CreateJockey;
 use App\Filament\Resources\JockeyResource\Pages\EditJockey;
 use App\Filament\Resources\JockeyResource\Pages\ListJockeys;
 use App\Filament\Resources\JockeyResource\Pages\ViewJockey;
+use App\Filament\Support\LocationFields;
 use App\Filament\Support\PendingPosts;
 use App\Filament\Support\PlaceFormFields;
-use App\Models\City;
-use App\Models\Country;
 use App\Models\Jockey;
-use App\Models\Region;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -27,8 +25,6 @@ use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
@@ -37,7 +33,6 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 class JockeyResource extends Resource
@@ -81,12 +76,6 @@ class JockeyResource extends Resource
         return PendingPosts::navigationBadgeTooltip(static::$model);
     }
 
-    /** `ar_name` in the Arabic admin, else `en_name`. */
-    private static function nameColumn(): string
-    {
-        return app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
-    }
-
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -119,34 +108,7 @@ class JockeyResource extends Resource
                             ->columns(2),
                         Tab::make(__('jockeys.tabs.location'))
                             ->schema([
-                                Select::make('country_id')
-                                    ->label(__('jockeys.country'))
-                                    ->options(fn () => Country::query()->orderBy(static::nameColumn())->pluck(static::nameColumn(), 'id'))
-                                    ->searchable()
-                                    ->live()
-                                    ->afterStateUpdated(function (Set $set): void {
-                                        $set('region_id', null);
-                                        $set('city_id', null);
-                                    })
-                                    ->required(),
-                                Select::make('region_id')
-                                    ->label(__('jockeys.region'))
-                                    ->options(fn (Get $get): Collection => Region::query()
-                                        ->where('country_id', $get('country_id'))
-                                        ->orderBy(static::nameColumn())
-                                        ->pluck(static::nameColumn(), 'id'))
-                                    ->searchable()
-                                    ->live()
-                                    ->afterStateUpdated(fn (Set $set) => $set('city_id', null))
-                                    ->required(),
-                                Select::make('city_id')
-                                    ->label(__('jockeys.city'))
-                                    ->options(fn (Get $get): Collection => City::query()
-                                        ->where('region_id', $get('region_id'))
-                                        ->orderBy(static::nameColumn())
-                                        ->pluck(static::nameColumn(), 'id'))
-                                    ->searchable()
-                                    ->required(),
+                                ...LocationFields::make(fn (string $field) => __("jockeys.{$field}")),
                             ])->icon('heroicon-o-map-pin')
                             ->columns(3),
                         Tab::make(__('jockeys.tabs.listing'))
@@ -190,7 +152,7 @@ class JockeyResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $name = static::nameColumn();
+        $name = LocationFields::nameColumn();
 
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->with('country'))

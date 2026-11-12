@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\MobileDevice;
 use App\Models\PushCampaign;
 use App\Models\PushDelivery;
+use App\Services\Push\ExpoPush;
 use Filament\Facades\Filament;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\DB;
@@ -134,6 +135,19 @@ class PushTest extends TestCase
         $this->postJson("/api/v1/push/{$campaign->id}/opened", ['token' => 'ExponentPushToken[customer]'])->assertOk();
         $this->postJson("/api/v1/push/{$campaign->id}/opened", ['token' => 'ExponentPushToken[busy]'])->assertOk();
         $this->assertSame(1, $campaign->refresh()->opened);
+    }
+
+    public function test_a_failed_batch_does_not_stop_the_next_ones(): void
+    {
+        $devices = collect(range(1, 101))->map(fn (int $i) => $this->device("p{$i}"));
+        Http::fakeSequence('exp.host/*')
+            ->push('down', 502)
+            ->push(['data' => [['status' => 'ok']]]);
+
+        $accepted = app(ExpoPush::class)->send($devices, fn () => ['title' => 'Hi', 'body' => 'There']);
+
+        Http::assertSentCount(2);
+        $this->assertSame([$devices->last()->id], $accepted);
     }
 
     public function test_a_draft_is_not_sent_and_a_sent_campaign_cannot_change(): void

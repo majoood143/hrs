@@ -29,6 +29,7 @@ trait PreparesMobileApi
         '2026_09_08_030000_create_tool_sale_posts_table.php',
         '2026_09_30_000001_add_views_count_to_listings.php',
         '2026_09_30_000003_add_price_negotiable_to_sale_posts.php',
+        '2026_11_13_000001_add_live_since_to_horse_sale_posts.php',
     ];
 
     protected function prepareMobileApi(array $settings = []): void

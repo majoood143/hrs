@@ -31,6 +31,7 @@ use App\Http\Controllers\Site\StableController;
 use App\Http\Controllers\Site\ToolSaleController;
 use App\Http\Controllers\Site\TransferBoardController;
 use App\Http\Controllers\Site\VideoLibraryController;
+use App\Models\CmsPage;
 use App\Models\CmsRedirect;
 use Illuminate\Support\Facades\Route;
 
@@ -51,6 +52,8 @@ Route::get('/blog/category/{slug}', [PostController::class, 'category'])->name('
 Route::get('/blog/tag/{slug}', [PostController::class, 'tag'])->name('blog.tag');
 Route::get('/blog/{slug}', [PostController::class, 'show'])->name('blog.show');
 
+// the old Filament board (removed 2026-11-12) lived here: old links and bookmarks land on the board
+Route::permanentRedirect('/transportation/{any?}', '/transfer-board')->where('any', '.*');
 Route::get('/transfer-board', [TransferBoardController::class, 'index'])->name('transfer-board.index');
 Route::get('/transfer-board/post', [TransferBoardController::class, 'create'])->name('transfer-board.create');
 Route::post('/transfer-board/post', [TransferBoardController::class, 'store'])->middleware('throttle:10,1')->name('transfer-board.store');
@@ -99,15 +102,16 @@ Route::get('/video-library', [VideoLibraryController::class, 'index'])->name('vi
 Route::get('/video-library/watch/{slug}', [VideoLibraryController::class, 'show'])->name('video-library.show');
 Route::get('/video-library/{slug}', [VideoLibraryController::class, 'folder'])->name('video-library.folder');
 
-Route::get('/racing/search', [RacingController::class, 'search'])->name('racing.search');
+// every uncached search or id is a request to the racing club's site: limited like the app's (api-racing-search)
+Route::get('/racing/search', [RacingController::class, 'search'])->middleware('throttle:30,1')->name('racing.search');
 Route::get('/racing/image', [RacingController::class, 'image'])->middleware('throttle:300,1')->name('racing.image');
-Route::get('/racing/calendar', [RacingCalendarController::class, 'index'])->name('racing.calendar');
+Route::get('/racing/calendar', [RacingCalendarController::class, 'index'])->middleware('throttle:120,1')->name('racing.calendar');
 Route::get('/racing/widget', RacingWidgetController::class)->middleware('throttle:120,1')->name('racing.widget');
 // the silks designer block's drawing as a file (two segments, so no clash with the /{slug} CMS route)
 Route::get('/silks/image', [SilksController::class, 'image'])->middleware('throttle:120,1')->name('silks.image');
 Route::post('/silks/pdf', [SilksController::class, 'pdf'])->middleware('throttle:20,1')->name('silks.pdf');
-Route::get('/racing/calendar/{date}', [RacingCalendarController::class, 'day'])->where('date', '\d{4}-\d{2}-\d{2}')->name('racing.calendar.day');
-Route::get('/racing/handicap-ratings', [RacingHandicapController::class, 'index'])->name('racing.handicap');
+Route::get('/racing/calendar/{date}', [RacingCalendarController::class, 'day'])->where('date', '\d{4}-\d{2}-\d{2}')->middleware('throttle:120,1')->name('racing.calendar.day');
+Route::get('/racing/handicap-ratings', [RacingHandicapController::class, 'index'])->middleware('throttle:120,1')->name('racing.handicap');
 Route::get('/racing/{entity}/{id}/pdf', [RacingPdfController::class, 'profile'])
     ->whereIn('entity', ['horse', 'owner', 'jockey', 'trainer'])
     ->whereNumber('id')
@@ -118,14 +122,16 @@ Route::get('/racing/{page}/{race}/pdf', [RacingPdfController::class, 'race'])
     ->where('race', '[0-9]{1,10}')
     ->middleware('throttle:30,1')
     ->name('racing.meeting.pdf');
-Route::get('/racing/race/{race}', [RacingRaceController::class, 'race'])->where('race', '[0-9]{1,10}')->name('racing.race');
+Route::get('/racing/race/{race}', [RacingRaceController::class, 'race'])->where('race', '[0-9]{1,10}')->middleware('throttle:120,1')->name('racing.race');
 Route::get('/racing/{page}/{race?}', [RacingRaceController::class, 'show'])
     ->whereIn('page', ['results', 'entries', 'card', 'form-guide'])
     ->where('race', '[0-9]{1,10}')
+    ->middleware('throttle:120,1')
     ->name('racing.meeting');
 Route::get('/racing/{entity}/{id}', [RacingController::class, 'profile'])
     ->whereIn('entity', ['horse', 'owner', 'jockey', 'trainer'])
     ->whereNumber('id')
+    ->middleware('throttle:120,1')
     ->name('racing.profile');
 
 // Paying for a service order. Every path here has at least two segments, so none can be
@@ -191,14 +197,15 @@ Route::get('/order-documents/{document}', [OrderDocumentController::class, 'admi
 
 Route::get('/orders/{order}', [OrderController::class, 'show'])->middleware('throttle:60,1')->name('orders.show');
 
-Route::get('/promo/{ad}/go', [AdClickController::class, 'redirect'])->name('promo.click');
+// clicks are counted (ads are sold): a visitor's repeat clicks are capped so a bot cannot inflate them
+Route::get('/promo/{ad}/go', [AdClickController::class, 'redirect'])->middleware('throttle:30,1')->name('promo.click');
 
 // `[^/]+` (not `.*`) keeps this to a single path segment: `.*` also matches `/`, so it was
 // swallowing every two-or-more-segment path (e.g. /docs/api) that isn't defined above it in
 // this file, before packages that register their own routes later (in a booted() callback,
 // like dedoc/scramble's /docs/api) ever got a chance to match.
 Route::get('/{slug}', [PageController::class, 'show'])
-    ->where('slug', '^(?!admin|transportation|blog|transfer-board|horses-for-sale|stables|clinics|centers|shops|farriers|jockeys|tools-for-sale|events|video-library|racing)[^/]+$')
+    ->where('slug', '^(?!'.implode('|', [...CmsPage::RESERVED, ...CmsPage::SECTIONS]).')[^/]+$')
     ->name('page.show');
 
 Route::fallback(function () {

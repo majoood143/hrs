@@ -33,11 +33,6 @@ class StatusResource extends Resource
         return __('admin_status.navigation.plural');
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        return (string) static::$model::count();
-    }
-
     public static function form(Schema $schema): Schema
     {
         return LookupSchema::form($schema);

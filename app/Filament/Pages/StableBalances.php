@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Resources\StableResource;
+use App\Models\BookingSlot;
 use App\Models\ServiceOrder;
 use App\Models\Stable;
 use App\Models\StableSettlement;
@@ -145,8 +146,9 @@ class StableBalances extends Page implements HasTable
                 ->required(),
             DatePicker::make('paid_on')
                 ->label(__('stable_statement.fields.paid_on'))
-                ->default(now()->toDateString())
-                ->maxDate(now())
+                // Oman's day: the server's UTC date is still yesterday until 4 a.m.
+                ->default(BookingSlot::today())
+                ->maxDate(BookingSlot::today())
                 ->required(),
             Select::make('method')
                 ->label(__('stable_statement.fields.method'))

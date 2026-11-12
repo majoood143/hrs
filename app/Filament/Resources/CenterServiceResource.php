@@ -33,11 +33,6 @@ class CenterServiceResource extends Resource
         return __('admin_center_service.navigation.plural');
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        return static::$model::count();
-    }
-
     public static function form(Schema $schema): Schema
     {
         return DirectoryPlaceSchema::serviceForm($schema, CenterService::class, 'centers', 'all');

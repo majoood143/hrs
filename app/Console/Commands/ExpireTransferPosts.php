@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\BookingSlot;
 use App\Models\TransferPost;
 use Illuminate\Console\Command;
 
@@ -27,7 +28,7 @@ class ExpireTransferPosts extends Command
     public function handle(): void
     {
         $count = TransferPost::where('status', 'active')
-            ->where('transfer_date', '<', now()->toDateString())
+            ->where('transfer_date', '<', BookingSlot::today())
             ->update(['status' => 'expired']);
 
         $this->info("Expired {$count} transfer post(s).");

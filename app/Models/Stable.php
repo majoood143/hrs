@@ -7,6 +7,7 @@ use App\Enums\StableApprovalStatus;
 use App\Models\Concerns\FiltersDirectoryPlaces;
 use App\Models\Concerns\HasRichDescription;
 use App\Models\Concerns\LogsStableActivity;
+use App\Models\Concerns\RefusesDeleteWhileReferenced;
 use App\Support\PhoneNumber;
 use App\Support\StableBookingSettings;
 use Filament\Models\Contracts\HasAvatar;
@@ -31,6 +32,18 @@ class Stable extends Model implements HasAvatar, HasName
     use FiltersDirectoryPlaces;
     use HasRichDescription;
     use LogsStableActivity;
+    use RefusesDeleteWhileReferenced;
+
+    /**
+     * Money and customers' records: deleting the stable would cascade them away (bookings,
+     * payouts, packages) and leave its paid orders pointing at nothing. Suspend it instead.
+     */
+    public const DELETE_REFERENCES = [
+        'service_orders' => 'stable_id',
+        'stable_bookings' => 'stable_id',
+        'stable_settlements' => 'stable_id',
+        'stable_package_purchases' => 'stable_id',
+    ];
 
     public const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 

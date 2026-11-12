@@ -6,12 +6,12 @@ use App\Filament\Resources\ToolSalePostResource\Pages\CreateToolSalePost;
 use App\Filament\Resources\ToolSalePostResource\Pages\EditToolSalePost;
 use App\Filament\Resources\ToolSalePostResource\Pages\ListToolSalePosts;
 use App\Filament\Resources\ToolSalePostResource\Pages\ViewToolSalePost;
+use App\Filament\Support\LocationFields;
 use App\Filament\Support\PendingPosts;
 use App\Filament\Support\PlaceFormFields;
 use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
 use App\Models\Country;
-use App\Models\Region;
 use App\Models\SiteSetting;
 use App\Models\ToolSalePost;
 use Filament\Actions\ActionGroup;
@@ -27,15 +27,12 @@ use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 class ToolSalePostResource extends Resource
@@ -79,12 +76,6 @@ class ToolSalePostResource extends Resource
         return PendingPosts::navigationBadgeTooltip(static::$model);
     }
 
-    /** `ar_name` in the Arabic admin, else `en_name` (locations, posts). */
-    private static function nameColumn(): string
-    {
-        return app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
-    }
-
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -117,34 +108,7 @@ class ToolSalePostResource extends Resource
                             ->columns(2),
                         Tab::make(__('admin_tool_sale_post.tabs.location'))
                             ->schema([
-                                Select::make('country_id')
-                                    ->label(__('tools-for-sale.country'))
-                                    ->options(fn () => Country::query()->orderBy(static::nameColumn())->pluck(static::nameColumn(), 'id'))
-                                    ->searchable()
-                                    ->live()
-                                    ->afterStateUpdated(function (Set $set): void {
-                                        $set('region_id', null);
-                                        $set('city_id', null);
-                                    })
-                                    ->required(),
-                                Select::make('region_id')
-                                    ->label(__('tools-for-sale.region'))
-                                    ->options(fn (Get $get): Collection => Region::query()
-                                        ->where('country_id', $get('country_id'))
-                                        ->orderBy(static::nameColumn())
-                                        ->pluck(static::nameColumn(), 'id'))
-                                    ->searchable()
-                                    ->live()
-                                    ->afterStateUpdated(fn (Set $set) => $set('city_id', null))
-                                    ->required(),
-                                Select::make('city_id')
-                                    ->label(__('tools-for-sale.city'))
-                                    ->options(fn (Get $get): Collection => City::query()
-                                        ->where('region_id', $get('region_id'))
-                                        ->orderBy(static::nameColumn())
-                                        ->pluck(static::nameColumn(), 'id'))
-                                    ->searchable()
-                                    ->required(),
+                                ...LocationFields::make(fn (string $field) => __("tools-for-sale.{$field}")),
                             ])->icon('heroicon-o-map-pin')
                             ->columns(3),
                         Tab::make(__('admin_tool_sale_post.tabs.listing'))
@@ -168,6 +132,8 @@ class ToolSalePostResource extends Resource
                                     ->maxLength(32)
                                     ->required(),
                                 PlaceFormFields::coverPhoto('tools-for-sale/covers', __('tools-for-sale.cover_photo'))
+                                    // required like the website/app form (the boards show the photo)
+                                    ->required()
                                     ->required()
                                     ->columnSpanFull(),
                                 Textarea::make('description_en')
@@ -185,7 +151,7 @@ class ToolSalePostResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $name = static::nameColumn();
+        $name = LocationFields::nameColumn();
 
         return $table
             // The city column is eager loaded by Filament; the country under it is not.

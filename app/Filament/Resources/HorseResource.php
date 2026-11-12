@@ -9,6 +9,7 @@ use App\Filament\Resources\HorseResource\Pages\ViewHorse;
 use App\Filament\Resources\HorseResource\RelationManagers\AttachementRelationManager;
 use App\Filament\Resources\HorseResource\RelationManagers\TransactionRelationManager;
 use App\Filament\Resources\HorseResource\RelationManagers\VaccinationRelationManager;
+use App\Filament\Support\LocationFields;
 use App\Filament\Support\PlaceFormFields;
 use App\Models\City;
 use App\Models\Color;
@@ -35,15 +36,12 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 use Mpdf\QrCode\Output\Png;
 use Mpdf\QrCode\QrCode;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
@@ -69,17 +67,6 @@ class HorseResource extends Resource
         return __('admin_horse.navigation.plural');
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        return (string) static::$model::count();
-    }
-
-    /** `ar_name` in the Arabic admin, else `en_name`. */
-    private static function nameColumn(): string
-    {
-        return app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
-    }
-
     private static function label(string $key): string
     {
         return __("admin_horse.fields.{$key}");
@@ -90,7 +77,7 @@ class HorseResource extends Resource
     {
         return Select::make($field)
             ->label(static::label($label))
-            ->options(fn () => $model::query()->orderBy(static::nameColumn())->pluck(static::nameColumn(), 'id'))
+            ->options(fn () => $model::query()->orderBy(LocationFields::nameColumn())->pluck(LocationFields::nameColumn(), 'id'))
             ->searchable()
             ->preload();
     }
@@ -103,9 +90,9 @@ class HorseResource extends Resource
             ->options(fn (?Horse $record) => Horse::query()
                 ->with('gender')
                 ->when($record, fn (Builder $query) => $query->whereKeyNot($record->getKey()))
-                ->orderBy(static::nameColumn())
+                ->orderBy(LocationFields::nameColumn())
                 ->get()
-                ->mapWithKeys(fn (Horse $horse) => [$horse->getKey() => $horse->{static::nameColumn()}.($horse->gender ? ' · '.$horse->gender->{static::nameColumn()} : '')]))
+                ->mapWithKeys(fn (Horse $horse) => [$horse->getKey() => $horse->{LocationFields::nameColumn()}.($horse->gender ? ' · '.$horse->gender->{LocationFields::nameColumn()} : '')]))
             ->searchable();
     }
 
@@ -117,34 +104,7 @@ class HorseResource extends Resource
     private static function locationFields(): array
     {
         return [
-            Select::make('country_id')
-                ->label(static::label('country'))
-                ->options(fn () => Country::query()->orderBy(static::nameColumn())->pluck(static::nameColumn(), 'id'))
-                ->searchable()
-                ->live()
-                ->afterStateUpdated(function (Set $set): void {
-                    $set('region_id', null);
-                    $set('city_id', null);
-                })
-                ->required(),
-            Select::make('region_id')
-                ->label(static::label('region'))
-                ->options(fn (Get $get): Collection => Region::query()
-                    ->where('country_id', $get('country_id'))
-                    ->orderBy(static::nameColumn())
-                    ->pluck(static::nameColumn(), 'id'))
-                ->searchable()
-                ->live()
-                ->afterStateUpdated(fn (Set $set) => $set('city_id', null))
-                ->required(),
-            Select::make('city_id')
-                ->label(static::label('city'))
-                ->options(fn (Get $get): Collection => City::query()
-                    ->where('region_id', $get('region_id'))
-                    ->orderBy(static::nameColumn())
-                    ->pluck(static::nameColumn(), 'id'))
-                ->searchable()
-                ->required(),
+            ...LocationFields::make(fn (string $field) => static::label($field)),
         ];
     }
 
@@ -255,7 +215,7 @@ class HorseResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $name = static::nameColumn();
+        $name = LocationFields::nameColumn();
 
         return $table
             ->columns([
@@ -342,7 +302,7 @@ class HorseResource extends Resource
                         ->icon('heroicon-o-user-circle')
                         ->color('warning')
                         ->modalWidth('xl')
-                        ->modalHeading(fn (Horse $record) => __('admin_horse.actions.change_owner_heading', ['name' => $record->{static::nameColumn()}]))
+                        ->modalHeading(fn (Horse $record) => __('admin_horse.actions.change_owner_heading', ['name' => $record->{LocationFields::nameColumn()}]))
                         ->schema([
                             Section::make(__('admin_horse.actions.current_owner'))
                                 ->schema([
@@ -372,7 +332,7 @@ class HorseResource extends Resource
                                         ->hiddenLabel()
                                         ->content(fn (Horse $record) => collect([$record->city, $record->region, $record->country])
                                             ->filter()
-                                            ->map(fn ($place) => $place->{static::nameColumn()})
+                                            ->map(fn ($place) => $place->{LocationFields::nameColumn()})
                                             ->implode(', ') ?: static::label('unassigned')),
                                 ]),
                             Section::make(__('admin_horse.actions.new_location'))

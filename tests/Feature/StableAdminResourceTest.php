@@ -125,4 +125,16 @@ class StableAdminResourceTest extends TestCase
         $this->assertFalse((bool) $this->stable->is_active);
         $this->assertSame($approval, $this->stable->approval_status);
     }
+
+    public function test_a_stable_with_payouts_or_bookings_is_suspended_not_deleted(): void
+    {
+        $used = $this->makeStable();
+        $used->settlements()->create(['direction' => 'payout', 'amount' => '5.000', 'paid_on' => '2026-11-01', 'method' => 'bank_transfer']);
+        $empty = $this->makeStable(attributes: ['en_name' => 'Test Stable', 'slug' => 'test-stable']);
+
+        // deleting would cascade the payout (and bookings, packages) away
+        $this->assertFalse($used->delete());
+        $this->assertSame(1, $used->settlements()->count());
+        $this->assertTrue($empty->delete());
+    }
 }

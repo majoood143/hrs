@@ -6,6 +6,7 @@ use App\Filament\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Models\User;
+use App\Policies\UserPolicy;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
@@ -119,5 +120,25 @@ class UserResourceTest extends TestCase
             ->set('activeTab', User::TYPE_STABLE_OWNER)
             ->assertCanSeeTableRecords([$owner])
             ->assertCanNotSeeTableRecords([$admin]);
+    }
+
+    public function test_only_a_super_admin_may_change_or_delete_a_super_admin(): void
+    {
+        $super = $this->makeAdminUser('super@example.com');
+        $super->assignRole('super_admin');
+        $other = $this->makeAdminUser('other@example.com');
+        $manager = $this->makeAdminUser('manager@example.com');
+        $policy = new UserPolicy;
+
+        // a new password or email would hand over the super admin's account
+        $this->assertFalse($policy->update($manager, $super));
+        $this->assertFalse($policy->delete($manager, $super));
+        $this->assertTrue($policy->update($manager, $other));
+        $this->assertTrue($policy->update($super, $super));
+    }
+
+    public function test_nobody_can_sign_up_for_the_admin_panel(): void
+    {
+        $this->get('/admin/register')->assertNotFound();
     }
 }

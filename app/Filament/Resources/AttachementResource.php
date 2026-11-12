@@ -41,11 +41,6 @@ class AttachementResource extends Resource
         return __('admin_attachment.navigation.plural');
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        return (string) static::$model::count();
-    }
-
     public static function form(Schema $schema): Schema
     {
         return $schema->components(AttachmentFields::form())->columns(2);

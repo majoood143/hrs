@@ -262,6 +262,8 @@ class RacePredictionFormTest extends TestCase
         $data = $form->fresh()->fields[2]['data'];
         $this->assertSame(['2026-10-17', 10030, true, 'card'], [$data['race_date'], (int) $data['race_id'], (bool) $data['sync_runners'], $data['runners_from']]);
 
+        $form->update(['closes_at' => '2026-10-17 05:30:00']);
+        $closesAt = $form->fresh()->closes_at->format('Y-m-d H:i:s');
         $page = Livewire::test(EditForm::class, ['record' => $form->getRouteKey()])
             ->callAction('reloadRaceRunners')
             ->assertNotified(trans_choice('admin_race_predictions.reload.done', 1, ['count' => 1]));
@@ -274,6 +276,8 @@ class RacePredictionFormTest extends TestCase
         // a later save in the editor keeps each runner's card (the choices list itself holds only names)
         $page->call('save')->assertHasNoFormErrors();
         $data = $form->fresh()->fields[2]['data'];
+        // the closing time survives the reload (the editor shows it in Oman's time and refills the form)
+        $this->assertSame($closesAt, $form->fresh()->closes_at?->format('Y-m-d H:i:s'));
         $this->assertCount(19, $data['runners']);
         $this->assertSame('1', $data['runners']['3125']['no']);
         $this->assertSame('999', $data['withdrawn'][0]['value']);

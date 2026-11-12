@@ -2,13 +2,14 @@
 
 namespace App\Policies;
 
-use Illuminate\Foundation\Auth\User as AuthUser;
+use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Foundation\Auth\User as AuthUser;
 
 class UserPolicy
 {
     use HandlesAuthorization;
-    
+
     public function viewAny(AuthUser $authUser): bool
     {
         return $authUser->can('ViewAny:User');
@@ -24,14 +25,22 @@ class UserPolicy
         return $authUser->can('Create:User');
     }
 
-    public function update(AuthUser $authUser): bool
+    public function update(AuthUser $authUser, User $user): bool
     {
-        return $authUser->can('Update:User');
+        return $authUser->can('Update:User') && $this->mayTouch($authUser, $user);
     }
 
-    public function delete(AuthUser $authUser): bool
+    public function delete(AuthUser $authUser, User $user): bool
     {
-        return $authUser->can('Delete:User');
+        return $authUser->can('Delete:User') && $this->mayTouch($authUser, $user);
+    }
+
+    /** Only a super admin may change or delete a super admin (a new password or email would hand over their account). */
+    private function mayTouch(AuthUser $authUser, User $user): bool
+    {
+        $super = (string) config('filament-shield.super_admin.name', 'super_admin');
+
+        return ! $user->hasRole($super) || (method_exists($authUser, 'hasRole') && $authUser->hasRole($super));
     }
 
     public function deleteAny(AuthUser $authUser): bool
@@ -68,5 +77,4 @@ class UserPolicy
     {
         return $authUser->can('Reorder:User');
     }
-
 }

@@ -7,7 +7,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 
 /**
  * A visitor published a post from the public site (transfer board, horse/tool for sale, farrier).
- * Fired by the site controllers and the /transportation panel, not by admin-created records.
+ * Fired by the site controllers and the app API, not by admin-created records.
  */
 class PublicPostSubmitted
 {

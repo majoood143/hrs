@@ -2,10 +2,12 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Support\SecretInput;
 use App\Mail\TestSmtpEmail;
-use App\Services\SettingsService;
+use App\Models\SiteSetting;
+use App\Support\MailServer;
+use App\Support\SecretSetting;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
-use Exception;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -14,12 +16,14 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 
+/** The SMTP server the site's emails go through (`Support\MailServer`). */
 class SmtpSettings extends Page
 {
     use HasPageShield;
 
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-envelope';
 
     protected string $view = 'filament.pages.smtp-settings';
 
@@ -42,112 +46,61 @@ class SmtpSettings extends Page
         return __('admin_smtp_settings.navigation_label');
     }
 
-    public function mount(SettingsService $settings): void
+    public function mount(): void
     {
-        $smtpSettings = $settings->getSmtpSettings();
-
-        $this->form->fill([
-            'mail_host' => $smtpSettings['host'],
-            'mail_port' => $smtpSettings['port'],
-            'mail_username' => $smtpSettings['username'],
-            'mail_password' => $smtpSettings['password'],
-            'mail_encryption' => $smtpSettings['encryption'],
-            'mail_from_address' => $smtpSettings['from_address'],
-            'mail_from_name' => $smtpSettings['from_name'],
-        ]);
+        // the password opens empty: it never goes to the browser
+        $this->form->fill(['password' => ''] + MailServer::settings());
     }
 
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Section::make('SMTP Configuration')
+                Section::make(__('admin_smtp_settings.section'))
+                    ->icon('heroicon-o-server')
                     ->schema([
-                        TextInput::make('mail_host')
-                            ->label('SMTP Host')
-                            ->required(),
-                        TextInput::make('mail_port')
-                            ->label('SMTP Port')
-                            ->numeric()
-                            ->required(),
-                        TextInput::make('mail_username')
-                            ->label('SMTP Username')
-                            ->required(),
-                        TextInput::make('mail_password')
-                            ->label('SMTP Password')
-                            ->password()
-                            ->required(),
-                        Select::make('mail_encryption')
-                            ->label('Encryption')
-                            ->options([
-                                'tls' => 'TLS',
-                                'ssl' => 'SSL',
-                                '' => 'None',
-                            ]),
-                    ])->columns(2),
-
-                Section::make('From Address')
-                    ->schema([
-                        TextInput::make('mail_from_address')
-                            ->label('From Email')
-                            ->email()
-                            ->required(),
-                        TextInput::make('mail_from_name')
-                            ->label('From Name')
-                            ->required(),
-                    ])->columns(2),
+                        TextInput::make('host')->label(__('admin_smtp_settings.fields.host'))->required()->maxLength(255),
+                        TextInput::make('port')->label(__('admin_smtp_settings.fields.port'))->numeric()->required(),
+                        TextInput::make('username')->label(__('admin_smtp_settings.fields.username'))->required()->maxLength(255),
+                        SecretInput::make('password', 'smtp.password')->label(__('admin_smtp_settings.fields.password')),
+                        Select::make('encryption')
+                            ->label(__('admin_smtp_settings.fields.encryption'))
+                            ->options(['tls' => 'TLS', 'ssl' => 'SSL', '' => __('admin_smtp_settings.fields.encryption_none')])
+                            ->native(false),
+                        TextInput::make('from_address')->label(__('admin_smtp_settings.fields.from_address'))->email()->required()->maxLength(255),
+                        TextInput::make('from_name')->label(__('admin_smtp_settings.fields.from_name'))->required()->maxLength(255),
+                    ])
+                    ->columns(2),
             ])
             ->statePath('data');
     }
 
-    public function save(SettingsService $settings): void
+    public function save(): void
     {
-        $data = $this->form->getState();
+        $state = $this->form->getState();
 
-        foreach ($data as $key => $value) {
-            $settings->set($key, $value);
+        foreach (['host', 'port', 'username', 'encryption', 'from_address', 'from_name'] as $key) {
+            SiteSetting::set("smtp.{$key}", (string) ($state[$key] ?? ''), 'text', null, 'smtp');
         }
+        SecretSetting::setUnlessBlank('smtp.password', $state['password'] ?? '', 'smtp');
 
-        Notification::make()
-            ->title('SMTP settings saved successfully!')
-            ->success()
-            ->send();
+        Notification::make()->title(__('admin_smtp_settings.notifications.saved'))->success()->send();
     }
 
+    /** Sends a test email to the "from" address with what is in the form (a blank password = the saved one). */
     public function testConnection(): void
     {
+        $state = $this->form->getState();
+        $state['password'] = filled($state['password'] ?? null) ? $state['password'] : SecretSetting::get('smtp.password');
+
         try {
-            $data = $this->form->getState();
-            if (empty($data['mail_host']) || empty($data['mail_username']) || empty($data['mail_from_address'])) {
-                throw new Exception('Required SMTP settings are missing.');
-            }
-            if (! filter_var($data['mail_from_address'], FILTER_VALIDATE_EMAIL)) {
-                throw new Exception('Invalid from email address.');
-            }
+            MailServer::apply(array_map('strval', $state));
+            Mail::mailer('smtp')->to($state['from_address'])->send(new TestSmtpEmail);
 
-            config([
-                'mail.mailers.smtp.host' => $data['mail_host'],
-                'mail.mailers.smtp.port' => $data['mail_port'] ?? 587,
-                'mail.mailers.smtp.username' => $data['mail_username'],
-                'mail.mailers.smtp.password' => $data['mail_password'] ?? '',
-                'mail.mailers.smtp.encryption' => $data['mail_encryption'] ?? null,
-                'mail.from.address' => $data['mail_from_address'],
-                'mail.from.name' => $data['mail_from_name'] ?? 'Test User',
-            ]);
-
-            Mail::to($data['mail_from_address'], $data['mail_from_name'] ?? 'Test User')
-                ->send(new TestSmtpEmail);
-
-            Notification::make()
-                ->title('SMTP connection test successful!')
-                ->success()
-                ->send();
-        } catch (Exception $e) {
-            Log::error('SMTP test failed: '.$e->getMessage());
-            Notification::make()
-                ->title('SMTP connection failed. Please check your settings.'.$e->getMessage())
-                ->danger()
-                ->send();
+            Notification::make()->title(__('admin_smtp_settings.notifications.test_sent'))->success()->send();
+        } catch (Throwable $e) {
+            Log::warning('SMTP test failed: '.$e->getMessage());
+            Notification::make()->title(__('admin_smtp_settings.notifications.test_failed'))->body($e->getMessage())->danger()->persistent()->send();
         }
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Filament\Public\Resources\TransferPostResource\Pages\ListTransferPosts as PublicListTransferPosts;
 use App\Filament\Resources\TransferPostResource\Pages\EditTransferPost;
 use App\Filament\Resources\TransferPostResource\Pages\ListTransferPosts;
 use App\Models\TransferPost;
@@ -10,14 +9,13 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use Tests\Concerns\PreparesMobileApi;
 use Tests\Concerns\PreparesMobileApiDirectory;
 use Tests\TestCase;
 
-/** The admin Transfer Posts screen and the public /transportation board: both languages, routes, queries. */
+/** The admin Transfer Posts screen: both languages, routes, queries. */
 class TransferPostAdminResourceTest extends TestCase
 {
     use PreparesMobileApi;
@@ -91,23 +89,6 @@ class TransferPostAdminResourceTest extends TestCase
             ->assertHasNoFormErrors();
 
         $this->assertSame(3, (int) $this->post->refresh()->capacity);
-    }
-
-    public function test_the_public_board_shows_arabic_routes_without_a_query_per_card(): void
-    {
-        App::setLocale('ar');
-        Filament::setCurrentPanel(Filament::getPanel('public'));
-        $this->transfer();
-        $this->transfer();
-
-        DB::enableQueryLog();
-        Livewire::test(PublicListTransferPosts::class)
-            ->assertOk()
-            ->assertSee('السيب, عمان → بوشر, عمان', false)
-            ->assertSee(__('transportation.filter_date_from'));
-
-        $cityQueries = collect(DB::getQueryLog())->filter(fn (array $query) => str_contains($query['query'], 'from "cities"'));
-        $this->assertLessThanOrEqual(2, $cityQueries->count());
     }
 
     public function test_the_list_switch_turns_a_post_on_and_off_but_leaves_other_statuses_alone(): void

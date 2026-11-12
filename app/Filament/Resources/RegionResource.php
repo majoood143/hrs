@@ -8,6 +8,7 @@ use App\Filament\Resources\RegionResource\Pages\ListRegions;
 use App\Filament\Resources\RegionResource\Pages\ViewRegion;
 use App\Filament\Resources\RegionResource\RelationManagers\CityRelationManager;
 use App\Filament\Support\InUseDeleteActions;
+use App\Filament\Support\LocationFields;
 use App\Models\Country;
 use App\Models\Region;
 use Filament\Actions\ActionGroup;
@@ -49,17 +50,6 @@ class RegionResource extends Resource
         return __('admin_region.navigation.plural');
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        return (string) static::$model::count();
-    }
-
-    /** `ar_name` in the Arabic admin, else `en_name`. */
-    private static function nameColumn(): string
-    {
-        return app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
-    }
-
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -75,7 +65,7 @@ class RegionResource extends Resource
                     ->extraInputAttributes(['dir' => 'rtl']),
                 Select::make('country_id')
                     ->label(__('admin_locations.fields.country'))
-                    ->options(fn () => Country::query()->orderBy(static::nameColumn())->pluck(static::nameColumn(), 'id'))
+                    ->options(fn () => Country::query()->orderBy(LocationFields::nameColumn())->pluck(LocationFields::nameColumn(), 'id'))
                     ->searchable()
                     ->required(),
             ]);
@@ -83,7 +73,7 @@ class RegionResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $name = static::nameColumn();
+        $name = LocationFields::nameColumn();
 
         return $table
             ->columns([

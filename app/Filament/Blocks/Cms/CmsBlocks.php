@@ -3,20 +3,21 @@
 namespace App\Filament\Blocks\Cms;
 
 use App\Filament\Support\TranslatableInput;
-use Filament\Forms\Components\Builder\Block;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Grid;
 use App\Models\AdZone;
 use App\Models\VideoFolder;
 use App\Services\Racing\RacingSearchType;
 use App\Support\FormChartBlock;
+use App\Support\Localized;
+use Filament\Forms\Components\Builder\Block;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Packstub\FormBuilder\Models\Form as FormBuilderForm;
@@ -52,21 +53,21 @@ class CmsBlocks
             static::form(),
             static::formChart(),
             static::divider(),
-            
+
         ];
     }
 
     private static function headingField(bool $required = true): Grid
     {
         return TranslatableInput::grid(fn ($code, $meta) => TextInput::make("heading.{$code}")
-            ->label(__('cms.blocks.heading') . ' (' . $meta['native'] . ')')
+            ->label(__('cms.blocks.heading').' ('.$meta['native'].')')
             ->required($required && $code === TranslatableInput::defaultLocale()));
     }
 
     private static function subheadingField(): Grid
     {
         return TranslatableInput::grid(fn ($code, $meta) => Textarea::make("subheading.{$code}")
-            ->label(__('cms.blocks.subheading') . ' (' . $meta['native'] . ')')
+            ->label(__('cms.blocks.subheading').' ('.$meta['native'].')')
             ->rows(2));
     }
 
@@ -86,13 +87,13 @@ class CmsBlocks
                             ->image()
                             ->disk('public')
                             ->directory('cms/hero')
-                            ->required()
+                            // optional: a slide without a photo shows the warm gradient (cms/blocks/hero)
                             ->columnSpanFull(),
                         TranslatableInput::grid(fn ($code, $meta) => TextInput::make("primary_button_text.{$code}")
-                            ->label(__('cms.blocks.primary_button_text') . ' (' . $meta['native'] . ')')),
+                            ->label(__('cms.blocks.primary_button_text').' ('.$meta['native'].')')),
                         TextInput::make('primary_button_url')->label(__('cms.blocks.primary_button_url')),
                         TranslatableInput::grid(fn ($code, $meta) => TextInput::make("secondary_button_text.{$code}")
-                            ->label(__('cms.blocks.secondary_button_text') . ' (' . $meta['native'] . ')')),
+                            ->label(__('cms.blocks.secondary_button_text').' ('.$meta['native'].')')),
                         TextInput::make('secondary_button_url')->label(__('cms.blocks.secondary_button_url')),
                     ])
                     ->columns(2)
@@ -100,7 +101,7 @@ class CmsBlocks
                     ->defaultItems(1)
                     ->reorderable()
                     ->collapsible()
-                    ->itemLabel(fn (array $state): ?string => \App\Support\Localized::value($state, 'heading') ?: __('cms.blocks.slide'))
+                    ->itemLabel(fn (array $state): ?string => Localized::value($state, 'heading') ?: __('cms.blocks.slide'))
                     ->columnSpanFull(),
                 Toggle::make('autoplay')
                     ->label(__('cms.blocks.autoplay'))
@@ -237,7 +238,7 @@ class CmsBlocks
                         TextInput::make('number')->label(__('cms.blocks.number'))->required(),
                         TextInput::make('suffix')->label(__('cms.blocks.suffix')),
                         TranslatableInput::grid(fn ($code, $meta) => TextInput::make("label.{$code}")
-                            ->label(__('cms.blocks.label') . ' (' . $meta['native'] . ')')
+                            ->label(__('cms.blocks.label').' ('.$meta['native'].')')
                             ->required($code === TranslatableInput::defaultLocale()))
                             ->columnSpanFull(),
                     ])
@@ -256,7 +257,7 @@ class CmsBlocks
                 static::headingField(),
                 static::subheadingField(),
                 TranslatableInput::grid(fn ($code, $meta) => TextInput::make("button_text.{$code}")
-                    ->label(__('cms.blocks.button_text') . ' (' . $meta['native'] . ')')
+                    ->label(__('cms.blocks.button_text').' ('.$meta['native'].')')
                     ->required($code === TranslatableInput::defaultLocale())),
                 TextInput::make('button_url')->label(__('cms.blocks.button_url'))->required(),
                 Select::make('style')
@@ -278,7 +279,7 @@ class CmsBlocks
             ->icon('heroicon-o-bars-3-bottom-left')
             ->schema([
                 TranslatableInput::grid(fn ($code, $meta) => TextInput::make("text.{$code}")
-                    ->label(__('cms.blocks.text') . ' (' . $meta['native'] . ')')
+                    ->label(__('cms.blocks.text').' ('.$meta['native'].')')
                     ->required($code === TranslatableInput::defaultLocale()))
                     ->columnSpanFull(),
                 Select::make('level')
@@ -302,7 +303,7 @@ class CmsBlocks
             ->icon('heroicon-o-document-text')
             ->schema([
                 TranslatableInput::grid(fn ($code, $meta) => RichEditor::make("content.{$code}")
-                    ->label(__('cms.blocks.content') . ' (' . $meta['native'] . ')')
+                    ->label(__('cms.blocks.content').' ('.$meta['native'].')')
                     ->required($code === TranslatableInput::defaultLocale()), columns: 1),
             ]);
     }
@@ -321,9 +322,9 @@ class CmsBlocks
                     ->required()
                     ->columnSpanFull(),
                 TranslatableInput::grid(fn ($code, $meta) => TextInput::make("caption.{$code}")
-                    ->label(__('cms.blocks.caption') . ' (' . $meta['native'] . ')')),
+                    ->label(__('cms.blocks.caption').' ('.$meta['native'].')')),
                 TranslatableInput::grid(fn ($code, $meta) => TextInput::make("alt.{$code}")
-                    ->label(__('cms.blocks.alt') . ' (' . $meta['native'] . ')')),
+                    ->label(__('cms.blocks.alt').' ('.$meta['native'].')')),
             ]);
     }
 
@@ -340,7 +341,7 @@ class CmsBlocks
                     ->required()
                     ->columnSpanFull(),
                 TranslatableInput::grid(fn ($code, $meta) => TextInput::make("caption.{$code}")
-                    ->label(__('cms.blocks.caption') . ' (' . $meta['native'] . ')')),
+                    ->label(__('cms.blocks.caption').' ('.$meta['native'].')')),
             ]);
     }
 
@@ -502,15 +503,15 @@ class CmsBlocks
                             ->visible(fn ($get) => $get('media_type') === 'image')
                             ->columnSpanFull(),
                         TranslatableInput::grid(fn ($code, $meta) => TextInput::make("heading.{$code}")
-                            ->label(__('cms.blocks.heading') . ' (' . $meta['native'] . ')')
+                            ->label(__('cms.blocks.heading').' ('.$meta['native'].')')
                             ->required($code === TranslatableInput::defaultLocale()))
                             ->columnSpanFull(),
                         TranslatableInput::grid(fn ($code, $meta) => Textarea::make("text.{$code}")
-                            ->label(__('cms.blocks.text') . ' (' . $meta['native'] . ')')
+                            ->label(__('cms.blocks.text').' ('.$meta['native'].')')
                             ->rows(3))
                             ->columnSpanFull(),
                         TranslatableInput::grid(fn ($code, $meta) => TextInput::make("link_label.{$code}")
-                            ->label(__('cms.blocks.link_label') . ' (' . $meta['native'] . ')'))
+                            ->label(__('cms.blocks.link_label').' ('.$meta['native'].')'))
                             ->columnSpanFull(),
                         TextInput::make('link_url')
                             ->label(__('cms.blocks.link_url'))
@@ -521,7 +522,7 @@ class CmsBlocks
                     ->defaultItems(2)
                     ->reorderable()
                     ->collapsible()
-                    ->itemLabel(fn (array $state): ?string => \App\Support\Localized::value($state, 'heading') ?: __('cms.blocks.item'))
+                    ->itemLabel(fn (array $state): ?string => Localized::value($state, 'heading') ?: __('cms.blocks.item'))
                     ->columnSpanFull(),
             ])
             ->columns(3);

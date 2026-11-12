@@ -52,11 +52,6 @@ class TransactionResource extends Resource
         return __('admin_transaction.navigation.plural');
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        return (string) static::$model::count();
-    }
-
     private static function label(string $key): string
     {
         return __("admin_transaction.fields.{$key}");

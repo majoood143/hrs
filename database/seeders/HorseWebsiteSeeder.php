@@ -47,18 +47,22 @@ class HorseWebsiteSeeder extends Seeder
                 [
                     'type' => 'hero',
                     'data' => [
-                        'heading' => [
-                            'en' => 'Every journey, a little more like home',
-                            'ar' => 'كل رحلة، أقرب قليلًا إلى الوطن',
-                        ],
-                        'subheading' => [
-                            'en' => 'From the first phone call to the final hoofbeat off the trailer, we treat every horse like our own — matched with caring, vetted transporters across the region.',
-                            'ar' => 'من أول اتصال هاتفي وحتى آخر خطوة للحصان خارج المقطورة، نتعامل مع كل حصان وكأنه ملكنا — مع نقل موثوق ومهتم في جميع أنحاء المنطقة.',
-                        ],
-                        'primary_button_text' => ['en' => 'Find a Transfer', 'ar' => 'ابحث عن نقلة'],
-                        'primary_button_url' => '/transportation',
-                        'secondary_button_text' => ['en' => 'Post a Request', 'ar' => 'انشر طلبًا'],
-                        'secondary_button_url' => '/transportation/post',
+                        // the hero block holds slides (admin → Pages); a slide without a photo shows the warm gradient
+                        'slides' => [[
+                            'heading' => [
+                                'en' => 'Every journey, a little more like home',
+                                'ar' => 'كل رحلة، أقرب قليلًا إلى الوطن',
+                            ],
+                            'subheading' => [
+                                'en' => 'From the first phone call to the final hoofbeat off the trailer, we treat every horse like our own — matched with caring, vetted transporters across the region.',
+                                'ar' => 'من أول اتصال هاتفي وحتى آخر خطوة للحصان خارج المقطورة، نتعامل مع كل حصان وكأنه ملكنا — مع نقل موثوق ومهتم في جميع أنحاء المنطقة.',
+                            ],
+                            'primary_button_text' => ['en' => 'Find a Transfer', 'ar' => 'ابحث عن نقلة'],
+                            'primary_button_url' => '/transfer-board',
+                            'secondary_button_text' => ['en' => 'Post a Request', 'ar' => 'انشر طلبًا'],
+                            'secondary_button_url' => '/transfer-board/post',
+                        ]],
+                        'autoplay' => true,
                     ],
                 ],
                 [
@@ -126,7 +130,7 @@ class HorseWebsiteSeeder extends Seeder
                             'ar' => 'انشر طلب النقل في دقائق وتواصل مع ناقل موثوق اليوم.',
                         ],
                         'button_text' => ['en' => 'Book a Transfer', 'ar' => 'احجز نقلة'],
-                        'button_url' => '/transportation',
+                        'button_url' => '/transfer-board',
                         'style' => 'warm',
                     ],
                 ],
@@ -240,11 +244,15 @@ class HorseWebsiteSeeder extends Seeder
                     [
                         'type' => 'hero',
                         'data' => [
-                            'heading' => ['en' => 'About Us', 'ar' => 'من نحن'],
-                            'subheading' => [
-                                'en' => 'We connect horse owners with caring, vetted transporters and stables across the region — because every horse deserves a safe journey.',
-                                'ar' => 'نربط ملاك الخيول بناقلين وإسطبلات موثوقة ومهتمة في جميع أنحاء المنطقة — لأن كل حصان يستحق رحلة آمنة.',
-                            ],
+                            // the hero block holds slides (admin → Pages); a slide without a photo shows the warm gradient
+                            'slides' => [[
+                                'heading' => ['en' => 'About Us', 'ar' => 'من نحن'],
+                                'subheading' => [
+                                    'en' => 'We connect horse owners with caring, vetted transporters and stables across the region — because every horse deserves a safe journey.',
+                                    'ar' => 'نربط ملاك الخيول بناقلين وإسطبلات موثوقة ومهتمة في جميع أنحاء المنطقة — لأن كل حصان يستحق رحلة آمنة.',
+                                ],
+                            ]],
+                            'autoplay' => true,
                         ],
                     ],
                     [
@@ -314,7 +322,7 @@ class HorseWebsiteSeeder extends Seeder
                                 'ar' => 'انشر طلب النقل في دقائق وتواصل مع ناقل موثوق اليوم.',
                             ],
                             'button_text' => ['en' => 'Book a Transfer', 'ar' => 'احجز نقلة'],
-                            'button_url' => '/transportation',
+                            'button_url' => '/transfer-board',
                             'style' => 'warm',
                         ],
                     ],
@@ -331,11 +339,15 @@ class HorseWebsiteSeeder extends Seeder
                     [
                         'type' => 'hero',
                         'data' => [
-                            'heading' => ['en' => 'Contact Us', 'ar' => 'تواصل معنا'],
-                            'subheading' => [
-                                'en' => 'Questions about a transfer, a listing, or becoming a partner? We would love to hear from you.',
-                                'ar' => 'لديك أسئلة حول نقلة أو إعلان أو الانضمام كشريك؟ يسعدنا أن نسمع منك.',
-                            ],
+                            // the hero block holds slides (admin → Pages); a slide without a photo shows the warm gradient
+                            'slides' => [[
+                                'heading' => ['en' => 'Contact Us', 'ar' => 'تواصل معنا'],
+                                'subheading' => [
+                                    'en' => 'Questions about a transfer, a listing, or becoming a partner? We would love to hear from you.',
+                                    'ar' => 'لديك أسئلة حول نقلة أو إعلان أو الانضمام كشريك؟ يسعدنا أن نسمع منك.',
+                                ],
+                            ]],
+                            'autoplay' => true,
                         ],
                     ],
                     [
@@ -416,7 +428,7 @@ class HorseWebsiteSeeder extends Seeder
 
         if ($footer->allItems()->doesntExist()) {
             $footer->allItems()->createMany([
-                ['label' => ['en' => 'Transfer Board', 'ar' => 'لوحة النقلات'], 'url' => '/transportation', 'order' => 1],
+                ['label' => ['en' => 'Transfer Board', 'ar' => 'لوحة النقلات'], 'url' => '/transfer-board', 'order' => 1],
                 ['label' => ['en' => 'Stories', 'ar' => 'قصص'], 'url' => '/blog', 'order' => 2],
             ]);
         }

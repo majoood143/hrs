@@ -53,11 +53,6 @@ class CountryResource extends Resource
         return __('admin_country.navigation.plural');
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        return (string) static::$model::count();
-    }
-
     public static function form(Schema $schema): Schema
     {
         $upper = fn (?string $state) => $state ? strtoupper($state) : $state;

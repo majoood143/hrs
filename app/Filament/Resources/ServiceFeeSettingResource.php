@@ -19,6 +19,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Text;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -88,6 +89,8 @@ class ServiceFeeSettingResource extends Resource
                             ->required()
                             ->numeric()
                             ->minValue(0)
+                            // a percentage is of the price: more than 100 would charge more than the service costs
+                            ->maxValue(fn (Get $get) => $get('fee_type') === FeeType::Percentage->value ? 100 : null)
                             ->step(0.001),
                     ])
                     ->columns(2),
@@ -108,7 +111,7 @@ class ServiceFeeSettingResource extends Resource
                             ->searchable(),
 
                         DatePicker::make('effective_from')->label(__('admin_service_fee_setting.fields.effective_from')),
-                        DatePicker::make('effective_to')->label(__('admin_service_fee_setting.fields.effective_to')),
+                        DatePicker::make('effective_to')->label(__('admin_service_fee_setting.fields.effective_to'))->afterOrEqual('effective_from'),
 
                         Toggle::make('is_active')
                             ->label(__('admin_service_fee_setting.fields.is_active'))

@@ -163,6 +163,30 @@ class PaymentAdminPagesTest extends TestCase
             ->assertHasFormErrors(['name.en' => 'required', 'fee_value' => 'required']);
     }
 
+    public function test_a_percentage_is_at_most_100_and_a_rule_cannot_end_before_it_starts(): void
+    {
+        Livewire::test(CreateServiceFeeSetting::class)
+            ->fillForm(['name' => ['en' => 'Fee'], 'fee_type' => 'percentage', 'fee_value' => '150', 'effective_from' => '2026-12-10', 'effective_to' => '2026-12-01'])
+            ->call('create')
+            ->assertHasFormErrors(['fee_value' => 'max', 'effective_to' => 'after_or_equal']);
+
+        // a fixed amount has no such limit
+        Livewire::test(CreateServiceFeeSetting::class)
+            ->fillForm(['name' => ['en' => 'Fee'], 'fee_type' => 'fixed', 'fee_value' => '150'])
+            ->call('create')
+            ->assertHasNoFormErrors();
+    }
+
+    public function test_a_service_with_orders_is_not_deleted(): void
+    {
+        $order = $this->makeOrder();
+        $unused = $this->makeService(5, 'Unused');
+
+        $this->assertFalse($order->service->delete());
+        $this->assertTrue($unused->delete());
+        $this->assertNotNull($order->service->fresh());
+    }
+
     public function test_the_fee_list_shows_where_each_rule_applies(): void
     {
         $service = $this->makeService(10, 'Vaccination');
@@ -254,9 +278,15 @@ class PaymentAdminPagesTest extends TestCase
         $this->assertSame('true', $stored['vat.enabled']);
         $this->assertSame('false', $stored['thawani.test_mode']);
 
-        // opening the page again shows what was saved, decrypted for the admin
+        // opening the page again: the keys stay on the server (not in the page), and saving them blank keeps them
         Livewire::test(PaymentGateways::class)
-            ->assertFormSet(['thawani.secret_key' => 'sk_live_abc', 'enabled_gateways' => ['thawani', 'demo'], 'vat.rate' => '5']);
+            ->assertFormSet(['thawani.secret_key' => '', 'enabled_gateways' => ['thawani', 'demo'], 'vat.rate' => '5'])
+            ->assertDontSeeHtml('sk_live_abc')
+            ->assertDontSeeHtml('whsec_abc')
+            ->call('save')
+            ->assertHasNoFormErrors();
+        $this->assertSame('sk_live_abc', SecretSetting::get('thawani.secret_key'));
+        $this->assertSame('whsec_abc', SecretSetting::get('thawani.webhook_secret'));
     }
 
     public function test_old_installs_with_free_and_cash_ticked_open_cleanly(): void

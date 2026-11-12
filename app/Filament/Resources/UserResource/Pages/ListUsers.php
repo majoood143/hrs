@@ -4,16 +4,10 @@ namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Concerns\HasExportActions;
 use App\Filament\Resources\UserResource;
-use App\Mail\WelcomeEmail;
-use App\Services\SettingsService;
-use Exception;
-use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Mail;
 
 class ListUsers extends ListRecords
 {
@@ -25,30 +19,6 @@ class ListUsers extends ListRecords
     {
         return [
             CreateAction::make(),
-            Action::make('sendWelcomeEmail')
-                ->label(__('admin_user.actions.send_welcome'))
-                ->icon('heroicon-o-envelope')
-                ->modalDescription(__('admin_user.actions.send_welcome_description'))
-                ->action(function (SettingsService $settings) {
-                    $users = $this->getTable()->getRecords();
-
-                    foreach ($users as $user) {
-                        try {
-                            Mail::to($user->email)->send(new WelcomeEmail($user));
-
-                            Notification::make()
-                                ->title("Welcome email sent to {$user->email}")
-                                ->success()
-                                ->send();
-                        } catch (Exception $e) {
-                            Notification::make()
-                                ->title("Failed to send email to {$user->email}: {$e->getMessage()}")
-                                ->danger()
-                                ->send();
-                        }
-                    }
-                })
-                ->requiresConfirmation(),
         ];
     }
 

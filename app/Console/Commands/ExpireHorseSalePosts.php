@@ -19,15 +19,19 @@ class ExpireHorseSalePosts extends Command
      *
      * @var string
      */
-    protected $description = 'Mark horse sale posts older than 60 days as expired';
+    protected $description = 'Mark horse sale posts live for more than 60 days as expired';
 
     /**
      * Execute the console command.
      */
     public function handle(): void
     {
+        $cutoff = now()->subDays(60);
+
+        // from when it last went live (approved or switched back on), else when it was posted
         $count = HorseSalePost::where('status', 'active')
-            ->where('created_at', '<', now()->subDays(60))
+            ->where(fn ($query) => $query->where('live_since', '<', $cutoff)
+                ->orWhere(fn ($query) => $query->whereNull('live_since')->where('created_at', '<', $cutoff)))
             ->update(['status' => 'expired']);
 
         $this->info("Expired {$count} horse sale post(s).");

@@ -6,6 +6,13 @@
 --}}
 @props(['src', 'alt' => '', 'fit' => 'contain', 'group' => null])
 
+@if(blank($src))
+    {{-- no photo (optional on some boards, missing on older posts): a plain panel, not a broken image --}}
+    <div {{ $attributes->class('flex items-center justify-center bg-warm-100 text-warm-300') }} aria-hidden="true">
+        <x-heroicon-o-photo class="h-12 w-12" />
+    </div>
+@else
+
 <a href="{{ $src }}" target="_blank" rel="noopener"
    data-lightbox="{{ $group ?? '' }}"
    data-lightbox-labels="{{ json_encode(['close' => __('listings.close_image'), 'prev' => __('listings.previous_image'), 'next' => __('listings.next_image')]) }}"
@@ -24,3 +31,4 @@
         @endif
     </span>
 </a>
+@endif

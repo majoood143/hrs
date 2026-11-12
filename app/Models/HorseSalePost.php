@@ -49,6 +49,7 @@ class HorseSalePost extends Model
     ];
 
     protected $casts = [
+        'live_since' => 'datetime',
         'dob' => 'date',
         'price' => 'decimal:3',
         'price_negotiable' => 'boolean',
@@ -92,6 +93,13 @@ class HorseSalePost extends Model
 
     protected static function booted(): void
     {
+        // its 60 days (horse-sale-posts:expire) run from when it last went live, not from when it was sent in
+        static::saving(function (self $post): void {
+            if ($post->status === 'active' && ($post->isDirty('status') || ! $post->exists)) {
+                $post->live_since = now();
+            }
+        });
+
         // live now (posted without review, or approved): tell the phones with a matching saved search
         static::created(fn (self $post) => NotifySavedSearches::whenLive($post, 'horses', true));
         static::updated(fn (self $post) => NotifySavedSearches::whenLive($post, 'horses', false));

@@ -57,9 +57,4 @@ return [
         'all' => 'All',
         'staff' => 'With a role',
     ],
-
-    'actions' => [
-        'send_welcome' => 'Send welcome email',
-        'send_welcome_description' => 'A welcome email goes to every user shown on this page of the table.',
-    ],
 ];

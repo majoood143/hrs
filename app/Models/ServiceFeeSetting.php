@@ -7,6 +7,8 @@ use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Translatable\HasTranslations;
 
 /**
@@ -15,7 +17,7 @@ use Spatie\Translatable\HasTranslations;
  */
 class ServiceFeeSetting extends Model
 {
-    use HasTranslations;
+    use HasTranslations, LogsActivity;
 
     protected $guarded = [];
 
@@ -26,6 +28,15 @@ class ServiceFeeSetting extends Model
         'fee_type' => 'percentage',
         'is_active' => true,
     ];
+
+    /** Who changed what we charge, and when (admin → activity log). */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['form_id', 'service_id', 'fee_type', 'fee_value', 'is_active', 'effective_from', 'effective_to'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
 
     protected function casts(): array
     {
@@ -48,9 +59,10 @@ class ServiceFeeSetting extends Model
         return $query->where('is_active', true);
     }
 
+    /** `$date` a day in Oman (rules start and end at its midnight, not the server's UTC one). */
     public function scopeEffectiveOn(Builder $query, CarbonInterface|string $date): Builder
     {
-        $date = $date instanceof CarbonInterface ? $date->toDateString() : $date;
+        $date = $date instanceof CarbonInterface ? $date->copy()->setTimezone(BookingSlot::timezone())->toDateString() : $date;
 
         return $query
             ->where(fn (Builder $q) => $q->whereNull('effective_from')->orWhereDate('effective_from', '<=', $date))
@@ -65,7 +77,7 @@ class ServiceFeeSetting extends Model
     {
         return static::query()
             ->active()
-            ->effectiveOn($on ?? now())
+            ->effectiveOn($on ?? BookingSlot::today())
             ->where(function (Builder $q) use ($service, $formId) {
                 if ($formId !== null) {
                     $q->where('form_id', $formId);
@@ -84,7 +96,7 @@ class ServiceFeeSetting extends Model
     {
         return static::query()
             ->active()
-            ->effectiveOn($on ?? now())
+            ->effectiveOn($on ?? BookingSlot::today())
             ->whereNull('form_id')
             ->whereNull('service_id')
             ->orderByDesc('id')

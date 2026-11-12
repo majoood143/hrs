@@ -33,11 +33,6 @@ class GenderResource extends Resource
         return __('admin_gender.navigation.plural');
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        return (string) static::$model::count();
-    }
-
     public static function form(Schema $schema): Schema
     {
         return LookupSchema::form($schema);

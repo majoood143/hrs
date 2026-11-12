@@ -2,10 +2,9 @@
 
 namespace App\Filament\Resources\StableResource\Pages;
 
-use Filament\Actions\ViewAction;
-use Filament\Actions\DeleteAction;
 use App\Filament\Resources\StableResource;
-use Filament\Actions;
+use App\Filament\Support\InUseDeleteActions;
+use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditStable extends EditRecord
@@ -16,7 +15,7 @@ class EditStable extends EditRecord
     {
         return [
             ViewAction::make(),
-            DeleteAction::make(),
+            InUseDeleteActions::delete('admin_stable'),
         ];
     }
 

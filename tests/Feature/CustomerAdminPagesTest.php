@@ -79,8 +79,14 @@ class CustomerAdminPagesTest extends TestCase
         $this->assertSame('p@ssw0rd', SecretSetting::get('sms.tamimah.password'));
         $this->assertSame('200,201', $stored['sms.tamimah.success_codes']);
 
+        // the password never goes back to the browser; saving with it blank keeps it
         Livewire::test(SmsSettings::class)
-            ->assertFormSet(['driver' => 'tamimah', 'tamimah.username' => 'hrs-user', 'tamimah.password' => 'p@ssw0rd', 'tamimah.sender' => 'HRS']);
+            ->assertFormSet(['driver' => 'tamimah', 'tamimah.username' => 'hrs-user', 'tamimah.password' => '', 'tamimah.sender' => 'HRS'])
+            ->assertDontSeeHtml('p@ssw0rd')
+            ->fillForm(['tamimah.sender' => 'HRS2'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+        $this->assertSame('p@ssw0rd', SecretSetting::get('sms.tamimah.password'));
     }
 
     public function test_tamimah_needs_its_credentials(): void

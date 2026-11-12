@@ -14,7 +14,7 @@
             <p class="mx-auto mt-4 max-w-xl text-balance opacity-90">{{ $subheading }}</p>
         @endif
         @if($buttonText)
-            <a href="{{ $data['button_url'] ?? url('/transportation') }}" class="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-3 font-semibold text-warm-800 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl">
+            <a href="{{ $data['button_url'] ?? route('transfer-board.create') }}" class="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-3 font-semibold text-warm-800 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl">
                 {{ $buttonText }}
             </a>
         @endif

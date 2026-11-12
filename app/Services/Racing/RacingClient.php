@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Http;
 
 class RacingClient
 {
+    /** Set for a minute after the source failed, so visitors are not each held for the whole timeout. */
+    private const DOWN_KEY = 'racing:down';
+
     /** Profile entity => [detail page on the source, id parameter]. */
     public const ENTITIES = [
         'horse' => ['Horse_GenWin', 'horseID'],
@@ -555,7 +558,7 @@ class RacingClient
      */
     public function image(string $path): ?array
     {
-        if (! preg_match('#^/img/[\w\s./()-]+\.(jpe?g|png|gif)$#i', $path) || str_contains($path, '..')) {
+        if (! preg_match('#^/img/[\w\s./()\'-]+\.(jpe?g|png|gif)$#i', $path) || str_contains($path, '..')) {
             return null;
         }
 
@@ -596,6 +599,11 @@ class RacingClient
     /** @throws RacingUnavailableException */
     private function get(string $path, array $query, ?string $locale = null, ?int $timeout = null): string
     {
+        // a source that hangs would hold a web worker per visitor for the whole timeout: once it fails, stop asking for a minute
+        if (Cache::has(self::DOWN_KEY)) {
+            throw new RacingUnavailableException('Racing source marked down after a recent failure');
+        }
+
         // under load the source answers some requests with an HTTP 200 "showError()" page; the same request works moments later
         for ($attempt = 1; $attempt <= 3; $attempt++) {
             if ($attempt > 1) {
@@ -605,10 +613,16 @@ class RacingClient
             try {
                 $response = $this->request($timeout)->get($path, $locale === null ? $query : $query + ['lang' => $this->lang($locale)]);
             } catch (ConnectionException $e) {
+                Cache::put(self::DOWN_KEY, true, 60);
+
                 throw new RacingUnavailableException('Racing source unreachable: '.$e->getMessage(), 0, $e);
             }
 
             if ($response->failed()) {
+                if ($response->serverError()) {
+                    Cache::put(self::DOWN_KEY, true, 60);
+                }
+
                 throw new RacingUnavailableException('Racing source responded with HTTP '.$response->status());
             }
 

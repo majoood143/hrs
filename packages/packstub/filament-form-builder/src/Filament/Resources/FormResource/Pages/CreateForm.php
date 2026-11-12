@@ -60,21 +60,31 @@ class CreateForm extends CreateRecord
      */
     public function startWith(array $fields, array $name, array $attributes = []): void
     {
-        $state = $this->form->getRawState();
+        $raw = $this->form->getRawState();
+        $state = $raw;
         $state['fields'] = $fields;
+        $changed = ['fields'];
 
         if (blank($state['name']['en'] ?? null)) {
             $state['name'] = $name;
             $state['slug'] = filled($state['slug'] ?? null) ? $state['slug'] : Str::slug($state['name']['en'] ?? '');
+            $changed = [...$changed, 'name', 'slug'];
         }
 
         foreach ($attributes as $key => $value) {
             if (blank($state[$key] ?? null)) {
                 $state[$key] = $value;
+                $changed[] = $key;
             }
         }
 
         $this->form->fill($state);
+
+        // fill() hydrates every field again, and a date-time picker would shift a time already on
+        // screen by the panel's timezone once more: put back what the admin had typed
+        foreach (array_diff(array_keys($raw), $changed) as $key) {
+            $this->data[$key] = $raw[$key];
+        }
     }
 
     public static function getResource(): string

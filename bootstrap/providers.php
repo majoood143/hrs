@@ -1,10 +1,15 @@
 <?php
 
+use App\Providers\AppServiceProvider;
+use App\Providers\Filament\AdminPanelProvider;
+use App\Providers\Filament\StablePanelProvider;
+use App\Providers\FilamentFileExplorerServiceProvider;
+use App\Providers\MailConfigServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\FilamentFileExplorerServiceProvider::class,
-    App\Providers\Filament\AdminPanelProvider::class,
-    App\Providers\Filament\PublicPanelProvider::class,
-    App\Providers\Filament\StablePanelProvider::class,
-    App\Providers\MailConfigServiceProvider::class,
+    AppServiceProvider::class,
+    FilamentFileExplorerServiceProvider::class,
+    AdminPanelProvider::class,
+    StablePanelProvider::class,
+    MailConfigServiceProvider::class,
 ];

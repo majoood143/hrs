@@ -81,7 +81,7 @@ class StableBookingPricing
         }
 
         return $stable->commission_type === FeeType::Percentage
-            ? (int) round($priceBaisa * (float) $stable->commission_value / 100, 0, PHP_ROUND_HALF_UP)
+            ? min($priceBaisa, (int) round($priceBaisa * (float) $stable->commission_value / 100, 0, PHP_ROUND_HALF_UP))
             : min($priceBaisa, (int) round((float) $stable->commission_value * 1000));
     }
 

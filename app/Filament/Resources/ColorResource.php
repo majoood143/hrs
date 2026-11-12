@@ -38,11 +38,6 @@ class ColorResource extends Resource
         return __('admin_color.navigation.plural');
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        return (string) static::$model::count();
-    }
-
     public static function form(Schema $schema): Schema
     {
         return LookupSchema::form($schema, [

@@ -177,12 +177,10 @@ class MobileAnnouncementResource extends Resource
                     DateTimePicker::make('starts_at')
                         ->label(__('admin_mobile_app.fields.starts_at'))
                         ->helperText(__('admin_mobile_app.fields.dates_help', ['zone' => self::timezone()]))
-                        ->timezone(self::timezone())
                         ->native(false)
                         ->seconds(false),
                     DateTimePicker::make('ends_at')
                         ->label(__('admin_mobile_app.fields.ends_at'))
-                        ->timezone(self::timezone())
                         ->native(false)
                         ->seconds(false)
                         ->after('starts_at'),
@@ -260,12 +258,12 @@ class MobileAnnouncementResource extends Resource
                     ->sortable(),
                 TextColumn::make('starts_at')
                     ->label(__('admin_mobile_app.fields.starts_at'))
-                    ->dateTime(timezone: self::timezone())
+                    ->dateTime()
                     ->placeholder('—')
                     ->sortable(),
                 TextColumn::make('ends_at')
                     ->label(__('admin_mobile_app.fields.ends_at'))
-                    ->dateTime(timezone: self::timezone())
+                    ->dateTime()
                     ->placeholder('—')
                     ->sortable(),
                 ToggleColumn::make('is_active')

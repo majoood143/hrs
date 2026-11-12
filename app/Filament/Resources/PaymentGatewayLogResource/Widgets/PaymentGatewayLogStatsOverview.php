@@ -2,7 +2,9 @@
 
 namespace App\Filament\Resources\PaymentGatewayLogResource\Widgets;
 
+use App\Models\BookingSlot;
 use App\Models\PaymentGatewayLog;
+use Carbon\CarbonImmutable;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Carbon;
@@ -24,7 +26,8 @@ class PaymentGatewayLogStatsOverview extends BaseWidget
 
         $errorsToday = PaymentGatewayLog::query()
             ->outcome('error')
-            ->whereDate('created_at', Carbon::today())
+            // Oman's day, not the server's UTC one
+            ->where('created_at', '>=', CarbonImmutable::now(BookingSlot::timezone())->startOfDay()->utc())
             ->count();
 
         return [

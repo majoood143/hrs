@@ -6,13 +6,13 @@ use App\Filament\Resources\HorseSalePostResource\Pages\CreateHorseSalePost;
 use App\Filament\Resources\HorseSalePostResource\Pages\EditHorseSalePost;
 use App\Filament\Resources\HorseSalePostResource\Pages\ListHorseSalePosts;
 use App\Filament\Resources\HorseSalePostResource\Pages\ViewHorseSalePost;
+use App\Filament\Support\LocationFields;
 use App\Filament\Support\PendingPosts;
 use App\Filament\Support\PlaceFormFields;
 use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\HorseSalePost;
-use App\Models\Region;
 use App\Models\SiteSetting;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -29,15 +29,12 @@ use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 class HorseSalePostResource extends Resource
@@ -81,18 +78,12 @@ class HorseSalePostResource extends Resource
         return PendingPosts::navigationBadgeTooltip(static::$model);
     }
 
-    /** `ar_name` in the Arabic admin, else `en_name` (lookups, locations, posts). */
-    private static function nameColumn(): string
-    {
-        return app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
-    }
-
     /** A lookup (type, gender, colour, country) by its name in the admin's language. */
     private static function lookup(string $field, string $relationship, string $label): Select
     {
         return Select::make($field)
             ->label($label)
-            ->relationship($relationship, static::nameColumn())
+            ->relationship($relationship, LocationFields::nameColumn())
             ->searchable()
             ->preload();
     }
@@ -150,34 +141,7 @@ class HorseSalePostResource extends Resource
                             ->columns(2),
                         Tab::make(__('admin_horse_sale_post.tabs.location'))
                             ->schema([
-                                Select::make('country_id')
-                                    ->label(__('horses-for-sale.country'))
-                                    ->options(fn () => Country::query()->orderBy(static::nameColumn())->pluck(static::nameColumn(), 'id'))
-                                    ->searchable()
-                                    ->live()
-                                    ->afterStateUpdated(function (Set $set): void {
-                                        $set('region_id', null);
-                                        $set('city_id', null);
-                                    })
-                                    ->required(),
-                                Select::make('region_id')
-                                    ->label(__('horses-for-sale.region'))
-                                    ->options(fn (Get $get): Collection => Region::query()
-                                        ->where('country_id', $get('country_id'))
-                                        ->orderBy(static::nameColumn())
-                                        ->pluck(static::nameColumn(), 'id'))
-                                    ->searchable()
-                                    ->live()
-                                    ->afterStateUpdated(fn (Set $set) => $set('city_id', null))
-                                    ->required(),
-                                Select::make('city_id')
-                                    ->label(__('horses-for-sale.city'))
-                                    ->options(fn (Get $get): Collection => City::query()
-                                        ->where('region_id', $get('region_id'))
-                                        ->orderBy(static::nameColumn())
-                                        ->pluck(static::nameColumn(), 'id'))
-                                    ->searchable()
-                                    ->required(),
+                                ...LocationFields::make(fn (string $field) => __("horses-for-sale.{$field}")),
                             ])->icon('heroicon-o-map-pin')
                             ->columns(3),
                         Tab::make(__('admin_horse_sale_post.tabs.listing'))
@@ -201,6 +165,8 @@ class HorseSalePostResource extends Resource
                                     ->maxLength(32)
                                     ->required(),
                                 PlaceFormFields::coverPhoto('horse-sale/covers', __('horses-for-sale.cover_photo'))
+                                    // required like the website/app form (the boards show the photo)
+                                    ->required()
                                     ->required()
                                     ->columnSpanFull(),
                                 PlaceFormFields::gallery('horse-sale/gallery', __('horses-for-sale.gallery_photos'), 'images')
@@ -220,7 +186,7 @@ class HorseSalePostResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $name = static::nameColumn();
+        $name = LocationFields::nameColumn();
 
         return $table
             // The type/gender/city columns are eager loaded by Filament; the country under the city is not.

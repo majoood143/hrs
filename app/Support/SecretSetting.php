@@ -42,4 +42,12 @@ class SecretSetting
 
         SiteSetting::set($key, $value === '' ? '' : self::PREFIX.Crypt::encryptString($value), 'text', null, $group);
     }
+
+    /** From a settings form, whose credential fields open empty: blank = keep the stored value. */
+    public static function setUnlessBlank(string $key, ?string $value, ?string $group = null): void
+    {
+        if (filled($value)) {
+            self::set($key, $value, $group);
+        }
+    }
 }

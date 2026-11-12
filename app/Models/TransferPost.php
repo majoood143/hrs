@@ -83,7 +83,7 @@ class TransferPost extends Model
     public function scopeVisible(Builder $query): Builder
     {
         return $query->where('status', 'active')
-            ->where('transfer_date', '>=', now()->toDateString());
+            ->where('transfer_date', '>=', BookingSlot::today()); // Oman's day, not the server's UTC one
     }
 
     /**

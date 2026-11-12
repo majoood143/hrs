@@ -13,6 +13,8 @@ return [
         'page' => 'Page',
         'site_section' => 'Site Section',
         'url' => 'URL',
+        'url_helper' => 'A page of this site, like /blog, or a full link starting with https://.',
+        'url_invalid' => 'Use a path starting with / (like /blog) or a link starting with https://.',
         'parent' => 'Parent Item',
         'parent_helper' => 'Nest this item under a top-level item to show it as a submenu/dropdown.',
         'target' => 'Open In',

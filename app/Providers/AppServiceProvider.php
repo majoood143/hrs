@@ -9,46 +9,42 @@ use App\Filament\RichEditor\TextDirectionPlugin;
 use App\Filament\Support\FieldPlaceholders;
 use App\Filament\Support\FormPaymentTab;
 use App\Http\Controllers\Api\V1\Owner\OwnerAuthController;
-use App\Models\Setting;
+use App\Models\BookingSlot;
 use App\Models\SiteSetting;
 use App\Policies\ActivityPolicy;
 use App\Policies\FormPolicy;
 use App\Policies\TagPolicy;
-use App\Policies\TokenPolicy;
 use App\Policies\WhatsappInstancePolicy;
 use App\Policies\WhatsappMessagePolicy;
 use App\Policies\WhatsappWebhookPolicy;
 use App\Services\Forms\RacePredictions;
-use App\Services\SettingsService;
 use App\Support\Api\PostingToken;
 use App\Support\FormOrderSettings;
 use App\Support\ImageCompressor;
+use App\Support\MailServer;
 use App\Support\MobileApp\MobileAutoPush;
 use App\Support\PhoneNumber;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Dedoc\Scramble\Scramble;
-use Exception;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
+use Filament\Support\Facades\FilamentTimezone;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Sanctum\Sanctum;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Packstub\FormBuilder\Facades\FormBuilder;
 use Packstub\FormBuilder\Models\Form as FormBuilderForm;
-use Rupadana\ApiService\Models\Token;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Health\Checks\Checks\DatabaseCheck;
 use Spatie\Health\Checks\Checks\DebugModeCheck;
@@ -71,11 +67,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
-        $this->app->singleton(SettingsService::class, function () {
-            return new SettingsService;
-        });
-
         // Each form's Insights page (charts of its submissions). Registered here, not in boot(): Filament
         // loads its panel routes while the package providers boot, which is before this provider's boot().
         FormBuilder::registerResourcePage('insights', ViewFormInsights::class, '/{record}/insights');
@@ -84,7 +75,7 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(SettingsService $settings): void
+    public function boot(): void
     {
         // SiteSetting memoizes the settings table in a static property for the life of the PHP
         // process (see SiteSetting::cached()); reset it at the start of each request/boot so a
@@ -100,6 +91,9 @@ class AppServiceProvider extends ServiceProvider
             Js::make(TextDirectionPlugin::ASSET, resource_path('js/dist/filament/rich-editor/text-direction.js'))
                 ->loadedOnRequest(),
         ]);
+
+        // every date and time in the panels in Oman's time (the server runs on UTC)
+        FilamentTimezone::set(BookingSlot::timezone());
 
         Gate::define('viewApiDocs', function ($user) {
             return $user?->hasRole('super_admin') ?? false;
@@ -168,24 +162,10 @@ class AppServiceProvider extends ServiceProvider
             ->routes(fn ($route) => str_starts_with($route->uri(), 'api/v1/') && $route->getName() !== 'api.v1.not-found')
             ->expose(ui: 'docs/v1', document: 'docs/v1.json');
 
-        // The admin API (rupadana/filament-api-service) registers `api/{panel}/…` with any value
-        // allowed for {panel}, so `api/v1/farriers` would hit the admin route (401). {panel} only
-        // ever means a Filament panel id: say so once every route is registered.
-        $this->app->booted(function () {
-            $panels = implode('|', array_map(fn (string $id) => preg_quote($id, '/'), array_keys(Filament::getPanels())));
-
-            foreach (Route::getRoutes()->getRoutes() as $route) {
-                if ($panels !== '' && in_array('panel', $route->parameterNames(), true)) {
-                    $route->where('panel', $panels);
-                }
-            }
-        });
-
         Gate::policy(FormBuilderForm::class, FormPolicy::class);
 
         // Overrides the vendor policy, which checks Shield's default snake_case
         // permission names instead of this project's ViewAny:Model format.
-        Gate::policy(Token::class, TokenPolicy::class);
 
         // Tag (CmsTagResource) and Activity (the Activity Log page) are vendor models
         // outside app/Models, so Laravel's convention-based policy discovery never finds
@@ -277,25 +257,14 @@ class AppServiceProvider extends ServiceProvider
             DatabaseCheck::new(),
         ]);
 
+        // the mail server from admin → SMTP Settings (site settings; the table may not exist while installing)
         try {
-            if (Schema::hasTable('settings')) {
-                // $settings = app(Setting::class);
-                $smtpSettings = $settings->getSmtpSettings();
+            $smtp = MailServer::settings();
 
-                // Only override if we have valid settings
-                if (! empty($smtpSettings['host']) && ! empty($smtpSettings['username'])) {
-                    Config::set('mail.mailers.smtp.host', $smtpSettings['host']);
-                    Config::set('mail.mailers.smtp.port', $smtpSettings['port']);
-                    Config::set('mail.mailers.smtp.username', $smtpSettings['username']);
-                    Config::set('mail.mailers.smtp.password', $smtpSettings['password']);
-                    Config::set('mail.mailers.smtp.encryption', $smtpSettings['encryption']);
-                    Config::set('mail.from.address', $smtpSettings['from_address']);
-                    Config::set('mail.from.name', $smtpSettings['from_name']);
-                }
+            if (filled($smtp['host']) && filled($smtp['username'])) {
+                MailServer::apply($smtp);
             }
-        } catch (Exception $e) {
-            // Settings table might not exist during installation
-            // Or there might be a database connection issue
+        } catch (QueryException) {
         }
     }
 }

@@ -10,6 +10,7 @@ return [
     ],
     'fields' => [
         'from_path' => 'From Path',
+        'to_itself' => 'A redirect cannot point to its own address.',
         'from_path_helper' => 'The old path, without a leading slash, e.g. "old-page".',
         'to_path' => 'To Path',
         'status_code' => 'Status Code',

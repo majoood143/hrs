@@ -4,7 +4,6 @@ namespace App\Filament\Support;
 
 use App\Models\City;
 use App\Models\Country;
-use App\Models\Region;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -28,7 +27,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
@@ -40,12 +38,6 @@ use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
  */
 final class DirectoryPlaceSchema
 {
-    /** `ar_name` in the Arabic admin, else `en_name`. */
-    public static function nameColumn(): string
-    {
-        return app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
-    }
-
     /**
      * @param  class-string<Model>  $model  with a `TYPES` constant
      * @return array<string, string>
@@ -116,34 +108,7 @@ final class DirectoryPlaceSchema
                         ->columns(2),
                     Tab::make(__('admin_directory.tabs.location'))
                         ->schema([
-                            Select::make('country_id')
-                                ->label($label('country'))
-                                ->options(fn () => Country::query()->orderBy(self::nameColumn())->pluck(self::nameColumn(), 'id'))
-                                ->searchable()
-                                ->live()
-                                ->afterStateUpdated(function (Set $set): void {
-                                    $set('region_id', null);
-                                    $set('city_id', null);
-                                })
-                                ->required(),
-                            Select::make('region_id')
-                                ->label($label('region'))
-                                ->options(fn (Get $get): Collection => Region::query()
-                                    ->where('country_id', $get('country_id'))
-                                    ->orderBy(self::nameColumn())
-                                    ->pluck(self::nameColumn(), 'id'))
-                                ->searchable()
-                                ->live()
-                                ->afterStateUpdated(fn (Set $set) => $set('city_id', null))
-                                ->required(),
-                            Select::make('city_id')
-                                ->label($label('city'))
-                                ->options(fn (Get $get): Collection => City::query()
-                                    ->where('region_id', $get('region_id'))
-                                    ->orderBy(self::nameColumn())
-                                    ->pluck(self::nameColumn(), 'id'))
-                                ->searchable()
-                                ->required(),
+                            ...LocationFields::make($label),
                             TextInput::make('address')
                                 ->label($label('address'))
                                 ->maxLength(255)
@@ -179,7 +144,7 @@ final class DirectoryPlaceSchema
                                 ->label($label('services'))
                                 ->relationship(
                                     name: 'services',
-                                    titleAttribute: self::nameColumn(),
+                                    titleAttribute: LocationFields::nameColumn(),
                                     modifyQueryUsing: fn (Builder $query, Get $get) => $query->forType($get('type')),
                                 )
                                 ->getOptionLabelFromRecordUsing(fn (Model $record) => $record->getAttribute('name'))
@@ -223,7 +188,7 @@ final class DirectoryPlaceSchema
      */
     public static function table(Table $table, string $model, string $section, string $route): Table
     {
-        $name = self::nameColumn();
+        $name = LocationFields::nameColumn();
         $label = fn (string $key) => __("admin_directory.fields.{$key}");
 
         return $table

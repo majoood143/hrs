@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Settings;
 
 use App\Enums\PaymentGateway;
+use App\Filament\Support\SecretInput;
 use App\Models\SiteSetting;
 use App\Support\SecretSetting;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
@@ -50,28 +51,28 @@ class PaymentGateways extends Page implements HasForms
         $this->form->fill([
             'enabled_gateways' => $this->resolveEnabledGateways(),
             'thawani' => [
-                'secret_key' => SecretSetting::get('thawani.secret_key'),
+                'secret_key' => '',
                 'publishable_key' => SiteSetting::get('thawani.publishable_key', ''),
                 'base_url' => SiteSetting::get('thawani.base_url', ''),
-                'webhook_secret' => SecretSetting::get('thawani.webhook_secret'),
+                'webhook_secret' => '',
                 'test_mode' => (bool) SiteSetting::get('thawani.test_mode', true),
             ],
             'ompay' => [
-                'api_key' => SecretSetting::get('ompay.api_key'),
-                'api_secret' => SecretSetting::get('ompay.api_secret'),
+                'api_key' => '',
+                'api_secret' => '',
                 'test_mode' => (bool) SiteSetting::get('ompay.test_mode', true),
             ],
             'nbo' => [
                 'tranportal_id' => SiteSetting::get('nbo.tranportal_id', ''),
-                'tranportal_password' => SecretSetting::get('nbo.tranportal_password'),
-                'resource_key' => SecretSetting::get('nbo.resource_key'),
+                'tranportal_password' => '',
+                'resource_key' => '',
                 'endpoint_url' => SiteSetting::get('nbo.endpoint_url', ''),
                 'test_mode' => (bool) SiteSetting::get('nbo.test_mode', true),
             ],
             'ccavenue' => [
                 'merchant_id' => SiteSetting::get('ccavenue.merchant_id', ''),
                 'access_code' => SiteSetting::get('ccavenue.access_code', ''),
-                'working_key' => SecretSetting::get('ccavenue.working_key'),
+                'working_key' => '',
                 'endpoint_url' => SiteSetting::get('ccavenue.endpoint_url', ''),
                 'test_mode' => (bool) SiteSetting::get('ccavenue.test_mode', true),
             ],
@@ -163,12 +164,8 @@ class PaymentGateways extends Page implements HasForms
                             ->live(),
 
                         Group::make([
-                            TextInput::make('thawani.secret_key')
-                                ->label(__('payment_gateways.fields.secret_key'))
-                                ->password()
-                                ->revealable()
-                                ->required(fn ($get) => in_array('thawani', (array) $get('enabled_gateways')))
-                                ->maxLength(255),
+                            SecretInput::make('thawani.secret_key', 'thawani.secret_key', fn ($get) => in_array('thawani', (array) $get('enabled_gateways')))
+                                ->label(__('payment_gateways.fields.secret_key')),
 
                             TextInput::make('thawani.publishable_key')
                                 ->label(__('payment_gateways.fields.publishable_key'))
@@ -185,12 +182,9 @@ class PaymentGateways extends Page implements HasForms
                                 : 'https://checkout.thawani.om/api/v1')
                             ->maxLength(255),
 
-                        TextInput::make('thawani.webhook_secret')
+                        SecretInput::make('thawani.webhook_secret', 'thawani.webhook_secret')
                             ->label(__('payment_gateways.fields.webhook_secret'))
-                            ->helperText(__('payment_gateways.fields.webhook_secret_helper').' '.__('payment_gateways.fields.webhook_url_helper', ['url' => route('payment.thawani.webhook')]))
-                            ->password()
-                            ->revealable()
-                            ->maxLength(255),
+                            ->helperText(__('payment_gateways.fields.webhook_secret_helper').' '.__('payment_gateways.fields.webhook_url_helper', ['url' => route('payment.thawani.webhook')])),
                     ]),
 
                 Section::make(__('payment_gateways.sections.ompay'))
@@ -204,19 +198,11 @@ class PaymentGateways extends Page implements HasForms
                             ->live(),
 
                         Group::make([
-                            TextInput::make('ompay.api_key')
-                                ->label(__('payment_gateways.fields.api_key'))
-                                ->password()
-                                ->revealable()
-                                ->required(fn ($get) => in_array('ompay', (array) $get('enabled_gateways')))
-                                ->maxLength(255),
+                            SecretInput::make('ompay.api_key', 'ompay.api_key', fn ($get) => in_array('ompay', (array) $get('enabled_gateways')))
+                                ->label(__('payment_gateways.fields.api_key')),
 
-                            TextInput::make('ompay.api_secret')
-                                ->label(__('payment_gateways.fields.api_secret'))
-                                ->password()
-                                ->revealable()
-                                ->required(fn ($get) => in_array('ompay', (array) $get('enabled_gateways')))
-                                ->maxLength(255),
+                            SecretInput::make('ompay.api_secret', 'ompay.api_secret', fn ($get) => in_array('ompay', (array) $get('enabled_gateways')))
+                                ->label(__('payment_gateways.fields.api_secret')),
                         ])->columns(2),
                     ]),
 
@@ -236,21 +222,13 @@ class PaymentGateways extends Page implements HasForms
                                 ->required(fn ($get) => in_array('nbo', (array) $get('enabled_gateways')))
                                 ->maxLength(255),
 
-                            TextInput::make('nbo.tranportal_password')
-                                ->label(__('payment_gateways.fields.tranportal_password'))
-                                ->password()
-                                ->revealable()
-                                ->required(fn ($get) => in_array('nbo', (array) $get('enabled_gateways')))
-                                ->maxLength(255),
+                            SecretInput::make('nbo.tranportal_password', 'nbo.tranportal_password', fn ($get) => in_array('nbo', (array) $get('enabled_gateways')))
+                                ->label(__('payment_gateways.fields.tranportal_password')),
                         ])->columns(2),
 
-                        TextInput::make('nbo.resource_key')
+                        SecretInput::make('nbo.resource_key', 'nbo.resource_key', fn ($get) => in_array('nbo', (array) $get('enabled_gateways')))
                             ->label(__('payment_gateways.fields.resource_key'))
-                            ->helperText(__('payment_gateways.fields.resource_key_helper'))
-                            ->password()
-                            ->revealable()
-                            ->required(fn ($get) => in_array('nbo', (array) $get('enabled_gateways')))
-                            ->maxLength(255),
+                            ->helperText(__('payment_gateways.fields.resource_key_helper')),
 
                         TextInput::make('nbo.endpoint_url')
                             ->label(__('payment_gateways.fields.endpoint_url_override'))
@@ -286,13 +264,9 @@ class PaymentGateways extends Page implements HasForms
                                 ->maxLength(255),
                         ])->columns(2),
 
-                        TextInput::make('ccavenue.working_key')
+                        SecretInput::make('ccavenue.working_key', 'ccavenue.working_key', fn ($get) => in_array('ccavenue', (array) $get('enabled_gateways')))
                             ->label(__('payment_gateways.fields.working_key'))
-                            ->helperText(__('payment_gateways.fields.working_key_helper'))
-                            ->password()
-                            ->revealable()
-                            ->required(fn ($get) => in_array('ccavenue', (array) $get('enabled_gateways')))
-                            ->maxLength(255),
+                            ->helperText(__('payment_gateways.fields.working_key_helper')),
 
                         TextInput::make('ccavenue.endpoint_url')
                             ->label(__('payment_gateways.fields.endpoint_url_override'))
@@ -318,25 +292,25 @@ class PaymentGateways extends Page implements HasForms
 
         SiteSetting::set('enabled_gateways', json_encode($enabled), 'text', null, 'payment_gateways');
 
-        SecretSetting::set('thawani.secret_key', $thawani['secret_key'] ?? '', 'payment_gateways');
+        SecretSetting::setUnlessBlank('thawani.secret_key', $thawani['secret_key'] ?? '', 'payment_gateways');
         SiteSetting::set('thawani.publishable_key', $thawani['publishable_key'] ?? '', 'text', null, 'payment_gateways');
         SiteSetting::set('thawani.base_url', $thawani['base_url'] ?? '', 'text', null, 'payment_gateways');
-        SecretSetting::set('thawani.webhook_secret', $thawani['webhook_secret'] ?? '', 'payment_gateways');
+        SecretSetting::setUnlessBlank('thawani.webhook_secret', $thawani['webhook_secret'] ?? '', 'payment_gateways');
         SiteSetting::set('thawani.test_mode', ! empty($thawani['test_mode']), 'boolean', null, 'payment_gateways');
 
-        SecretSetting::set('ompay.api_key', $ompay['api_key'] ?? '', 'payment_gateways');
-        SecretSetting::set('ompay.api_secret', $ompay['api_secret'] ?? '', 'payment_gateways');
+        SecretSetting::setUnlessBlank('ompay.api_key', $ompay['api_key'] ?? '', 'payment_gateways');
+        SecretSetting::setUnlessBlank('ompay.api_secret', $ompay['api_secret'] ?? '', 'payment_gateways');
         SiteSetting::set('ompay.test_mode', ! empty($ompay['test_mode']), 'boolean', null, 'payment_gateways');
 
         SiteSetting::set('nbo.tranportal_id', $nbo['tranportal_id'] ?? '', 'text', null, 'payment_gateways');
-        SecretSetting::set('nbo.tranportal_password', $nbo['tranportal_password'] ?? '', 'payment_gateways');
-        SecretSetting::set('nbo.resource_key', $nbo['resource_key'] ?? '', 'payment_gateways');
+        SecretSetting::setUnlessBlank('nbo.tranportal_password', $nbo['tranportal_password'] ?? '', 'payment_gateways');
+        SecretSetting::setUnlessBlank('nbo.resource_key', $nbo['resource_key'] ?? '', 'payment_gateways');
         SiteSetting::set('nbo.endpoint_url', $nbo['endpoint_url'] ?? '', 'text', null, 'payment_gateways');
         SiteSetting::set('nbo.test_mode', ! empty($nbo['test_mode']), 'boolean', null, 'payment_gateways');
 
         SiteSetting::set('ccavenue.merchant_id', $ccavenue['merchant_id'] ?? '', 'text', null, 'payment_gateways');
         SiteSetting::set('ccavenue.access_code', $ccavenue['access_code'] ?? '', 'text', null, 'payment_gateways');
-        SecretSetting::set('ccavenue.working_key', $ccavenue['working_key'] ?? '', 'payment_gateways');
+        SecretSetting::setUnlessBlank('ccavenue.working_key', $ccavenue['working_key'] ?? '', 'payment_gateways');
         SiteSetting::set('ccavenue.endpoint_url', $ccavenue['endpoint_url'] ?? '', 'text', null, 'payment_gateways');
         SiteSetting::set('ccavenue.test_mode', ! empty($ccavenue['test_mode']), 'boolean', null, 'payment_gateways');
 

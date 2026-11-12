@@ -2,14 +2,12 @@
 
 namespace App\Filament\Resources\HorseResource\RelationManagers;
 
+use App\Filament\Resources\VaccinationResource;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -38,31 +36,7 @@ class VaccinationRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                TextInput::make('vaccine_type')
-                    ->label(static::label('vaccine_type'))
-                    ->required()
-                    ->maxLength(255),
-                DatePicker::make('date_administered')
-                    ->label(static::label('date_administered'))
-                    ->maxDate(now())
-                    ->required(),
-                TextInput::make('manufacturer')
-                    ->label(static::label('manufacturer'))
-                    ->maxLength(255),
-                TextInput::make('batch_number')
-                    ->label(static::label('batch_number'))
-                    ->maxLength(255),
-                TextInput::make('veterinarian_name')
-                    ->label(static::label('veterinarian_name'))
-                    ->maxLength(255),
-                Textarea::make('notes')
-                    ->label(static::label('notes'))
-                    ->rows(2)
-                    ->columnSpanFull(),
-            ])
-            ->columns(2);
+        return $schema->components(VaccinationResource::fields())->columns(2);
     }
 
     public function table(Table $table): Table

@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\TransferPost;
+use Carbon\CarbonImmutable;
 use Tests\Concerns\PreparesMobileApi;
 use Tests\Concerns\PreparesMobileApiDirectory;
 use Tests\Concerns\PreparesSiteLayout;
@@ -48,6 +50,16 @@ class DirectoryListingFiltersTest extends TestCase
 
         $this->assertSame(1, substr_count($page->getContent(), route('transfer-board.show', 2)));
         $this->assertSame(0, substr_count($page->getContent(), route('transfer-board.show', 1)));
+    }
+
+    public function test_a_transfer_is_gone_once_its_day_has_passed_in_oman_not_in_utc(): void
+    {
+        // 22:00 UTC on the 12th is 02:00 on the 13th in Muscat
+        $this->travelTo(CarbonImmutable::parse('2026-11-12 22:00:00', 'UTC'));
+        $this->row('transfer_posts', ['type' => 'offer', 'transfer_date' => '2026-11-12', 'capacity' => 1, 'from_city_id' => $this->ids['seeb'], 'to_city_id' => $this->ids['bawshar'], 'status' => 'active']);
+        $this->row('transfer_posts', ['type' => 'offer', 'transfer_date' => '2026-11-13', 'capacity' => 1, 'from_city_id' => $this->ids['seeb'], 'to_city_id' => $this->ids['bawshar'], 'status' => 'active']);
+
+        $this->assertSame(['2026-11-13'], TransferPost::query()->visible()->get()->map(fn (TransferPost $post) => $post->transfer_date->toDateString())->all());
     }
 
     public function test_the_place_boards_filter_by_type_and_service(): void

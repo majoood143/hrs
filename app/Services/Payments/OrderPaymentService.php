@@ -195,6 +195,8 @@ class OrderPaymentService
         $last = ServiceOrder::query()
             ->where('receipt_number', 'like', $prefix.'%')
             ->orderByDesc('receipt_number')
+            // locking read: inside the payment's transaction a plain read would see the same snapshot on every retry
+            ->lockForUpdate()
             ->value('receipt_number');
 
         $next = $last ? ((int) substr($last, strlen($prefix))) + 1 : 1;

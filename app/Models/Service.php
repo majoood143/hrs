@@ -2,11 +2,22 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\RefusesDeleteWhileReferenced;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Service extends Model
 {
+    use RefusesDeleteWhileReferenced;
+
+    /** An order, transaction or fee/commission rule still names it: turn it off instead (orders would lose their service). */
+    public const DELETE_REFERENCES = [
+        'service_orders' => 'service_id',
+        'transactions' => 'service_id',
+        'service_fee_settings' => 'service_id',
+        'commission_settings' => 'service_id',
+    ];
+
     protected $fillable = [
         'name',
         'ar_name',

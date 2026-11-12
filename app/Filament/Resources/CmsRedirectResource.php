@@ -17,6 +17,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -24,7 +26,9 @@ use Filament\Tables\Table;
 class CmsRedirectResource extends Resource
 {
     protected static ?string $model = CmsRedirect::class;
+
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-turn-right-up';
+
     protected static ?int $navigationSort = 85;
 
     public static function getNavigationGroup(): ?string
@@ -58,14 +62,22 @@ class CmsRedirectResource extends Resource
                                 ->label(__('cms_redirect.fields.from_path'))
                                 ->helperText(__('cms_redirect.fields.from_path_helper'))
                                 ->required()
+                                // written as the lookup reads it, before the duplicate check sees it
+                                ->live(onBlur: true)
+                                ->afterStateUpdated(fn (?string $state, Set $set) => $set('from_path', CmsRedirect::normalizePath($state)))
                                 ->unique(ignoreRecord: true)
-                                ->maxLength(255)
-                                ->dehydrateStateUsing(fn ($state) => ltrim((string) $state, '/')),
+                                ->maxLength(255),
 
                             TextInput::make('to_path')
                                 ->label(__('cms_redirect.fields.to_path'))
                                 ->required()
-                                ->maxLength(255),
+                                ->maxLength(255)
+                                // a redirect to itself would send the browser round in circles
+                                ->rule(fn (Get $get) => function (string $attribute, mixed $value, \Closure $fail) use ($get): void {
+                                    if (CmsRedirect::normalizePath((string) $value) === CmsRedirect::normalizePath((string) $get('from_path'))) {
+                                        $fail(__('cms_redirect.fields.to_itself'));
+                                    }
+                                }),
                         ]),
 
                         Select::make('status_code')

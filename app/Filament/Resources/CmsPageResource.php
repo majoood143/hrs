@@ -97,7 +97,13 @@ class CmsPageResource extends Resource
                                             ->required()
                                             ->unique(ignoreRecord: true)
                                             ->maxLength(255)
-                                            ->rule('not_in:admin,transportation,blog')
+                                            // one path segment, and not one the site's own sections take (CmsPage::slugIsAllowed)
+                                            ->alphaDash()
+                                            ->rule(fn () => function (string $attribute, mixed $value, \Closure $fail): void {
+                                                if (! CmsPage::slugIsAllowed((string) $value)) {
+                                                    $fail(__('cms_page.fields.slug_taken_by_section'));
+                                                }
+                                            })
                                             ->disabled(fn (Get $get) => (bool) $get('is_system'))
                                             ->dehydrated(fn (Get $get) => ! $get('is_system'))
                                             ->helperText(fn (Get $get) => $get('is_system')

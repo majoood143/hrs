@@ -159,4 +159,34 @@ class HorseSalePostAdminResourceTest extends TestCase
             $this->assertSame($locked, $post->refresh()->status);
         }
     }
+
+    public function test_a_post_expires_60_days_after_it_went_live_not_after_it_was_sent_in(): void
+    {
+        // sent in 70 days ago, waited for review, approved today: it stays up
+        $this->travel(-70)->days();
+        $approvedLate = $this->post->replicate()->fill(['status' => 'pending']);
+        $approvedLate->save();
+        $old = $this->post->replicate()->fill(['status' => 'active']);
+        $old->save();
+        $this->travelBack();
+        $approvedLate->update(['status' => 'active']);
+
+        $this->artisan('horse-sale-posts:expire')->assertSuccessful();
+
+        $this->assertSame('active', $approvedLate->refresh()->status);
+        $this->assertSame('expired', $old->refresh()->status);
+
+        // switched back on by an admin: another 60 days
+        $old->update(['status' => 'active']);
+        $this->artisan('horse-sale-posts:expire')->assertSuccessful();
+        $this->assertSame('active', $old->refresh()->status);
+    }
+
+    public function test_a_cover_photo_is_required_like_on_the_website(): void
+    {
+        Livewire::test(EditHorseSalePost::class, ['record' => $this->post->getKey()])
+            ->fillForm(['cover_photo' => null])
+            ->call('save')
+            ->assertHasFormErrors(['cover_photo' => 'required']);
+    }
 }

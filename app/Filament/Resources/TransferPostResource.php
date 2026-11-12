@@ -6,6 +6,7 @@ use App\Filament\Resources\TransferPostResource\Pages\CreateTransferPost;
 use App\Filament\Resources\TransferPostResource\Pages\EditTransferPost;
 use App\Filament\Resources\TransferPostResource\Pages\ListTransferPosts;
 use App\Filament\Resources\TransferPostResource\Pages\ViewTransferPost;
+use App\Filament\Support\LocationFields;
 use App\Filament\Support\PendingPosts;
 use App\Filament\Support\PlaceFormFields;
 use App\Filament\Support\WebsiteLinkActions;
@@ -26,7 +27,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -34,7 +34,6 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
 class TransferPostResource extends Resource
@@ -78,12 +77,6 @@ class TransferPostResource extends Resource
         return PendingPosts::navigationBadgeTooltip(static::$model);
     }
 
-    /** `ar_name` in the Arabic admin, else `en_name` (countries, regions, cities). */
-    private static function nameColumn(): string
-    {
-        return app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
-    }
-
     /**
      * Country → region → city for one end of the route (`from` / `to`), in the admin's language.
      *
@@ -91,40 +84,15 @@ class TransferPostResource extends Resource
      */
     private static function locationFields(string $prefix): array
     {
-        return [
-            Select::make("{$prefix}_country_id")
-                ->label(__('transportation.country'))
-                ->options(fn () => Country::query()->orderBy(static::nameColumn())->pluck(static::nameColumn(), 'id'))
-                ->searchable()
-                ->live()
-                ->afterStateUpdated(function (Set $set) use ($prefix): void {
-                    $set("{$prefix}_region_id", null);
-                    $set("{$prefix}_city_id", null);
-                })
-                ->required(),
-            Select::make("{$prefix}_region_id")
-                ->label(__('transportation.region'))
-                ->options(fn (Get $get): Collection => Region::query()
-                    ->where('country_id', $get("{$prefix}_country_id"))
-                    ->orderBy(static::nameColumn())
-                    ->pluck(static::nameColumn(), 'id'))
-                ->searchable()
-                ->live()
-                ->afterStateUpdated(fn (Set $set) => $set("{$prefix}_city_id", null))
-                ->required(),
-            Select::make("{$prefix}_city_id")
-                ->label(__('transportation.city'))
-                ->options(fn (Get $get): Collection => City::query()
-                    ->where('region_id', $get("{$prefix}_region_id"))
-                    ->orderBy(static::nameColumn())
-                    ->pluck(static::nameColumn(), 'id'))
-                ->searchable()
-                // Same rule as the website/app form (TransferPostCreator): a route goes somewhere else.
-                ->when($prefix === 'to', fn (Select $field) => $field
-                    ->notIn(fn (Get $get): array => array_filter([$get('from_city_id')]))
-                    ->validationMessages(['not_in' => __('transportation.same_city')]))
-                ->required(),
-        ];
+        $fields = LocationFields::make(fn (string $field) => __("transportation.{$field}"), "{$prefix}_");
+
+        // Same rule as the website/app form (TransferPostCreator): a route goes somewhere else.
+        if ($prefix === 'to') {
+            $fields[2]->notIn(fn (Get $get): array => array_filter([$get('from_city_id')]))
+                ->validationMessages(['not_in' => __('transportation.same_city')]);
+        }
+
+        return $fields;
     }
 
     public static function form(Schema $schema): Schema
@@ -184,7 +152,7 @@ class TransferPostResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $name = static::nameColumn();
+        $name = LocationFields::nameColumn();
 
         return $table
             // The city columns are eager loaded by Filament; the countries under them are not.

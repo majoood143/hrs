@@ -32,8 +32,11 @@ use Illuminate\Support\Facades\Storage;
 class AdResource extends Resource
 {
     protected static ?string $model = Ad::class;
+
     protected static ?string $slug = 'promotions';
+
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-megaphone';
+
     protected static ?int $navigationSort = 94;
 
     public static function getNavigationGroup(): ?string
@@ -108,13 +111,14 @@ class AdResource extends Resource
                     ->columnSpanFull(),
 
                 TranslatableInput::grid(fn ($code, $meta) => TextInput::make("alt_text.{$code}")
-                    ->label(__('ads.fields.alt_text') . ' (' . $meta['native'] . ')'))
+                    ->label(__('ads.fields.alt_text').' ('.$meta['native'].')'))
                     ->columnSpanFull(),
 
                 TextInput::make('target_url')
                     ->label(__('ads.fields.target_url'))
                     ->helperText(__('ads.fields.target_url_helper'))
                     ->url()
+                    ->rule('url:http,https')
                     ->maxLength(255)
                     ->columnSpanFull(),
 

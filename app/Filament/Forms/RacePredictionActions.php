@@ -105,7 +105,10 @@ class RacePredictionActions
                 // the editor shows the new runners at once, keeping its other unsaved changes
                 // (refreshFormData() cannot: it only refills paths that hold a plain value)
                 if ($livewire instanceof EditRecord && $changed > 0) {
-                    $livewire->form->fill([...$livewire->form->getRawState(), 'fields' => $record->fields]);
+                    $raw = $livewire->form->getRawState();
+                    $livewire->form->fill([...$raw, 'fields' => $record->fields]);
+                    // fill() would shift the closing time on screen by the panel's timezone again
+                    $livewire->data = ['fields' => $livewire->data['fields']] + $raw;
                 }
 
                 Notification::make()

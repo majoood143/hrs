@@ -98,4 +98,10 @@ return [
     'admin_mode' => [
         'open' => 'Open stable panel',
     ],
+
+    'in_use' => [
+        'title' => 'Has bookings or money records',
+        'body' => 'This stable has orders, bookings, payouts or packages. Suspend it instead: that hides it and stops new bookings, and keeps the records.',
+        'bulk' => 'Some were not deleted: they have orders, bookings, payouts or packages. Suspend them instead.',
+    ],
 ];

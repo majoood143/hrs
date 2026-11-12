@@ -14,6 +14,7 @@ use App\Filament\Resources\StatusResource\Pages\ListStatuses;
 use App\Filament\Resources\TransactionResource\Pages\CreateTransaction;
 use App\Filament\Resources\TransactionResource\Pages\ListTransactions;
 use App\Filament\Resources\TypeResource\Pages\ListTypes;
+use App\Filament\Resources\VaccinationResource\Pages\CreateVaccination;
 use App\Models\Attachement;
 use App\Models\Color;
 use App\Models\Gender;
@@ -58,6 +59,8 @@ class HorseRegistryAdminTest extends TestCase
         '2025_10_01_075758_add_new_columns_to__transactions_tabel.php',
         '2025_09_29_103941_create_attachements_table.php',
         '2025_10_02_181044_add_new_columns_to_attachement_tabel.php',
+        '2025_08_09_192206_create_vaccinations_table.php',
+        '2025_10_01_030109_add_new_columns_to__vaccinations_tabel.php',
     ];
 
     /** @var array<string, int> */
@@ -208,5 +211,22 @@ class HorseRegistryAdminTest extends TestCase
         $this->assertNull(Gender::find($this->ids['stallion']), 'An unused gender goes.');
         $this->assertFalse(Color::find($this->ids['bay'])->delete());
         $this->assertSame(1, Horse::query()->count());
+    }
+
+    public function test_a_vaccination_belongs_to_a_horse(): void
+    {
+        $horse = $this->horse();
+
+        Livewire::test(CreateVaccination::class)
+            ->fillForm(['vaccine_type' => 'Tetanus', 'date_administered' => '2026-10-01'])
+            ->call('create')
+            ->assertHasFormErrors(['horse_id' => 'required']);
+
+        Livewire::test(CreateVaccination::class)
+            ->fillForm(['horse_id' => $horse->id, 'vaccine_type' => 'Tetanus', 'date_administered' => '2026-10-01', 'veterinarian_name' => 'Dr. Salim'])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(['Tetanus', 'Dr. Salim'], [$horse->vaccination()->sole()->vaccine_type, $horse->vaccination()->sole()->veterinarian_name]);
     }
 }

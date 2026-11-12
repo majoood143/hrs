@@ -27,7 +27,6 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use MarcoGermani87\FilamentCaptcha\FilamentCaptcha;
 use Packstub\FormBuilder\FormBuilderPlugin;
 use Rmsramos\Activitylog\ActivitylogPlugin;
-use Rupadana\ApiService\ApiServicePlugin;
 use ShuvroRoy\FilamentSpatieLaravelBackup\FilamentSpatieLaravelBackupPlugin;
 use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
 use WallaceMartinss\FilamentEvolution\FilamentEvolutionPlugin;
@@ -42,7 +41,6 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->login(Login::class)
-            ->registration()
             ->profile()
             ->passwordReset()
             ->brandName(fn () => SiteSetting::siteName())
@@ -99,7 +97,6 @@ class AdminPanelProvider extends PanelProvider
                 FilamentSpatieLaravelBackupPlugin::make()
                     ->authorize(fn (): bool => (bool) auth()->user()?->can('View:Backups')),
                 ActivitylogPlugin::make(),
-                ApiServicePlugin::make(),
                 FilamentCaptcha::make(),
                 FilamentFileExplorerPlugin::make(),
                 FormBuilderPlugin::make()->navigationGroup(__('cms.navigation.group')),

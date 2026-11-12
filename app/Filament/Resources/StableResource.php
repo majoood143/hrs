@@ -13,16 +13,15 @@ use App\Filament\Resources\StableResource\RelationManagers\ReviewsRelationManage
 use App\Filament\Resources\StableResource\RelationManagers\SettlementsRelationManager;
 use App\Filament\Resources\StableResource\StableApprovalActions;
 use App\Filament\Stable\Schemas\StableProfileForm;
+use App\Filament\Support\InUseDeleteActions;
+use App\Filament\Support\LocationFields;
 use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
 use App\Models\Country;
-use App\Models\Region;
 use App\Models\Stable;
 use App\Models\StableService;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
@@ -32,7 +31,6 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\ImageColumn;
@@ -41,7 +39,6 @@ use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
@@ -102,12 +99,6 @@ class StableResource extends Resource
         return static::badgeCounts()['pending'] ? __('admin_stable.approval.pending_badge') : null;
     }
 
-    /** `ar_name` in the Arabic admin, else `en_name` (countries, regions, cities, services, stables). */
-    private static function nameColumn(): string
-    {
-        return app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
-    }
-
     public static function getRelations(): array
     {
         return [
@@ -152,34 +143,7 @@ class StableResource extends Resource
                             ->columns(2),
                         Tab::make(__('stable_panel.profile.tabs.location'))
                             ->schema([
-                                Select::make('country_id')
-                                    ->label(__('stable_panel.fields.country'))
-                                    ->options(fn () => Country::query()->orderBy(static::nameColumn())->pluck(static::nameColumn(), 'id'))
-                                    ->searchable()
-                                    ->live()
-                                    ->afterStateUpdated(function (Set $set): void {
-                                        $set('region_id', null);
-                                        $set('city_id', null);
-                                    })
-                                    ->required(),
-                                Select::make('region_id')
-                                    ->label(__('stable_panel.fields.region'))
-                                    ->options(fn (Get $get): Collection => Region::query()
-                                        ->where('country_id', $get('country_id'))
-                                        ->orderBy(static::nameColumn())
-                                        ->pluck(static::nameColumn(), 'id'))
-                                    ->searchable()
-                                    ->live()
-                                    ->afterStateUpdated(fn (Set $set) => $set('city_id', null))
-                                    ->required(),
-                                Select::make('city_id')
-                                    ->label(__('stable_panel.fields.city'))
-                                    ->options(fn (Get $get): Collection => City::query()
-                                        ->where('region_id', $get('region_id'))
-                                        ->orderBy(static::nameColumn())
-                                        ->pluck(static::nameColumn(), 'id'))
-                                    ->searchable()
-                                    ->required(),
+                                ...LocationFields::make(fn (string $field) => __("stable_panel.fields.{$field}")),
                                 ...collect(StableProfileForm::location())
                                     ->filter(fn ($field) => in_array($field->getName(), ['address', 'map_link'], true))
                                     ->map(fn ($field) => $field->columnSpanFull())
@@ -194,7 +158,7 @@ class StableResource extends Resource
                             ->schema([
                                 Select::make('services')
                                     ->label(__('admin_stable.fields.services'))
-                                    ->relationship('services', static::nameColumn())
+                                    ->relationship('services', LocationFields::nameColumn())
                                     ->getOptionLabelFromRecordUsing(fn (StableService $record) => $record->name)
                                     ->multiple()
                                     ->searchable()
@@ -241,7 +205,7 @@ class StableResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $name = static::nameColumn();
+        $name = LocationFields::nameColumn();
 
         return $table
             // The city/services/owners columns are eager loaded by Filament; the country under the city is not.
@@ -323,12 +287,12 @@ class StableResource extends Resource
                         isPublic: fn (Stable $record): bool => $record->is_active && $record->isApproved() && filled($record->slug),
                     ),
                     EditAction::make(),
-                    DeleteAction::make(),
+                    InUseDeleteActions::delete('admin_stable'),
                 ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    InUseDeleteActions::bulk('admin_stable'),
                     ExportBulkAction::make(),
                 ]),
             ]);

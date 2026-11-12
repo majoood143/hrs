@@ -42,11 +42,6 @@ class ShopServiceResource extends Resource
         return __('admin_shop_service.navigation.plural');
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        return static::$model::count();
-    }
-
     public static function form(Schema $schema): Schema
     {
         return $schema

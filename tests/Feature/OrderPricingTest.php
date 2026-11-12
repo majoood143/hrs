@@ -9,6 +9,7 @@ use App\Models\ServiceOrder;
 use App\Services\Orders\CreateServiceOrder;
 use App\Services\Orders\OrderPricing;
 use App\Services\Orders\PriceBreakdown;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Event;
 use Tests\Concerns\PreparesOrderSite;
 use Tests\TestCase;
@@ -135,6 +136,22 @@ class OrderPricingTest extends TestCase
         $live = $this->makeFee('percentage', 4, extra: ['effective_from' => '2026-01-01', 'effective_to' => '2999-01-01']);
 
         $this->assertSame($live->id, $this->quote(10)->feeSetting->id);
+    }
+
+    public function test_a_rule_starts_at_midnight_in_oman_not_in_utc(): void
+    {
+        // 21:00 UTC on the 30th is already 01:00 on 1 December in Muscat
+        $this->travelTo(CarbonImmutable::parse('2026-11-30 21:00:00', 'UTC'));
+        $december = $this->makeFee('percentage', 4, extra: ['effective_from' => '2026-12-01']);
+
+        $this->assertSame($december->id, $this->quote(10)->feeSetting?->id);
+    }
+
+    public function test_a_commission_is_never_more_than_the_price(): void
+    {
+        $this->makeCommission('percentage', 150);
+
+        $this->assertSame(10000, $this->quote(10)->commission);
     }
 
     public function test_the_order_keeps_the_amounts_it_was_created_with(): void

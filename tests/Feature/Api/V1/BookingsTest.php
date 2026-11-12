@@ -336,6 +336,26 @@ class BookingsTest extends TestCase
         $this->as($token)->getJson('/api/v1/account/packages')->assertOk()->assertJsonPath('data.0.sessions_left', 4);
     }
 
+    public function test_another_customers_package_cannot_pay_for_a_booking(): void
+    {
+        $package = StablePackage::create(['stable_id' => $this->stable->id, 'stable_offering_id' => $this->offering->id, 'en_name' => 'Five lessons', 'ar_name' => 'خمس حصص', 'sessions' => 5, 'price' => 60]);
+        $owner = $this->signIn();
+        $this->as($owner)->postJson("/api/v1/packages/{$package->id}/buy")->assertCreated();
+
+        $purchase = StablePackagePurchase::query()->sole();
+        $purchase->order->forceFill(['status' => OrderStatus::New, 'payment_status' => PaymentStatus::Paid, 'paid_at' => now()])->save();
+        $purchase->forceFill(['status' => StablePackagePurchase::ACTIVE, 'activated_at' => now(), 'expires_at' => now()->addDays(60)])->save();
+
+        $other = $this->signIn('92223333');
+        $this->as($other)->getJson("/api/v1/bookings/slots/{$this->slot->id}")->assertJsonCount(0, 'packages');
+        $this->as($other)->postJson("/api/v1/bookings/slots/{$this->slot->id}", $this->form(1, ['payment_option' => 'package', 'package_purchase_id' => $purchase->id]))
+            ->assertStatus(409)
+            ->assertJsonPath('code', 'booking_unavailable');
+
+        $this->assertSame(0, StableBooking::query()->count());
+        $this->assertSame(5, $purchase->refresh()->sessionsLeft());
+    }
+
     public function test_an_account_is_deleted_only_when_nothing_is_running(): void
     {
         $token = $this->signIn();

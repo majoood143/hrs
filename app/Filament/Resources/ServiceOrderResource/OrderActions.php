@@ -39,7 +39,7 @@ class OrderActions
             ->color('warning')
             ->modalHeading(__('admin_service_order.actions.refund'))
             ->modalDescription(fn (ServiceOrder $record): string => __('admin_service_order.actions.refund_desc', ['max' => SiteSetting::formatCurrency($record->refundableAmount())]))
-            ->visible(fn (ServiceOrder $record): bool => $record->isPaid() && $record->refundableAmount() > 0)
+            ->visible(fn (ServiceOrder $record): bool => self::mayUpdate($record) && $record->isPaid() && $record->refundableAmount() > 0)
             ->schema(fn (ServiceOrder $record): array => [
                 TextInput::make('amount')
                     ->label(__('admin_service_order.actions.refund_amount'))
@@ -80,7 +80,7 @@ class OrderActions
             ->color('gray')
             ->modalHeading(__('admin_service_order.actions.resend'))
             ->modalDescription(__('admin_service_order.actions.resend_desc'))
-            ->visible(fn (ServiceOrder $record): bool => self::resendOptions($record) !== [])
+            ->visible(fn (ServiceOrder $record): bool => self::mayUpdate($record) && self::resendOptions($record) !== [])
             ->schema(fn (ServiceOrder $record): array => [
                 Select::make('type')
                     ->label(__('admin_service_order.actions.resend_type'))
@@ -247,10 +247,15 @@ class OrderActions
         return $record->stable_id ? $record->stableBooking : null;
     }
 
-    /** Changing a booking takes the "update" permission: viewing orders is not enough. */
+    /** Anything that changes an order or messages its customer takes the "update" permission: viewing orders is not enough. */
+    public static function mayUpdate(ServiceOrder $record): bool
+    {
+        return (bool) auth()->user()?->can('update', $record);
+    }
+
     private static function mayRunBooking(ServiceOrder $record): bool
     {
-        return self::booking($record) !== null && auth()->user()?->can('update', $record);
+        return self::booking($record) !== null && self::mayUpdate($record);
     }
 
     private static function runBooking(ServiceOrder $record, callable $action): void

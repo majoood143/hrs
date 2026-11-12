@@ -6,11 +6,11 @@ use App\Filament\Resources\ShopResource\Pages\CreateShop;
 use App\Filament\Resources\ShopResource\Pages\EditShop;
 use App\Filament\Resources\ShopResource\Pages\ListShops;
 use App\Filament\Resources\ShopResource\Pages\ViewShop;
+use App\Filament\Support\LocationFields;
 use App\Filament\Support\PlaceFormFields;
 use App\Filament\Support\WebsiteLinkActions;
 use App\Models\City;
 use App\Models\Country;
-use App\Models\Region;
 use App\Models\Shop;
 use App\Models\ShopService;
 use Filament\Actions\ActionGroup;
@@ -38,7 +38,6 @@ use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 
@@ -66,17 +65,6 @@ class ShopResource extends Resource
     public static function getNavigationLabel(): string
     {
         return __('admin_shop.navigation.plural');
-    }
-
-    public static function getNavigationBadge(): ?string
-    {
-        return static::$model::count();
-    }
-
-    /** `ar_name` in the Arabic admin, else `en_name` (countries, regions, cities, categories, shops). */
-    private static function nameColumn(): string
-    {
-        return app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
     }
 
     public static function form(Schema $schema): Schema
@@ -128,34 +116,7 @@ class ShopResource extends Resource
                             ->columns(2),
                         Tab::make(__('admin_shop.tabs.location'))
                             ->schema([
-                                Select::make('country_id')
-                                    ->label(__('admin_shop.fields.country'))
-                                    ->options(fn () => Country::query()->orderBy(static::nameColumn())->pluck(static::nameColumn(), 'id'))
-                                    ->searchable()
-                                    ->live()
-                                    ->afterStateUpdated(function (Set $set): void {
-                                        $set('region_id', null);
-                                        $set('city_id', null);
-                                    })
-                                    ->required(),
-                                Select::make('region_id')
-                                    ->label(__('admin_shop.fields.region'))
-                                    ->options(fn (Get $get): Collection => Region::query()
-                                        ->where('country_id', $get('country_id'))
-                                        ->orderBy(static::nameColumn())
-                                        ->pluck(static::nameColumn(), 'id'))
-                                    ->searchable()
-                                    ->live()
-                                    ->afterStateUpdated(fn (Set $set) => $set('city_id', null))
-                                    ->required(),
-                                Select::make('city_id')
-                                    ->label(__('admin_shop.fields.city'))
-                                    ->options(fn (Get $get): Collection => City::query()
-                                        ->where('region_id', $get('region_id'))
-                                        ->orderBy(static::nameColumn())
-                                        ->pluck(static::nameColumn(), 'id'))
-                                    ->searchable()
-                                    ->required(),
+                                ...LocationFields::make(fn (string $field) => __("admin_shop.fields.{$field}")),
                                 TextInput::make('en_address')
                                     ->label(__('admin_shop.fields.en_address'))
                                     ->maxLength(255)
@@ -203,7 +164,7 @@ class ShopResource extends Resource
                                     ->label(__('admin_shop.fields.services'))
                                     ->relationship(
                                         name: 'services',
-                                        titleAttribute: static::nameColumn(),
+                                        titleAttribute: LocationFields::nameColumn(),
                                         modifyQueryUsing: fn (Builder $query, Get $get) => $query->forType($get('type')),
                                     )
                                     ->getOptionLabelFromRecordUsing(fn (ShopService $record) => $record->name)
@@ -250,7 +211,7 @@ class ShopResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $name = static::nameColumn();
+        $name = LocationFields::nameColumn();
 
         return $table
             // The city/services columns are eager loaded by Filament; the country under the city is not.

@@ -33,11 +33,6 @@ class ClinicServiceResource extends Resource
         return __('admin_clinic_service.navigation.plural');
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        return static::$model::count();
-    }
-
     public static function form(Schema $schema): Schema
     {
         return DirectoryPlaceSchema::serviceForm($schema, ClinicService::class, 'clinics', 'both');

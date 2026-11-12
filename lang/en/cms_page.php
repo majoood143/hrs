@@ -32,6 +32,7 @@ return [
         'is_homepage_helper' => 'Only one page can be the homepage. Setting this will unset any other homepage.',
         'is_system' => 'System Page',
         'is_system_helper' => 'This page controls the SEO metadata for a built-in site section. Its content blocks are not shown on the site, and it cannot be deleted or moved to a different URL.',
+        'slug_taken_by_section' => 'This address belongs to a section of the site (stables, events, racing…). Choose another, or use exactly the section\'s name to give it its SEO texts.',
         'slug_system_helper' => 'This slug is locked because a dedicated route serves this section. Changing it would disconnect this page from that route\'s SEO.',
         'content_system_helper' => 'Content blocks added here are not displayed — this section is rendered by its own template. Use the SEO tab to control its meta title, description, and social preview.',
         'container_width' => 'Container Width',

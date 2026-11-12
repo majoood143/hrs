@@ -58,11 +58,6 @@ class UserResource extends Resource
         return __('admin_user.navigation.plural');
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        return static::$model::count();
-    }
-
     /** @return array<string, string> */
     public static function typeOptions(): array
     {
@@ -295,7 +290,8 @@ class UserResource extends Resource
             ->checkIfRecordIsSelectableUsing(fn (User $record) => ! $record->is(auth()->user()))
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    // per row, so a super admin among the selected is left alone (UserPolicy)
+                    DeleteBulkAction::make()->authorizeIndividualRecords('delete'),
                     ExportBulkAction::make(),
                 ]),
             ]);

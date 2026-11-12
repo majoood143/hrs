@@ -199,7 +199,6 @@ class PushCampaignResource extends Resource
                     DateTimePicker::make('scheduled_at')
                         ->label(__('admin_mobile_app.campaigns.fields.scheduled_at'))
                         ->helperText(__('admin_mobile_app.campaigns.fields.scheduled_at_help', ['zone' => self::timezone()]))
-                        ->timezone(self::timezone())
                         ->native(false)
                         ->seconds(false)
                         ->minDate(fn (?PushCampaign $record) => $record?->scheduled_at?->isPast() ? null : now()->startOfMinute()),
@@ -247,7 +246,7 @@ class PushCampaignResource extends Resource
                 TextColumn::make('when')
                     ->label(__('admin_mobile_app.campaigns.fields.scheduled_at'))
                     ->state(fn (PushCampaign $record) => $record->sent_at ?? $record->scheduled_at)
-                    ->dateTime(timezone: self::timezone())
+                    ->dateTime()
                     ->placeholder('—'),
                 TextColumn::make('recipients')
                     ->label(__('admin_mobile_app.campaigns.fields.recipients'))
@@ -289,6 +288,7 @@ class PushCampaignResource extends Resource
                     Action::make('send_test')
                         ->label(__('admin_mobile_app.campaigns.send_test'))
                         ->icon('heroicon-o-beaker')
+                        ->visible(fn (PushCampaign $record) => auth()->user()?->can('update', $record) ?? false)
                         ->schema([
                             TextInput::make('test_phone')
                                 ->label(__('admin_mobile_app.campaigns.fields.test_phone'))

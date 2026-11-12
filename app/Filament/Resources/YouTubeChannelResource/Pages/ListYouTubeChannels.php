@@ -24,7 +24,7 @@ class ListYouTubeChannels extends ListRecords
                 ->label(__('admin_youtube.actions.check_all'))
                 ->icon('heroicon-o-arrow-path')
                 ->color('gray')
-                ->visible(fn () => YouTubeChannel::query()->active()->exists())
+                ->visible(fn () => YouTubeChannelResource::canCreate() && YouTubeChannel::query()->active()->exists())
                 ->action(function (ChannelWatcher $watcher) {
                     $found = YouTubeChannel::query()->active()->get()
                         ->sum(fn (YouTubeChannel $channel) => $watcher->check($channel)['found']);

@@ -64,7 +64,10 @@ class CmsMenuItemsRelationManager extends RelationManager
 
                 TextInput::make('url')
                     ->label(__('cms_menu_item.fields.url'))
-                    ->url()
+                    ->helperText(__('cms_menu_item.fields.url_helper'))
+                    // a page of this site ("/blog") or a full http(s) link: menus hold both
+                    ->regex('#^(/(?!/)|https?://)\S*$#i')
+                    ->validationMessages(['regex' => __('cms_menu_item.fields.url_invalid')])
                     ->maxLength(255)
                     ->visible(fn ($get) => blank($get('page_id')) && blank($get('route_name'))),
 

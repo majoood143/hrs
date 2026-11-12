@@ -95,7 +95,7 @@ class ViewServiceOrder extends ViewRecord
                 ->requiresConfirmation()
                 ->modalHeading(__('admin_service_order.actions.complete'))
                 ->modalDescription(__('admin_service_order.actions.complete_desc'))
-                ->visible(fn (ServiceOrder $record): bool => app(OrderWorkflow::class)->canComplete($record))
+                ->visible(fn (ServiceOrder $record): bool => OrderActions::mayUpdate($record) && app(OrderWorkflow::class)->canComplete($record))
                 ->action(function (ServiceOrder $record): void {
                     $done = app(OrderWorkflow::class)->complete($record, auth()->id());
                     $this->record->refresh();
@@ -112,7 +112,7 @@ class ViewServiceOrder extends ViewRecord
                     ->color('gray')
                     ->modalHeading(__('admin_service_order.actions.upload_document'))
                     ->modalDescription(__('admin_service_order.actions.upload_document_desc'))
-                    ->visible(fn (ServiceOrder $record): bool => ($record->isPaid() || $record->isFree()) && $record->status !== OrderStatus::Rejected)
+                    ->visible(fn (ServiceOrder $record): bool => OrderActions::mayUpdate($record) && ($record->isPaid() || $record->isFree()) && $record->status !== OrderStatus::Rejected)
                     ->schema(fn (ServiceOrder $record): array => [
                         TextInput::make('title')->label(__('admin_service_order.actions.document_title'))->required()->maxLength(150),
                         FileUpload::make('file')
@@ -138,7 +138,7 @@ class ViewServiceOrder extends ViewRecord
                     ->color('gray')
                     ->modalHeading(__('admin_service_order.actions.replace_document'))
                     ->modalDescription(__('admin_service_order.actions.replace_document_desc'))
-                    ->visible(fn (ServiceOrder $record): bool => $record->documents()->exists() && $record->status !== OrderStatus::Rejected)
+                    ->visible(fn (ServiceOrder $record): bool => OrderActions::mayUpdate($record) && $record->documents()->exists() && $record->status !== OrderStatus::Rejected)
                     ->schema(fn (ServiceOrder $record): array => [
                         Select::make('document_id')
                             ->label(__('admin_service_order.actions.document'))
@@ -178,7 +178,7 @@ class ViewServiceOrder extends ViewRecord
                     ->requiresConfirmation()
                     ->modalHeading(__('admin_service_order.actions.delete_document'))
                     ->modalDescription(fn (ServiceOrder $record): string => __($record->status === OrderStatus::Completed ? 'admin_service_order.actions.delete_document_desc_completed' : 'admin_service_order.actions.delete_document_desc'))
-                    ->visible(fn (ServiceOrder $record): bool => $record->documents()->exists())
+                    ->visible(fn (ServiceOrder $record): bool => OrderActions::mayUpdate($record) && $record->documents()->exists())
                     ->schema(fn (ServiceOrder $record): array => [
                         Select::make('document_id')
                             ->label(__('admin_service_order.actions.document'))

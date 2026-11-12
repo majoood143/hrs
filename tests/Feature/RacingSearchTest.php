@@ -151,6 +151,24 @@ class RacingSearchTest extends TestCase
         $this->get('/racing/search?q=al+qous&type=1')->assertOk()->assertSee('temporarily unavailable');
     }
 
+    public function test_after_an_outage_the_source_is_left_alone_for_a_minute(): void
+    {
+        Http::fake(['*' => Http::response('boom', 503)]);
+
+        foreach ([1, 2] as $visitor) {
+            try {
+                app(RacingClient::class)->search('al qous', RacingSearchType::Horse, 'en');
+                $this->fail('expected the outage');
+            } catch (RacingUnavailableException) {
+            }
+        }
+        Http::assertSentCount(1);
+
+        $this->travel(61)->seconds();
+        $this->get('/racing/search?q=al+qous&type=1')->assertOk()->assertSee('temporarily unavailable');
+        Http::assertSentCount(2);
+    }
+
     public function test_the_sources_error_page_is_retried(): void
     {
         Http::fakeSequence()
@@ -243,6 +261,9 @@ class RacingSearchTest extends TestCase
         $this->get('/racing/image?p='.urlencode('/img/OwnerColours/basil masoud kasbi.jpg'))
             ->assertOk()
             ->assertHeader('Content-Type', 'image/jpeg');
+
+        // some owners' file names have an apostrophe
+        $this->get('/racing/image?p='.urlencode("/img/OwnerColours/haza'a abdullah balushi.jpg"))->assertOk();
 
         foreach (['/pages/Horse_GenWin.cfm', '/img/../web.config', '//evil.test/img/a.jpg', '', '/img/x.php'] as $bad) {
             $this->get('/racing/image?p='.urlencode($bad))->assertNotFound();

@@ -6,10 +6,10 @@ use App\Filament\Resources\ServiceResource\Pages\CreateService;
 use App\Filament\Resources\ServiceResource\Pages\EditService;
 use App\Filament\Resources\ServiceResource\Pages\ListServices;
 use App\Filament\Resources\ServiceResource\Pages\ViewService;
+use App\Filament\Support\InUseDeleteActions;
 use App\Models\Service;
 use App\Models\SiteSetting;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\RichEditor;
@@ -45,11 +45,6 @@ class ServiceResource extends Resource
         return __('admin_service.navigation.plural');
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        return static::$model::count();
-    }
-
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -78,7 +73,8 @@ class ServiceResource extends Resource
                     ->step(0.001)
                     ->prefix(fn () => SiteSetting::currencyHtml()),
                 Toggle::make('is_active')
-                    ->required(),
+                    ->label(__('admin_service.fields.is_active'))
+                    ->default(true),
             ]);
     }
 
@@ -104,16 +100,19 @@ class ServiceResource extends Resource
                     ])
                     ->sortable(),
                 IconColumn::make('is_active')
+                    ->label(__('admin_service.fields.is_active'))
                     ->boolean()
                     ->summarize([
                         Average::make(),
                         Range::make(),
                     ]),
                 TextColumn::make('created_at')
+                    ->label(__('admin_service.fields.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
+                    ->label(__('admin_service.fields.updated_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -127,7 +126,7 @@ class ServiceResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    InUseDeleteActions::bulk('admin_service'),
                     ExportBulkAction::make(),
                 ]),
             ]);

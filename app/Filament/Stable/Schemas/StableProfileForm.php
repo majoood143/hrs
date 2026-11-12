@@ -2,6 +2,7 @@
 
 namespace App\Filament\Stable\Schemas;
 
+use App\Filament\Support\LocationFields;
 use App\Filament\Support\PlaceFormFields;
 use App\Models\City;
 use App\Models\Country;
@@ -23,11 +24,6 @@ use Filament\Schemas\Components\Utilities\Set;
  */
 final class StableProfileForm
 {
-    private static function nameColumn(): string
-    {
-        return app()->getLocale() === 'ar' ? 'ar_name' : 'en_name';
-    }
-
     /** @return array<int, mixed> */
     public static function names(): array
     {
@@ -70,7 +66,7 @@ final class StableProfileForm
             Select::make('country_id')
                 ->label(__('stable_panel.fields.country'))
                 ->placeholder(__('stable_panel.placeholders.country'))
-                ->options(fn () => Country::query()->public()->orderBy(self::nameColumn())->pluck(self::nameColumn(), 'id'))
+                ->options(fn () => Country::query()->public()->orderBy(LocationFields::nameColumn())->pluck(LocationFields::nameColumn(), 'id'))
                 ->default(fn () => Country::query()->public()->where('en_name', 'Oman')->value('id'))
                 ->searchable()
                 ->live()
@@ -82,7 +78,7 @@ final class StableProfileForm
             Select::make('region_id')
                 ->label(__('stable_panel.fields.region'))
                 ->placeholder(__('stable_panel.placeholders.region'))
-                ->options(fn (Get $get) => Region::query()->where('country_id', $get('country_id'))->orderBy(self::nameColumn())->pluck(self::nameColumn(), 'id'))
+                ->options(fn (Get $get) => Region::query()->where('country_id', $get('country_id'))->orderBy(LocationFields::nameColumn())->pluck(LocationFields::nameColumn(), 'id'))
                 ->searchable()
                 ->live()
                 ->afterStateUpdated(fn (Set $set) => $set('city_id', null))
@@ -90,7 +86,7 @@ final class StableProfileForm
             Select::make('city_id')
                 ->label(__('stable_panel.fields.city'))
                 ->placeholder(__('stable_panel.placeholders.city'))
-                ->options(fn (Get $get) => City::query()->where('region_id', $get('region_id'))->orderBy(self::nameColumn())->pluck(self::nameColumn(), 'id'))
+                ->options(fn (Get $get) => City::query()->where('region_id', $get('region_id'))->orderBy(LocationFields::nameColumn())->pluck(LocationFields::nameColumn(), 'id'))
                 ->searchable()
                 ->required(),
             TextInput::make('address')
@@ -124,7 +120,7 @@ final class StableProfileForm
             Select::make('services')
                 ->label(__('stable_panel.fields.amenities'))
                 ->placeholder(__('stable_panel.placeholders.amenities'))
-                ->relationship('services', self::nameColumn())
+                ->relationship('services', LocationFields::nameColumn())
                 ->getOptionLabelFromRecordUsing(fn (StableService $record) => $record->name)
                 ->multiple()
                 ->preload()

@@ -10,6 +10,28 @@ use Spatie\Translatable\HasTranslations;
 
 class CmsPage extends Model implements HasMedia
 {
+    /**
+     * The site's own sections: `/{slug}` (routes/web.php) never serves a slug that starts with one
+     * of these, so a page there only gives that section its SEO texts (Seo::forSlug), when it is
+     * exactly the section's name. Keep the route and CmsPageResource on this list.
+     */
+    public const SECTIONS = ['transfer-board', 'horses-for-sale', 'stables', 'clinics', 'centers', 'shops', 'farriers', 'jockeys', 'tools-for-sale', 'events', 'video-library', 'racing'];
+
+    /** Never a page, not even for SEO. */
+    public const RESERVED = ['admin', 'transportation', 'blog'];
+
+    /** Whether a page may take this slug: one `/{slug}` serves, or exactly a section's name (its SEO texts). */
+    public static function slugIsAllowed(string $slug): bool
+    {
+        foreach ([...self::RESERVED, ...self::SECTIONS] as $prefix) {
+            if (str_starts_with($slug, $prefix)) {
+                return in_array($slug, self::SECTIONS, true);
+            }
+        }
+
+        return true;
+    }
+
     use HasTranslations;
     use InteractsWithMedia;
 

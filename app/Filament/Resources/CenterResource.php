@@ -38,11 +38,6 @@ class CenterResource extends Resource
         return __('admin_center.navigation.plural');
     }
 
-    public static function getNavigationBadge(): ?string
-    {
-        return (string) static::$model::count();
-    }
-
     public static function form(Schema $schema): Schema
     {
         return DirectoryPlaceSchema::form($schema, Center::class, 'centers', 'training');

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Settings;
 
+use App\Filament\Support\SecretInput;
 use App\Models\SiteSetting;
 use App\Services\Auth\CustomerOtpService;
 use App\Services\Sms\SmsManager;
@@ -56,7 +57,7 @@ class SmsSettings extends Page implements HasForms
             'driver' => SiteSetting::get('sms.driver', ''),
             'tamimah' => [
                 'username' => SiteSetting::get('sms.tamimah.username', ''),
-                'password' => SecretSetting::get('sms.tamimah.password'),
+                'password' => '',
                 'sender' => SiteSetting::get('sms.tamimah.sender', ''),
                 'app_id' => SiteSetting::get('sms.tamimah.app_id', ''),
                 'priority' => SiteSetting::get('sms.tamimah.priority', 0),
@@ -108,12 +109,8 @@ class SmsSettings extends Page implements HasForms
                             ->required($isTamimah)
                             ->maxLength(255),
 
-                        TextInput::make('tamimah.password')
-                            ->label(__('admin_sms_settings.fields.password'))
-                            ->password()
-                            ->revealable()
-                            ->required($isTamimah)
-                            ->maxLength(255),
+                        SecretInput::make('tamimah.password', 'sms.tamimah.password', $isTamimah)
+                            ->label(__('admin_sms_settings.fields.password')),
 
                         TextInput::make('tamimah.sender')
                             ->label(__('admin_sms_settings.fields.sender'))
@@ -158,7 +155,7 @@ class SmsSettings extends Page implements HasForms
         // the section is hidden (and its state dropped) under another driver: keep what was saved then
         if (($state['driver'] ?? null) === SmsManager::TAMIMAH) {
             SiteSetting::set('sms.tamimah.username', $tamimah['username'] ?? '', 'text', null, 'sms');
-            SecretSetting::set('sms.tamimah.password', $tamimah['password'] ?? '', 'sms');
+            SecretSetting::setUnlessBlank('sms.tamimah.password', $tamimah['password'] ?? '', 'sms');
             SiteSetting::set('sms.tamimah.sender', $tamimah['sender'] ?? '', 'text', null, 'sms');
             SiteSetting::set('sms.tamimah.app_id', $tamimah['app_id'] ?? '', 'text', null, 'sms');
             SiteSetting::set('sms.tamimah.priority', (int) ($tamimah['priority'] ?? 0), 'number', null, 'sms');
