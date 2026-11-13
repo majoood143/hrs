@@ -12,6 +12,7 @@ use App\Models\MobileAnnouncement;
 use App\Models\SiteSetting;
 use App\Support\MobileApp\AppClient;
 use App\Support\MobileApp\AppLinks;
+use App\Support\MobileApp\MobileAds;
 use App\Support\MobileApp\MobileAutoPush;
 use App\Support\MobileApp\MobileFeatures;
 use App\Support\MobileApp\MobileMaintenance;
@@ -51,6 +52,7 @@ class MobileAppAdminTest extends TestCase
             '2025_10_03_170350_add_batch_uuid_column_to_activity_log_table',
             '2026_10_13_120000_create_mobile_announcements_table',
             '2026_11_01_000002_create_content_reports_table',
+            '2026_09_15_100000_create_ad_zones_table',
         ] as $migration) {
             (require database_path("migrations/{$migration}.php"))->up();
         }
@@ -147,6 +149,21 @@ class MobileAppAdminTest extends TestCase
 
         $log = DB::table('activity_log')->where('log_name', 'mobile_app')->sole();
         $this->assertTrue(json_decode($log->properties, true)['attributes']['posting']['review']);
+    }
+
+    public function test_the_ad_zones_tab_picks_a_zone_per_placement_from_the_active_ones(): void
+    {
+        $zone = DB::table('ad_zones')->insertGetId(['name' => json_encode(['en' => 'App banner', 'ar' => 'بانر التطبيق']), 'slug' => 'app']);
+        DB::table('ad_zones')->insert(['name' => json_encode(['en' => 'Old', 'ar' => 'قديمة']), 'slug' => 'old', 'is_active' => false]);
+
+        Livewire::test(MobileAppSettings::class)
+            ->assertFormSet(['ads.home' => null, 'ads.horses' => null])
+            ->assertFormFieldExists('ads.transfers', fn ($field) => $field->getOptions() === [$zone => 'App banner'])
+            ->fillForm(['ads.horses' => $zone])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(['home' => null, 'horses' => $zone, 'tools' => null, 'transfers' => null], MobileAds::settings());
     }
 
     public function test_reports_list_the_open_ones_and_can_be_marked_resolved(): void

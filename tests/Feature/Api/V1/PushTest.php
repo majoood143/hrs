@@ -37,6 +37,7 @@ class PushTest extends TestCase
             '2026_09_11_145142_create_personal_access_tokens_table',
             '2026_11_04_000002_create_push_campaigns_tables',
             '2026_11_07_000002_add_source_to_push_campaigns',
+            '2026_11_12_000001_add_controls_to_push_campaigns',
         ] as $migration) {
             (require database_path("migrations/{$migration}.php"))->up();
         }

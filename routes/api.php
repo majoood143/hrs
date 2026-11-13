@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AccountBookingController;
 use App\Http\Controllers\Api\V1\AccountController;
 use App\Http\Controllers\Api\V1\AccountPackageController;
+use App\Http\Controllers\Api\V1\AdController;
 use App\Http\Controllers\Api\V1\AppConfigController;
 use App\Http\Controllers\Api\V1\AppStatusController;
 use App\Http\Controllers\Api\V1\BlogController;
@@ -46,6 +47,7 @@ Route::prefix('v1')
         Route::get('app-status', AppStatusController::class)->name('app-status');
         Route::get('lookups', LookupController::class)->name('lookups');
         Route::get('home', HomeController::class)->name('home');
+        Route::get('ads/{placement}', AdController::class)->whereIn('placement', ['horses', 'tools', 'transfers'])->name('ads');
 
         Route::get('horses-for-sale', [HorseForSaleController::class, 'index'])->name('horses-for-sale.index');
         Route::get('horses-for-sale/{id}', [HorseForSaleController::class, 'show'])->whereNumber('id')->name('horses-for-sale.show');

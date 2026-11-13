@@ -24,6 +24,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use LaBoiteACode\FilamentDashboardWidgets\FilamentDashboardWidgetsPlugin;
 use MarcoGermani87\FilamentCaptcha\FilamentCaptcha;
 use Packstub\FormBuilder\FormBuilderPlugin;
 use Rmsramos\Activitylog\ActivitylogPlugin;
@@ -98,6 +99,7 @@ class AdminPanelProvider extends PanelProvider
                     ->authorize(fn (): bool => (bool) auth()->user()?->can('View:Backups')),
                 ActivitylogPlugin::make(),
                 FilamentCaptcha::make(),
+                FilamentDashboardWidgetsPlugin::make(),
                 FilamentFileExplorerPlugin::make(),
                 FormBuilderPlugin::make()->navigationGroup(__('cms.navigation.group')),
                 // WhatsApp through Evolution API: instances (QR connect), sent messages, webhook log.

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\PhoneNumber;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -35,6 +36,16 @@ class MobileDevice extends Model
     public function scopeCustomerSignedIn(Builder $query, ?int $customerId): Builder
     {
         return $query->where('customer_id', $customerId)->whereNotNull('customer_token_id');
+    }
+
+    /** The phones a customer or stable owner is signed in on with one of these numbers (typed any way: PhoneNumber). */
+    public function scopeSignedInWithPhones(Builder $query, array $phones): Builder
+    {
+        $numbers = collect($phones)->flatMap(fn ($p) => [PhoneNumber::normalize((string) $p), PhoneNumber::toAscii((string) $p)])->filter()->unique()->values()->all();
+
+        return $query->where(fn (Builder $q) => $q
+            ->where(fn (Builder $c) => $c->whereNotNull('customer_token_id')->whereIn('customer_id', Customer::query()->whereIn('phone', $numbers)->select('id')))
+            ->orWhere(fn (Builder $o) => $o->whereNotNull('owner_token_id')->whereIn('user_id', User::query()->whereIn('phone', $numbers)->select('id'))));
     }
 
     public function deliveries(): HasMany

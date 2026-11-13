@@ -2,9 +2,11 @@
 
 namespace App\Filament\Pages\MobileApp;
 
+use App\Models\AdZone;
 use App\Support\MobileApp\AppClient;
 use App\Support\MobileApp\AppLinks;
 use App\Support\MobileApp\AppVersion;
+use App\Support\MobileApp\MobileAds;
 use App\Support\MobileApp\MobileAutoPush;
 use App\Support\MobileApp\MobileFeatures;
 use App\Support\MobileApp\MobileImages;
@@ -32,7 +34,7 @@ use Filament\Schemas\Schema;
 
 /**
  * What the Muhra app shows: feature switches, the versions that must / may update, maintenance, and
- * how posting from the app is moderated, the photos of the Services screen, and the keys that let website links open the app.
+ * how posting from the app is moderated, the photos of the Services screen, the ad zones shown in the app, and the keys that let website links open the app.
  * Read by the app from GET /api/v1/app-status. Every save is written to the activity log
  * (log name `mobile_app`) with the values before and after.
  */
@@ -71,7 +73,7 @@ class MobileAppSettings extends Page implements HasForms
         $this->form->fill(self::currentState());
     }
 
-    /** @return array{features: array<string, mixed>, updates: array<string, mixed>, maintenance: array<string, mixed>, posting: array<string, mixed>, auto_push: array<string, mixed>, images: array<string, string|null>, links: array<string, mixed>} */
+    /** @return array{features: array<string, mixed>, updates: array<string, mixed>, maintenance: array<string, mixed>, posting: array<string, mixed>, auto_push: array<string, mixed>, images: array<string, string|null>, ads: array<string, int|null>, links: array<string, mixed>} */
     private static function currentState(): array
     {
         return [
@@ -81,6 +83,7 @@ class MobileAppSettings extends Page implements HasForms
             'posting' => MobilePosting::settings(),
             'auto_push' => MobileAutoPush::settings(),
             'images' => MobileImages::settings(),
+            'ads' => MobileAds::settings(),
             'links' => ['android_fingerprints' => implode("\n", AppLinks::settings()['android_fingerprints'])] + AppLinks::settings(),
         ];
     }
@@ -109,6 +112,9 @@ class MobileAppSettings extends Page implements HasForms
                     Tab::make(__('admin_mobile_app.tabs.images'))
                         ->icon('heroicon-o-photo')
                         ->schema($this->imageSections()),
+                    Tab::make(__('admin_mobile_app.tabs.ads'))
+                        ->icon('heroicon-o-megaphone')
+                        ->schema($this->adSections()),
                     Tab::make(__('admin_mobile_app.tabs.links'))
                         ->icon('heroicon-o-link')
                         ->schema($this->linkSections()),
@@ -323,6 +329,23 @@ class MobileAppSettings extends Page implements HasForms
         ];
     }
 
+    /** @return list<Section> */
+    private function adSections(): array
+    {
+        return [
+            Section::make(__('admin_mobile_app.tabs.ads'))
+                ->description(__('admin_mobile_app.ads.help'))
+                ->columns(['default' => 1, 'md' => 2])
+                ->schema(array_map(fn (string $key) => Select::make("ads.{$key}")
+                    ->label(__('admin_mobile_app.ads.'.$key))
+                    ->helperText(__('admin_mobile_app.ads.'.$key.'_help'))
+                    ->placeholder(__('admin_mobile_app.ads.none'))
+                    ->options(fn () => AdZone::query()->active()->orderBy('order')->get()
+                        ->mapWithKeys(fn (AdZone $zone) => [$zone->id => $zone->name]))
+                    ->native(false), MobileAds::PLACEMENTS)),
+        ];
+    }
+
     /** @return list<Section|Text> */
     private function linkSections(): array
     {
@@ -378,6 +401,7 @@ class MobileAppSettings extends Page implements HasForms
         MobilePosting::save((array) ($state['posting'] ?? []));
         MobileAutoPush::save((array) ($state['auto_push'] ?? []));
         MobileImages::save((array) ($state['images'] ?? []));
+        MobileAds::save((array) ($state['ads'] ?? []));
         AppLinks::save((array) ($state['links'] ?? []));
 
         $after = self::currentState();

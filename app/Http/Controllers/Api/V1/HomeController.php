@@ -17,6 +17,7 @@ use App\Models\HorseSalePost;
 use App\Models\ToolSalePost;
 use App\Models\TransferPost;
 use App\Support\MobileApp\AppClient;
+use App\Support\MobileApp\MobileAds;
 use App\Support\MobileApp\MobileFeatures;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -65,13 +66,17 @@ class HomeController extends Controller
     }
 
     /**
-     * The promos of the website's homepage: its first "ads area" block's zone and count. No such
-     * block, no promos (the app shows ads where the site does).
+     * The zone picked for Home in admin → Mobile app → Ad zones; else the promos of the website's
+     * homepage: its first "ads area" block's zone and count. Neither, no promos.
      *
      * @return Collection<int, Ad>
      */
     private function ads(): Collection
     {
+        if (($zone = MobileAds::zoneFor('home')) !== null) {
+            return MobileAds::ads($zone);
+        }
+
         $page = CmsPage::query()->where('is_homepage', true)->published()->first()
             ?? CmsPage::query()->where('is_homepage', true)->first();
 

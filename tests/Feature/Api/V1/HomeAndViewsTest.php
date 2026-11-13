@@ -70,6 +70,41 @@ class HomeAndViewsTest extends TestCase
         $this->getJson('/api/v1/home')->assertOk()->assertJsonPath('data.ads', []);
     }
 
+    public function test_the_zone_picked_for_home_in_the_admin_replaces_the_homepage_block(): void
+    {
+        $site = $this->row('ad_zones', ['name' => $this->both('Site', 'الموقع'), 'slug' => 'site']);
+        $app = $this->row('ad_zones', ['name' => $this->both('App', 'التطبيق'), 'slug' => 'app']);
+        $this->row('cms_pages', ['slug' => 'home', 'is_homepage' => true, 'content' => json_encode([['type' => 'ads_area', 'data' => ['zone_id' => $site]]])]);
+        $this->row('ads', ['zone_id' => $site, 'image_path' => 'ads/site.jpg']);
+        $ad = $this->row('ads', ['zone_id' => $app, 'image_path' => 'ads/app.jpg']);
+        $this->seedApiSettings(['mobile.ads' => json_encode(['home' => $app])]);
+
+        $this->getJson('/api/v1/home')->assertOk()->assertJsonCount(1, 'data.ads')->assertJsonPath('data.ads.0.id', $ad);
+    }
+
+    public function test_a_board_shows_the_running_ads_of_its_zone(): void
+    {
+        $zone = $this->row('ad_zones', ['name' => $this->both('Horses', 'الخيول'), 'slug' => 'horses']);
+        $off = $this->row('ad_zones', ['name' => $this->both('Off', 'متوقفة'), 'slug' => 'off', 'is_active' => false]);
+        $second = $this->row('ads', ['zone_id' => $zone, 'image_path' => 'ads/two.jpg', 'order' => 2]);
+        $first = $this->row('ads', ['zone_id' => $zone, 'image_path' => 'ads/one.jpg', 'target_url' => 'https://sponsor.example', 'order' => 1]);
+        $this->row('ads', ['zone_id' => $zone, 'image_path' => 'ads/later.jpg', 'starts_at' => now()->addDay()]);
+        $this->row('ads', ['zone_id' => $zone, 'image_path' => 'ads/paused.jpg', 'is_active' => false]);
+        $this->row('ads', ['zone_id' => $zone]);
+        $this->row('ads', ['zone_id' => $off, 'image_path' => 'ads/off.jpg']);
+        $this->seedApiSettings(['mobile.ads' => json_encode(['horses' => $zone, 'tools' => $off])]);
+
+        $this->getJson('/api/v1/ads/horses')->assertOk()
+            ->assertJsonPath('data.*.id', [$first, $second])
+            ->assertJsonPath('data.0.click_url', route('promo.click', $first));
+        $this->getJson('/api/v1/ads/tools')->assertOk()->assertJsonPath('data', []);
+        $this->getJson('/api/v1/ads/transfers')->assertOk()->assertJsonPath('data', []);
+        $this->getJson('/api/v1/ads/home')->assertNotFound();
+
+        $this->seedApiSettings(['mobile.ads' => json_encode(['horses' => $zone]), 'mobile.features' => json_encode(['promos' => ['enabled' => false]])]);
+        $this->getJson('/api/v1/ads/horses')->assertOk()->assertJsonPath('data', []);
+    }
+
     public function test_home_leaves_out_the_sections_switched_off_for_this_app(): void
     {
         $this->row('transfer_posts', ['type' => 'offer', 'transfer_date' => now()->addDay()->toDateString(), 'from_city_id' => $this->ids['seeb'], 'to_city_id' => $this->ids['bawshar'], 'status' => 'active']);

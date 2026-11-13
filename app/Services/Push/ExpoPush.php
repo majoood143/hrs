@@ -21,9 +21,10 @@ class ExpoPush
      * @param  Collection<int, MobileDevice>  $devices
      * @param  callable(): array{title: string, body: string}  $message  called in each phone's language
      * @param  array<string, mixed>  $data  given to the app on a tap (e.g. the screen to open)
+     * @param  array<string, mixed>  $options  Expo's message fields that override the defaults (priority, ttl, sound: null = silent, channelId)
      * @return list<int> the ids of the phones Expo accepted it for
      */
-    public function send(Collection $devices, callable $message, array $data = [], string $channel = 'default'): array
+    public function send(Collection $devices, callable $message, array $data = [], string $channel = 'default', array $options = []): array
     {
         $accepted = [];
 
@@ -33,6 +34,7 @@ class ExpoPush
             $messages = $chunk->map(fn (MobileDevice $device) => Locale::within($device->locale, $message) + [
                 'to' => $device->expo_token,
                 'data' => $data,
+            ] + $options + [
                 'sound' => 'default',
                 'channelId' => $channel,
             ])->all();

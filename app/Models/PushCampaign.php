@@ -6,10 +6,12 @@ use App\Support\MobileApp\AppClient;
 use App\Support\MobileApp\MobileAutoPush;
 use App\Support\MobileApp\MobileFeatures;
 use App\Support\MobileApp\MobileScreens;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -23,7 +25,15 @@ class PushCampaign extends Model
 {
     use LogsActivity;
 
-    public const AUDIENCES = ['everyone', 'customers', 'owners', 'guests'];
+    public const AUDIENCES = ['everyone', 'customers', 'owners', 'guests', 'phones', 'stable_customers', 'stable_owners'];
+
+    /** The Android channels the app makes (src/features/push/push.tsx): bookings = high importance. */
+    public const CHANNELS = ['default', 'bookings'];
+
+    /** Quiet hours in Oman: a campaign that would go out from QUIET_FROM:00 waits until QUIET_UNTIL:00. */
+    public const QUIET_FROM = 22;
+
+    public const QUIET_UNTIL = 7;
 
     public const STATUSES = ['draft', 'scheduled', 'sending', 'sent'];
 
@@ -33,7 +43,8 @@ class PushCampaign extends Model
     protected $fillable = [
         'source', 'source_id', 'en_title', 'ar_title', 'en_body', 'ar_body', 'image_path',
         'action_type', 'action_screen', 'action_url',
-        'audience', 'topic', 'platforms', 'locales', 'min_version', 'max_version', 'active_days',
+        'audience', 'target_phones', 'target_stables', 'topic', 'platforms', 'locales', 'min_version', 'max_version', 'active_days',
+        'priority', 'ttl_hours', 'sound', 'channel', 'quiet_hours', 'ignore_cap', 'spread_minutes',
         'status', 'scheduled_at', 'sent_at', 'recipients', 'accepted', 'opened', 'created_by',
     ];
 
@@ -41,6 +52,15 @@ class PushCampaign extends Model
         'platforms' => 'array',
         'locales' => 'array',
         'active_days' => 'integer',
+        'target_phones' => 'array',
+        'target_stables' => 'array',
+        'ttl_hours' => 'integer',
+        'sound' => 'boolean',
+        'quiet_hours' => 'boolean',
+        'ignore_cap' => 'boolean',
+        'spread_minutes' => 'integer',
+        'pending_devices' => 'array',
+        'next_batch_at' => 'datetime',
         'scheduled_at' => 'datetime',
         'sent_at' => 'datetime',
         'recipients' => 'integer',
@@ -62,7 +82,8 @@ class PushCampaign extends Model
     {
         return LogOptions::defaults()
             ->logOnly(['en_title', 'ar_title', 'action_type', 'action_screen', 'action_url', 'audience', 'topic',
-                'platforms', 'locales', 'min_version', 'max_version', 'active_days', 'status', 'scheduled_at'])
+                'platforms', 'locales', 'min_version', 'max_version', 'active_days', 'status', 'scheduled_at',
+                'target_phones', 'target_stables', 'priority', 'ttl_hours', 'sound', 'channel', 'quiet_hours', 'ignore_cap', 'spread_minutes'])
             ->logOnlyDirty()
             ->useLogName('mobile_app');
     }
@@ -74,7 +95,10 @@ class PushCampaign extends Model
 
     public function scopeDue(Builder $query): Builder
     {
-        return $query->where('status', 'scheduled')->where('scheduled_at', '<=', now());
+        // scheduled ones whose time came, and the next batch of one spread over some minutes
+        return $query->where(fn (Builder $q) => $q
+            ->where(fn (Builder $s) => $s->where('status', 'scheduled')->where('scheduled_at', '<=', now()))
+            ->orWhere(fn (Builder $s) => $s->where('status', 'sending')->where('next_batch_at', '<=', now())));
     }
 
     public function editable(): bool
@@ -97,13 +121,18 @@ class PushCampaign extends Model
             ->when($this->audience === 'customers', fn (Builder $q) => $q->whereNotNull('customer_token_id'))
             ->when($this->audience === 'owners', fn (Builder $q) => $q->whereNotNull('owner_token_id'))
             ->when($this->audience === 'guests', fn (Builder $q) => $q->whereNull('customer_token_id')->whereNull('owner_token_id'))
+            ->when($this->audience === 'phones', fn (Builder $q) => $q->signedInWithPhones($this->target_phones ?? []))
+            ->when($this->audience === 'stable_customers', fn (Builder $q) => $q->whereNotNull('customer_token_id')
+                ->whereIn('customer_id', StableBooking::query()->whereIn('stable_id', $this->target_stables ?? [])->whereNotNull('customer_id')->select('customer_id')))
+            ->when($this->audience === 'stable_owners', fn (Builder $q) => $q->whereNotNull('owner_token_id')
+                ->whereIn('user_id', DB::table('stable_user')->whereIn('stable_id', $this->target_stables ?? [])->select('user_id')))
             ->where(fn (Builder $q) => $q->whereNull('topics')->orWhereJsonContains('topics', $this->topic))
             ->when(! empty($this->platforms), fn (Builder $q) => $q->whereIn('platform', $this->platforms))
             ->when(! empty($this->locales), fn (Builder $q) => $q->whereIn('locale', $this->locales))
             ->when($this->active_days, fn (Builder $q) => $q->where('last_seen_at', '>=', now()->subDays($this->active_days)))
-            ->has('deliveries', '<', $automatic ? MobileAutoPush::dailyCap() : self::DAILY_CAP, 'and', fn (Builder $q) => $q
+            ->when(! $this->ignore_cap, fn (Builder $q) => $q->has('deliveries', '<', $automatic ? MobileAutoPush::dailyCap() : self::DAILY_CAP, 'and', fn (Builder $q) => $q
                 ->where('created_at', '>', now()->subDay())
-                ->whereHas('campaign', fn (Builder $c) => $automatic ? $c->whereNotNull('source') : $c->whereNull('source')))
+                ->whereHas('campaign', fn (Builder $c) => $automatic ? $c->whereNotNull('source') : $c->whereNull('source'))))
             ->get()
             ->filter(function (MobileDevice $device) use ($feature, $told) {
                 $client = new AppClient($device->platform, $device->app_version);
@@ -112,6 +141,30 @@ class PushCampaign extends Model
                     && ($feature === null || MobileFeatures::enabledFor($feature, $client));
             })
             ->values();
+    }
+
+    /** Expo's delivery fields for it (App\Services\Push\ExpoPush::send() $options). */
+    public function pushOptions(): array
+    {
+        return array_filter([
+            'priority' => $this->priority === 'high' ? 'high' : null,
+            'ttl' => $this->ttl_hours ? $this->ttl_hours * 3600 : null,
+            'channelId' => in_array($this->channel, self::CHANNELS, true) ? $this->channel : null,
+        ]) + ($this->sound === false ? ['sound' => null] : []);
+    }
+
+    /** With quiet hours on and Oman's clock inside them: when it may go out (UTC); else null. */
+    public function quietUntil(): ?CarbonImmutable
+    {
+        $local = CarbonImmutable::now(BookingSlot::timezone());
+
+        if (! $this->quiet_hours || ($local->hour < self::QUIET_FROM && $local->hour >= self::QUIET_UNTIL)) {
+            return null;
+        }
+
+        $resume = $local->setTime(self::QUIET_UNTIL, 0);
+
+        return ($resume->lessThanOrEqualTo($local) ? $resume->addDay() : $resume)->utc();
     }
 
     /** What the app gets with it: the campaign (for "opened") and what a tap opens. */

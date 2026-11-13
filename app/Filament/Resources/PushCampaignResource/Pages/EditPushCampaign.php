@@ -13,6 +13,7 @@ class EditPushCampaign extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            PushCampaignResource::testAction(fn () => CreatePushCampaign::draft($this->data ?? [])),
             DeleteAction::make(),
         ];
     }
