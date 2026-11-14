@@ -35,6 +35,24 @@ class SubmissionsCsv
     public static function write(Form $form, Builder|Collection $submissions, mixed $handle = null): void
     {
         $handle ??= fopen('php://output', 'w');
+
+        foreach (static::rows($form, $submissions) as $row) {
+            fputcsv($handle, $row);
+        }
+
+        if ($handle !== null && is_resource($handle) && stream_get_meta_data($handle)['uri'] === 'php://output') {
+            fclose($handle);
+        }
+    }
+
+    /**
+     * The header row, then one row per submission (shared with SubmissionsXlsx).
+     *
+     * @param  Builder<FormSubmission>|Collection<int, FormSubmission>  $submissions
+     * @return list<list<string|int|null>>
+     */
+    public static function rows(Form $form, Builder|Collection $submissions): array
+    {
         $records = $submissions instanceof Builder ? $submissions->orderBy('created_at')->get() : $submissions;
 
         $keys = $form->inputFields()->keys()->all();
@@ -49,23 +67,21 @@ class SubmissionsCsv
 
         $labels = array_map(fn (string $key): string => $form->field($key)?->label ?? $key, $keys);
 
-        fputcsv($handle, ['id', 'submitted_at', ...$labels, 'source_url', 'ip', 'user_id']);
+        $rows = [['id', 'submitted_at', ...$labels, 'source_url', 'ip', 'user_id']];
 
         foreach ($records as $record) {
             $formatted = $record->formatted();
 
-            fputcsv($handle, [
+            $rows[] = [
                 $record->getKey(),
                 $record->created_at?->toDateTimeString(),
                 ...array_map(fn (string $key): string => $formatted[$key]['value'] ?? '', $keys),
                 $record->source_url,
                 $record->ip,
                 $record->user_id,
-            ]);
+            ];
         }
 
-        if ($handle !== null && is_resource($handle) && stream_get_meta_data($handle)['uri'] === 'php://output') {
-            fclose($handle);
-        }
+        return $rows;
     }
 }

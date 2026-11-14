@@ -59,6 +59,17 @@ final class StableProfileForm
         ];
     }
 
+    /** @return array<int, mixed> the website and social accounts, each shown on the stable page when filled */
+    public static function social(): array
+    {
+        return collect(Stable::SOCIAL)->map(fn (string $column) => TextInput::make($column)
+            ->label(__("stable_panel.fields.{$column}"))
+            ->placeholder(__("stable_panel.placeholders.{$column}"))
+            ->url()
+            ->rule('url:http,https')
+            ->maxLength(255))->values()->all();
+    }
+
     /** @return array<int, mixed> */
     public static function location(): array
     {
@@ -89,10 +100,15 @@ final class StableProfileForm
                 ->options(fn (Get $get) => City::query()->where('region_id', $get('region_id'))->orderBy(LocationFields::nameColumn())->pluck(LocationFields::nameColumn(), 'id'))
                 ->searchable()
                 ->required(),
-            TextInput::make('address')
-                ->label(__('stable_panel.fields.address'))
-                ->placeholder(__('stable_panel.placeholders.address'))
+            TextInput::make('en_address')
+                ->label(__('stable_panel.fields.en_address'))
+                ->placeholder(__('stable_panel.placeholders.en_address'))
                 ->maxLength(255),
+            TextInput::make('ar_address')
+                ->label(__('stable_panel.fields.ar_address'))
+                ->placeholder(__('stable_panel.placeholders.ar_address'))
+                ->maxLength(255)
+                ->extraInputAttributes(['dir' => 'rtl']),
             TextInput::make('map_link')
                 ->label(__('stable_panel.fields.map_link'))
                 ->placeholder(__('stable_panel.placeholders.map_link'))
@@ -151,6 +167,8 @@ final class StableProfileForm
     public static function photos(): array
     {
         return [
+            PlaceFormFields::logo('stables/logos', __('stable_panel.fields.logo'))
+                ->helperText(__('stable_panel.fields.logo_helper')),
             PlaceFormFields::coverPhoto('stables/covers', __('stable_panel.fields.cover_photo')),
             PlaceFormFields::gallery('stables/gallery', __('stable_panel.fields.gallery')),
         ];

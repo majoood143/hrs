@@ -261,6 +261,7 @@ return [
         'mark_read' => 'Mark as read',
         'mark_unread' => 'Mark as unread',
         'export' => 'Export CSV',
+        'export_xlsx' => 'Export Excel (XLSX)',
         'export_menu' => 'Export',
         'data' => 'Submitted values',
         'details' => 'Details',

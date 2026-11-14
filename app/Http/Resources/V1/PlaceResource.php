@@ -45,6 +45,12 @@ class PlaceResource extends JsonResource
             'country' => LookupResource::make($this->whenLoaded('country')),
             'region' => LookupResource::make($this->whenLoaded('region')),
             'city' => LookupResource::make($this->whenLoaded('city')),
+            /**
+             * Stables only: the profile picture, else the app's logo (never null for a stable).
+             *
+             * @var string|null
+             */
+            'profile_photo_url' => $place->getAttribute('profile_photo_url'),
             /** @var string|null */
             'address' => $place->getAttribute('address'),
             /**
@@ -65,7 +71,21 @@ class PlaceResource extends JsonResource
             'website_url' => $place->getAttribute('website_url'),
             /** @var string|null */
             'instagram_url' => $place->getAttribute('instagram_url'),
+            /** Stables only. @var string|null */
+            'x_url' => $place->getAttribute('x_url'),
+            /** Stables only. @var string|null */
+            'facebook_url' => $place->getAttribute('facebook_url'),
+            /** Stables only. @var string|null */
+            'tiktok_url' => $place->getAttribute('tiktok_url'),
+            /** Stables only. @var string|null */
+            'youtube_url' => $place->getAttribute('youtube_url'),
             'services' => LookupResource::collection($this->whenLoaded('services')),
+            /**
+             * Stables only: the profile picture, else the app's logo.
+             *
+             * @var string|null
+             */
+            'profile_photo_url' => $place->getAttribute('profile_photo_url'),
             /** @var string|null */
             'cover_photo_url' => $place->getAttribute('cover_photo_url'),
             /** @var list<string> */

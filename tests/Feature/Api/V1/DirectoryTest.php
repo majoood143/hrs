@@ -163,7 +163,7 @@ class DirectoryTest extends TestCase
 
     public function test_stables_show_only_approved_ones_with_their_rating_and_visible_reviews(): void
     {
-        $stable = $this->place('stables', ['en_name' => 'Royal Stables', 'slug' => 'royal', 'email' => 'royal@example.com']);
+        $stable = $this->place('stables', ['en_name' => 'Royal Stables', 'ar_name' => 'الإسطبلات الملكية', 'slug' => 'royal', 'email' => 'royal@example.com', 'en_address' => 'Al Mawaleh', 'ar_address' => 'الموالح', 'instagram_url' => 'https://instagram.com/royal', 'tiktok_url' => 'https://tiktok.com/@royal', 'logo' => 'stables/logos/royal.jpg']);
         $this->place('stables', ['en_name' => 'Pending Stables', 'slug' => 'pending', 'approval_status' => 'pending']);
         $this->row('stable_reviews', ['stable_id' => $stable, 'author_name' => 'Aisha Al Balushi', 'rating' => 5, 'comment' => 'Lovely lessons', 'reply' => 'Thank you!']);
         $this->row('stable_reviews', ['stable_id' => $stable, 'author_name' => 'Omar', 'rating' => 4]);
@@ -177,12 +177,19 @@ class DirectoryTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.type', null)
             ->assertJsonPath('data.email', 'royal@example.com')
+            ->assertJsonPath('data.address', 'Al Mawaleh')
+            ->assertJsonPath('data.instagram_url', 'https://instagram.com/royal')
+            ->assertJsonPath('data.tiktok_url', 'https://tiktok.com/@royal')
+            ->assertJsonPath('data.x_url', null)
+            ->assertJsonPath('data.profile_photo_url', url('/storage/stables/logos/royal.jpg'))
             ->assertJsonPath('data.rating', ['average' => 4.5, 'count' => 2])
             ->assertJsonCount(2, 'data.reviews')
             ->assertJsonPath('data.reviews.1.author', 'Aisha A.')
             ->assertJsonPath('data.reviews.1.reply', 'Thank you!')
             ->assertJsonPath('data.views_count', null)
             ->assertJsonPath('data.share_url', route('stables.show', 'royal'));
+
+        $this->getJson('/api/v1/stables/royal', ['Accept-Language' => 'ar'])->assertJsonPath('data.address', 'الموالح');
     }
 
     public function test_lookups_carry_the_directory_choices(): void

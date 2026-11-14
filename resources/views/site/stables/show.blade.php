@@ -9,11 +9,24 @@
             &larr; {{ __('stables.back_to_stables') }}
         </a>
 
-        @if($stable->cover_photo_url)
-            <x-zoomable-image :src="$stable->cover_photo_url" alt="{{ $stable->name }}" class="mt-6 h-72 w-full rounded-3xl sm:h-96" />
-        @endif
+        {{-- profile header: the cover, the profile picture overlapping its bottom edge (the app logo when there is none) --}}
+        <div class="relative mt-6">
+            @if($stable->cover_photo_url)
+                <x-zoomable-image :src="$stable->cover_photo_url" alt="{{ $stable->name }}" class="h-56 w-full rounded-3xl sm:h-96" />
+            @else
+                <div class="h-32 w-full rounded-3xl bg-gradient-to-br from-warm-200 via-warm-100 to-warm-50 sm:h-44" aria-hidden="true"></div>
+            @endif
 
-        <div class="mt-8 grid gap-10 lg:grid-cols-3">
+            <div class="absolute -bottom-12 start-5 h-24 w-24 overflow-hidden rounded-full bg-white shadow-md ring-4 ring-warm-50 sm:-bottom-16 sm:start-8 sm:h-32 sm:w-32">
+                @if($stable->logo)
+                    <x-zoomable-image :src="$stable->profile_photo_url" :alt="$stable->name" fit="cover" class="h-full w-full rounded-full" />
+                @else
+                    <img src="{{ $stable->profile_photo_url }}" alt="" width="128" height="128" class="h-full w-full object-cover">
+                @endif
+            </div>
+        </div>
+
+        <div class="mt-16 grid gap-10 sm:mt-20 lg:grid-cols-3">
             <div class="lg:col-span-2">
                 <h1 class="font-display text-3xl font-semibold text-warm-900 sm:text-4xl">{{ $stable->name }}</h1>
                 <p class="mt-2 text-sm text-warm-900/60">📍 {{ $stable->city?->name }}, {{ $stable->country?->name }}</p>
@@ -125,6 +138,13 @@
                         </a>
                     @endif
                 </div>
+
+                @if($socials = $stable->socialLinks())
+                    <div class="card-warm p-5">
+                        <h2 class="font-display text-base font-semibold text-warm-900">{{ __('stables.online') }}</h2>
+                        <x-social-links :links="$socials" class="mt-3" />
+                    </div>
+                @endif
 
                 <div class="card-warm p-5">
                     <h2 class="font-display text-base font-semibold text-warm-900">{{ __('stables.opening_hours') }}</h2>

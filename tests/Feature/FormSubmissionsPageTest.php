@@ -164,6 +164,20 @@ class FormSubmissionsPageTest extends TestCase
         $this->assertStringStartsWith('the first 300 of 305', $many->facts['Records']);
     }
 
+    public function test_the_page_downloads_xlsx_of_all_or_the_selected_submissions(): void
+    {
+        $form = $this->surveyForm();
+        $a = $this->submit($form, ['full_name' => 'Salim']);
+
+        Livewire::test(ManageSubmissions::class, ['record' => $form->getRouteKey()])
+            ->callTableAction('exportXlsx')
+            ->assertFileDownloaded('owner-survey-submissions-2026-10-07.xlsx');
+
+        Livewire::test(ManageSubmissions::class, ['record' => $form->getRouteKey()])
+            ->callTableBulkAction('exportSelectedXlsx', [$a])
+            ->assertFileDownloaded('owner-survey-submissions-2026-10-07.xlsx');
+    }
+
     public function test_the_page_downloads_pdfs_of_all_the_selected_or_one_submission(): void
     {
         $form = $this->surveyForm();
@@ -192,7 +206,7 @@ class FormSubmissionsPageTest extends TestCase
         $this->assertCount(1, $table->getRecordActions());
         $this->assertCount(1, $table->getHeaderActions());
         $this->assertSame(
-            ['export', 'exportPdfEn', 'exportPdfAr'],
+            ['export', 'exportXlsx', 'exportPdfEn', 'exportPdfAr'],
             array_keys(array_values($table->getHeaderActions())[0]->getFlatActions()),
         );
 

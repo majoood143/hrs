@@ -24,6 +24,7 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Packstub\FormBuilder\Filament\SubmissionsCsv;
+use Packstub\FormBuilder\Filament\SubmissionsXlsx;
 use Packstub\FormBuilder\FormBuilder;
 use Packstub\FormBuilder\FormBuilderPlugin;
 use Packstub\FormBuilder\Models\Form;
@@ -175,6 +176,10 @@ class ManageSubmissions extends ManageRelatedRecords
                         ->label(__('packstub-form-builder::form-builder.submissions.export'))
                         ->icon('heroicon-o-table-cells')
                         ->action(fn () => SubmissionsCsv::download($form, $this->getFilteredTableQuery())),
+                    Action::make('exportXlsx')
+                        ->label(__('packstub-form-builder::form-builder.submissions.export_xlsx'))
+                        ->icon('heroicon-o-table-cells')
+                        ->action(fn () => SubmissionsXlsx::download($form, $this->getFilteredTableQuery())),
                     ...$extra['export'],
                 ])
                     ->label(__('packstub-form-builder::form-builder.submissions.export_menu'))
@@ -194,6 +199,10 @@ class ManageSubmissions extends ManageRelatedRecords
                         ->label(__('packstub-form-builder::form-builder.submissions.export'))
                         ->icon('heroicon-o-table-cells')
                         ->action(fn (Collection $records) => SubmissionsCsv::download($form, $records)),
+                    BulkAction::make('exportSelectedXlsx')
+                        ->label(__('packstub-form-builder::form-builder.submissions.export_xlsx'))
+                        ->icon('heroicon-o-table-cells')
+                        ->action(fn (Collection $records) => SubmissionsXlsx::download($form, $records)),
                     ...$extra['bulk'],
                     DeleteBulkAction::make(),
                 ]),

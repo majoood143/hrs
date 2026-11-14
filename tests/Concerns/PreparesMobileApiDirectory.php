@@ -64,7 +64,7 @@ trait PreparesMobileApiDirectory
                 $table->foreignId('country_id')->nullable();
                 $table->foreignId('region_id')->nullable();
                 $table->foreignId('city_id')->nullable();
-                if ($places === 'shops') {
+                if (in_array($places, ['shops', 'stables'], true)) {
                     $table->string('en_address')->nullable();
                     $table->string('ar_address')->nullable();
                 } else {
@@ -75,6 +75,11 @@ trait PreparesMobileApiDirectory
                 $table->string('email')->nullable();
                 $table->string('website_url')->nullable();
                 $table->string('instagram_url')->nullable();
+                if ($places === 'stables') {
+                    foreach (['x_url', 'facebook_url', 'tiktok_url', 'youtube_url', 'logo'] as $column) {
+                        $table->string($column)->nullable();
+                    }
+                }
                 $table->text('en_description')->nullable();
                 $table->text('ar_description')->nullable();
                 $table->string('cover_photo')->nullable();

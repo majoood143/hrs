@@ -26,6 +26,7 @@ return [
 
     'address' => 'العنوان',
     'open_in_maps' => 'فتح في خرائط جوجل',
+    'online' => 'الموقع ووسائل التواصل',
     'description' => 'نبذة',
     'services' => 'الخدمات',
     'opening_hours' => 'ساعات العمل',

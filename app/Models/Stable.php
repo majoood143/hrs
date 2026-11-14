@@ -45,6 +45,16 @@ class Stable extends Model implements HasAvatar, HasName
         'stable_package_purchases' => 'stable_id',
     ];
 
+    /** Network => column: the website and social accounts shown on the stable's page when filled. */
+    public const SOCIAL = [
+        'website' => 'website_url',
+        'instagram' => 'instagram_url',
+        'x' => 'x_url',
+        'facebook' => 'facebook_url',
+        'tiktok' => 'tiktok_url',
+        'youtube' => 'youtube_url',
+    ];
+
     public const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
     protected $fillable = [
@@ -54,10 +64,18 @@ class Stable extends Model implements HasAvatar, HasName
         'country_id',
         'region_id',
         'city_id',
-        'address',
+        'en_address',
+        'ar_address',
         'map_link',
+        'website_url',
+        'instagram_url',
+        'x_url',
+        'facebook_url',
+        'tiktok_url',
+        'youtube_url',
         'en_description',
         'ar_description',
+        'logo',
         'cover_photo',
         'gallery',
         'opening_hours',
@@ -283,7 +301,7 @@ class Stable extends Model implements HasAvatar, HasName
 
     public function getFilamentAvatarUrl(): ?string
     {
-        return $this->cover_photo_url;
+        return $this->logo ? $this->profile_photo_url : $this->cover_photo_url;
     }
 
     public function getNameAttribute(): string
@@ -291,9 +309,27 @@ class Stable extends Model implements HasAvatar, HasName
         return app()->getLocale() === 'ar' ? $this->ar_name : $this->en_name;
     }
 
+    /** @return array<string, string> network => url, only the filled ones */
+    public function socialLinks(): array
+    {
+        return array_filter(array_map(fn (string $column) => $this->getAttribute($column), self::SOCIAL));
+    }
+
+    /** Falls back to the English address while the Arabic one is empty. */
+    public function getAddressAttribute(): ?string
+    {
+        return app()->getLocale() === 'ar' ? ($this->ar_address ?: $this->en_address) : $this->en_address;
+    }
+
     public function getDescriptionAttribute(): ?string
     {
         return app()->getLocale() === 'ar' ? $this->ar_description : $this->en_description;
+    }
+
+    /** The uploaded profile picture, else the app's logo (General Settings, then the bundled copy), so the circle is never empty. */
+    public function getProfilePhotoUrlAttribute(): string
+    {
+        return $this->logo ? Storage::disk('public')->url($this->logo) : (SiteSetting::appLogoUrl() ?? asset('images/app-logo.jpg'));
     }
 
     public function getCoverPhotoUrlAttribute(): ?string
@@ -311,6 +347,6 @@ class Stable extends Model implements HasAvatar, HasName
     /** @return list<string> */
     protected function stableActivityAttributes(): array
     {
-        return ['en_name', 'ar_name', 'slug', 'country_id', 'region_id', 'city_id', 'address', 'map_link', 'en_description', 'ar_description', 'cover_photo', 'gallery', 'opening_hours', 'is_active', 'phone', 'email', 'approval_status', 'commission_type', 'commission_value', 'booking_settings', 'sales_report', 'rejection_reason'];
+        return ['en_name', 'ar_name', 'slug', 'country_id', 'region_id', 'city_id', 'en_address', 'ar_address', 'map_link', 'website_url', 'instagram_url', 'x_url', 'facebook_url', 'tiktok_url', 'youtube_url', 'en_description', 'ar_description', 'logo', 'cover_photo', 'gallery', 'opening_hours', 'is_active', 'phone', 'email', 'approval_status', 'commission_type', 'commission_value', 'booking_settings', 'sales_report', 'rejection_reason'];
     }
 }

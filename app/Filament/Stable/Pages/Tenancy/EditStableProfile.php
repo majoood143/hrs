@@ -28,7 +28,7 @@ class EditStableProfile extends EditTenantProfile
                         Tab::make(__('stable_panel.profile.tabs.info'))
                             ->icon('heroicon-o-information-circle')
                             ->columns(2)
-                            ->schema([...StableProfileForm::names(), ...StableProfileForm::contact()]),
+                            ->schema([...StableProfileForm::names(), ...StableProfileForm::contact(), ...StableProfileForm::social()]),
                         Tab::make(__('stable_panel.profile.tabs.location'))
                             ->icon('heroicon-o-map-pin')
                             ->columns(3)

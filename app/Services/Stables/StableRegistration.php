@@ -46,7 +46,7 @@ class StableRegistration
     {
         $stable = DB::transaction(function () use ($owner, $data): Stable {
             $stable = new Stable(collect($data)->only([
-                'en_name', 'ar_name', 'country_id', 'region_id', 'city_id', 'address', 'map_link',
+                'en_name', 'ar_name', 'country_id', 'region_id', 'city_id', 'en_address', 'ar_address', 'map_link',
                 'en_description', 'ar_description', 'phone', 'email',
             ])->all());
 

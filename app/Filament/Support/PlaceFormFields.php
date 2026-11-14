@@ -33,6 +33,12 @@ final class PlaceFormFields
         ];
     }
 
+    /** A square picture shown in a circle (a stable's profile picture). */
+    public static function logo(string $directory, string $label): FileUpload
+    {
+        return self::photo(FileUpload::make('logo'), $directory, $label)->avatar()->imageEditor()->circleCropper();
+    }
+
     public static function coverPhoto(string $directory, string $label): FileUpload
     {
         return self::photo(FileUpload::make('cover_photo'), $directory, $label);

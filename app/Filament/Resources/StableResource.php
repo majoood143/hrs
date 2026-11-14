@@ -139,13 +139,14 @@ class StableResource extends Resource
                                     ->label(__('stable_panel.fields.is_active'))
                                     ->default(true),
                                 ...StableProfileForm::contact(),
+                                ...StableProfileForm::social(),
                             ])->icon('heroicon-o-information-circle')
                             ->columns(2),
                         Tab::make(__('stable_panel.profile.tabs.location'))
                             ->schema([
                                 ...LocationFields::make(fn (string $field) => __("stable_panel.fields.{$field}")),
                                 ...collect(StableProfileForm::location())
-                                    ->filter(fn ($field) => in_array($field->getName(), ['address', 'map_link'], true))
+                                    ->filter(fn ($field) => in_array($field->getName(), ['en_address', 'ar_address', 'map_link'], true))
                                     ->map(fn ($field) => $field->columnSpanFull())
                                     ->values()
                                     ->all(),

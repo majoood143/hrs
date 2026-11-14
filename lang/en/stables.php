@@ -26,6 +26,7 @@ return [
 
     'address' => 'Address',
     'open_in_maps' => 'Open in Google Maps',
+    'online' => 'Website and social media',
     'description' => 'About',
     'services' => 'Services',
     'opening_hours' => 'Opening Hours',

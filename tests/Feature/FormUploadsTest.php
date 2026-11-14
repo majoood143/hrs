@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Packstub\FormBuilder\Filament\SubmissionsCsv;
+use Packstub\FormBuilder\Filament\SubmissionsXlsx;
 use Packstub\FormBuilder\Models\FormSubmission;
 use Packstub\FormBuilder\Support\UploadLinks;
 use Tests\Concerns\MakesOrderForms;
@@ -176,5 +177,25 @@ class FormUploadsTest extends TestCase
 
         $this->assertStringContainsString('/form-files/', $csv);
         $this->assertStringNotContainsString('form-uploads', $csv);
+    }
+
+    public function test_the_xlsx_export_matches_the_csv_and_never_makes_formulas(): void
+    {
+        $submission = $this->upload();
+        $submission->update(['data' => ['full_name' => '=HYPERLINK("http://evil")'] + $submission->data]);
+
+        $path = tempnam(sys_get_temp_dir(), 'xlsx-test');
+        SubmissionsXlsx::write($submission->form, collect([$submission->fresh()]), $path);
+
+        $zip = new \ZipArchive;
+        $zip->open($path);
+        $sheet = $zip->getFromName('xl/worksheets/sheet1.xml');
+        $zip->close();
+        unlink($path);
+
+        $this->assertStringContainsString('Full name', $sheet);
+        $this->assertStringContainsString('=HYPERLINK(&quot;http://evil&quot;)', $sheet);
+        $this->assertStringNotContainsString('<f>', $sheet);
+        $this->assertStringContainsString('/form-files/', $sheet);
     }
 }

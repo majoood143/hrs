@@ -221,7 +221,7 @@ class AppServiceProvider extends ServiceProvider
                     'ar' => 'العربية',
                 ])
                 ->visible(insidePanels: true, outsidePanels: true)
-                ->excludes(['public']);
+                ->excludes(['stable']); // the stable panel shows the website's own switcher (StablePanelProvider)
         });
 
         // Phone fields (->tel()) accept what an Arabic keyboard or a pasted contact gives:

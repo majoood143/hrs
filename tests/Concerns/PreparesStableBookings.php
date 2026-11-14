@@ -98,6 +98,9 @@ trait PreparesStableBookings
             '2026_09_30_100008_add_reminded_at_to_stable_bookings',
             '2026_11_07_000003_add_sales_report_to_stables',
             '2026_11_10_100000_link_stable_offerings_to_services',
+            '2026_11_14_000001_split_stables_address_by_language',
+            '2026_11_14_000002_add_social_links_to_stables',
+            '2026_11_14_000003_add_logo_to_stables',
             // the owners' phones: every booking looks for one to push to
             '2026_11_04_000001_create_mobile_devices_table',
             '2026_11_07_000001_add_enabled_to_mobile_devices',

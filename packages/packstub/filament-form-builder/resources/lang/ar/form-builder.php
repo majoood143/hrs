@@ -261,6 +261,7 @@ return [
         'mark_read' => 'وضع علامة مقروء',
         'mark_unread' => 'وضع علامة غير مقروء',
         'export' => 'تصدير CSV',
+        'export_xlsx' => 'تصدير Excel (XLSX)',
         'export_menu' => 'تصدير',
         'data' => 'القيم المُرسلة',
         'details' => 'التفاصيل',
