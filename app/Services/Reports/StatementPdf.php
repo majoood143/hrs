@@ -37,7 +37,7 @@ class StatementPdf
                 'rows' => $statement->rows(),
                 'serviceName' => $statement->serviceId ? (Service::find($statement->serviceId)?->localizedName() ?? '#'.$statement->serviceId) : null,
                 'gatewayName' => $statement->gateway ? (PaymentGateway::tryFrom($statement->gateway)?->label() ?? $statement->gateway) : null,
-                'lines' => app(StatementCsv::class)->summaryLines($statement->totals()),
+                'lines' => app(StatementCsv::class)->summaryLines($statement->totals(), $statement->dueFromStables()),
                 'currency' => SiteSetting::currency()['code'],
                 'currencyIcon' => app(RacingPdf::class)->currencyIcon(),
                 'vatNumber' => (string) SiteSetting::get('vat.registration_number', ''),

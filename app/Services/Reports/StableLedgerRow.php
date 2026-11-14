@@ -9,10 +9,12 @@ use App\Services\Orders\OrderMoney;
 use Carbon\CarbonImmutable;
 
 /**
- * One booking that carries money, as a stable's statement sees it, in baisa (integers).
+ * One entry of a stable's account with us, in baisa (integers): a booking's sale, or a refund on it
+ * (dated the day it was recorded, carrying only what it changed, so it never rewrites the period the
+ * sale fell in). fromOrder() is the booking as it stands now, sale and refunds together.
  *
- *   stableShare = price + vatOnPrice - refunded - commission - vatOnCommission   what the stable earns
- *   ourShare    = fee + vatOnFee + commission + vatOnCommission                  what we earn
+ *   stableShare = price + vatOnPrice - clientRefunded - commission - vatOnCommission   what the stable earns
+ *   ourShare    = fee + vatOnFee + commission + vatOnCommission                        what we earn (fee net of any refunded)
  *
  * Who holds the money decides who owes whom: a booking paid into our account leaves us owing the
  * stable its share; one paid into the stable's own account, or at the stable, leaves the stable
@@ -25,6 +27,10 @@ final class StableLedgerRow
     public const ONLINE_OWN = 'online_own';
 
     public const AT_STABLE = 'at_stable';
+
+    public const SALE = 'sale';
+
+    public const REFUND = 'refund';
 
     public function __construct(
         public readonly int $orderId,
@@ -44,24 +50,49 @@ final class StableLedgerRow
         public readonly int $vatOnCommission,
         public readonly int $refunded,
         public readonly ?int $stableId = null,
+        /** the part of $refunded that came out of the client's share (the rest was our fee) */
+        public readonly int $clientRefunded = 0,
+        public readonly string $entry = self::SALE,
     ) {}
 
+    /** The booking as it stands now (sale and refunds together), e.g. for the booking's own page. */
     public static function fromOrder(ServiceOrder $order): self
     {
-        $baisa = fn ($amount): int => (int) round((float) $amount * 1000);
-        $booking = $order->stableBooking;
-        $clientShare = $baisa($order->price) + $baisa($order->vat_on_price);
-        $refunded = $baisa($order->refunded_amount);
+        $refunded = (int) round((float) $order->refunded_amount * 1000);
 
-        $kind = match (true) {
-            $order->payment_status === PaymentStatus::OnSite => self::AT_STABLE,
-            $order->collected_by === 'stable' => self::ONLINE_OWN,
-            default => self::ONLINE_OURS,
-        };
+        return self::make($order, self::SALE, self::saleDate($order), ['total' => self::baisa($order->total), 'refunded' => $refunded] + OrderMoney::afterRefunds($order, $refunded));
+    }
 
-        $date = $kind === self::AT_STABLE
-            ? ($booking?->attended_at ?? $order->completed_at ?? $order->created_at)
+    /**
+     * The booking's dated entries: its sale, then one per refund.
+     *
+     * @return list<self>
+     */
+    public static function entriesFor(ServiceOrder $order): array
+    {
+        return array_map(
+            fn (array $e) => self::make($order, $e['entry'], $e['date'] ?? self::saleDate($order), $e),
+            OrderMoney::entries($order, self::saleDate($order)),
+        );
+    }
+
+    private static function saleDate(ServiceOrder $order): mixed
+    {
+        return $order->payment_status === PaymentStatus::OnSite
+            ? ($order->stableBooking?->attended_at ?? $order->completed_at ?? $order->created_at)
             : ($order->paid_at ?? $order->created_at);
+    }
+
+    private static function baisa(mixed $amount): int
+    {
+        return (int) round((float) $amount * 1000);
+    }
+
+    /** @param  array{total: int, refunded: int, client_refunded: int, fee: int, vat_on_fee: int, commission: int, vat_on_commission: int}  $money */
+    private static function make(ServiceOrder $order, string $entry, mixed $date, array $money): self
+    {
+        $booking = $order->stableBooking;
+        $sale = $entry === self::SALE;
 
         return new self(
             orderId: $order->getKey(),
@@ -69,20 +100,37 @@ final class StableLedgerRow
             bookingReference: $booking?->reference,
             service: (string) ($booking?->offering?->name ?? $order->serviceName()),
             sessionDate: $booking?->slot?->date?->toDateString(),
-            riders: (int) ($booking?->riders ?? 0),
+            riders: $sale ? (int) ($booking?->riders ?? 0) : 0,
             // in Muscat time, so days and months group by the local calendar
             date: CarbonImmutable::instance($date)->setTimezone(BookingSlot::timezone()),
-            kind: $kind,
-            total: $baisa($order->total),
-            price: $baisa($order->price),
-            vatOnPrice: $baisa($order->vat_on_price),
-            fee: $baisa($order->fee_amount),
-            vatOnFee: $baisa($order->vat_on_fee),
-            commission: OrderMoney::earnedCommission($baisa($order->commission_amount), $clientShare, $refunded),
-            vatOnCommission: OrderMoney::earnedCommission($baisa($order->vat_on_commission), $clientShare, $refunded),
-            refunded: $refunded,
+            kind: match (true) {
+                $order->payment_status === PaymentStatus::OnSite => self::AT_STABLE,
+                $order->collected_by === 'stable' => self::ONLINE_OWN,
+                default => self::ONLINE_OURS,
+            },
+            total: $money['total'],
+            price: $sale ? self::baisa($order->price) : 0,
+            vatOnPrice: $sale ? self::baisa($order->vat_on_price) : 0,
+            fee: $money['fee'],
+            vatOnFee: $money['vat_on_fee'],
+            commission: $money['commission'],
+            vatOnCommission: $money['vat_on_commission'],
+            refunded: $money['refunded'],
             stableId: $order->stable_id,
+            clientRefunded: $money['client_refunded'],
+            entry: $entry,
         );
+    }
+
+    /** "Online, through us"…, or "Refund" for a refund entry. */
+    public function label(): string
+    {
+        return __('stable_statement.kinds.'.($this->isRefund() ? self::REFUND : $this->kind));
+    }
+
+    public function isRefund(): bool
+    {
+        return $this->entry === self::REFUND;
     }
 
     public function heldByUs(): bool
@@ -92,7 +140,7 @@ final class StableLedgerRow
 
     public function stableShare(): int
     {
-        return $this->price + $this->vatOnPrice - $this->refunded - $this->commission - $this->vatOnCommission;
+        return $this->price + $this->vatOnPrice - $this->clientRefunded - $this->commission - $this->vatOnCommission;
     }
 
     public function ourShare(): int
@@ -100,7 +148,7 @@ final class StableLedgerRow
         return $this->fee + $this->vatOnFee + $this->commission + $this->vatOnCommission;
     }
 
-    /** What the customer's money came to after refunds. */
+    /** What the customer's money came to after refunds (a refund entry: what went back). */
     public function collected(): int
     {
         return $this->total - $this->refunded;

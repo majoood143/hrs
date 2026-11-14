@@ -31,7 +31,7 @@ final class StableApprovalActions
     /** @return array<int, Action> */
     public static function all(): array
     {
-        return [self::approve(), self::commission(), self::linkOwner(), self::reject(), self::suspend()];
+        return [self::approve(), self::commission(), self::vat(), self::linkOwner(), self::reject(), self::suspend()];
     }
 
     /**
@@ -123,6 +123,32 @@ final class StableApprovalActions
                 app(StableApproval::class)->setCommission($record, FeeType::from($data['commission_type']), $data['commission_value']);
 
                 Notification::make()->success()->title(__('admin_stable.approval.commission_saved'))->send();
+            });
+    }
+
+    /** The stable's own VAT registration: its sessions carry VAT only when it is registered. */
+    public static function vat(): Action
+    {
+        return Action::make('stableVat')
+            ->label(__('admin_stable.vat.action'))
+            ->icon('heroicon-o-document-check')
+            ->color('gray')
+            ->visible(fn (Stable $record) => self::allowed($record))
+            ->fillForm(fn (Stable $record) => ['vat_registered' => (bool) $record->vat_registered, 'vat_number' => $record->vat_number])
+            ->modalDescription(__('admin_stable.vat.description'))
+            ->schema([
+                Toggle::make('vat_registered')->label(__('admin_stable.vat.registered'))->live(),
+                TextInput::make('vat_number')
+                    ->label(__('admin_stable.vat.number'))
+                    ->placeholder(__('admin_stable.vat.number_placeholder'))
+                    ->maxLength(30)
+                    ->visible(fn (Get $get) => (bool) $get('vat_registered'))
+                    ->required(fn (Get $get) => (bool) $get('vat_registered')),
+            ])
+            ->action(function (Stable $record, array $data): void {
+                app(StableApproval::class)->setVat($record, (bool) $data['vat_registered'], $data['vat_number'] ?? null);
+
+                Notification::make()->success()->title(__('admin_stable.vat.saved'))->send();
             });
     }
 

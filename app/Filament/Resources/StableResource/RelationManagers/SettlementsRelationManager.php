@@ -6,6 +6,7 @@ use App\Filament\Pages\StableBalances;
 use App\Filament\Pages\StableStatementReport;
 use App\Models\Stable;
 use App\Models\StableSettlement;
+use App\Services\Reports\ClosedBooks;
 use App\Services\Reports\StableStatement;
 use App\Support\Money;
 use Filament\Actions\Action;
@@ -69,7 +70,7 @@ class SettlementsRelationManager extends RelationManager
                     ->icon($direction === StableSettlement::PAYOUT ? 'heroicon-o-arrow-up-right' : 'heroicon-o-arrow-down-left')
                     ->modalDescription(__('stable_statement.admin.record_'.$direction.'_hint'))
                     ->visible(fn () => Gate::allows('update', $this->stable()))
-                    ->schema(fn () => StableBalances::settlementForm($direction, $direction === StableSettlement::PAYOUT ? max(0, $balance) : max(0, -$balance)))
+                    ->schema(fn () => StableBalances::settlementForm($direction, $direction === StableSettlement::PAYOUT ? max(0, StableStatement::payable($this->stable())) : max(0, -$balance)))
                     ->action(fn (array $data) => StableBalances::recordSettlement($this->stable(), $direction, $data)))->all(),
                 Action::make('statement')
                     ->label(__('stable_statement.admin.statement'))
@@ -84,7 +85,8 @@ class SettlementsRelationManager extends RelationManager
                     ->color('danger')
                     ->requiresConfirmation()
                     ->modalDescription(__('stable_statement.admin.remove_hint'))
-                    ->visible(fn () => Gate::allows('update', $this->stable()))
+                    // a closed month's settlement stays: a correcting one is recorded instead
+                    ->visible(fn (StableSettlement $record) => Gate::allows('update', $this->stable()) && ! ClosedBooks::isClosed($record->paid_on->toDateString()))
                     ->action(function (StableSettlement $record): void {
                         $record->delete();
                         Notification::make()->success()->title(__('stable_statement.admin.removed'))->send();

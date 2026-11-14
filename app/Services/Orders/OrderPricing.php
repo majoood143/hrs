@@ -51,12 +51,18 @@ class OrderPricing
         return (bool) SiteSetting::get('vat.on_commission', false);
     }
 
-    /** The VAT rate in percent, 0 when VAT is switched off. */
+    /** Our VAT rate in percent (on what we supply), 0 when we do not charge VAT. */
     public function vatRate(): float
     {
         $enabled = (bool) SiteSetting::get('vat.enabled', config('payments.vat.enabled', true));
 
-        return $enabled ? (float) SiteSetting::get('vat.rate', config('payments.vat.rate', 5.0)) : 0.0;
+        return $enabled ? $this->standardRate() : 0.0;
+    }
+
+    /** The country's standard rate, whoever charges it (a VAT-registered stable charges it even when we do not). */
+    public function standardRate(): float
+    {
+        return (float) SiteSetting::get('vat.rate', config('payments.vat.rate', 5.0));
     }
 
     private function vat(int $baisa, float $rate): int

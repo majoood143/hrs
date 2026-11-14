@@ -7,6 +7,7 @@ use App\Events\ServiceOrderRefunded;
 use App\Models\OrderRefund;
 use App\Models\ServiceOrder;
 use App\Models\SiteSetting;
+use App\Services\Stables\StablePackages;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -48,6 +49,7 @@ class OrderRefundService
             }
 
             $refund = $locked->refunds()->create([
+                'credit_note_number' => $this->nextCreditNoteNumber(),
                 'amount' => number_format($baisa / 1000, 3, '.', ''),
                 'reason' => $reason,
                 'method' => in_array($method, ['gateway', 'manual'], true) ? $method : 'manual',
@@ -60,6 +62,10 @@ class OrderRefundService
             // nothing left to give back: the order is fully refunded
             if ($this->refundable($locked) === 0) {
                 $locked->payment_status = PaymentStatus::Refunded;
+                // a lesson package paid back in full gives no more sessions
+                if ($locked->stable_id !== null) {
+                    app(StablePackages::class)->orderRefunded($locked);
+                }
             }
 
             $locked->save();
@@ -72,5 +78,17 @@ class OrderRefundService
         ServiceOrderRefunded::dispatch($order, $refund);
 
         return $refund;
+    }
+
+    /**
+     * Credit notes run CN-<year>-000001, 000002... Read under a lock inside the refund's transaction
+     * (the unique index backs it), like the receipt numbers.
+     */
+    private function nextCreditNoteNumber(): string
+    {
+        $prefix = 'CN-'.now()->format('Y').'-';
+        $last = OrderRefund::query()->where('credit_note_number', 'like', $prefix.'%')->orderByDesc('credit_note_number')->lockForUpdate()->value('credit_note_number');
+
+        return $prefix.str_pad((string) ($last ? ((int) substr($last, strlen($prefix))) + 1 : 1), 6, '0', STR_PAD_LEFT);
     }
 }

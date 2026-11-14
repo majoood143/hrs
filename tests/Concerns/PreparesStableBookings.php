@@ -8,6 +8,7 @@ use App\Models\BookingSlot;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Region;
+use App\Models\SiteSetting;
 use App\Models\Stable;
 use App\Models\StableBooking;
 use App\Models\StableOffering;
@@ -104,6 +105,9 @@ trait PreparesStableBookings
             // the owners' phones: every booking looks for one to push to
             '2026_11_04_000001_create_mobile_devices_table',
             '2026_11_07_000001_add_enabled_to_mobile_devices',
+            // closing the books: settlements and attendance check it
+            '2026_11_15_000001_create_book_closings_table',
+            '2026_11_15_000003_add_vat_registration_to_stables',
         ] as $migration) {
             (require database_path("migrations/{$migration}.php"))->up();
         }
@@ -159,7 +163,9 @@ trait PreparesStableBookings
             'is_active' => true,
         ]);
         $stable->slug = $attributes['slug'] ?? 'desert-riders-'.(Stable::query()->count() + 1);
-        $stable->forceFill(['approval_status' => $status])->save();
+        // VAT-registered when the site charges VAT (the fixtures' "5% VAT" covers the price too), unless a test says otherwise
+        $registered = $attributes['vat_registered'] ?? (bool) SiteSetting::get('vat.enabled', true);
+        $stable->forceFill(['approval_status' => $status, 'vat_registered' => $registered, 'vat_number' => $registered ? 'OM1100000001' : null])->save();
 
         if ($status === StableApprovalStatus::Approved) {
             $stable->forceFill(['commission_type' => FeeType::Percentage, 'commission_value' => 10])->save();

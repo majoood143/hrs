@@ -12,9 +12,13 @@ use App\Services\Orders\OrderPricing;
 use App\Services\Orders\PriceBreakdown;
 
 /**
- * What a booking costs, by the same rules as every other order: the price (per rider × riders),
- * our service fee on top (the site-wide fee rule), VAT on both; the stable's own commission comes
- * out of the price, never added to what the customer pays. A free session carries none of it.
+ * What a booking costs: the price (per rider × riders), our service fee on top (the site-wide fee
+ * rule); the stable's own commission comes out of the price, never added to what the customer pays.
+ * A free session carries none of it.
+ *
+ * VAT follows who supplies what. The stable supplies the session (we collect for it as its agent),
+ * so VAT on the price is charged only when the stable is VAT-registered. We supply the fee (to the
+ * customer) and the commission (to the stable), so VAT on those follows our own registration.
  */
 class StableBookingPricing
 {
@@ -43,18 +47,19 @@ class StableBookingPricing
         $feeSetting = ServiceFeeSetting::resolveGlobal();
         $fee = $feeSetting?->calculateBaisa($price) ?? 0;
         $commission = $this->commission($stable, $price);
-        $rate = $this->orders->vatRate();
+        $ours = $this->orders->vatRate();
+        $stables = $stable->vat_registered ? $this->orders->standardRate() : 0.0;
 
         return new PriceBreakdown(
             price: $price,
             fee: $fee,
-            vatOnPrice: $this->vat($price, $rate),
-            vatOnFee: $this->vat($fee, $rate),
-            vatRate: $rate,
+            vatOnPrice: $this->vat($price, $stables),
+            vatOnFee: $this->vat($fee, $ours),
+            vatRate: max($ours, $stables),
             currency: $currency,
             feeSetting: $feeSetting,
             commission: $commission,
-            vatOnCommission: $this->orders->vatOnCommission() ? $this->vat($commission, $rate) : 0,
+            vatOnCommission: $this->orders->vatOnCommission() ? $this->vat($commission, $ours) : 0,
         );
     }
 
@@ -70,6 +75,7 @@ class StableBookingPricing
             ...$quote->toOrderAttributes(),
             'commission_type' => $quote->price > 0 ? $stable->commission_type?->value : null,
             'commission_value' => $quote->price > 0 ? $stable->commission_value : null,
+            'stable_vat_number' => $quote->vatOnPrice > 0 ? $stable->vat_number : null,
         ];
     }
 

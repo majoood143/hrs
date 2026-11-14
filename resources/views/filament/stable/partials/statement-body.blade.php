@@ -89,9 +89,9 @@
                             <td class="py-2 pe-3 font-mono text-xs" dir="ltr">{{ $row->bookingReference ?? $row->orderNumber }}</td>
                             <td class="py-2 pe-3">{{ $row->service }} <span class="text-xs text-gray-500">· {{ trans_choice('stable_bookings.riders_count', $row->riders, ['count' => $row->riders]) }}</span></td>
                             <td class="py-2 pe-3">
-                                <x-filament::badge :color="$row->heldByUs() ? 'info' : 'gray'" size="sm">{{ __('stable_statement.kinds.'.$row->kind) }}</x-filament::badge>
+                                <x-filament::badge :color="$row->heldByUs() ? 'info' : 'gray'" size="sm">{{ $row->label() }}</x-filament::badge>
                             </td>
-                            <td class="py-2 pe-3 text-end" dir="ltr">{{ $m($row->collected()) }}@if($row->refunded > 0)<span class="block text-xs text-red-600">−{{ $m($row->refunded) }}</span>@endif</td>
+                            <td class="py-2 pe-3 text-end" dir="ltr">{{ $m($row->collected()) }}</td>
                             <td class="py-2 pe-3 text-end" dir="ltr">{{ $m($row->commission + $row->vatOnCommission) }}</td>
                             <td class="py-2 pe-3 text-end" dir="ltr">{{ $m($row->stableShare()) }}</td>
                             <td @class(['py-2 text-end font-semibold', 'text-emerald-700 dark:text-emerald-400' => $row->net() > 0, 'text-amber-700 dark:text-amber-400' => $row->net() < 0]) dir="ltr">{{ $m($row->net()) }}</td>

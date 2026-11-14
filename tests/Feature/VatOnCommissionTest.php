@@ -55,6 +55,10 @@ class VatOnCommissionTest extends TestCase
             'paid_at' => '2026-09-24 10:00:00', 'refunded_amount' => $refunded,
         ])->save();
 
+        if ($refunded > 0) {
+            $order->refunds()->forceCreate(['amount' => $refunded, 'method' => 'manual', 'created_at' => '2026-09-24 10:00:00', 'updated_at' => '2026-09-24 10:00:00']);
+        }
+
         return $order->refresh();
     }
 

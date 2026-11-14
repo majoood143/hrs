@@ -328,6 +328,8 @@ class StableBookingCheckoutTest extends TestCase
         $this->offering->update(['price' => 0]);
         $booking = $this->book(1);
 
+        // from the session's day (Tuesday 2026-10-06)
+        Carbon::setTestNow('2026-10-06 08:00:00');
         $this->actions()->markAttended($booking);
         $this->assertSame([StableBookingStatus::Completed, OrderStatus::Completed], [$booking->refresh()->status, $booking->order->refresh()->status]);
 

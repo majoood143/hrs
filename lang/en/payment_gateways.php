@@ -4,6 +4,8 @@ return [
     'title' => 'Payment Gateways',
 
     'sections' => [
+        'costs' => 'Gateway charges (estimate)',
+        'costs_desc' => 'What each gateway charges us per payment, to estimate our net income in the reports. Fixed on each order when it is paid; changing it never changes past orders. The gateway\'s own statement is the real figure.',
         'active_gateway' => 'Enabled Payment Methods',
         'active_gateway_desc' => 'Choose which payment methods customers can use when paying for a service.',
         'thawani' => 'Thawani',
@@ -31,6 +33,10 @@ return [
     ],
 
     'fields' => [
+        'cost_percent' => ':gateway: charge per payment',
+        'cost_percent_placeholder' => 'e.g. 2.5',
+        'cost_fixed' => ':gateway: fixed charge per payment',
+        'cost_fixed_placeholder' => 'e.g. 0.100',
         'test_mode' => 'Test Mode',
         'thawani_test_mode_helper' => 'Use Thawani\'s sandbox environment instead of live payments.',
         'ompay_test_mode_helper' => 'Use OMPAY\'s sandbox instead of live payments. Sandbox keys do not work live, and live keys do not work in the sandbox.',

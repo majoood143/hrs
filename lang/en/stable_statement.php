@@ -44,6 +44,7 @@ return [
         'online_ours' => 'Online, through us',
         'online_own' => 'Online, stable\'s gateway',
         'at_stable' => 'At the stable',
+        'refund' => 'Refund',
     ],
 
     'directions' => [
@@ -89,6 +90,7 @@ return [
         'rate' => 'At :rate',
         'balance' => 'Balance with us',
         'balance_we_owe' => 'We owe you this',
+        'held' => ':amount held until a cancelled booking is refunded',
         'balance_you_owe' => 'You owe us this',
         'balance_settled' => 'All settled',
         'today' => 'Today\'s bookings',

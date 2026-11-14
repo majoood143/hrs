@@ -104,4 +104,13 @@ return [
         'body' => 'This stable has orders, bookings, payouts or packages. Suspend it instead: that hides it and stops new bookings, and keeps the records.',
         'bulk' => 'Some were not deleted: they have orders, bookings, payouts or packages. Suspend them instead.',
     ],
+    'vat' => [
+        'action' => 'VAT registration',
+        'description' => 'The stable supplies its sessions; we collect for it as its agent. Only a VAT-registered stable charges VAT on its price, under its own number. Applies to bookings made from now on.',
+        'registered' => 'The stable is VAT-registered',
+        'number' => 'Its VAT number (VATIN)',
+        'number_placeholder' => 'e.g. OM1100123456',
+        'number_required' => 'Enter the stable\'s VAT number.',
+        'saved' => 'VAT registration saved.',
+    ],
 ];

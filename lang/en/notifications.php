@@ -7,7 +7,7 @@ return [
         'received_free' => ':site: your request was received. Order :number (:service). Track it: :url',
         'completed' => ':site: your order :number is completed. Details: :url',
         'rejected' => ':site: your request :number could not be approved. Details: :url',
-        'refunded' => ':site: a refund of :amount for order :number was processed. The service fee is not refundable. Details: :url',
+        'refunded' => ':site: a refund of :amount for order :number was processed. Details: :url',
     ],
 
     'mail' => [

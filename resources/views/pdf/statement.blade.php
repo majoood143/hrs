@@ -103,7 +103,7 @@
             </tr>
             @foreach($rows as $row)
                 <tr>
-                    <td><span dir="ltr">{{ $row->paidAt->format('Y-m-d') }}</span></td><td><span dir="ltr">{{ $row->orderNumber }}</span></td><td class="num"><span dir="ltr">{{ $m($row->total) }}</span></td>
+                    <td><span dir="ltr">{{ $row->paidAt->format('Y-m-d') }}</span></td><td><span dir="ltr">{{ $row->orderNumber }}</span>@if($row->isRefund()) · {{ __('statement.refund') }}@endif</td><td class="num"><span dir="ltr">{{ $m($row->collected()) }}</span></td>
                     <td class="num"><span dir="ltr">{{ $m($row->fee + $row->vatOnFee) }}</span></td><td class="num"><span dir="ltr">{{ $m($row->commission + $row->vatOnCommission) }}</span></td><td class="num"><span dir="ltr">{{ $m($row->dueToUs()) }}</span></td>
                 </tr>
             @endforeach

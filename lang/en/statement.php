@@ -31,5 +31,9 @@ return [
     'by_day' => 'By day',
     'orders_list' => 'Orders',
     'empty' => 'No paid orders in this period.',
-    'note' => 'All amounts were collected into the client\'s account. The amount due to us is the service fees, the VAT on them and the commission (taken from the client\'s share, and reduced when part of that share is refunded). Service fees are never refunded. Amounts are by the day of payment.',
+    'note' => 'All amounts were collected into the client\'s account. The amount due to us is the service fees, the VAT on them and the commission (taken from the client\'s share, and reduced when part of that share is refunded). Service fees are refunded only when we or the provider cancelled the order. Amounts are by the day of payment, refunds by the day they were recorded.',
+    'refund' => 'Refund',
+    'gateway_cost' => 'Gateway charges (estimate)',
+    'net_to_us' => 'Ours after gateway charges',
+    'due_from_stables' => 'Also earned: fees and commission on bookings the stables collected (owed by them)',
 ];

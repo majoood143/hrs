@@ -116,6 +116,7 @@ return [
         'payment_option' => 'Please choose how you pay.',
         'cannot_cancel' => 'This booking can no longer be cancelled online. Please contact the stable.',
         'not_confirmed' => 'Only a confirmed booking can be marked this way.',
+        'attendance_closed' => 'Attendance can only be set or corrected within :days days of the session. Please contact us to change it.',
     ],
 
     'fields' => [
@@ -177,6 +178,7 @@ return [
         'customer_button' => 'View my booking',
         'stable_button' => 'Open your bookings',
         'customer_refund' => 'Your payment will be refunded (the service fee is not refundable). We will let you know when it is done.',
+        'customer_refund_full' => 'Your payment will be refunded in full, service fee included. We will let you know when it is done.',
         'stable_refund' => 'This booking was paid, so a refund is due.',
         'customer_confirmed' => [
             'subject' => 'Booking :reference confirmed: :offering on :date',
@@ -199,4 +201,5 @@ return [
             'intro' => 'This booking was cancelled by :who.',
         ],
     ],
+    'attendance_closed_note' => 'Not marked within :days days of the session: taken as attended.',
 ];

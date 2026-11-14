@@ -92,6 +92,7 @@ class Stable extends Model implements HasAvatar, HasName
         'approved_at' => 'datetime',
         'commission_type' => FeeType::class,
         'commission_value' => 'decimal:3',
+        'vat_registered' => 'boolean',
         'booking_settings' => 'array',
         'sales_report' => 'array',
     ];
@@ -347,6 +348,6 @@ class Stable extends Model implements HasAvatar, HasName
     /** @return list<string> */
     protected function stableActivityAttributes(): array
     {
-        return ['en_name', 'ar_name', 'slug', 'country_id', 'region_id', 'city_id', 'en_address', 'ar_address', 'map_link', 'website_url', 'instagram_url', 'x_url', 'facebook_url', 'tiktok_url', 'youtube_url', 'en_description', 'ar_description', 'logo', 'cover_photo', 'gallery', 'opening_hours', 'is_active', 'phone', 'email', 'approval_status', 'commission_type', 'commission_value', 'booking_settings', 'sales_report', 'rejection_reason'];
+        return ['en_name', 'ar_name', 'slug', 'country_id', 'region_id', 'city_id', 'en_address', 'ar_address', 'map_link', 'website_url', 'instagram_url', 'x_url', 'facebook_url', 'tiktok_url', 'youtube_url', 'en_description', 'ar_description', 'logo', 'cover_photo', 'gallery', 'opening_hours', 'is_active', 'phone', 'email', 'approval_status', 'commission_type', 'commission_value', 'vat_registered', 'vat_number', 'booking_settings', 'sales_report', 'rejection_reason'];
     }
 }

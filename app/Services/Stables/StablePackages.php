@@ -110,6 +110,18 @@ class StablePackages
             ->update(['status' => StablePackagePurchase::CANCELLED]);
     }
 
+    /**
+     * Its order was refunded in full: the sessions left can no longer be used (sessions already
+     * booked stay booked; cancel them if they go too). A partial refund leaves it on.
+     */
+    public function orderRefunded(ServiceOrder $order): void
+    {
+        StablePackagePurchase::query()
+            ->where('service_order_id', $order->getKey())
+            ->where('status', StablePackagePurchase::ACTIVE)
+            ->update(['status' => StablePackagePurchase::CANCELLED]);
+    }
+
     /** @return Collection<int, StablePackagePurchase> the customer's packages that can pay for this service, with sessions left */
     public function usableFor(?Customer $customer, StableOffering $offering): Collection
     {

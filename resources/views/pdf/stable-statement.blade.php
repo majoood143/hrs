@@ -38,7 +38,10 @@
     </td></tr></table>
 
     <table class="facts">
-        <tr><td class="label">{{ __('stable_statement.fields.stable') }}</td><td>{{ $d($stable->name) }}</td></tr>
+        <tr><td class="label">{{ __('stable_statement.fields.stable') }}</td><td>{{ $d($stable->name) }}@if($stable->vat_number) &nbsp;·&nbsp;{{ __('receipt.vat_number') }} <span dir="ltr">{{ $stable->vat_number }}</span>@endif</td></tr>
+        @if($vatNumber !== '')
+            <tr><td class="label">{{ $d($siteName) }}</td><td>{{ __('receipt.vat_number') }} <span dir="ltr">{{ $vatNumber }}</span></td></tr>
+        @endif
         <tr><td class="label">{{ __('statement.period') }}</td><td><span dir="ltr">{{ $statement->from->toDateString() }} &rarr; {{ $statement->to->toDateString() }}</span></td></tr>
         @if($stable->formatted_commission)
             <tr><td class="label">{{ __('stable_panel.fields.commission') }}</td><td><span dir="ltr">{{ $stable->formatted_commission }}</span></td></tr>
@@ -81,7 +84,7 @@
                     <td><span dir="ltr">{{ $row->bookingReference ?? $row->orderNumber }}</span></td>
                     <td>{{ $d($row->service) }}@if($row->sessionDate) <span dir="ltr">({{ $row->sessionDate }})</span>@endif</td>
                     <td class="num">{{ $row->riders }}</td>
-                    <td>{{ __('stable_statement.kinds.'.$row->kind) }}</td>
+                    <td>{{ $row->label() }}</td>
                     <td class="num"><span dir="ltr">{{ $m($row->collected()) }}</span></td>
                     <td class="num"><span dir="ltr">{{ $m($row->refunded) }}</span></td>
                     <td class="num"><span dir="ltr">{{ $m($row->stableShare()) }}</span></td>

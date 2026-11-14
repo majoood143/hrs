@@ -25,6 +25,10 @@ return [
     ],
 
     'cards' => [
+        'net_to_us' => 'Ours after gateway charges',
+        'net_hint' => 'Less :cost estimated gateway charges',
+        'due_from_stables' => 'Earned on bookings stables collected',
+        'due_from_stables_hint' => 'Our fees and commission, owed by the stables (see Stable balances)',
         'collected' => 'Collected from customers',
         'collected_hint' => ':count paid order(s), all into the client\'s account',
         'due_to_us' => 'Amount due to us',
@@ -32,7 +36,7 @@ return [
         'client_keeps' => 'Remains with the client',
         'client_hint' => 'Collected, less refunds and what is due to us',
         'refunded' => 'Refunded to customers',
-        'refunded_hint' => 'Service fees are never refunded',
+        'refunded_hint' => 'Fees are refunded only when we or the provider cancelled',
     ],
 
     'sections' => [
@@ -56,7 +60,7 @@ return [
         'client_keeps' => 'Remains with the client',
         'client_hint' => 'After refunds and our share',
         'refunded' => 'Refunded',
-        'refunded_hint' => 'Fees are kept',
+        'refunded_hint' => 'Fees kept unless we or the provider cancelled',
         'chart_heading' => 'Daily income',
         'last_days' => 'Last :days days',
     ],

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\PaymentGateway;
+use App\Enums\StableBookingStatus;
 use App\Filament\Pages\StableBalances;
 use App\Filament\Pages\StableStatementReport;
 use App\Filament\Stable\Pages\Statement;
@@ -15,9 +16,15 @@ use App\Models\StableBooking;
 use App\Models\StablePaymentAccount;
 use App\Models\StableSettlement;
 use App\Models\User;
+use App\Services\Orders\OrderReceiptPdf;
+use App\Services\Orders\OrderRefundService;
 use App\Services\Payments\OrderPaymentService;
+use App\Services\Reports\ClosedBooks;
+use App\Services\Reports\IncomeStatement;
+use App\Services\Reports\StableLedgerRow;
 use App\Services\Reports\StableStatement;
 use App\Services\Reports\StableStatementExport;
+use App\Services\Stables\BookingUnavailable;
 use App\Services\Stables\CreateStableBooking;
 use App\Services\Stables\SlotGenerator;
 use App\Services\Stables\StableBookingActions;
@@ -26,6 +33,7 @@ use Filament\Facades\Filament;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Queue;
+use InvalidArgumentException;
 use Livewire\Livewire;
 use Tests\Concerns\PreparesStableBookings;
 use Tests\TestCase;
@@ -143,14 +151,186 @@ class StableStatementTest extends TestCase
 
     public function test_a_refund_shrinks_the_stables_share_and_our_commission(): void
     {
+        Queue::fake();
         $booking = $this->paidBooking(2);
         // the whole client share (31.500) went back to the customer: nothing left to share, the fee stays ours
-        $booking->order->forceFill(['refunded_amount' => '31.500', 'payment_status' => 'refunded'])->save();
+        app(OrderRefundService::class)->record($booking->order, 31500);
 
-        $row = $this->month()->rows()->sole();
+        $row = StableLedgerRow::fromOrder($booking->order->refresh());
 
         $this->assertSame([31500, 0, 0, 0], [$row->refunded, $row->commission, $row->stableShare(), $row->net()]);
         $this->assertSame(1575, $row->collected());
+    }
+
+    public function test_a_paid_booking_called_off_is_held_back_until_its_refund_is_recorded(): void
+    {
+        Queue::fake();
+        $booking = $this->paidBooking(1);
+        $this->assertSame(14250, StableStatement::payable($this->stable));
+
+        // the money goes back to the customer: not ours to pay out to the stable meanwhile
+        app(StableBookingActions::class)->cancelByStable($booking, 'Sick horse');
+        $this->assertSame(14250, StableStatement::heldForRefund($this->stable));
+        $this->assertSame(0, StableStatement::payable($this->stable));
+        $this->assertStringContainsString('14.250 held until a cancelled booking is refunded', StableStatement::balanceLabel($this->stable));
+
+        // 10.000 refunded: the rest is the stable's again, less the commission it still earns
+        app(OrderRefundService::class)->record($booking->order->refresh(), 10000);
+        $this->assertSame(0, StableStatement::heldForRefund($this->stable));
+        $this->assertSame(5750 - 548, StableStatement::payable($this->stable));
+    }
+
+    public function test_the_fee_goes_back_too_when_the_customer_did_not_call_it_off(): void
+    {
+        Queue::fake();
+        $booking = $this->paidBooking(1);
+        $order = $booking->order;
+
+        // the customer's own cancellation: price and its VAT only
+        $order->forceFill(['status' => 'cancelled', 'cancellation_source' => 'customer'])->save();
+        $this->assertSame(15.75, $order->refresh()->refundableAmount());
+
+        // the stable's: everything they paid, our fee included
+        $order->forceFill(['cancellation_source' => 'stable'])->save();
+        $this->assertSame(16.538, $order->refresh()->refundableAmount());
+
+        app(OrderRefundService::class)->record($order, 16538);
+        $row = StableLedgerRow::fromOrder($order->refresh()->load('refunds'));
+        $this->assertSame([0, 0, 0], [$row->stableShare(), $row->ourShare(), $row->collected()]);
+        $this->assertSame(0, StableStatement::balance($this->stable));
+        $this->assertSame(0, IncomeStatement::forPeriod('this_month')->totals()['due_to_us']);
+    }
+
+    public function test_a_refund_is_dated_the_day_it_was_recorded_and_leaves_the_past_month_alone(): void
+    {
+        Queue::fake();
+        Carbon::setTestNow('2026-09-20 05:30:00');
+        $booking = $this->paidBooking(1);
+
+        Carbon::setTestNow('2026-10-04 05:30:00');
+        app(OrderRefundService::class)->record($booking->order->refresh(), 10000);
+
+        $september = StableStatement::forPeriod($this->stable->refresh(), 'custom', '2026-09-01', '2026-09-30');
+        $this->assertSame([14250, 1], [$september->closing(), $september->totals()['bookings']]);
+
+        // October: the refund only, 10.000 back and 0.952 of the commission with it
+        $october = $this->month();
+        $this->assertSame([14250, -9048, 0], [$october->opening(), $october->totals()['net'], $october->totals()['bookings']]);
+        $this->assertTrue($october->rows()->sole()->isRefund());
+        $this->assertSame(5202, $october->closing());
+
+        $this->assertSame(2288, IncomeStatement::forPeriod('custom', '2026-09-01', '2026-09-30')->totals()['due_to_us']);
+        $income = IncomeStatement::forPeriod('this_month')->totals();
+        $this->assertSame([0, 10000, -952], [$income['orders'], $income['refunded'], $income['due_to_us']]);
+    }
+
+    public function test_a_closed_month_takes_no_backdated_settlement_or_attendance_change(): void
+    {
+        $books = app(ClosedBooks::class);
+
+        try {
+            $books->close('2026-10');
+            $this->fail('The current month was closed.');
+        } catch (InvalidArgumentException) {
+        }
+
+        $books->close('2026-09');
+        $this->assertSame('2026-09-30', ClosedBooks::through());
+
+        try {
+            app(StableSettlements::class)->record($this->stable, StableSettlement::PAYOUT, '5', '2026-09-30');
+            $this->fail('A payout was dated in a closed month.');
+        } catch (InvalidArgumentException) {
+        }
+        app(StableSettlements::class)->record($this->stable, StableSettlement::PAYOUT, '5', '2026-10-01');
+
+        // a pay-at-the-stable session attended in October, then October closed: it stays attended
+        $late = BookingSlot::query()->where('date', '2026-10-27')->sole();
+        $booking = app(CreateStableBooking::class)->handle($late, [['name' => 'Omar']], ['name' => 'Aisha', 'phone' => '91234567'], 'at_stable');
+        Carbon::setTestNow('2026-10-27 08:00:00');
+        app(StableBookingActions::class)->markAttended($booking);
+
+        Carbon::setTestNow('2026-11-01 08:00:00');
+        $books->close('2026-10');
+        $this->expectException(BookingUnavailable::class);
+        app(StableBookingActions::class)->markNoShow($booking);
+    }
+
+    public function test_gateway_charges_are_fixed_on_the_payment_and_stable_collected_fees_are_reported(): void
+    {
+        $this->stableSiteSettings(['enabled_gateways' => ['demo'], 'sms.driver' => 'demo', 'vat.enabled' => true, 'vat.rate' => '5',
+            'payments.gateway_costs' => json_encode(['thawani' => ['percent' => 2.5, 'fixed' => 0.1]])]);
+
+        $booking = $this->booking(1);
+        app(OrderPaymentService::class)->applyPaid($booking->order, PaymentGateway::Thawani, 'T-1');
+        $this->assertSame('0.513', $booking->order->refresh()->gateway_cost);   // 2.5% of 16.538 + 0.100
+
+        $atStable = $this->booking(1, 'at_stable');
+        Carbon::setTestNow('2026-10-06 08:00:00');
+        app(StableBookingActions::class)->markAttended($atStable);
+
+        $income = IncomeStatement::forPeriod('this_month');
+        $this->assertSame([2288, 513, 1775], [$income->totals()['due_to_us'], $income->totals()['gateway_cost'], $income->totals()['net_to_us']]);
+        $this->assertSame(2288, $income->dueFromStables());
+    }
+
+    public function test_attendance_is_final_after_the_window_and_unmarked_sessions_are_billed(): void
+    {
+        $marked = $this->booking(1, 'at_stable');
+        $unmarked = $this->booking(1, 'at_stable');
+        $actions = app(StableBookingActions::class);
+
+        Carbon::setTestNow('2026-10-06 08:00:00');
+        $actions->markAttended($marked);
+
+        // the last day of the window: still open, and the sweep leaves it to the stable
+        Carbon::setTestNow('2026-10-13 08:00:00');
+        $this->artisan('stables:close-attendance')->assertSuccessful();
+        $this->assertSame(StableBookingStatus::Confirmed, $unmarked->refresh()->status);
+
+        Carbon::setTestNow('2026-10-14 08:00:00');
+        try {
+            $actions->markNoShow($marked);   // would wipe what the stable owes us
+            $this->fail('A closed session was changed.');
+        } catch (BookingUnavailable) {
+            $this->assertSame(StableBookingStatus::Completed, $marked->refresh()->status);
+        }
+
+        $this->artisan('stables:close-attendance')->assertSuccessful();
+        $this->assertSame(StableBookingStatus::Completed, $unmarked->refresh()->status);
+        $this->assertSame(0, StableStatement::unmarkedAtStable($this->stable));
+        $this->assertSame(2 * 2288, $this->month()->totals()['owed_by_stable']);
+    }
+
+    public function test_vat_on_the_price_is_the_stables_and_only_when_it_is_registered(): void
+    {
+        // an unregistered stable: no VAT on its session; our fee still carries ours
+        $this->stable->forceFill(['vat_registered' => false, 'vat_number' => null])->save();
+        $order = $this->booking(1)->order;
+        $this->assertSame(['0.000', '0.038', '15.788', null], [$order->vat_on_price, $order->vat_on_fee, $order->total, $order->stable_vat_number]);
+
+        // a registered stable while we are not: VAT on its price only, under its number
+        $this->stableSiteSettings(['enabled_gateways' => ['demo'], 'sms.driver' => 'demo', 'vat.enabled' => false, 'vat.rate' => '5']);
+        $this->stable->forceFill(['vat_registered' => true, 'vat_number' => 'OM1100000099'])->save();
+        $order = $this->booking(1)->order;
+        $this->assertSame(['0.750', '0.000', '16.500', 'OM1100000099'], [$order->vat_on_price, $order->vat_on_fee, $order->total, $order->stable_vat_number]);
+    }
+
+    public function test_each_refund_is_a_numbered_credit_note_on_the_tax_invoice(): void
+    {
+        Queue::fake();
+        $order = $this->paidBooking(1)->order;
+
+        $first = app(OrderRefundService::class)->record($order, 5000);
+        $second = app(OrderRefundService::class)->record($order->refresh(), 2000);
+        $this->assertSame(['CN-2026-000001', 'CN-2026-000002'], [$first->credit_note_number, $second->credit_note_number]);
+
+        $html = app(OrderReceiptPdf::class)->html($order->refresh(), 'en');
+        $this->assertStringContainsString('Tax invoice and receipt', $html);
+        $this->assertStringContainsString('Session supplied by', $html);
+        $this->assertStringContainsString('OM1100000001', $html);
+        $this->assertStringContainsString('CN-2026-000002', $html);
+        $this->assertStringStartsWith('%PDF', app(OrderReceiptPdf::class)->render($order, 'ar'));
     }
 
     public function test_the_period_carries_its_opening_balance(): void
@@ -272,5 +452,24 @@ class StableStatementTest extends TestCase
             ->assertOk()
             ->assertSee('Nothing is owed either way.')
             ->assertSee('TRX-1');
+    }
+
+    public function test_the_admin_closes_and_reopens_a_month_from_the_balances_page(): void
+    {
+        Gate::before(fn () => true);
+        $this->actingAs($this->makeAdminUser());
+        Filament::setCurrentPanel(Filament::getPanel('admin'));
+
+        Livewire::test(StableBalances::class)
+            ->assertActionHidden('reopenMonth')
+            ->callAction('closeMonth', ['month' => '2026-09', 'note' => 'September audited'])
+            ->assertHasNoActionErrors()
+            ->assertSee('Books closed through 2026-09-30')
+            ->assertActionVisible('reopenMonth');
+
+        $this->assertSame('2026-09-30', ClosedBooks::through());
+
+        Livewire::test(StableBalances::class)->callAction('reopenMonth');
+        $this->assertSame('2026-08-31', ClosedBooks::through());
     }
 }

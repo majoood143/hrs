@@ -7,9 +7,11 @@ use App\Mail\StableSettlementMail;
 use App\Models\Stable;
 use App\Models\StableSettlement;
 use App\Models\User;
+use App\Services\Reports\ClosedBooks;
 use App\Services\Sms\SmsManager;
 use App\Support\Locale;
 use App\Support\Money;
+use Illuminate\Support\Carbon;
 use InvalidArgumentException;
 use Throwable;
 
@@ -32,6 +34,10 @@ class StableSettlements
 
         if (! in_array($direction, [StableSettlement::PAYOUT, StableSettlement::RECEIPT], true) || $amount <= 0) {
             throw new InvalidArgumentException('A settlement is a payout or a receipt of a positive amount.');
+        }
+
+        if (ClosedBooks::isClosed(Carbon::parse($paidOn)->toDateString())) {
+            throw new InvalidArgumentException(__('closed_books.errors.closed_date', ['date' => ClosedBooks::through()]));
         }
 
         $settlement = $stable->settlements()->create([

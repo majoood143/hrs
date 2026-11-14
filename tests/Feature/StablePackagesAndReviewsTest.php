@@ -16,6 +16,7 @@ use App\Models\StablePackage;
 use App\Models\StablePackagePurchase;
 use App\Models\StableReview;
 use App\Models\User;
+use App\Services\Orders\OrderRefundService;
 use App\Services\Payments\OrderPaymentService;
 use App\Services\Reports\StableStatement;
 use App\Services\Stables\BookingUnavailable;
@@ -156,6 +157,23 @@ class StablePackagesAndReviewsTest extends TestCase
 
         app(StableBookingActions::class)->cancelByCustomer($booking);
         $this->assertSame(5, $purchase->sessionsLeft());
+    }
+
+    public function test_a_package_refunded_in_full_gives_no_more_sessions(): void
+    {
+        Queue::fake();
+        $purchase = $this->activePurchase();
+
+        // two of the five sessions' worth back: the package stays on with three
+        app(OrderRefundService::class)->record($purchase->order, 24000);
+        $this->assertSame(StablePackagePurchase::ACTIVE, $purchase->refresh()->status);
+        $this->assertSame(3, $purchase->sessionsLeft());
+
+        app(OrderRefundService::class)->record($purchase->order->refresh(), 36000);
+        $this->assertSame(StablePackagePurchase::CANCELLED, $purchase->refresh()->status);
+
+        $this->expectException(BookingUnavailable::class);
+        $this->bookWithPackage($purchase);
     }
 
     public function test_a_package_only_pays_for_its_own_customer_service_and_dates(): void

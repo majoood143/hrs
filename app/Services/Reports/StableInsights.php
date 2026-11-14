@@ -53,7 +53,7 @@ class StableInsights
     {
         return $this->rows ??= StableStatement::ordersQuery($this->stable)
             ->get()
-            ->map(fn (ServiceOrder $order) => StableLedgerRow::fromOrder($order))
+            ->flatMap(fn (ServiceOrder $order) => StableLedgerRow::entriesFor($order))
             ->filter(fn (StableLedgerRow $row) => $row->date->betweenIncluded($this->from, $this->to))
             ->values();
     }
@@ -71,7 +71,7 @@ class StableInsights
             'commission' => (int) $rows->sum(fn (StableLedgerRow $r) => $r->commission + $r->vatOnCommission),
             'fee' => (int) $rows->sum(fn (StableLedgerRow $r) => $r->fee + $r->vatOnFee),
             'our_share' => (int) $rows->sum(fn (StableLedgerRow $r) => $r->ourShare()),
-            'bookings' => $rows->filter(fn (StableLedgerRow $r) => $r->bookingReference !== null)->count(),
+            'bookings' => $rows->filter(fn (StableLedgerRow $r) => $r->bookingReference !== null && ! $r->isRefund())->count(),
             'riders' => (int) $rows->sum(fn (StableLedgerRow $r) => $r->riders),
         ];
     }
@@ -198,7 +198,7 @@ class StableInsights
             ->groupBy(fn (StableLedgerRow $r) => $r->service)
             ->map(fn (Collection $rows, string $name) => [
                 'name' => $name,
-                'count' => $rows->count(),
+                'count' => $rows->reject(fn (StableLedgerRow $r) => $r->isRefund())->count(),
                 'riders' => (int) $rows->sum(fn (StableLedgerRow $r) => $r->riders),
                 'collected' => (int) $rows->sum(fn (StableLedgerRow $r) => $r->collected()),
                 'stable_share' => (int) $rows->sum(fn (StableLedgerRow $r) => $r->stableShare()),
@@ -223,7 +223,7 @@ class StableInsights
             ->map(fn (Collection $rows, int $id) => [
                 'stable' => $stables->get($id),
                 'stable_id' => $id,
-                'count' => $rows->count(),
+                'count' => $rows->reject(fn (StableLedgerRow $r) => $r->isRefund())->count(),
                 'collected' => (int) $rows->sum(fn (StableLedgerRow $r) => $r->collected()),
                 'stable_share' => (int) $rows->sum(fn (StableLedgerRow $r) => $r->stableShare()),
                 'our_share' => (int) $rows->sum(fn (StableLedgerRow $r) => $r->ourShare()),

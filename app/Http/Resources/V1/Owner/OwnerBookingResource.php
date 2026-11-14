@@ -7,9 +7,9 @@ use App\Filament\Stable\Resources\StableBookings\StableBookingResource;
 use App\Http\Resources\V1\Bookings\SlotResource;
 use App\Http\Resources\V1\MoneyResource;
 use App\Http\Resources\V1\OptionResource;
-use App\Models\BookingSlot;
 use App\Models\StableBooking;
 use App\Services\Reports\StableLedgerRow;
+use App\Services\Stables\StableBookingActions;
 use App\Support\StableBookingSettings;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -29,7 +29,8 @@ class OwnerBookingResource extends JsonResource
         $booking->loadMissing(['slot.trainer', 'offering', 'order', 'packagePurchase']);
         $order = $booking->order;
         $status = $booking->status;
-        $due = $booking->slot && $booking->slot->date->toDateString() <= BookingSlot::today();
+        // from the session's day until the attendance window closes (then it is final)
+        $due = StableBookingActions::attendanceOpen($booking);
         $row = $this->ledgerRow($booking);
 
         return [

@@ -26,7 +26,7 @@
 @endif
 
 @if($type === 'cancelled' && $refundDue)
-{{ __("stable_bookings.mail.{$audience}_refund") }}
+{{ __("stable_bookings.mail.{$audience}_refund".($audience === 'customer' && $booking->order?->feeRefundable() ? '_full' : '')) }}
 @endif
 
 @if($audience === 'customer' && $type === 'confirmed')

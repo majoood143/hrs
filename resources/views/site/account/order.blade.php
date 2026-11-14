@@ -84,7 +84,7 @@
                     </li>
                 @endforeach
             </ul>
-            @if((float) $order->fee_amount > 0)
+            @if((float) $order->fee_amount > 0 && ! $order->feeRefundable())
                 <p class="mt-2 text-xs text-warm-700">{{ __('account.fee_not_refunded') }}</p>
             @endif
         @endif

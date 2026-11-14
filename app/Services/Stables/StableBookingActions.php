@@ -3,14 +3,19 @@
 namespace App\Services\Stables;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Enums\StableBookingStatus;
 use App\Events\StableBookingCancelled;
 use App\Events\StableBookingConfirmed;
 use App\Jobs\SendStableBookingNotification;
+use App\Models\BookingSlot;
 use App\Models\ServiceOrder;
 use App\Models\StableBooking;
+use App\Models\User;
 use App\Services\Payments\OrderPaymentService;
 use App\Services\Payments\PaymentGateways;
+use App\Services\Reports\ClosedBooks;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -23,6 +28,12 @@ use Illuminate\Support\Facades\DB;
  */
 class StableBookingActions
 {
+    /**
+     * Days after the session during which attended / no-show can still be set or corrected. After
+     * that it is final: statements and settlements count it, so it must not move under them.
+     */
+    public const ATTENDANCE_DAYS = 7;
+
     public function __construct(private readonly OrderPaymentService $payments) {}
 
     /**
@@ -136,6 +147,38 @@ class StableBookingActions
         return $this->finish($booking, StableBookingStatus::NoShow);
     }
 
+    /**
+     * The stable let the attendance window close without marking it: the session is taken as held
+     * (stables:close-attendance), so a pay-at-the-stable booking is billed. No review invite.
+     */
+    public function closeAttendance(StableBooking $booking): StableBooking
+    {
+        return $this->finish($booking, StableBookingStatus::Completed, automatic: true);
+    }
+
+    /** Whether attended / no-show may be set now: from the session's day until ATTENDANCE_DAYS after it. */
+    public static function attendanceOpen(StableBooking $booking): bool
+    {
+        $date = $booking->slot?->date?->toDateString();
+        $today = BookingSlot::today();
+
+        return $date !== null && $date <= $today
+            && $date >= CarbonImmutable::parse($today)->subDays(self::ATTENDANCE_DAYS)->toDateString();
+    }
+
+    /** attendanceOpen(), except that an admin may still correct a past session later (logged); never a stable owner. */
+    public static function mayMark(StableBooking $booking): bool
+    {
+        if (self::attendanceOpen($booking)) {
+            return true;
+        }
+
+        $user = auth()->user();
+
+        return $user instanceof User && $user->managesStables()
+            && $booking->slot !== null && $booking->slot->date->toDateString() <= BookingSlot::today();
+    }
+
     private function cancel(StableBooking $booking, string $source, ?string $reason = null): StableBooking
     {
         $notify = DB::transaction(function () use ($booking, $source, $reason): bool {
@@ -178,18 +221,28 @@ class StableBookingActions
         return $booking;
     }
 
-    private function finish(StableBooking $booking, StableBookingStatus $status): StableBooking
+    private function finish(StableBooking $booking, StableBookingStatus $status, bool $automatic = false): StableBooking
     {
         $invite = false;
 
-        DB::transaction(function () use ($booking, $status, &$invite): void {
+        DB::transaction(function () use ($booking, $status, $automatic, &$invite): void {
             $locked = StableBooking::query()->whereKey($booking->getKey())->lockForUpdate()->first();
 
-            if (! $locked || ! in_array($locked->status, [StableBookingStatus::Confirmed, StableBookingStatus::Completed, StableBookingStatus::NoShow], true)) {
+            if (! $locked || ! in_array($locked->status, $automatic ? [StableBookingStatus::Confirmed] : [StableBookingStatus::Confirmed, StableBookingStatus::Completed, StableBookingStatus::NoShow], true)) {
                 throw new BookingUnavailable(__('stable_bookings.errors.not_confirmed'));
             }
 
-            $invite = $status === StableBookingStatus::Completed && $locked->status !== StableBookingStatus::Completed;
+            if (! $automatic && ! self::mayMark($locked)) {
+                throw new BookingUnavailable(__('stable_bookings.errors.attendance_closed', ['days' => self::ATTENDANCE_DAYS]));
+            }
+
+            // a pay-at-the-stable session counted in a closed month stays as it was counted
+            if ($locked->status === StableBookingStatus::Completed && $locked->order?->payment_status === PaymentStatus::OnSite
+                && ClosedBooks::isClosed($locked->attended_at?->setTimezone(BookingSlot::timezone())->toDateString())) {
+                throw new BookingUnavailable(__('closed_books.errors.closed_attendance'));
+            }
+
+            $invite = ! $automatic && $status === StableBookingStatus::Completed && $locked->status !== StableBookingStatus::Completed;
             $locked->forceFill(['status' => $status, 'attended_at' => $status === StableBookingStatus::Completed ? now() : null])->save();
 
             // the session took place (or the customer did not come): the order is done with
@@ -197,7 +250,7 @@ class StableBookingActions
 
             if ($order && in_array($order->status, [OrderStatus::New, OrderStatus::Processing], true)) {
                 $order->forceFill(['status' => OrderStatus::Completed, 'completed_at' => now()])->save();
-                $order->recordEvent($status === StableBookingStatus::Completed ? 'booking_attended' : 'booking_no_show', null, public: false);
+                $order->recordEvent($status === StableBookingStatus::Completed ? 'booking_attended' : 'booking_no_show', $automatic ? __('stable_bookings.attendance_closed_note', ['days' => self::ATTENDANCE_DAYS]) : null, public: false);
             }
         });
 

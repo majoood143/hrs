@@ -64,6 +64,8 @@ class StableStatementExport
                 'currencyIcon' => app(RacingPdf::class)->currencyIcon(),
                 'logo' => app(RacingPdf::class)->siteLogo(),
                 'siteName' => SiteSetting::siteName(),
+                // the statement is also our invoice to the stable for the commission: both VAT numbers
+                'vatNumber' => (string) SiteSetting::get('vat.registration_number', ''),
                 'locale' => $locale,
                 'rtl' => $rtl,
                 'd' => fn (?string $text) => PdfText::dir($text, $rtl),
@@ -123,7 +125,7 @@ class StableStatementExport
             foreach ($statement->rows() as $row) {
                 fputcsv($out, [
                     $row->date->toDateString(), $row->bookingReference, $row->orderNumber, $row->service, $row->riders,
-                    __('stable_statement.kinds.'.$row->kind), $plain($row->collected()), $plain($row->refunded),
+                    $row->label(), $plain($row->collected()), $plain($row->refunded),
                     $plain($row->stableShare()), $plain($row->fee + $row->vatOnFee), $plain($row->commission + $row->vatOnCommission), $plain($row->net()),
                 ]);
             }

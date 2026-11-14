@@ -8,8 +8,10 @@ use App\Enums\PaymentStatus;
 use App\Events\ServiceOrderReceived;
 use App\Models\PaymentGatewayLog;
 use App\Models\ServiceOrder;
+use App\Services\Orders\PriceBreakdown;
 use App\Services\Stables\StableBookingActions;
 use App\Services\Stables\StablePackages;
+use App\Support\GatewayCosts;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -76,6 +78,8 @@ class OrderPaymentService
                 'payment_method' => $gateway,
                 'payment_reference' => $reference ?? $locked->payment_reference,
                 'paid_at' => now(),
+                // what the gateway charges us, fixed now; a stable's own account bears its own
+                'gateway_cost' => PriceBreakdown::toOmr($locked->collected_by === 'stable' ? 0 : GatewayCosts::estimate($gateway, $locked->totalBaisa())),
             ];
 
             if ($action !== self::ACTION_NEEDS_REFUND) {

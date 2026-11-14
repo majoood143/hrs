@@ -199,7 +199,6 @@ class OrderRefundTest extends TestCase
         $this->assertCount(2, $sms);
         $this->assertStringContainsString('OMR 4.000', $sms[0]);
         $this->assertStringContainsString('OMR 2.000', $sms[1]);
-        $this->assertStringContainsString('not refundable', $sms[1]);
     }
 
     public function test_the_refund_email_speaks_arabic_to_an_arabic_customer(): void

@@ -8,6 +8,13 @@
         ['label' => __('admin_income_report.cards.client_keeps'), 'value' => $t['client_keeps'], 'hint' => __('admin_income_report.cards.client_hint')],
         ['label' => __('admin_income_report.cards.refunded'), 'value' => $t['refunded'], 'hint' => __('admin_income_report.cards.refunded_hint')],
     ];
+    if ($t['gateway_cost'] > 0) {
+        $cards[] = ['label' => __('admin_income_report.cards.net_to_us'), 'value' => $t['net_to_us'], 'hint' => new \Illuminate\Support\HtmlString(__('admin_income_report.cards.net_hint', ['cost' => $m($t['gateway_cost'])]))];
+    }
+    $fromStables = $statement->dueFromStables();
+    if ($fromStables !== 0) {
+        $cards[] = ['label' => __('admin_income_report.cards.due_from_stables'), 'value' => $fromStables, 'hint' => __('admin_income_report.cards.due_from_stables_hint')];
+    }
     $services = $statement->byService();
     $days = $statement->byDay()->filter(fn (array $day) => $day['orders'] > 0);
     $gateways = $statement->byGateway();

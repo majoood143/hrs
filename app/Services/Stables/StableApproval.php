@@ -59,6 +59,20 @@ class StableApproval
         return $stable;
     }
 
+    /** Whether the stable is VAT-registered (it then charges VAT on its sessions, under its own number). */
+    public function setVat(Stable $stable, bool $registered, ?string $number): Stable
+    {
+        $number = strtoupper(preg_replace('/\s+/', '', (string) $number));
+
+        if ($registered && $number === '') {
+            throw new InvalidArgumentException(__('admin_stable.vat.number_required'));
+        }
+
+        $stable->forceFill(['vat_registered' => $registered, 'vat_number' => $registered ? $number : null])->save();
+
+        return $stable;
+    }
+
     private function decline(Stable $stable, StableApprovalStatus $status, string $reason, ?User $by): Stable
     {
         $stable->forceFill([

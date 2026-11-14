@@ -46,6 +46,11 @@ class IncomeStatementTest extends TestCase
             'refunded_amount' => $refunded,
         ])->save();
 
+        // a refund is an entry of its own (here on the payment's day, so it falls in the same period)
+        if ($refunded > 0) {
+            $order->refunds()->forceCreate(['amount' => $refunded, 'method' => 'manual', 'created_at' => $paidAt, 'updated_at' => $paidAt]);
+        }
+
         return $order->refresh();
     }
 

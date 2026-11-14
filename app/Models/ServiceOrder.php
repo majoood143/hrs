@@ -55,6 +55,7 @@ class ServiceOrder extends Model
             'commission_value' => 'decimal:3',
             'vat_on_commission' => 'decimal:3',
             'refunded_amount' => 'decimal:3',
+            'gateway_cost' => 'decimal:3',
             'paid_at' => 'datetime',
             'completed_at' => 'datetime',
             'cancelled_at' => 'datetime',
@@ -239,13 +240,36 @@ class ServiceOrder extends Model
         return round((float) $this->fee_amount + (float) $this->vat_on_fee, 3);
     }
 
+    /**
+     * Whether a refund may include our service fee: the order was called off by the stable, an admin
+     * or the system, or paid after it had been cancelled. Not when the customer cancelled it
+     * themselves, nor when a reviewer rejected it (the review was done).
+     */
+    public function feeRefundable(): bool
+    {
+        return $this->status === OrderStatus::Cancelled
+            && ($this->cancellation_source !== 'customer' || ! empty($this->meta['needs_refund']));
+    }
+
+    /** The part of the refunds that came out of the client's share (refunds take from it first). */
+    public function clientRefunded(): float
+    {
+        return min((float) $this->refunded_amount, $this->clientShare());
+    }
+
+    /** The part of the refunds that was our service fee and its VAT. */
+    public function feeRefunded(): float
+    {
+        return max(0.0, round((float) $this->refunded_amount - $this->clientShare(), 3));
+    }
+
     /** The commission taken from the client's share, less the part that went back to the customer in a refund. */
     public function earnedCommission(): float
     {
         return OrderMoney::earnedCommission(
             (int) round((float) $this->commission_amount * 1000),
             (int) round($this->clientShare() * 1000),
-            (int) round((float) $this->refunded_amount * 1000),
+            (int) round($this->clientRefunded() * 1000),
         ) / 1000;
     }
 
@@ -255,14 +279,14 @@ class ServiceOrder extends Model
         return OrderMoney::earnedCommission(
             (int) round((float) $this->vat_on_commission * 1000),
             (int) round($this->clientShare() * 1000),
-            (int) round((float) $this->refunded_amount * 1000),
+            (int) round($this->clientRefunded() * 1000),
         ) / 1000;
     }
 
-    /** Everything this order owes us: the service fee, the VAT on it, the commission earned, and the VAT on that. */
+    /** Everything this order owes us: the service fee and its VAT (less any refunded), the commission earned, and the VAT on that. */
     public function dueToUs(): float
     {
-        return round($this->feeShare() + $this->earnedCommission() + $this->earnedVatOnCommission(), 3);
+        return round($this->feeShare() - $this->feeRefunded() + $this->earnedCommission() + $this->earnedVatOnCommission(), 3);
     }
 
     /** A paid order that will not be fulfilled (rejected or cancelled) and has not been refunded yet. */
@@ -279,14 +303,16 @@ class ServiceOrder extends Model
         return $this->stages->firstWhere('status', OrderStage::REJECTED)?->comment;
     }
 
-    /** What a refund may still return: the client's share less what was already refunded. */
+    /** What a refund may still return: the client's share (the whole total when the fee is refundable) less what was already refunded. */
     public function refundableAmount(): float
     {
         if (! $this->isPaid()) {
             return 0.0;
         }
 
-        return max(0.0, round($this->clientShare() - (float) $this->refunded_amount, 3));
+        $cap = $this->feeRefundable() ? (float) $this->total : $this->clientShare();
+
+        return max(0.0, round($cap - (float) $this->refunded_amount, 3));
     }
 
     /** The total in baisa, the unit gateways compare amounts in. */

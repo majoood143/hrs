@@ -44,6 +44,7 @@ return [
         'online_ours' => 'إلكتروني عن طريقنا',
         'online_own' => 'إلكتروني عبر بوابة الإسطبل',
         'at_stable' => 'في الإسطبل',
+        'refund' => 'استرداد',
     ],
 
     'directions' => [
@@ -89,6 +90,7 @@ return [
         'rate' => 'بنسبة :rate',
         'balance' => 'رصيدك معنا',
         'balance_we_owe' => 'مستحق لك علينا',
+        'held' => ':amount محجوز حتى يُسترد مبلغ حجز ملغى',
         'balance_you_owe' => 'مستحق لنا عليك',
         'balance_settled' => 'لا يوجد رصيد مستحق',
         'today' => 'حجوزات اليوم',

@@ -93,7 +93,19 @@ class StablePackagePurchase extends Model
 
     public function sessionsLeft(): int
     {
-        return max(0, $this->sessions - $this->sessionsUsed());
+        return max(0, $this->sessions - $this->sessionsUsed() - $this->sessionsRefunded());
+    }
+
+    /**
+     * Sessions taken back by refunds: the refunded share of the price, in whole sessions (to the
+     * nearest one). A refund of the unused part of a package takes those sessions away.
+     */
+    public function sessionsRefunded(): int
+    {
+        $order = $this->order;
+        $share = $order ? (int) round($order->clientShare() * 1000) : 0;
+
+        return $share > 0 ? (int) round($this->sessions * (int) round($order->clientRefunded() * 1000) / $share, 0, PHP_ROUND_HALF_UP) : 0;
     }
 
     public function isUsable(): bool

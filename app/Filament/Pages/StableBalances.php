@@ -8,10 +8,12 @@ use App\Models\ServiceOrder;
 use App\Models\Stable;
 use App\Models\StableSettlement;
 use App\Models\User;
+use App\Services\Reports\ClosedBooks;
 use App\Services\Reports\StableStatement;
 use App\Services\Stables\StableSettlements;
 use App\Support\Money;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+use Carbon\CarbonImmutable;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\DatePicker;
@@ -27,6 +29,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
+use InvalidArgumentException;
 
 /**
  * Every stable's balance with us: what we owe the ones whose bookings we collected, what the ones
@@ -54,6 +57,57 @@ class StableBalances extends Page implements HasTable
     public static function getNavigationLabel(): string
     {
         return __('stable_statement.admin.title');
+    }
+
+    public function getSubheading(): ?string
+    {
+        $through = ClosedBooks::through();
+
+        return $through ? __('closed_books.closed_through', ['date' => $through]) : null;
+    }
+
+    /** Closing a month (and reopening the last one) lives here, next to the payouts it protects. */
+    protected function getHeaderActions(): array
+    {
+        $user = fn () => auth()->user() instanceof User ? auth()->user() : null;
+        $run = function (callable $action, string $done): void {
+            try {
+                $action();
+                Notification::make()->success()->title(__($done))->send();
+            } catch (InvalidArgumentException $e) {
+                Notification::make()->danger()->title($e->getMessage())->send();
+            }
+        };
+
+        return [
+            Action::make('closeMonth')
+                ->label(__('closed_books.close'))
+                ->icon('heroicon-o-lock-closed')
+                ->color('gray')
+                ->modalDescription(__('closed_books.close_hint'))
+                ->schema([
+                    Select::make('month')
+                        ->label(__('closed_books.month'))
+                        ->options(fn () => collect(range(1, 12))
+                            ->map(fn (int $i) => CarbonImmutable::parse(BookingSlot::today())->startOfMonth()->subMonthsNoOverflow($i))
+                            ->reject(fn (CarbonImmutable $m) => ClosedBooks::isClosed($m->endOfMonth()->toDateString()))
+                            ->mapWithKeys(fn (CarbonImmutable $m) => [$m->format('Y-m') => $m->locale(app()->getLocale())->translatedFormat('F Y')]))
+                        ->default(CarbonImmutable::parse(BookingSlot::today())->subMonthNoOverflow()->format('Y-m'))
+                        ->required()
+                        ->native(false),
+                    Textarea::make('note')->label(__('closed_books.note'))->rows(2)->maxLength(500),
+                ])
+                ->action(fn (array $data) => $run(fn () => app(ClosedBooks::class)->close($data['month'], $user(), $data['note'] ?? null), 'closed_books.closed')),
+            Action::make('reopenMonth')
+                ->label(fn () => __('closed_books.reopen', ['month' => CarbonImmutable::parse((string) ClosedBooks::through())->locale(app()->getLocale())->translatedFormat('F Y')]))
+                ->icon('heroicon-o-lock-open')
+                ->color('danger')
+                ->requiresConfirmation()
+                ->modalDescription(__('closed_books.reopen_hint'))
+                // super admins only: Shield lets them past every check, and nobody else holds this permission
+                ->visible(fn () => ClosedBooks::through() !== null && (bool) $user()?->can('ReopenBooks'))
+                ->action(fn () => $run(fn () => app(ClosedBooks::class)->reopen($user()), 'closed_books.reopened')),
+        ];
     }
 
     public function getTitle(): string
@@ -148,6 +202,7 @@ class StableBalances extends Page implements HasTable
                 ->label(__('stable_statement.fields.paid_on'))
                 // Oman's day: the server's UTC date is still yesterday until 4 a.m.
                 ->default(BookingSlot::today())
+                ->minDate(ClosedBooks::firstOpenDay())
                 ->maxDate(BookingSlot::today())
                 ->required(),
             Select::make('method')
@@ -170,10 +225,16 @@ class StableBalances extends Page implements HasTable
     {
         $user = auth()->user();
 
-        app(StableSettlements::class)->record(
-            $stable, $direction, $data['amount'], substr((string) $data['paid_on'], 0, 10), $data['method'],
-            $data['reference'] ?? null, $data['note'] ?? null, $user instanceof User ? $user : null,
-        );
+        try {
+            app(StableSettlements::class)->record(
+                $stable, $direction, $data['amount'], substr((string) $data['paid_on'], 0, 10), $data['method'],
+                $data['reference'] ?? null, $data['note'] ?? null, $user instanceof User ? $user : null,
+            );
+        } catch (InvalidArgumentException $e) {
+            Notification::make()->danger()->title($e->getMessage())->send();
+
+            return;
+        }
 
         Notification::make()->success()->title(__('stable_statement.admin.recorded'))->send();
     }
@@ -185,7 +246,7 @@ class StableBalances extends Page implements HasTable
             ->icon($direction === StableSettlement::PAYOUT ? 'heroicon-o-arrow-up-right' : 'heroicon-o-arrow-down-left')
             ->modalDescription(__('stable_statement.admin.record_'.$direction.'_hint'))
             ->visible(fn (Stable $record) => Gate::allows('update', $record))
-            ->schema(fn (Stable $record) => static::settlementForm($direction, $direction === StableSettlement::PAYOUT ? max(0, $this->balanceOf($record)) : max(0, -$this->balanceOf($record))))
+            ->schema(fn (Stable $record) => static::settlementForm($direction, $direction === StableSettlement::PAYOUT ? max(0, StableStatement::payable($record)) : max(0, -$this->balanceOf($record))))
             ->action(function (Stable $record, array $data) use ($direction): void {
                 static::recordSettlement($record, $direction, $data);
                 unset($this->balances[$record->getKey()]);

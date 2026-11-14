@@ -34,7 +34,7 @@ class OrderRefundedMail extends Mailable
             'serviceName' => $this->order->serviceName(),
             'rtl' => app()->getLocale() === 'ar',
             'amount' => $this->order->currency.' '.SiteSetting::formatAmount((float) ($refund?->amount ?? 0)),
-            'keptFee' => (float) $this->order->fee_amount > 0 ? $this->order->currency.' '.SiteSetting::formatAmount($this->order->feeShare()) : null,
+            'keptFee' => (float) $this->order->fee_amount > 0 && ! $this->order->feeRefundable() ? $this->order->currency.' '.SiteSetting::formatAmount($this->order->feeShare()) : null,
             'url' => route('orders.show', $this->order->order_number),
         ]);
     }

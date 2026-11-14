@@ -17,6 +17,8 @@ Schedule::command('horse-sale-posts:expire')->dailyAt('00:10');
 Schedule::command('stables:generate-slots')->dailyAt('00:20')->withoutOverlapping();
 Schedule::command('stables:send-reminders')->hourly()->withoutOverlapping();
 Schedule::command('stables:send-sales-reports')->hourly()->withoutOverlapping();
+// sessions nobody marked within the attendance window count as attended (pay-at-the-stable ones are billed)
+Schedule::command('stables:close-attendance')->dailyAt('00:40')->withoutOverlapping();
 
 // Push campaigns set to go out at a time (admin → Mobile app → Notifications).
 Schedule::command('push:send-due')->everyMinute()->withoutOverlapping();

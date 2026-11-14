@@ -6,6 +6,8 @@
     $subtotal = (float) $order->price + (float) $order->fee_amount;
     $vat = (float) $order->vat_on_price + (float) $order->vat_on_fee;
     $rate = rtrim(rtrim(number_format((float) $order->vat_rate, 2), '0'), '.');
+    // a stable's booking has two suppliers: the stable (the session; we collect as its agent) and us (the fee)
+    $stable = $order->stable_id ? $order->stable : null;
 @endphp
 <!DOCTYPE html>
 <html lang="{{ $locale }}" dir="{{ $rtl ? 'rtl' : 'ltr' }}">
@@ -41,7 +43,7 @@
             @else
                 <div class="site">{{ $siteName }}</div>
             @endif
-            <h1>{{ __('receipt.title') }}</h1>
+            <h1>{{ $vat > 0 ? __('receipt.title_tax') : __('receipt.title') }}</h1>
         </td>
         <td width="28mm">
             <div style="text-align: center;"><barcode code="{{ $qrUrl }}" type="QR" error="M" size="0.7" disableborder="1" /></div>
@@ -57,7 +59,12 @@
         @if($order->payment_method)
             <tr><td class="label">{{ __('receipt.paid_with') }}</td><td>{{ $order->payment_method->label() }}@if($order->payment_reference) <span dir="ltr" class="muted">&nbsp;·&nbsp;{{ $order->payment_reference }}</span>@endif</td></tr>
         @endif
-        @if($vatNumber !== '')
+        @if($stable)
+            <tr><td class="label">{{ __('receipt.session_supplier') }}</td><td>{{ $d($stable->name) }} <span class="muted">&nbsp;·&nbsp;@if($order->stable_vat_number){{ __('receipt.vat_number') }} <span dir="ltr">{{ $order->stable_vat_number }}</span>@else{{ __('receipt.not_vat_registered') }}@endif</span></td></tr>
+            @if((float) $order->fee_amount > 0)
+                <tr><td class="label">{{ __('receipt.fee_supplier') }}</td><td>{{ $d($siteName) }}@if($vatNumber !== '') <span class="muted">&nbsp;·&nbsp;{{ __('receipt.vat_number') }} <span dir="ltr">{{ $vatNumber }}</span></span>@endif</td></tr>
+            @endif
+        @elseif($vatNumber !== '')
             <tr><td class="label">{{ __('receipt.vat_number') }}</td><td><span dir="ltr">{{ $vatNumber }}</span></td></tr>
         @endif
     </table>
@@ -69,13 +76,19 @@
             <tr><td>{{ __('orders.service_fee') }}</td><td class="amount"><span dir="ltr">{{ $money($order->fee_amount) }}</span></td></tr>
         @endif
         <tr class="sum"><td>{{ __('receipt.subtotal') }}</td><td class="amount"><span dir="ltr">{{ $money($subtotal) }}</span></td></tr>
-        @if($vat > 0)
+        @if((float) $order->vat_on_price > 0)
             <tr><td>{{ __('receipt.vat_on_service', ['rate' => $rate]) }}</td><td class="amount"><span dir="ltr">{{ $money($order->vat_on_price) }}</span></td></tr>
-            @if((float) $order->vat_on_fee > 0)
-                <tr><td>{{ __('receipt.vat_on_fee', ['rate' => $rate]) }}</td><td class="amount"><span dir="ltr">{{ $money($order->vat_on_fee) }}</span></td></tr>
-            @endif
+        @endif
+        @if((float) $order->vat_on_fee > 0)
+            <tr><td>{{ __('receipt.vat_on_fee', ['rate' => $rate]) }}</td><td class="amount"><span dir="ltr">{{ $money($order->vat_on_fee) }}</span></td></tr>
         @endif
         <tr class="total"><td>{{ __('receipt.total_paid') }}</td><td class="amount"><span dir="ltr">{{ $money($order->total) }}</span></td></tr>
+        @foreach($order->refunds as $refund)
+            <tr><td>{{ __('receipt.refunded_on', ['date' => $refund->created_at->setTimezone(\App\Models\BookingSlot::timezone())->format('Y-m-d')]) }}@if($refund->credit_note_number) <span class="muted">&nbsp;·&nbsp;{{ __('receipt.credit_note', ['number' => '']) }}<span dir="ltr">{{ $refund->credit_note_number }}</span></span>@endif</td><td class="amount"><span dir="ltr">−{{ $money($refund->amount) }}</span></td></tr>
+        @endforeach
+        @if($order->refunds->isNotEmpty())
+            <tr class="total"><td>{{ __('receipt.net_paid') }}</td><td class="amount"><span dir="ltr">{{ $money((float) $order->total - (float) $order->refunded_amount) }}</span></td></tr>
+        @endif
     </table>
 
     @if((float) $order->fee_amount > 0)

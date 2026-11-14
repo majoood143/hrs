@@ -14,8 +14,9 @@ use Illuminate\Support\Collection;
 /**
  * The income of a period: every order PAID in it (by the day it was paid), what the customers paid,
  * what belongs to the client and what the client owes us (the service fees, the VAT on them, and the
- * commission). Free orders and unpaid ones carry no money and are left out. Refunded orders stay in:
- * the refund reduces the client's share, while our fee is kept.
+ * commission). Free orders and unpaid ones carry no money and are left out. A refund is an entry of
+ * its own on the day it was recorded (it reduces the client's share, and our fee only when that was
+ * refundable), so a period already reported never changes.
  *
  * All the arithmetic is in baisa (whole numbers), so the columns of a statement always add up.
  */
@@ -63,23 +64,49 @@ class IncomeStatement
         return new self($start, $end, $serviceId, $gateway);
     }
 
-    /** @return Collection<int, IncomeRow> */
+    /** @return Collection<int, IncomeRow> payments and refunds, each on its own day, oldest first */
     public function rows(): Collection
     {
+        // stored in the app's zone (UTC): a Muscat bound is written out as UTC, or the day shifts 4 hours
+        $range = [$this->from->setTimezone(config('app.timezone')), $this->to->setTimezone(config('app.timezone'))];
+
         return $this->rows ??= ServiceOrder::query()
             ->whereIn('payment_status', [PaymentStatus::Paid->value, PaymentStatus::Refunded->value])
-            // stored in the app's zone (UTC): a Muscat bound is written out as UTC, or the day shifts 4 hours
-            ->whereBetween('paid_at', [$this->from->setTimezone(config('app.timezone')), $this->to->setTimezone(config('app.timezone'))])
+            ->whereNotNull('paid_at')
+            // paid in the period, or refunded in it: each entry is dated on its own day below
+            ->where(fn ($query) => $query->whereBetween('paid_at', $range)->orWhereHas('refunds', fn ($r) => $r->whereBetween('created_at', $range)))
             // money a stable took itself (its own gateway) never reached this account: phase 3's
             // stable statements cover what those stables owe us
             ->where(fn ($query) => $query->whereNull('collected_by')->orWhere('collected_by', '!=', 'stable'))
             ->when($this->serviceId, fn ($query, $id) => $query->where('service_id', $id))
             ->when($this->gateway, fn ($query, $gateway) => $query->where('payment_method', $gateway))
             ->when($this->formId, fn ($query, $id) => $query->where('form_id', $id))
-            ->orderBy('paid_at')
-            ->orderBy('id')
+            ->with('refunds')
             ->get()
-            ->map(fn (ServiceOrder $order) => IncomeRow::fromOrder($order));
+            ->flatMap(fn (ServiceOrder $order) => IncomeRow::entriesFor($order))
+            ->filter(fn (IncomeRow $row) => $row->paidAt->betweenIncluded($this->from, $this->to))
+            ->sortBy(fn (IncomeRow $row) => $row->paidAt->getTimestamp().'-'.str_pad((string) $row->orderId, 10, '0', STR_PAD_LEFT))
+            ->values();
+    }
+
+    /**
+     * Our fee and commission on bookings the stables collected themselves (their own gateway, or
+     * paid at the stable): earned in the period, but owed to us by the stables (Stable balances),
+     * so not in rows(). Zero when the report is narrowed to a service, gateway or form.
+     * shortcut: loads every stable-collected order; keep a stored ledger once there are tens of thousands.
+     */
+    public function dueFromStables(): int
+    {
+        if ($this->serviceId || $this->gateway || $this->formId || ! ServiceOrder::query()->where('collected_by', 'stable')->exists()) {
+            return 0;
+        }
+
+        return (int) StableStatement::ordersQuery(null)
+            ->where('collected_by', 'stable')
+            ->get()
+            ->flatMap(fn (ServiceOrder $order) => StableLedgerRow::entriesFor($order))
+            ->filter(fn (StableLedgerRow $row) => $row->date->betweenIncluded($this->from, $this->to))
+            ->sum(fn (StableLedgerRow $row) => $row->ourShare());
     }
 
     /** The commission with its VAT: what the tables show in their "commission" column when VAT on commission is in use. */
@@ -96,12 +123,12 @@ class IncomeStatement
 
     /**
      * @param  Collection<int, IncomeRow>  $rows
-     * @return array{orders: int, collected: int, price: int, vat_on_price: int, client_gross: int, fee: int, vat_on_fee: int, commission: int, refunded: int, due_to_us: int, client_keeps: int}
+     * @return array{orders: int, collected: int, price: int, vat_on_price: int, client_gross: int, fee: int, vat_on_fee: int, commission: int, refunded: int, due_to_us: int, gateway_cost: int, net_to_us: int, client_keeps: int}
      */
     public static function sum(Collection $rows): array
     {
         return [
-            'orders' => $rows->count(),
+            'orders' => $rows->reject(fn (IncomeRow $row) => $row->isRefund())->count(),
             'collected' => $rows->sum->total,
             'price' => $rows->sum->price,
             'vat_on_price' => $rows->sum->vatOnPrice,
@@ -112,6 +139,8 @@ class IncomeStatement
             'vat_on_commission' => $rows->sum->vatOnCommission,
             'refunded' => $rows->sum->refunded,
             'due_to_us' => $rows->sum(fn (IncomeRow $row) => $row->dueToUs()),
+            'gateway_cost' => $rows->sum->gatewayCost,
+            'net_to_us' => $rows->sum(fn (IncomeRow $row) => $row->netToUs()),
             'client_keeps' => $rows->sum(fn (IncomeRow $row) => $row->clientKeeps()),
         ];
     }

@@ -35,7 +35,7 @@ class StatementCsv
             fputcsv($out, []);
             fputcsv($out, [__('statement.summary')]);
 
-            foreach ($this->summaryLines($t) as [$label, $baisa]) {
+            foreach ($this->summaryLines($t, $statement->dueFromStables()) as [$label, $baisa]) {
                 fputcsv($out, [$label, $baisa === null ? '' : $plain($baisa)]);
             }
 
@@ -62,7 +62,7 @@ class StatementCsv
             fputcsv($out, [__('statement.date'), __('statement.order'), __('statement.collected'), __('statement.fee'), __('statement.vat_on_fees'), $commissionLabel, __('statement.refunded'), __('statement.due_to_us')]);
 
             foreach ($statement->rows() as $row) {
-                fputcsv($out, [$row->paidAt->format('Y-m-d H:i'), $row->orderNumber, $plain($row->total), $plain($row->fee), $plain($row->vatOnFee), $plain($row->commission + $row->vatOnCommission), $plain($row->refunded), $plain($row->dueToUs())]);
+                fputcsv($out, [$row->paidAt->format('Y-m-d H:i'), $row->orderNumber.($row->isRefund() ? ' · '.__('statement.refund') : ''), $plain($row->total), $plain($row->fee), $plain($row->vatOnFee), $plain($row->commission + $row->vatOnCommission), $plain($row->refunded), $plain($row->dueToUs())]);
             }
         });
     }
@@ -73,7 +73,7 @@ class StatementCsv
      * @param  array<string, int>  $t
      * @return list<array{0: string, 1: ?int}>
      */
-    public function summaryLines(array $t): array
+    public function summaryLines(array $t, int $dueFromStables = 0): array
     {
         return [
             [__('statement.orders_paid'), null],
@@ -86,7 +86,9 @@ class StatementCsv
             [__('statement.commission'), $t['commission']],
             ...($t['vat_on_commission'] > 0 ? [[__('statement.vat_on_commission'), $t['vat_on_commission']]] : []),
             [__('statement.due_to_us'), $t['due_to_us']],
+            ...($t['gateway_cost'] > 0 ? [[__('statement.gateway_cost'), $t['gateway_cost']], [__('statement.net_to_us'), $t['net_to_us']]] : []),
             [__('statement.client_keeps'), $t['client_keeps']],
+            ...($dueFromStables !== 0 ? [[__('statement.due_from_stables'), $dueFromStables]] : []),
         ];
     }
 }

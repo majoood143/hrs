@@ -140,7 +140,7 @@ class OwnerStableController extends Controller
                 /** @var string|null */
                 'session_date' => $row->sessionDate,
                 'riders' => $row->riders,
-                'kind' => OptionResource::of($row->kind, __('stable_statement.kinds.'.$row->kind)),
+                'kind' => OptionResource::of($row->isRefund() ? StableLedgerRow::REFUND : $row->kind, $row->label()),
                 'collected' => $money($row->collected()),
                 'refunded' => $money($row->refunded),
                 'stable_share' => $money($row->stableShare()),
@@ -158,7 +158,8 @@ class OwnerStableController extends Controller
             'amount' => new MoneyResource(abs($balance) / 1000),
             /** we_owe (we pay the stable) | you_owe (the stable pays us) | settled */
             'direction' => $direction,
-            'label' => __('stable_statement.widget.balance_'.$direction),
+            /** Who owes whom, plus what is held back until a cancelled booking's refund is made. */
+            'label' => StableStatement::balanceLabel($stable, $balance),
         ];
     }
 }

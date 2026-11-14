@@ -48,7 +48,7 @@ class StableFinanceOverview extends StatsOverviewWidget
                 ->description($stable->formatted_commission ? __('stable_statement.widget.rate', ['rate' => $stable->formatted_commission]) : null)
                 ->icon('heroicon-o-receipt-percent'),
             Stat::make(__('stable_statement.widget.balance'), Money::formatHtml(abs($balance)))
-                ->description(__('stable_statement.widget.balance_'.($balance > 0 ? 'we_owe' : ($balance < 0 ? 'you_owe' : 'settled'))))
+                ->description(StableStatement::balanceLabel($stable, $balance))
                 ->descriptionIcon('heroicon-o-scale')
                 ->color($balance > 0 ? 'success' : ($balance < 0 ? 'warning' : 'gray'))
                 ->url($url),

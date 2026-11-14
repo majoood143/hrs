@@ -175,7 +175,7 @@ return [
     'refund' => [
         'amount_positive' => 'The amount must be more than zero.',
         'not_paid' => 'Only a paid order can be refunded.',
-        'too_much' => 'That is more than can be refunded (:max left: the service fee is never refunded).',
+        'too_much' => 'That is more than can be refunded (:max left).',
         'methods' => ['gateway' => 'Payment gateway', 'manual' => 'Bank transfer / other'],
     ],
 

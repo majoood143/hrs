@@ -6,7 +6,7 @@ return [
         'received_free' => ':site: تم استلام طلبك. الطلب :number (:service). تابعه: :url',
         'completed' => ':site: تم إكمال طلبك :number. التفاصيل: :url',
         'rejected' => ':site: تعذّرت الموافقة على طلبك :number. التفاصيل: :url',
-        'refunded' => ':site: تمت معالجة استرداد :amount للطلب :number. رسوم الخدمة غير قابلة للاسترداد. التفاصيل: :url',
+        'refunded' => ':site: تمت معالجة استرداد :amount للطلب :number. التفاصيل: :url',
     ],
 
     'mail' => [

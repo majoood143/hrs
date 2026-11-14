@@ -2,12 +2,14 @@
 
 namespace App\Services\Reports;
 
+use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\StableBookingStatus;
 use App\Models\BookingSlot;
 use App\Models\ServiceOrder;
 use App\Models\Stable;
 use App\Models\StableSettlement;
+use App\Support\Money;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -62,7 +64,7 @@ class StableStatement
                 ->orWhere(fn (Builder $q) => $q
                     ->where('payment_status', PaymentStatus::OnSite->value)
                     ->whereHas('stableBooking', fn (Builder $b) => $b->where('status', StableBookingStatus::Completed->value))))
-            ->with(['stableBooking.offering', 'stableBooking.slot']);
+            ->with(['stableBooking.offering', 'stableBooking.slot', 'refunds']);
     }
 
     /**
@@ -86,7 +88,7 @@ class StableStatement
             return $this->allRows->filter(fn (StableLedgerRow $row) => $row->date->gte($this->from))->values();
         }
 
-        // a row's date is its paid, attended, completed or created time (StableLedgerRow::fromOrder): one of
+        // an entry's date is its sale's paid, attended, completed or created time, or a refund's: one of
         // them falls in the period, so the database narrows to those orders and the exact date decides
         $range = [$this->from->setTimezone(config('app.timezone')), $this->to->setTimezone(config('app.timezone'))];
 
@@ -94,7 +96,8 @@ class StableStatement
             ->whereBetween('paid_at', $range)
             ->orWhereBetween('completed_at', $range)
             ->orWhereBetween('created_at', $range)
-            ->orWhereHas('stableBooking', fn (Builder $b) => $b->whereBetween('attended_at', $range))))
+            ->orWhereHas('stableBooking', fn (Builder $b) => $b->whereBetween('attended_at', $range))
+            ->orWhereHas('refunds', fn (Builder $r) => $r->whereBetween('created_at', $range))))
             ->filter(fn (StableLedgerRow $row) => $row->date->betweenIncluded($this->from, $this->to))
             ->values();
     }
@@ -103,7 +106,7 @@ class StableStatement
     private function ledger(Builder $orders): Collection
     {
         return $orders->get()
-            ->map(fn (ServiceOrder $order) => StableLedgerRow::fromOrder($order))
+            ->flatMap(fn (ServiceOrder $order) => StableLedgerRow::entriesFor($order))
             ->sortBy(fn (StableLedgerRow $row) => $row->date->getTimestamp().'-'.str_pad((string) $row->orderId, 10, '0', STR_PAD_LEFT))
             ->values();
     }
@@ -149,7 +152,7 @@ class StableStatement
         $sum = fn (callable $f) => (int) $rows->sum($f);
 
         return [
-            'bookings' => $rows->count(),
+            'bookings' => $rows->reject(fn (StableLedgerRow $r) => $r->isRefund())->count(),
             'riders' => $sum(fn (StableLedgerRow $r) => $r->riders),
             'collected' => $sum(fn (StableLedgerRow $r) => $r->collected()),
             'collected_by_us' => $sum(fn (StableLedgerRow $r) => $r->heldByUs() ? $r->collected() : 0),
@@ -172,6 +175,37 @@ class StableStatement
     public static function balance(Stable $stable): int
     {
         return static::allTime($stable)->closing();
+    }
+
+    /**
+     * The stable's share of bookings paid through us and then cancelled, with no refund recorded
+     * yet: that money is going back to the customer, so it is held back from payouts meanwhile.
+     */
+    public static function heldForRefund(Stable $stable): int
+    {
+        return (int) static::ordersQuery($stable)
+            ->where('collected_by', 'platform')
+            ->where('payment_status', PaymentStatus::Paid->value)
+            ->whereIn('status', [OrderStatus::Cancelled->value, OrderStatus::Rejected->value])
+            ->where('refunded_amount', 0)
+            ->get()
+            ->sum(fn (ServiceOrder $order) => StableLedgerRow::fromOrder($order)->stableShare());
+    }
+
+    /** "We owe you this", plus what is held back for refunds when there is any, for the owner's balance. */
+    public static function balanceLabel(Stable $stable, ?int $balance = null): string
+    {
+        $balance ??= static::balance($stable);
+        $held = static::heldForRefund($stable);
+        $label = __('stable_statement.widget.balance_'.($balance > 0 ? 'we_owe' : ($balance < 0 ? 'you_owe' : 'settled')));
+
+        return $held > 0 ? $label.' · '.__('stable_statement.widget.held', ['amount' => Money::format($held)]) : $label;
+    }
+
+    /** What may be paid out to the stable now: the balance less what is held back for refunds (negative: it owes us). */
+    public static function payable(Stable $stable): int
+    {
+        return static::balance($stable) - static::heldForRefund($stable);
     }
 
     /**

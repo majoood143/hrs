@@ -261,7 +261,7 @@ class StableBookingResource extends Resource
 
     public static function sessionDue(StableBooking $record): bool
     {
-        return $record->slot && $record->slot->date->toDateString() <= BookingSlot::today();
+        return StableBookingActions::mayMark($record);
     }
 
     public static function attendedAction(): Action

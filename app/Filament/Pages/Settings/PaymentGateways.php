@@ -5,6 +5,7 @@ namespace App\Filament\Pages\Settings;
 use App\Enums\PaymentGateway;
 use App\Filament\Support\SecretInput;
 use App\Models\SiteSetting;
+use App\Support\GatewayCosts;
 use App\Support\SecretSetting;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms\Components\CheckboxList;
@@ -76,6 +77,7 @@ class PaymentGateways extends Page implements HasForms
                 'endpoint_url' => SiteSetting::get('ccavenue.endpoint_url', ''),
                 'test_mode' => (bool) SiteSetting::get('ccavenue.test_mode', true),
             ],
+            'costs' => GatewayCosts::rates(),
             'vat' => [
                 'enabled' => (bool) SiteSetting::get('vat.enabled', config('payments.vat.enabled', true)),
                 'rate' => SiteSetting::get('vat.rate', config('payments.vat.rate', 5)),
@@ -152,6 +154,20 @@ class PaymentGateways extends Page implements HasForms
                             ->maxLength(50)
                             ->visible(fn ($get) => (bool) $get('vat.enabled')),
                     ]),
+
+                Section::make(__('payment_gateways.sections.costs'))
+                    ->description(__('payment_gateways.sections.costs_desc'))
+                    ->collapsible()
+                    ->schema(collect(GatewayCosts::GATEWAYS)->map(fn (string $gateway) => Group::make([
+                        TextInput::make("costs.{$gateway}.percent")
+                            ->label(__('payment_gateways.fields.cost_percent', ['gateway' => PaymentGateway::from($gateway)->label()]))
+                            ->placeholder(__('payment_gateways.fields.cost_percent_placeholder'))
+                            ->numeric()->minValue(0)->maxValue(20)->step(0.01)->suffix('%'),
+                        TextInput::make("costs.{$gateway}.fixed")
+                            ->label(__('payment_gateways.fields.cost_fixed', ['gateway' => PaymentGateway::from($gateway)->label()]))
+                            ->placeholder(__('payment_gateways.fields.cost_fixed_placeholder'))
+                            ->numeric()->minValue(0)->step(0.001),
+                    ])->columns(2))->all()),
 
                 Section::make(__('payment_gateways.sections.thawani'))
                     ->description(__('payment_gateways.sections.thawani_desc'))
@@ -313,6 +329,11 @@ class PaymentGateways extends Page implements HasForms
         SecretSetting::setUnlessBlank('ccavenue.working_key', $ccavenue['working_key'] ?? '', 'payment_gateways');
         SiteSetting::set('ccavenue.endpoint_url', $ccavenue['endpoint_url'] ?? '', 'text', null, 'payment_gateways');
         SiteSetting::set('ccavenue.test_mode', ! empty($ccavenue['test_mode']), 'boolean', null, 'payment_gateways');
+
+        SiteSetting::set('payments.gateway_costs', json_encode(collect(GatewayCosts::GATEWAYS)->mapWithKeys(fn (string $g) => [$g => [
+            'percent' => round(max(0, (float) ($state['costs'][$g]['percent'] ?? 0)), 2),
+            'fixed' => round(max(0, (float) ($state['costs'][$g]['fixed'] ?? 0)), 3),
+        ]])->all()), 'text', null, 'payment_gateways');
 
         $vat = $state['vat'] ?? [];
 

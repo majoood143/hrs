@@ -64,6 +64,8 @@ class BookingResource extends JsonResource
                 'vat' => new MoneyResource((float) $order->vat_on_price + (float) $order->vat_on_fee),
                 'total' => new MoneyResource($total),
                 'refund_due' => $order->refundDue(),
+                /** Whether the refund includes the service fee (the stable, an admin or the system called it off). */
+                'fee_refundable' => $order->feeRefundable(),
                 /** @var string|null */
                 'paid_at' => $order->paid_at?->toIso8601String(),
             ] : null,
