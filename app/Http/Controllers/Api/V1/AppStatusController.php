@@ -8,6 +8,7 @@ use App\Models\MobileAnnouncement;
 use App\Support\MobileApp\AppClient;
 use App\Support\MobileApp\MobileFeatures;
 use App\Support\MobileApp\MobileMaintenance;
+use App\Support\MobileApp\MobileOnboarding;
 use App\Support\MobileApp\MobileUpdates;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -49,6 +50,8 @@ class AppStatusController extends Controller
                 /** @var array<string, 'on'|'hidden'|'soon'> */
                 'features' => MobileFeatures::forClient($client),
                 'announcements' => AnnouncementResource::collection($announcements),
+                /** First-launch slides (admin → Mobile app → Onboarding); show once per `version`. */
+                'onboarding' => MobileOnboarding::forClient(),
                 /** What the server understood from the headers (null = not sent or not recognised). */
                 'client' => ['platform' => $client->platform, 'version' => $client->version],
             ],

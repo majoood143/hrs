@@ -10,6 +10,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -25,7 +26,7 @@ class PushCampaign extends Model
 {
     use LogsActivity;
 
-    public const AUDIENCES = ['everyone', 'customers', 'owners', 'guests', 'phones', 'stable_customers', 'stable_owners'];
+    public const AUDIENCES = ['everyone', 'customers', 'owners', 'guests', 'phones', 'stable_customers', 'stable_owners', 'segment'];
 
     /** The Android channels the app makes (src/features/push/push.tsx): bookings = high importance. */
     public const CHANNELS = ['default', 'bookings'];
@@ -43,7 +44,7 @@ class PushCampaign extends Model
     protected $fillable = [
         'source', 'source_id', 'en_title', 'ar_title', 'en_body', 'ar_body', 'image_path',
         'action_type', 'action_screen', 'action_url',
-        'audience', 'target_phones', 'target_stables', 'topic', 'platforms', 'locales', 'min_version', 'max_version', 'active_days',
+        'audience', 'target_phones', 'target_stables', 'crm_segment_id', 'topic', 'platforms', 'locales', 'min_version', 'max_version', 'active_days',
         'priority', 'ttl_hours', 'sound', 'channel', 'quiet_hours', 'ignore_cap', 'spread_minutes',
         'status', 'scheduled_at', 'sent_at', 'recipients', 'accepted', 'opened', 'created_by',
     ];
@@ -83,9 +84,15 @@ class PushCampaign extends Model
         return LogOptions::defaults()
             ->logOnly(['en_title', 'ar_title', 'action_type', 'action_screen', 'action_url', 'audience', 'topic',
                 'platforms', 'locales', 'min_version', 'max_version', 'active_days', 'status', 'scheduled_at',
-                'target_phones', 'target_stables', 'priority', 'ttl_hours', 'sound', 'channel', 'quiet_hours', 'ignore_cap', 'spread_minutes'])
+                'target_phones', 'target_stables', 'crm_segment_id', 'priority', 'ttl_hours', 'sound', 'channel', 'quiet_hours', 'ignore_cap', 'spread_minutes'])
             ->logOnlyDirty()
             ->useLogName('mobile_app');
+    }
+
+    /** The audience "segment": its customers' signed-in phones. */
+    public function segment(): BelongsTo
+    {
+        return $this->belongsTo(CrmSegment::class, 'crm_segment_id');
     }
 
     public function deliveries(): HasMany
@@ -126,6 +133,10 @@ class PushCampaign extends Model
                 ->whereIn('customer_id', StableBooking::query()->whereIn('stable_id', $this->target_stables ?? [])->whereNotNull('customer_id')->select('customer_id')))
             ->when($this->audience === 'stable_owners', fn (Builder $q) => $q->whereNotNull('owner_token_id')
                 ->whereIn('user_id', DB::table('stable_user')->whereIn('stable_id', $this->target_stables ?? [])->select('user_id')))
+            // a deleted segment reaches nobody (never everyone)
+            ->when($this->audience === 'segment', fn (Builder $q) => $this->segment
+                ? $q->whereNotNull('customer_token_id')->whereIn('customer_id', $this->segment->customers()->select('customers.id'))
+                : $q->whereRaw('1 = 0'))
             ->where(fn (Builder $q) => $q->whereNull('topics')->orWhereJsonContains('topics', $this->topic))
             ->when(! empty($this->platforms), fn (Builder $q) => $q->whereIn('platform', $this->platforms))
             ->when(! empty($this->locales), fn (Builder $q) => $q->whereIn('locale', $this->locales))

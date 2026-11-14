@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AppEvent;
 use App\Models\CustomerOtp;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -26,7 +27,7 @@ Schedule::command('orders:expire-pending')->everyFiveMinutes()->withoutOverlappi
 Schedule::command('orders:recover-late-payments')->everyFiveMinutes()->withoutOverlapping();
 
 // One-time codes are only needed for minutes; keep a day of them for the rate limits, then drop them.
-Schedule::command('model:prune', ['--model' => [CustomerOtp::class]])->daily();
+Schedule::command('model:prune', ['--model' => [CustomerOtp::class, AppEvent::class]])->daily();
 // app sign-in tokens (customers 180 days, stable owners 90) that have expired
 Schedule::command('sanctum:prune-expired', ['--hours' => 24])->daily();
 

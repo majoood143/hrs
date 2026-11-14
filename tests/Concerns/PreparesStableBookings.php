@@ -87,6 +87,8 @@ trait PreparesStableBookings
             '2026_09_08_010100_create_stables_table',
             '2026_09_08_010200_create_stable_stable_service_table',
             '2026_09_23_000001_create_customers_tables',
+            '2026_11_14_000001_add_profile_to_customers',
+            '2026_11_14_000002_create_app_events_table',
             '2026_09_30_100001_add_stable_owners',
             '2026_09_30_100002_create_stable_booking_tables',
             '2026_09_30_100003_add_stable_booking_checkout',

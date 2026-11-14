@@ -17,6 +17,7 @@ return [
         'images' => 'Services screen',
         'ads' => 'Ad zones',
         'links' => 'Website links',
+        'onboarding' => 'Onboarding',
     ],
 
     'groups' => [
@@ -115,6 +116,18 @@ return [
         'tools_help' => 'At the top of the list.',
         'transfers' => 'Transfer board',
         'transfers_help' => 'At the top of the list.',
+    ],
+
+    'onboarding' => [
+        'help' => 'Up to 3 slides the app shows once at first launch, before it offers to create a profile (people can skip both). Changing the slides shows them again once to everyone.',
+        'enabled' => 'Show the slides',
+        'slides' => 'Slides',
+        'add' => 'Add a slide',
+        'image' => 'Picture',
+        'title' => 'Title',
+        'title_placeholder' => 'e.g. Horses for sale near you',
+        'text' => 'Text',
+        'text_placeholder' => 'e.g. Browse horses, tools and stables across Oman, and contact sellers directly.',
     ],
 
     'images' => [
@@ -320,6 +333,8 @@ return [
             'target_phones' => 'Phone numbers',
             'target_phones_help' => 'One per line. Goes to the customers and stable owners signed in to the app with these numbers.',
             'target_stables' => 'Stables',
+            'segment' => 'Segment',
+            'segment_help' => 'Its customers\' phones that are signed in to the app, worked out when the campaign is sent (admin → CRM → Segments).',
             'target_stables_help' => [
                 'stable_customers' => 'Customers who booked at least once at these stables and are signed in to the app.',
                 'stable_owners' => 'The owners and staff of these stables signed in to the app.',
@@ -347,6 +362,7 @@ return [
             'phones' => 'Chosen phone numbers',
             'stable_customers' => 'Customers of chosen stables',
             'stable_owners' => 'Owners and staff of chosen stables',
+            'segment' => 'A CRM segment',
         ],
         'topics' => [
             'news' => 'News and updates',

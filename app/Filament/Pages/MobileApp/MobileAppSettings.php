@@ -11,11 +11,13 @@ use App\Support\MobileApp\MobileAutoPush;
 use App\Support\MobileApp\MobileFeatures;
 use App\Support\MobileApp\MobileImages;
 use App\Support\MobileApp\MobileMaintenance;
+use App\Support\MobileApp\MobileOnboarding;
 use App\Support\MobileApp\MobilePosting;
 use App\Support\MobileApp\MobileUpdates;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -73,7 +75,7 @@ class MobileAppSettings extends Page implements HasForms
         $this->form->fill(self::currentState());
     }
 
-    /** @return array{features: array<string, mixed>, updates: array<string, mixed>, maintenance: array<string, mixed>, posting: array<string, mixed>, auto_push: array<string, mixed>, images: array<string, string|null>, ads: array<string, int|null>, links: array<string, mixed>} */
+    /** @return array{features: array<string, mixed>, updates: array<string, mixed>, maintenance: array<string, mixed>, posting: array<string, mixed>, auto_push: array<string, mixed>, images: array<string, string|null>, ads: array<string, int|null>, onboarding: array<string, mixed>, links: array<string, mixed>} */
     private static function currentState(): array
     {
         return [
@@ -84,6 +86,7 @@ class MobileAppSettings extends Page implements HasForms
             'auto_push' => MobileAutoPush::settings(),
             'images' => MobileImages::settings(),
             'ads' => MobileAds::settings(),
+            'onboarding' => MobileOnboarding::settings(),
             'links' => ['android_fingerprints' => implode("\n", AppLinks::settings()['android_fingerprints'])] + AppLinks::settings(),
         ];
     }
@@ -115,6 +118,9 @@ class MobileAppSettings extends Page implements HasForms
                     Tab::make(__('admin_mobile_app.tabs.ads'))
                         ->icon('heroicon-o-megaphone')
                         ->schema($this->adSections()),
+                    Tab::make(__('admin_mobile_app.tabs.onboarding'))
+                        ->icon('heroicon-o-rectangle-stack')
+                        ->schema($this->onboardingSections()),
                     Tab::make(__('admin_mobile_app.tabs.links'))
                         ->icon('heroicon-o-link')
                         ->schema($this->linkSections()),
@@ -346,6 +352,50 @@ class MobileAppSettings extends Page implements HasForms
         ];
     }
 
+    /** @return list<Section> */
+    private function onboardingSections(): array
+    {
+        $localized = fn (string $field, string $kind) => Grid::make(count(MobileUpdates::locales()))->schema(array_map(
+            fn (string $locale) => ($kind === 'title' ? TextInput::make("{$field}.{$locale}")->maxLength(60)->required($locale === config('languages.default', 'en')) : Textarea::make("{$field}.{$locale}")->rows(2)->maxLength(200))
+                ->label(__("admin_mobile_app.onboarding.{$kind}").' ('.config("languages.available.{$locale}.name", $locale).')')
+                ->placeholder(__("admin_mobile_app.onboarding.{$kind}_placeholder", [], $locale))
+                ->extraInputAttributes($locale === 'ar' ? ['dir' => 'rtl'] : []),
+            MobileUpdates::locales(),
+        ));
+
+        return [
+            Section::make(__('admin_mobile_app.tabs.onboarding'))
+                ->description(__('admin_mobile_app.onboarding.help'))
+                ->schema([
+                    Toggle::make('onboarding.enabled')
+                        ->label(__('admin_mobile_app.onboarding.enabled')),
+                    Repeater::make('onboarding.slides')
+                        ->label(__('admin_mobile_app.onboarding.slides'))
+                        ->addActionLabel(__('admin_mobile_app.onboarding.add'))
+                        ->maxItems(MobileOnboarding::MAX_SLIDES)
+                        ->reorderable()
+                        ->collapsible()
+                        ->defaultItems(0)
+                        ->schema([
+                            FileUpload::make('image')
+                                ->label(__('admin_mobile_app.onboarding.image'))
+                                ->image()
+                                ->imageEditor()
+                                ->disk('public')
+                                ->directory(MobileOnboarding::DIRECTORY)
+                                ->visibility('public')
+                                ->maxSize(5120)
+                                ->imageResizeMode('contain')
+                                ->imageResizeTargetWidth('1200')
+                                ->imageResizeTargetHeight('1500')
+                                ->imageResizeUpscale(false),
+                            $localized('title', 'title'),
+                            $localized('text', 'text'),
+                        ]),
+                ]),
+        ];
+    }
+
     /** @return list<Section|Text> */
     private function linkSections(): array
     {
@@ -402,6 +452,7 @@ class MobileAppSettings extends Page implements HasForms
         MobileAutoPush::save((array) ($state['auto_push'] ?? []));
         MobileImages::save((array) ($state['images'] ?? []));
         MobileAds::save((array) ($state['ads'] ?? []));
+        MobileOnboarding::save((array) ($state['onboarding'] ?? []));
         AppLinks::save((array) ($state['links'] ?? []));
 
         $after = self::currentState();

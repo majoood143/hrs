@@ -8,4 +8,5 @@ return [
     'payments' => 'Payments',
     'api_docs' => 'API Docs',
     'mobile_app' => 'Mobile app',
+    'crm' => 'CRM',
 ];

@@ -20,6 +20,8 @@ class RateLimitsTest extends TestCase
 
         $this->prepareMobileApi();
         (require database_path('migrations/2026_09_23_000001_create_customers_tables.php'))->up();
+        (require database_path('migrations/2026_11_14_000001_add_profile_to_customers.php'))->up();
+        (require database_path('migrations/2026_11_14_000002_create_app_events_table.php'))->up();
         $this->seedApiSettings(['sms.driver' => 'demo']);
     }
 

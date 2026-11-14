@@ -16,6 +16,7 @@ use App\Support\MobileApp\MobileAds;
 use App\Support\MobileApp\MobileAutoPush;
 use App\Support\MobileApp\MobileFeatures;
 use App\Support\MobileApp\MobileMaintenance;
+use App\Support\MobileApp\MobileOnboarding;
 use App\Support\MobileApp\MobilePosting;
 use App\Support\MobileApp\MobileUpdates;
 use Filament\Facades\Filament;
@@ -149,6 +150,24 @@ class MobileAppAdminTest extends TestCase
 
         $log = DB::table('activity_log')->where('log_name', 'mobile_app')->sole();
         $this->assertTrue(json_decode($log->properties, true)['attributes']['posting']['review']);
+    }
+
+    public function test_the_onboarding_tab_keeps_up_to_three_slides_with_a_title_in_the_default_language(): void
+    {
+        $slide = fn (string $en) => ['image' => null, 'title' => ['en' => $en, 'ar' => 'عنوان'], 'text' => ['en' => 'Text', 'ar' => 'نص']];
+
+        Livewire::test(MobileAppSettings::class)
+            ->fillForm(['onboarding.enabled' => true, 'onboarding.slides' => [$slide('')]])
+            ->call('save')
+            ->assertHasFormErrors()
+            ->fillForm(['onboarding.slides' => [$slide('One'), $slide('Two')]])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $settings = MobileOnboarding::settings();
+        $this->assertTrue($settings['enabled']);
+        $this->assertSame(['One', 'Two'], array_map(fn ($s) => $s['title']['en'], $settings['slides']));
+        $this->assertSame('نص', $settings['slides'][1]['text']['ar']);
     }
 
     public function test_the_ad_zones_tab_picks_a_zone_per_placement_from_the_active_ones(): void

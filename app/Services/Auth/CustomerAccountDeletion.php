@@ -3,6 +3,7 @@
 namespace App\Services\Auth;
 
 use App\Enums\StableBookingStatus;
+use App\Models\AppEvent;
 use App\Models\BookingSlot;
 use App\Models\Customer;
 use App\Models\ServiceOrder;
@@ -45,6 +46,9 @@ class CustomerAccountDeletion
             ServiceOrder::query()->where('customer_id', $id)->update(['customer_id' => null]);
             StableBooking::query()->where('customer_id', $id)->update(['customer_id' => null]);
             StableReview::query()->where('customer_id', $id)->update(['customer_id' => null]);
+
+            // what they did in the app is personal data: it goes with the account
+            AppEvent::query()->where('customer_id', $id)->delete();
 
             $customer->tokens()->delete();
             $customer->delete();

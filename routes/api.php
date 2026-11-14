@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\V1\ShopController;
 use App\Http\Controllers\Api\V1\SilksController;
 use App\Http\Controllers\Api\V1\StableController;
 use App\Http\Controllers\Api\V1\ToolForSaleController;
+use App\Http\Controllers\Api\V1\TrackingController;
 use App\Http\Controllers\Api\V1\TransferBoardController;
 use App\Http\Controllers\Api\V1\VerificationController;
 use App\Http\Controllers\Api\V1\VideoLibraryController;
@@ -81,6 +82,9 @@ Route::prefix('v1')
         Route::get('videos/{slug}', [VideoLibraryController::class, 'show'])->name('videos.show');
 
         Route::get('silks', SilksController::class)->name('silks');
+
+        // What people do in the app, for the CRM (by install; a customer's token makes them theirs).
+        Route::post('events', [TrackingController::class, 'store'])->middleware('throttle:api-events')->name('events.store');
 
         // The racing database (scraped and cached, like the website's /racing pages).
         Route::prefix('racing')->name('racing.')->controller(RacingController::class)->group(function () {

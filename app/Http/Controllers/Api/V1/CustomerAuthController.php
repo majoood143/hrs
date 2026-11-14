@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\CustomerResource;
+use App\Models\AppEvent;
 use App\Models\Customer;
 use App\Services\Auth\CustomerOtpService;
 use App\Services\Auth\OtpRequestResult;
@@ -64,7 +65,8 @@ class CustomerAuthController extends Controller
     /**
      * Sign in with the code
      *
-     * Returns the bearer `token` for the account endpoints (valid 180 days, until signed out).
+     * Returns the bearer `token` for the account endpoints (valid 180 days, until signed out). Send
+     * `X-Install-Id` so the install's earlier events (POST events) become the customer's.
      *
      * @unauthenticated
      */
@@ -75,6 +77,8 @@ class CustomerAuthController extends Controller
             'code' => ['required', 'string', 'max:10'],
             /** Shown nowhere yet; helps tell sessions apart. @example iPhone */
             'device_name' => ['nullable', 'string', 'max:60'],
+            /** The country picked for the phone (ISO 3166 alpha-2); kept on the profile. @example OM */
+            'country' => ['nullable', 'string', 'regex:/^[A-Za-z]{2}$/'],
         ]);
 
         [$status, $customer] = $this->otp->verify($data['phone'], $data['code']);
@@ -83,6 +87,25 @@ class CustomerAuthController extends Controller
             throw ValidationException::withMessages([
                 'code' => $status === CustomerOtpService::EXPIRED ? __('api.verification.expired') : __('api.verification.wrong'),
             ]);
+        }
+
+        $new = $customer->wasRecentlyCreated;
+
+        if ($new) {
+            $customer->source = 'app';
+        }
+
+        if (filled($data['country'] ?? null)) {
+            $customer->country = strtoupper($data['country']);
+        }
+
+        $customer->save();
+
+        // what this install did before signing in is theirs now (X-Install-Id)
+        AppEvent::claim(AppEvent::installId($request), $customer);
+
+        if ($new) {
+            AppEvent::record('signed_up', $customer, ['country' => $customer->country], $request);
         }
 
         $expires = now()->addDays(self::TOKEN_DAYS);

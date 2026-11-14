@@ -125,7 +125,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Posting from the app: per address, and per verified phone (its posting token).
         RateLimiter::for('api-posting', function (Request $request) {
-            $phone = PostingToken::phone($request->input('posting_token'));
+            $phone = PostingToken::phone($request->input('posting_token')) ?? $request->user('customer_api')?->phone;
 
             return array_filter([
                 Limit::perMinute(30)->by('ip|'.$request->ip()),
@@ -143,6 +143,11 @@ class AppServiceProvider extends ServiceProvider
         // Racing search asks the source each time; view counts are cheap but should not be inflated.
         RateLimiter::for('api-racing-search', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
         RateLimiter::for('api-views', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
+        // App events (CRM): per install, and per address on top.
+        RateLimiter::for('api-events', fn (Request $request) => [
+            Limit::perMinute(30)->by('install|'.$request->header('X-Install-Id')),
+            Limit::perMinute(300)->by('ip|'.$request->ip()),
+        ]);
         RateLimiter::for('api-reports', fn (Request $request) => Limit::perHour(20)->by($request->ip()));
 
         // A stable owner's app token is a User token, which the admin API's guard would accept too:

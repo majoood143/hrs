@@ -4,6 +4,7 @@ namespace Tests\Feature\Api\V1;
 
 use App\Events\PublicPostSubmitted;
 use App\Models\ContentReport;
+use App\Models\Customer;
 use App\Models\HorseSalePost;
 use App\Models\Jockey;
 use App\Models\ToolSalePost;
@@ -44,7 +45,10 @@ class PostingTest extends TestCase
         $this->prepareDirectoryTables();
 
         foreach ([
+            '2026_09_11_145142_create_personal_access_tokens_table',
             '2026_09_23_000001_create_customers_tables',
+            '2026_11_14_000001_add_profile_to_customers',
+            '2026_11_14_000002_create_app_events_table',
             '2026_09_23_000002_create_notification_logs_table',
             '2026_09_26_140451_create_whatsapp_instances_table',
             // after the directory tables: it changes the farriers' and transfers' status too
@@ -388,6 +392,16 @@ class PostingTest extends TestCase
     }
 
     /** Asks for a code by SMS (the demo driver hands it back) and returns it. */
+    public function test_a_signed_in_customer_posts_with_their_phone_and_no_second_code(): void
+    {
+        $customer = Customer::query()->create(['phone' => '96891234567', 'phone_verified_at' => now()]);
+        $fields = ['type' => 'request', 'from_city_id' => $this->ids['seeb'], 'to_city_id' => $this->ids['bawshar'], 'capacity' => 1, 'transfer_date' => now()->addDay()->toDateString()];
+
+        $this->withToken($customer->createToken('app', ['customer'])->plainTextToken)->postJson('/api/v1/transfer-board', $fields)->assertCreated();
+
+        $this->assertSame('+96891234567', TransferPost::query()->value('contact_number'));
+    }
+
     private function requestCode(string $phone = self::PHONE): string
     {
         return (string) $this->postJson('/api/v1/verification/request', ['phone' => $phone, 'channel' => 'sms'])->assertOk()->json('demo_code');

@@ -27,6 +27,9 @@ trait PreparesCustomerSite
         $this->prepareFormSite($settings);
 
         (require database_path('migrations/2026_09_23_000001_create_customers_tables.php'))->up();
+        (require database_path('migrations/2026_11_14_000001_add_profile_to_customers.php'))->up();
+        (require database_path('migrations/2026_11_14_000002_create_app_events_table.php'))->up();
+        (require database_path('migrations/2026_11_14_000003_create_crm_segments_table.php'))->up();
     }
 
     /** @param  array<string, mixed>  $extra */

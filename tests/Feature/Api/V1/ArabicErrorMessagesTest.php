@@ -59,6 +59,7 @@ class ArabicErrorMessagesTest extends TestCase
             'device' => ['POST', 'devices'],
             'saved search' => ['POST', 'push/searches'],
             'racing search' => ['GET', 'racing/search'],
+            'app events' => ['POST', 'events'],
         ];
     }
 
@@ -95,7 +96,7 @@ class ArabicErrorMessagesTest extends TestCase
             }
         }
 
-        foreach (['riders_count', 'name', 'email', 'payment_option', 'package_purchase_id', 'riders', 'waiver'] as $field) {
+        foreach (['riders_count', 'name', 'email', 'payment_option', 'package_purchase_id', 'riders', 'waiver', 'gender', 'date_of_birth', 'national_id', 'marketing_opt_in', 'country', 'events', 'events.*.name'] as $field) {
             $this->assertNoLatin($names[$field] ?? $field);
         }
 

@@ -9,6 +9,7 @@ use App\Filament\Resources\PushCampaignResource\Pages\ListPushCampaigns;
 use App\Filament\Resources\PushCampaignResource\Pages\ViewPushCampaign;
 use App\Filament\Resources\PushCampaignResource\Widgets;
 use App\Jobs\SendPushCampaign;
+use App\Models\CrmSegment;
 use App\Models\Customer;
 use App\Models\MobileAnnouncement;
 use App\Models\MobileDevice;
@@ -194,6 +195,14 @@ class PushCampaignResource extends Resource
                         ->live()
                         ->visible(fn (Get $get) => in_array($get('audience'), ['stable_customers', 'stable_owners'], true))
                         ->required(fn (Get $get) => in_array($get('audience'), ['stable_customers', 'stable_owners'], true)),
+                    Select::make('crm_segment_id')
+                        ->label(__('admin_mobile_app.campaigns.fields.segment'))
+                        ->helperText(__('admin_mobile_app.campaigns.fields.segment_help'))
+                        ->options(fn () => CrmSegment::query()->orderBy('name')->pluck('name', 'id')->all())
+                        ->searchable()
+                        ->live()
+                        ->visible(fn (Get $get) => $get('audience') === 'segment')
+                        ->required(fn (Get $get) => $get('audience') === 'segment'),
                     Select::make('topic')
                         ->live()
                         ->label(__('admin_mobile_app.campaigns.fields.topic'))
@@ -443,6 +452,7 @@ class PushCampaignResource extends Resource
             'audience' => $get('audience') ?: 'everyone',
             'target_phones' => self::phoneList($get('target_phones')),
             'target_stables' => array_map('intval', (array) $get('target_stables')),
+            'crm_segment_id' => is_numeric($get('crm_segment_id')) ? (int) $get('crm_segment_id') : null,
             'ignore_cap' => (bool) $get('ignore_cap'),
             'topic' => $get('topic') ?: 'news',
             'platforms' => $get('platforms') ?: null,

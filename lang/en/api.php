@@ -44,6 +44,10 @@ return [
         'search_limit' => 'You can keep up to :count saved searches. Remove one first.',
     ],
 
+    'events' => [
+        'install_required' => 'This app could not be identified. Update the app and try again.',
+    ],
+
     'account' => [
         'signed_out' => 'You are signed out.',
         'deleted' => 'Your account was deleted.',

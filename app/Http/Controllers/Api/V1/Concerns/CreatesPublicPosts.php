@@ -15,7 +15,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * Posting from the app: the same fields, rules and creation as the website's forms (a
  * PublicPostCreator), with a verified phone (`posting_token` from verification/verify) in place
- * of the captcha. The post's contact number is that phone; it is `pending` (hidden until an admin
+ * of the captcha (or a signed-in customer's bearer token: their phone). The post's contact number is that phone; it is `pending` (hidden until an admin
  * approves it) while admin → Mobile app → Posting → "Review app posts" is on.
  */
 trait CreatesPublicPosts
@@ -25,7 +25,8 @@ trait CreatesPublicPosts
      */
     protected function createPublicPost(Request $request, PublicPostCreator $creator, array $fileFields): Model
     {
-        $phone = PostingToken::phone($request->input('posting_token'));
+        // a signed-in customer's phone was confirmed by the sign-in code: no second check
+        $phone = PostingToken::phone($request->input('posting_token')) ?? $request->user('customer_api')?->phone;
 
         if ($phone === null) {
             throw new HttpResponseException(response()->json([

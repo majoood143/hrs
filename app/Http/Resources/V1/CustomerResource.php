@@ -25,6 +25,17 @@ class CustomerResource extends JsonResource
             'name' => $customer->name,
             /** @var string|null */
             'email' => $customer->email,
+            /** ISO 3166 alpha-2. @var string|null @example OM */
+            'country' => $customer->country,
+            /** @var 'male'|'female'|null */
+            'gender' => $customer->gender,
+            /** `Y-m-d`. @var string|null */
+            'date_of_birth' => $customer->date_of_birth?->toDateString(),
+            /** Only the last 4 digits; the number itself is never sent back. @var string|null @example ••••4567 */
+            'national_id' => $customer->maskedNationalId(),
+            'marketing_opt_in' => (bool) $customer->marketing_opt_in,
+            /** How much of the optional profile is filled in (name, email, gender, date of birth, ID number), 0–100. */
+            'profile_completion' => $customer->profileCompletion(),
         ];
     }
 }

@@ -39,7 +39,7 @@ class AutoPushTest extends TestCase
 
         Schema::create('users', fn (Blueprint $table) => $table->id());
 
-        foreach (['2026_09_11_145142_create_personal_access_tokens_table', '2026_09_23_000001_create_customers_tables', '2026_11_04_000001_create_mobile_devices_table', '2026_11_07_000001_add_enabled_to_mobile_devices', '2026_11_04_000002_create_push_campaigns_tables', '2026_11_07_000002_add_source_to_push_campaigns', '2026_11_12_000001_add_controls_to_push_campaigns', '2026_11_04_000003_create_push_saved_searches_table'] as $migration) {
+        foreach (['2026_09_11_145142_create_personal_access_tokens_table', '2026_09_23_000001_create_customers_tables', '2026_11_14_000001_add_profile_to_customers', '2026_11_14_000002_create_app_events_table', '2026_11_04_000001_create_mobile_devices_table', '2026_11_07_000001_add_enabled_to_mobile_devices', '2026_11_04_000002_create_push_campaigns_tables', '2026_11_07_000002_add_source_to_push_campaigns', '2026_11_12_000001_add_controls_to_push_campaigns', '2026_11_04_000003_create_push_saved_searches_table'] as $migration) {
             (require database_path("migrations/{$migration}.php"))->up();
         }
     }

@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\CustomerResource;
+use App\Models\AppEvent;
 use App\Models\Customer;
 use App\Services\Auth\CustomerAccountDeletion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 /** The signed-in customer's own details. */
 class AccountController extends Controller
@@ -19,19 +21,34 @@ class AccountController extends Controller
     }
 
     /**
-     * Update name and email
+     * Update the profile
      *
-     * Used to fill in the booking form; the phone is the one signed in with and cannot change.
+     * Name and email (the booking form), and the optional profile: gender, date of birth, ID number,
+     * marketing consent. Send only the fields that change (a field left out stays as it is; `null`
+     * clears it). The phone is the one signed in with and cannot change.
      */
     public function update(Request $request): CustomerResource
     {
         $data = $request->validate([
-            'name' => ['nullable', 'string', 'max:120'],
-            'email' => ['nullable', 'email', 'max:190'],
+            'name' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'email' => ['sometimes', 'nullable', 'email', 'max:190'],
+            'gender' => ['sometimes', 'nullable', Rule::in(Customer::GENDERS)],
+            /** `Y-m-d`. */
+            'date_of_birth' => ['sometimes', 'nullable', 'date_format:Y-m-d', 'after:1900-01-01', 'before:today'],
+            /** Letters and digits. @example 12345678 */
+            'national_id' => ['sometimes', 'nullable', 'string', 'regex:/^[A-Za-z0-9]{4,20}$/'],
+            'marketing_opt_in' => ['sometimes', 'boolean'],
         ]);
 
         $customer = $this->customer($request);
-        $customer->fill($data)->save();
+        $customer->fill($data);
+        $changed = array_keys($customer->getDirty());
+        $customer->save();
+
+        if ($changed !== []) {
+            // which fields changed, never their values (the CRM shows the profile itself)
+            AppEvent::record('profile_updated', $customer, ['fields' => implode(',', $changed), 'completion' => $customer->profileCompletion()], $request);
+        }
 
         return CustomerResource::make($customer);
     }
