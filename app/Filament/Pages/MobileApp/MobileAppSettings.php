@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\MobileApp;
 
 use App\Models\AdZone;
+use App\Models\CmsPage;
 use App\Support\MobileApp\AppClient;
 use App\Support\MobileApp\AppLinks;
 use App\Support\MobileApp\AppVersion;
@@ -12,6 +13,7 @@ use App\Support\MobileApp\MobileFeatures;
 use App\Support\MobileApp\MobileImages;
 use App\Support\MobileApp\MobileMaintenance;
 use App\Support\MobileApp\MobileOnboarding;
+use App\Support\MobileApp\MobilePages;
 use App\Support\MobileApp\MobilePosting;
 use App\Support\MobileApp\MobileUpdates;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
@@ -75,7 +77,7 @@ class MobileAppSettings extends Page implements HasForms
         $this->form->fill(self::currentState());
     }
 
-    /** @return array{features: array<string, mixed>, updates: array<string, mixed>, maintenance: array<string, mixed>, posting: array<string, mixed>, auto_push: array<string, mixed>, images: array<string, string|null>, ads: array<string, int|null>, onboarding: array<string, mixed>, links: array<string, mixed>} */
+    /** @return array{features: array<string, mixed>, updates: array<string, mixed>, maintenance: array<string, mixed>, posting: array<string, mixed>, auto_push: array<string, mixed>, images: array<string, string|null>, ads: array<string, int|null>, onboarding: array<string, mixed>, pages: list<array{page_id: int, placement: string}>, links: array<string, mixed>} */
     private static function currentState(): array
     {
         return [
@@ -87,6 +89,7 @@ class MobileAppSettings extends Page implements HasForms
             'images' => MobileImages::settings(),
             'ads' => MobileAds::settings(),
             'onboarding' => MobileOnboarding::settings(),
+            'pages' => MobilePages::settings(),
             'links' => ['android_fingerprints' => implode("\n", AppLinks::settings()['android_fingerprints'])] + AppLinks::settings(),
         ];
     }
@@ -121,6 +124,9 @@ class MobileAppSettings extends Page implements HasForms
                     Tab::make(__('admin_mobile_app.tabs.onboarding'))
                         ->icon('heroicon-o-rectangle-stack')
                         ->schema($this->onboardingSections()),
+                    Tab::make(__('admin_mobile_app.tabs.pages'))
+                        ->icon('heroicon-o-document-text')
+                        ->schema($this->pageSections()),
                     Tab::make(__('admin_mobile_app.tabs.links'))
                         ->icon('heroicon-o-link')
                         ->schema($this->linkSections()),
@@ -396,6 +402,38 @@ class MobileAppSettings extends Page implements HasForms
         ];
     }
 
+    /** @return list<Section> */
+    private function pageSections(): array
+    {
+        return [
+            Section::make(__('admin_mobile_app.tabs.pages'))
+                ->description(__('admin_mobile_app.pages.help'))
+                ->schema([
+                    Repeater::make('pages')
+                        ->hiddenLabel()
+                        ->addActionLabel(__('admin_mobile_app.pages.add'))
+                        ->reorderable()
+                        ->defaultItems(0)
+                        ->columns(['default' => 1, 'md' => 2])
+                        ->schema([
+                            Select::make('page_id')
+                                ->label(__('admin_mobile_app.pages.page'))
+                                ->options(fn () => CmsPage::query()->published()->where('is_homepage', false)->orderBy('slug')->get()
+                                    ->mapWithKeys(fn (CmsPage $page) => [$page->id => $page->getTranslation('title', app()->getLocale()).' (/'.$page->slug.')']))
+                                ->searchable()
+                                ->required()
+                                ->distinct(),
+                            Select::make('placement')
+                                ->label(__('admin_mobile_app.pages.placement'))
+                                ->options(collect(MobilePages::PLACEMENTS)->mapWithKeys(fn (string $p) => [$p => __('admin_mobile_app.pages.placements.'.$p)]))
+                                ->default('more')
+                                ->required()
+                                ->native(false),
+                        ]),
+                ]),
+        ];
+    }
+
     /** @return list<Section|Text> */
     private function linkSections(): array
     {
@@ -453,6 +491,7 @@ class MobileAppSettings extends Page implements HasForms
         MobileImages::save((array) ($state['images'] ?? []));
         MobileAds::save((array) ($state['ads'] ?? []));
         MobileOnboarding::save((array) ($state['onboarding'] ?? []));
+        MobilePages::save((array) ($state['pages'] ?? []));
         AppLinks::save((array) ($state['links'] ?? []));
 
         $after = self::currentState();

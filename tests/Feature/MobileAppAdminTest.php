@@ -17,6 +17,7 @@ use App\Support\MobileApp\MobileAutoPush;
 use App\Support\MobileApp\MobileFeatures;
 use App\Support\MobileApp\MobileMaintenance;
 use App\Support\MobileApp\MobileOnboarding;
+use App\Support\MobileApp\MobilePages;
 use App\Support\MobileApp\MobilePosting;
 use App\Support\MobileApp\MobileUpdates;
 use Filament\Facades\Filament;
@@ -168,6 +169,31 @@ class MobileAppAdminTest extends TestCase
         $this->assertTrue($settings['enabled']);
         $this->assertSame(['One', 'Two'], array_map(fn ($s) => $s['title']['en'], $settings['slides']));
         $this->assertSame('نص', $settings['slides'][1]['text']['ar']);
+    }
+
+    public function test_the_pages_tab_lists_published_pages_in_order_once_each(): void
+    {
+        Schema::create('cms_pages', function (Blueprint $table) {
+            $table->id();
+            $table->json('title')->nullable();
+            $table->string('slug');
+            $table->boolean('is_homepage')->default(false);
+            $table->string('status')->default('published');
+            $table->timestamp('published_at')->nullable();
+            $table->timestamps();
+        });
+        $files = DB::table('cms_pages')->insertGetId(['title' => json_encode(['en' => 'Files', 'ar' => 'ملفات']), 'slug' => 'files']);
+        $about = DB::table('cms_pages')->insertGetId(['title' => json_encode(['en' => 'About', 'ar' => 'من نحن']), 'slug' => 'about']);
+
+        Livewire::test(MobileAppSettings::class)
+            ->fillForm(['pages' => [['page_id' => $files, 'placement' => 'more'], ['page_id' => $files, 'placement' => 'services']]])
+            ->call('save')
+            ->assertHasFormErrors()
+            ->fillForm(['pages' => [['page_id' => $about, 'placement' => 'both'], ['page_id' => $files, 'placement' => 'more']]])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame([['page_id' => $about, 'placement' => 'both'], ['page_id' => $files, 'placement' => 'more']], MobilePages::settings());
     }
 
     public function test_the_ad_zones_tab_picks_a_zone_per_placement_from_the_active_ones(): void

@@ -9,6 +9,7 @@ return [
     ],
 
     'tabs' => [
+        'pages' => 'Pages',
         'features' => 'Features',
         'updates' => 'Updates',
         'maintenance' => 'Maintenance',
@@ -116,6 +117,14 @@ return [
         'tools_help' => 'At the top of the list.',
         'transfers' => 'Transfer board',
         'transfers_help' => 'At the top of the list.',
+    ],
+
+    'pages' => [
+        'help' => 'Website pages (Content → Pages) the app shows, in this order. The app draws a page itself when it is made only of text, pictures, videos, dividers and call-to-action blocks; any other page opens inside the app as the website page, without the site\'s header and footer. Only published pages are shown.',
+        'add' => 'Add a page',
+        'page' => 'Page',
+        'placement' => 'Shown in',
+        'placements' => ['more' => 'More', 'services' => 'Services screen', 'both' => 'More and Services screen'],
     ],
 
     'onboarding' => [

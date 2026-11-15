@@ -173,7 +173,10 @@ trait PreparesMobileApiDirectory
             $table->id();
             $table->json('title')->nullable();
             $table->string('slug');
+            $table->json('excerpt')->nullable();
             $table->json('content')->nullable();
+            $table->text('custom_head_scripts')->nullable();
+            $table->text('custom_body_scripts')->nullable();
             $table->boolean('is_homepage')->default(false);
             $table->string('status')->default('published');
             $table->timestamp('published_at')->nullable();

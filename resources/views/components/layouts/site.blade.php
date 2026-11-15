@@ -131,6 +131,9 @@
                 width="0" style="display:none;visibility:hidden"></iframe></noscript>
     @endif
 
+    {{-- In the app's WebView (admin → Mobile app → Pages) the app has its own header and menus. --}}
+    @php($inApp = \App\Support\MobileApp\MobilePages::inApp(request()))
+    @unless ($inApp)
     <header class="sticky top-0 z-50 border-b border-warm-200/60 bg-warm-50/90 backdrop-blur print:hidden">
         <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
             <a href="{{ url('/') }}"
@@ -237,11 +240,13 @@
             </nav>
         </div>
     </header>
+    @endunless
 
     <main>
         {{ $slot }}
     </main>
 
+    @unless ($inApp)
     <footer class="mt-24 border-t border-warm-200/60 bg-warm-100/60 print:hidden">
         <div class="mx-auto max-w-7xl px-6 py-14">
             <div class="grid gap-10 md:grid-cols-3">
@@ -339,6 +344,7 @@
             </div>
         </div>
     </footer>
+    @endunless
 
     @if ($bodyScripts = \App\Models\SiteSetting::get('custom_body_scripts'))
         {!! $bodyScripts !!}

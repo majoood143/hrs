@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\V1\Owner\OwnerAuthController;
 use App\Http\Controllers\Api\V1\Owner\OwnerBookingController;
 use App\Http\Controllers\Api\V1\Owner\OwnerScheduleController;
 use App\Http\Controllers\Api\V1\Owner\OwnerStableController;
+use App\Http\Controllers\Api\V1\PageController;
 use App\Http\Controllers\Api\V1\PushController;
 use App\Http\Controllers\Api\V1\RacingController;
 use App\Http\Controllers\Api\V1\ReportController;
@@ -82,6 +83,9 @@ Route::prefix('v1')
         Route::get('videos/{slug}', [VideoLibraryController::class, 'show'])->name('videos.show');
 
         Route::get('silks', SilksController::class)->name('silks');
+
+        // Website pages switched on for the app (admin → Mobile app → Pages).
+        Route::get('pages/{slug}', [PageController::class, 'show'])->name('pages.show');
 
         // What people do in the app, for the CRM (by install; a customer's token makes them theirs).
         Route::post('events', [TrackingController::class, 'store'])->middleware('throttle:api-events')->name('events.store');
