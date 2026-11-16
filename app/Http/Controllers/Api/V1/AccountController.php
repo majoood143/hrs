@@ -67,11 +67,15 @@ class AccountController extends Controller
     /**
      * Change the profile photo
      *
-     * `photo` is an image file (up to 4 MB); send multipart/form-data. Replaces the earlier one.
+     * `photo` is a JPG, PNG or WebP image (up to 4 MB); send multipart/form-data. Replaces the earlier one.
+     * 422 with one message for any refused file (`api.account.photo_invalid`).
      */
     public function photo(Request $request): CustomerResource
     {
-        $request->validate(['photo' => ['required', 'image', 'max:4096']]);
+        // one clear message for every way a file can be wrong (missing, not an image, too big, cut off)
+        $request->validate(['photo' => ['required', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096']], [
+            'photo.*' => __('api.account.photo_invalid'),
+        ]);
 
         $customer = $this->customer($request);
         $old = $customer->profile_photo;

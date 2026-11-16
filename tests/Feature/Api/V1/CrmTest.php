@@ -140,7 +140,9 @@ class CrmTest extends TestCase
         $this->as($token)->postJson('/api/v1/account', ['country_id' => $uae])->assertOk()->assertJsonPath('data.region_id', null);
         $this->as($token)->postJson('/api/v1/account', ['region_id' => $dubai])->assertOk()->assertJsonPath('data.region_id', $dubai);
 
-        $this->as($token)->post('/api/v1/account/photo', ['photo' => 'not a file'], ['Accept' => 'application/json'])->assertUnprocessable();
+        $this->as($token)->post('/api/v1/account/photo', ['photo' => 'not a file'], ['Accept' => 'application/json'])->assertUnprocessable()
+            ->assertJsonPath('message', __('api.account.photo_invalid'));
+        $this->as($token)->post('/api/v1/account/photo', ['photo' => UploadedFile::fake()->create('big.jpg', 5000, 'image/jpeg')], ['Accept' => 'application/json'])->assertJsonValidationErrors('photo');
         $first = $this->as($token)->post('/api/v1/account/photo', ['photo' => UploadedFile::fake()->image('me.jpg')], ['Accept' => 'application/json'])->assertOk()->json('data.photo_url');
         $path = Customer::query()->sole()->profile_photo;
         Storage::disk('public')->assertExists($path);

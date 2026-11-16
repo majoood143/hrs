@@ -34,6 +34,8 @@ Left without a placeholder on purpose: date/time pickers (native pickers ignore 
 ## Elsewhere
 
 - Mobile app (`../hrs-mobile`): `src/i18n/{en,ar}.ts` (`ar` is typed against `en`; a missing key fails `tsc`).
+  - **Uploads in the app**: a hint under the button with the size and shape, types and limit (`Square, at least 400 × 400 px (shown in a circle). JPG, PNG or WebP, up to 4 MB.`), the same limits as the API's rule. The API answers a refused file with **one** translated message for every way it can be wrong (`'photo.*' => __('api.account.photo_invalid')`), not Laravel's "The photo field must be an image."
+  - **An upload's error is a popup** (`showMessage` in `src/lib/confirm.ts`), never a line further down the page: people looking at the photo do not see it and report "nothing happens".
 - Website (non-Filament) forms: the section's own `lang/{en,ar}/<section>.php`.
 - On `TextEntry` / `TextColumn`, `->placeholder('—')` is the empty-value text, a different thing: leave those as they are.
 - Check a rendered form: `Livewire::test(Page::class)->html()` (a full admin GET in tests fails on the sidebar's count badges when tables are missing), or `curl -s <url> | grep -o 'placeholder="[^"]*"'` on a page without sign-in (searchable selects render theirs in JS).

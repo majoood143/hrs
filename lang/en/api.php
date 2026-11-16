@@ -51,6 +51,7 @@ return [
     'account' => [
         'signed_out' => 'You are signed out.',
         'deleted' => 'Your account was deleted.',
+        'photo_invalid' => 'Choose a photo in JPG, PNG or WebP, up to 4 MB.',
         'delete_blocked' => 'You still have an upcoming booking or a package with sessions left. Cancel or use them first, or contact us to delete your account.',
     ],
     'owner' => [
