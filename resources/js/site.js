@@ -420,6 +420,37 @@ function contactReveal() {
     });
 }
 
+// "Show more" under a list: fetches the next page and appends its [data-more-item] cards to the
+// [data-more-list] grid, then points the button at the page after (or removes it on the last one).
+function showMore() {
+    document.querySelectorAll('[data-show-more]').forEach((button) => {
+        const list = document.querySelector('[data-more-list]');
+
+        button.addEventListener('click', async (event) => {
+            event.preventDefault();
+            if (!list || button.getAttribute('aria-busy') === 'true') return;
+
+            button.setAttribute('aria-busy', 'true');
+            try {
+                const response = await fetch(button.href, { headers: { Accept: 'text/html' } });
+                if (!response.ok) throw new Error(response.statusText);
+
+                const page = new DOMParser().parseFromString(await response.text(), 'text/html');
+                const items = [...page.querySelectorAll('[data-more-list] [data-more-item]')];
+                list.append(...items);
+                items[0]?.focus(); // keyboard and screen-reader users land on the first new card
+
+                const next = page.querySelector('[data-show-more]');
+                if (next) button.href = next.href; else button.parentElement.remove();
+            } catch {
+                window.location.href = button.href; // let the plain link do it
+            } finally {
+                button.removeAttribute('aria-busy');
+            }
+        });
+    });
+}
+
 // Opens a listing photo (x-zoomable-image) at its original size in a <dialog>.
 // Links sharing a data-lightbox group can be browsed with the arrows / arrow keys.
 function lightbox() {
@@ -1369,6 +1400,7 @@ document.addEventListener('DOMContentLoaded', () => {
     transferBoardFilters();
     mobileMenu();
     contactReveal();
+    showMore();
     lightbox();
     youtubeModal();
     passportReveal();

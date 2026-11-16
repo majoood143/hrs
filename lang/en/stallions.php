@@ -70,6 +70,7 @@ return [
     'no_results_title' => 'No stallions match your search',
     'no_results_body' => 'Try another name or clear the colour.',
     'clear' => 'Clear',
+    'show_more' => 'Show more',
     'view_details' => 'Pedigree and record',
     'back_to_listing' => 'Back to stallions',
     'by' => ':sire × :dam',

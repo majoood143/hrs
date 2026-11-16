@@ -69,6 +69,7 @@ return [
     'no_results_title' => 'لا توجد فحول تطابق بحثك',
     'no_results_body' => 'جرّب اسمًا آخر أو ألغِ اختيار اللون.',
     'clear' => 'مسح',
+    'show_more' => 'عرض المزيد',
     'view_details' => 'النسب والسجل',
     'back_to_listing' => 'العودة إلى الفحول',
     'by' => ':sire × :dam',

@@ -33,9 +33,9 @@
                 <p class="mt-2 text-warm-900/60">{{ __('stallions.no_results_body') }}</p>
             </div>
         @else
-            <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-more-list>
                 @foreach($stallions as $stallion)
-                    <a href="{{ route('stallions.show', $stallion->id) }}" class="card-warm group block overflow-hidden p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-500">
+                    <a href="{{ route('stallions.show', $stallion->id) }}" data-more-item class="card-warm group block overflow-hidden p-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-warm-500">
                         {{-- a plain photo: the zoomable one is a link itself and cannot sit inside the card's link --}}
                         @if($stallion->photo_url)
                             <img src="{{ $stallion->photo_url }}" alt="" loading="lazy" class="h-56 w-full object-cover">
@@ -55,7 +55,12 @@
                 @endforeach
             </div>
 
-            <div class="mt-10">{{ $stallions->links() }}</div>
+            {{-- the next page, appended in place by site.js showMore(); without JS the link opens it --}}
+            @if($stallions->hasMorePages())
+                <div class="mt-10 flex justify-center">
+                    <a href="{{ $stallions->nextPageUrl() }}" data-show-more class="btn-warm-outline">{{ __('stallions.show_more') }}</a>
+                </div>
+            @endif
         @endif
     </div>
 </x-layouts.site>

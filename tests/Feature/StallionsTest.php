@@ -75,6 +75,11 @@ class StallionsTest extends TestCase
         $this->stallion(['en_name' => 'Hidden Horse', 'is_active' => false]);
 
         $this->get(route('stallions.index'))->assertOk()->assertSee('Al Sahm')->assertSee('Amer (SA) × Nisaee (FR)')->assertDontSee('Hidden Horse');
+        foreach (range(1, 12) as $n) {
+            $this->stallion(['en_name' => "Zz Stallion {$n}"]);
+        }
+        $this->get(route('stallions.index'))->assertSee(route('stallions.index', ['page' => 2]))->assertSee(__('stallions.show_more'))->assertDontSee('Zz Stallion 9');
+        $this->get(route('stallions.index', ['page' => 2]))->assertSee('Zz Stallion 9')->assertDontSee('data-show-more', false);
         $this->get(route('stallions.index', ['q' => 'nobody']))->assertOk()->assertSee(__('stallions.no_results_title'));
 
         $this->get(route('stallions.show', $sahm))
