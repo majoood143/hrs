@@ -49,6 +49,8 @@ return [
         'farriers_help' => 'Directory listing and farrier pages.',
         'jockeys' => 'Jockeys',
         'jockeys_help' => 'Directory listing and jockey pages.',
+        'stallions' => 'Stallions',
+        'stallions_help' => 'Breeding stallions: list, pedigree and race record.',
         'events' => 'Events',
         'events_help' => 'Events list and the Home section.',
         'blog' => 'Blog',

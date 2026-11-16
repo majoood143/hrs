@@ -28,6 +28,7 @@ use App\Http\Controllers\Site\ShopController;
 use App\Http\Controllers\Site\SilksController;
 use App\Http\Controllers\Site\StableBookingController;
 use App\Http\Controllers\Site\StableController;
+use App\Http\Controllers\Site\StallionController;
 use App\Http\Controllers\Site\ToolSaleController;
 use App\Http\Controllers\Site\TransferBoardController;
 use App\Http\Controllers\Site\VideoLibraryController;
@@ -88,6 +89,9 @@ Route::get('/jockeys', [JockeyController::class, 'index'])->name('jockeys.index'
 Route::get('/jockeys/post', [JockeyController::class, 'create'])->name('jockeys.create');
 Route::post('/jockeys/post', [JockeyController::class, 'store'])->middleware('throttle:10,1')->name('jockeys.store');
 Route::get('/jockeys/{jockey}', [JockeyController::class, 'show'])->whereNumber('jockey')->name('jockeys.show');
+
+Route::get('/stallions', [StallionController::class, 'index'])->name('stallions.index');
+Route::get('/stallions/{stallion}', [StallionController::class, 'show'])->whereNumber('stallion')->name('stallions.show');
 
 Route::get('/tools-for-sale', [ToolSaleController::class, 'index'])->name('tools-for-sale.index');
 Route::get('/tools-for-sale/post', [ToolSaleController::class, 'create'])->name('tools-for-sale.create');

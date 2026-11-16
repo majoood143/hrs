@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\ShopController;
 use App\Http\Controllers\Api\V1\SilksController;
 use App\Http\Controllers\Api\V1\StableController;
+use App\Http\Controllers\Api\V1\StallionController;
 use App\Http\Controllers\Api\V1\ToolForSaleController;
 use App\Http\Controllers\Api\V1\TrackingController;
 use App\Http\Controllers\Api\V1\TransferBoardController;
@@ -62,6 +63,9 @@ Route::prefix('v1')
 
         Route::get('jockeys', [JockeyController::class, 'index'])->name('jockeys.index');
         Route::get('jockeys/{id}', [JockeyController::class, 'show'])->whereNumber('id')->name('jockeys.show');
+
+        Route::get('stallions', [StallionController::class, 'index'])->name('stallions.index');
+        Route::get('stallions/{id}', [StallionController::class, 'show'])->whereNumber('id')->name('stallions.show');
 
         Route::get('transfer-board', [TransferBoardController::class, 'index'])->name('transfer-board.index');
         Route::get('transfer-board/{id}', [TransferBoardController::class, 'show'])->whereNumber('id')->name('transfer-board.show');

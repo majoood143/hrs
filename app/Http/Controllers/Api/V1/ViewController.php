@@ -11,6 +11,7 @@ use App\Models\Farrier;
 use App\Models\HorseSalePost;
 use App\Models\Jockey;
 use App\Models\Shop;
+use App\Models\Stallion;
 use App\Models\ToolSalePost;
 use App\Models\TransferPost;
 use App\Models\Video;
@@ -38,6 +39,7 @@ class ViewController extends Controller
             'farriers' => [Farrier::visible(), 'id'],
             'transfer-board' => [TransferPost::visible(), 'id'],
             'jockeys' => [Jockey::visible(), 'id'],
+            'stallions' => [Stallion::visible(), 'id'],
             'clinics' => [Clinic::active(), 'slug'],
             'centers' => [Center::active(), 'slug'],
             'shops' => [Shop::active(), 'slug'],
@@ -50,7 +52,7 @@ class ViewController extends Controller
     /**
      * Count a view
      *
-     * `section` is one of horses-for-sale, tools-for-sale, farriers, transfer-board, jockeys, clinics, centers,
+     * `section` is one of horses-for-sale, tools-for-sale, farriers, transfer-board, jockeys, stallions, clinics, centers,
      * shops, events (by `id`), blog, videos (by `slug`). Stables have no counter.
      *
      * @unauthenticated
