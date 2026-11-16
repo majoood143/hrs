@@ -14,6 +14,7 @@ return [
         'updates' => 'Updates',
         'maintenance' => 'Maintenance',
         'posting' => 'Posting',
+        'profile' => 'Profile',
         'auto_push' => 'Automatic notifications',
         'images' => 'Services screen',
         'ads' => 'Ad zones',
@@ -92,6 +93,20 @@ return [
         'play_link' => 'Play Store link: :url',
         'messages' => 'Messages',
         'messages_help' => 'Leave empty to use the built-in text shown in grey.',
+    ],
+
+    'profile' => [
+        'help' => 'The fields of the app\'s Account screen (the name is always there). Countries and regions are the public ones (Locations). The CRM\'s profile completion counts only the fields shown here.',
+        'fields' => [
+            'photo' => 'Profile photo',
+            'email' => 'Email',
+            'gender' => 'Gender',
+            'date_of_birth' => 'Date of birth',
+            'national_id' => 'ID number',
+            'country' => 'Country',
+            'region' => 'Region (needs Country)',
+            'marketing' => 'Offers and news consent',
+        ],
     ],
 
     'posting' => [

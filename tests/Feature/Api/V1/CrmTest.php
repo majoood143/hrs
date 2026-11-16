@@ -3,10 +3,13 @@
 namespace Tests\Feature\Api\V1;
 
 use App\Models\AppEvent;
+use App\Models\CrmSegment;
 use App\Models\Customer;
 use App\Models\SiteSetting;
 use App\Support\MobileApp\MobileOnboarding;
+use App\Support\MobileApp\MobileProfile;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -103,17 +106,70 @@ class CrmTest extends TestCase
             ->assertJsonPath('data.date_of_birth', '1995-04-20')
             ->assertJsonPath('data.national_id', '••••5678')
             ->assertJsonPath('data.marketing_opt_in', true)
-            ->assertJsonPath('data.profile_completion', 80);
+            ->assertJsonPath('data.profile_completion', 50);
 
         $this->assertNotSame('12345678', DB::table('customers')->value('national_id'));
         $this->assertSame('12345678', Customer::query()->sole()->national_id);
 
         // a field left out stays; the event names the fields, never their values
-        $this->as($token)->postJson('/api/v1/account', ['email' => 'aisha@example.com'])->assertOk()->assertJsonPath('data.gender', 'female')->assertJsonPath('data.profile_completion', 100);
+        $this->as($token)->postJson('/api/v1/account', ['email' => 'aisha@example.com'])->assertOk()->assertJsonPath('data.gender', 'female')->assertJsonPath('data.profile_completion', 63);
         $updates = AppEvent::query()->where('name', 'profile_updated')->orderBy('id')->get();
         $this->assertSame('name,gender,date_of_birth,national_id,marketing_opt_in', $updates[0]->properties['fields']);
         $this->assertStringNotContainsString('1234', json_encode($updates->pluck('properties')));
-        $this->assertSame(['fields' => 'email', 'completion' => 100], $updates[1]->properties);
+        $this->assertSame(['fields' => 'email', 'completion' => 63], $updates[1]->properties);
+    }
+
+    public function test_country_and_region_are_public_ones_and_the_photo_is_stored(): void
+    {
+        Storage::fake('public');
+        $oman = DB::table('countries')->insertGetId(['en_name' => 'Oman', 'ar_name' => 'عمان', 'is_public' => true]);
+        $hidden = DB::table('countries')->insertGetId(['en_name' => 'Hidden', 'ar_name' => 'مخفية', 'is_public' => false]);
+        $uae = DB::table('countries')->insertGetId(['en_name' => 'UAE', 'ar_name' => 'الإمارات', 'is_public' => true]);
+        $muscat = DB::table('regions')->insertGetId(['country_id' => $oman, 'en_name' => 'Muscat', 'ar_name' => 'مسقط']);
+        $dubai = DB::table('regions')->insertGetId(['country_id' => $uae, 'en_name' => 'Dubai', 'ar_name' => 'دبي']);
+        $token = $this->signIn();
+
+        // a hidden country, a region of another country
+        $this->as($token)->postJson('/api/v1/account', ['country_id' => $hidden])->assertUnprocessable()->assertJsonValidationErrors('country_id');
+        $this->as($token)->postJson('/api/v1/account', ['country_id' => $oman, 'region_id' => $dubai])->assertUnprocessable()->assertJsonValidationErrors('region_id');
+
+        $this->as($token)->postJson('/api/v1/account', ['country_id' => $oman, 'region_id' => $muscat])->assertOk()
+            ->assertJsonPath('data.country_id', $oman)->assertJsonPath('data.region_id', $muscat);
+        // the region alone checks against the saved country; a new country drops the old region
+        $this->as($token)->postJson('/api/v1/account', ['region_id' => $dubai])->assertUnprocessable();
+        $this->as($token)->postJson('/api/v1/account', ['country_id' => $uae])->assertOk()->assertJsonPath('data.region_id', null);
+        $this->as($token)->postJson('/api/v1/account', ['region_id' => $dubai])->assertOk()->assertJsonPath('data.region_id', $dubai);
+
+        $this->as($token)->post('/api/v1/account/photo', ['photo' => 'not a file'], ['Accept' => 'application/json'])->assertUnprocessable();
+        $first = $this->as($token)->post('/api/v1/account/photo', ['photo' => UploadedFile::fake()->image('me.jpg')], ['Accept' => 'application/json'])->assertOk()->json('data.photo_url');
+        $path = Customer::query()->sole()->profile_photo;
+        Storage::disk('public')->assertExists($path);
+        $this->assertStringEndsWith($path, $first);
+
+        // a new photo replaces the old file; removing it deletes the file
+        $this->as($token)->post('/api/v1/account/photo', ['photo' => UploadedFile::fake()->image('again.jpg')], ['Accept' => 'application/json'])->assertOk();
+        Storage::disk('public')->assertMissing($path);
+        $this->as($token)->deleteJson('/api/v1/account/photo')->assertOk()->assertJsonPath('data.photo_url', null);
+        $this->assertSame([], Storage::disk('public')->allFiles('customers/photos'));
+
+        // segments by where they live
+        $this->assertSame(1, CrmSegment::queryFor(['profile_countries' => [$uae]])->count());
+        $this->assertSame(1, CrmSegment::queryFor(['regions' => [$dubai]])->count());
+        $this->assertSame(0, CrmSegment::queryFor(['regions' => [$muscat]])->count());
+    }
+
+    public function test_the_admin_chooses_the_profile_fields_and_completion_counts_only_those(): void
+    {
+        $token = $this->signIn();
+        Cache::forever('site_settings.all', collect(['mobile.profile' => (object) ['key' => 'mobile.profile', 'type' => 'text', 'value' => json_encode(['fields' => ['email', 'region']])]]));
+        SiteSetting::resetMemo();
+
+        // a region without its country is not shown
+        $this->assertSame(['email'], MobileProfile::shown());
+        $this->getJson('/api/v1/app-status')->assertOk()->assertJsonPath('data.profile_fields', ['email']);
+
+        $this->as($token)->postJson('/api/v1/account', ['name' => 'Aisha'])->assertOk()->assertJsonPath('data.profile_completion', 50);
+        $this->assertSame(1, CrmSegment::queryFor(['min_completion' => 50])->count());
     }
 
     public function test_deleting_the_account_deletes_its_events(): void

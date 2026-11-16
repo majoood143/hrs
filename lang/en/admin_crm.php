@@ -3,6 +3,10 @@
 return [
     'fields' => [
         'country' => 'Country',
+        'phone_country' => 'Phone country',
+        'profile_country' => 'Country (lives in)',
+        'region' => 'Region',
+        'photo' => 'Photo',
         'gender' => 'Gender',
         'date_of_birth' => 'Date of birth',
         'national_id' => 'ID number',

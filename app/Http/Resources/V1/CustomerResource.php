@@ -25,8 +25,14 @@ class CustomerResource extends JsonResource
             'name' => $customer->name,
             /** @var string|null */
             'email' => $customer->email,
-            /** ISO 3166 alpha-2. @var string|null @example OM */
+            /** Absolute URL. @var string|null */
+            'photo_url' => $customer->profilePhotoUrl(),
+            /** The phone's country, from the sign-in: ISO 3166 alpha-2. @var string|null @example OM */
             'country' => $customer->country,
+            /** Where they live: a public country of `GET lookups`. @var int|null */
+            'country_id' => $customer->country_id,
+            /** One of that country's regions. @var int|null */
+            'region_id' => $customer->region_id,
             /** @var 'male'|'female'|null */
             'gender' => $customer->gender,
             /** `Y-m-d`. @var string|null */
@@ -34,7 +40,7 @@ class CustomerResource extends JsonResource
             /** Only the last 4 digits; the number itself is never sent back. @var string|null @example ••••4567 */
             'national_id' => $customer->maskedNationalId(),
             'marketing_opt_in' => (bool) $customer->marketing_opt_in,
-            /** How much of the optional profile is filled in (name, email, gender, date of birth, ID number), 0–100. */
+            /** How much of the optional profile is filled in over the name and the fields the admin shows (`app-status.profile_fields`), 0–100. */
             'profile_completion' => $customer->profileCompletion(),
         ];
     }

@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use App\Support\MobileApp\MobileProfile;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -16,9 +19,6 @@ class Customer extends Authenticatable
     use HasApiTokens;
 
     public const GENDERS = ['male', 'female'];
-
-    /** The profile fields the app asks for after sign-in; the CRM's "completed" share is over these. */
-    public const PROFILE_FIELDS = ['name', 'email', 'gender', 'date_of_birth', 'national_id'];
 
     protected $guarded = [];
 
@@ -54,6 +54,22 @@ class Customer extends Authenticatable
             : '••••'.substr($phone, -4);
     }
 
+    /** The country picked in the profile (a public one); `country` is the phone's, from the sign-in. */
+    public function profileCountry(): BelongsTo
+    {
+        return $this->belongsTo(Country::class, 'country_id');
+    }
+
+    public function region(): BelongsTo
+    {
+        return $this->belongsTo(Region::class);
+    }
+
+    public function profilePhotoUrl(): ?string
+    {
+        return $this->profile_photo ? Storage::disk('public')->url($this->profile_photo) : null;
+    }
+
     public function events(): HasMany
     {
         return $this->hasMany(AppEvent::class);
@@ -62,9 +78,10 @@ class Customer extends Authenticatable
     /** How much of the optional profile is filled in, 0–100. */
     public function profileCompletion(): int
     {
-        $filled = collect(self::PROFILE_FIELDS)->filter(fn (string $field) => filled($this->getAttribute($field)))->count();
+        $fields = MobileProfile::completionColumns();
+        $filled = collect($fields)->filter(fn (string $field) => filled($this->getAttribute($field)))->count();
 
-        return (int) round($filled * 100 / count(self::PROFILE_FIELDS));
+        return (int) round($filled * 100 / count($fields));
     }
 
     /** ••••••4567: the last digits, for the admin and the app (never the whole number). */

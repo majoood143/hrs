@@ -77,6 +77,7 @@ class CustomerResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['region', 'profileCountry']))
             ->columns([
                 TextColumn::make('phone')
                     ->label(__('admin_customer.columns.phone'))
@@ -96,10 +97,15 @@ class CustomerResource extends Resource
                     ->searchable()
                     ->toggleable(),
                 TextColumn::make('country')
-                    ->label(__('admin_crm.fields.country'))
+                    ->label(__('admin_crm.fields.phone_country'))
                     ->placeholder('—')
                     ->badge()
                     ->color('gray')
+                    ->toggleable(),
+                TextColumn::make('region.name')
+                    ->label(__('admin_crm.fields.region'))
+                    ->description(fn (Customer $record) => $record->profileCountry?->name)
+                    ->placeholder('—')
                     ->toggleable(),
                 TextColumn::make('gender')
                     ->label(__('admin_crm.fields.gender'))
@@ -143,7 +149,9 @@ class CustomerResource extends Resource
             ->filters([
                 SelectFilter::make('source')->label(__('admin_crm.fields.source'))->options(CrmSegmentResource::sourceOptions()),
                 SelectFilter::make('gender')->label(__('admin_crm.fields.gender'))->options(CrmSegmentResource::genderOptions()),
-                SelectFilter::make('country')->label(__('admin_crm.fields.country'))->options(fn () => CrmSegmentResource::countryOptions()),
+                SelectFilter::make('country')->label(__('admin_crm.fields.phone_country'))->options(fn () => CrmSegmentResource::countryOptions()),
+                SelectFilter::make('country_id')->label(__('admin_crm.fields.profile_country'))->multiple()->options(fn () => CrmSegmentResource::profileCountryOptions()),
+                SelectFilter::make('region_id')->label(__('admin_crm.fields.region'))->multiple()->searchable()->options(fn () => CrmSegmentResource::regionOptions()),
                 TernaryFilter::make('marketing_opt_in')->label(__('admin_crm.fields.marketing')),
                 SelectFilter::make('segment')
                     ->label(__('admin_crm.segments.label'))

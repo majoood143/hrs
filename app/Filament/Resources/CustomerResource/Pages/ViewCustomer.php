@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\MobileDevice;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
@@ -31,10 +32,13 @@ class ViewCustomer extends ViewRecord
                 ->columns(4)
                 ->columnSpanFull()
                 ->schema([
+                    ImageEntry::make('profile_photo')->label(__('admin_crm.fields.photo'))->disk('public')->circular()->imageSize(64)->placeholder('—'),
                     TextEntry::make('phone')->label(__('admin_customer.columns.phone'))->formatStateUsing(fn (string $state) => "\u{2066}+{$state}\u{2069}")->copyable(fn (Customer $record) => '+'.$record->phone),
                     TextEntry::make('name')->label(__('admin_customer.columns.name'))->placeholder('—'),
                     TextEntry::make('email')->label(__('admin_customer.columns.email'))->placeholder('—'),
-                    TextEntry::make('country')->label(__('admin_crm.fields.country'))->placeholder('—')->badge()->color('gray'),
+                    TextEntry::make('country')->label(__('admin_crm.fields.phone_country'))->placeholder('—')->badge()->color('gray'),
+                    TextEntry::make('profileCountry.name')->label(__('admin_crm.fields.profile_country'))->placeholder('—'),
+                    TextEntry::make('region.name')->label(__('admin_crm.fields.region'))->placeholder('—'),
                     TextEntry::make('gender')->label(__('admin_crm.fields.gender'))->formatStateUsing(fn (string $state) => __('admin_crm.genders.'.$state))->placeholder('—'),
                     TextEntry::make('date_of_birth')
                         ->label(__('admin_crm.fields.date_of_birth'))

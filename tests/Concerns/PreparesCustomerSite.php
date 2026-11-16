@@ -8,9 +8,11 @@ use App\Enums\PaymentStatus;
 use App\Models\Customer;
 use App\Models\ServiceOrder;
 use App\Services\Auth\CustomerOtpService;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * The customer tables (from the real migrations) on top of the order site, and helpers to pick an SMS
@@ -30,6 +32,25 @@ trait PreparesCustomerSite
         (require database_path('migrations/2026_11_14_000001_add_profile_to_customers.php'))->up();
         (require database_path('migrations/2026_11_14_000002_create_app_events_table.php'))->up();
         (require database_path('migrations/2026_11_14_000003_create_crm_segments_table.php'))->up();
+        (require database_path('migrations/2026_11_16_000001_add_photo_and_place_to_customers.php'))->up();
+
+        // the CRM's country and region filters read the public countries
+        if (! Schema::hasTable('countries')) {
+            Schema::create('countries', function (Blueprint $table) {
+                $table->id();
+                $table->string('en_name');
+                $table->string('ar_name');
+                $table->boolean('is_public')->default(true);
+                $table->timestamps();
+            });
+            Schema::create('regions', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('country_id');
+                $table->string('en_name');
+                $table->string('ar_name');
+                $table->timestamps();
+            });
+        }
     }
 
     /** @param  array<string, mixed>  $extra */

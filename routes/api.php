@@ -135,6 +135,8 @@ Route::prefix('v1')
             Route::get('account', [AccountController::class, 'show'])->name('account.show');
             Route::post('account', [AccountController::class, 'update'])->middleware('throttle:api-account')->name('account.update');
             Route::delete('account', [AccountController::class, 'destroy'])->middleware('throttle:api-account')->name('account.destroy');
+            Route::post('account/photo', [AccountController::class, 'photo'])->middleware('throttle:api-account')->name('account.photo');
+            Route::delete('account/photo', [AccountController::class, 'deletePhoto'])->middleware('throttle:api-account')->name('account.photo.destroy');
             Route::get('account/bookings', [AccountBookingController::class, 'index'])->name('account.bookings.index');
             Route::get('account/bookings/{reference}', [AccountBookingController::class, 'show'])->name('account.bookings.show');
             Route::get('account/packages', [AccountPackageController::class, 'index'])->name('account.packages.index');

@@ -10,6 +10,7 @@ use App\Support\MobileApp\MobileFeatures;
 use App\Support\MobileApp\MobileMaintenance;
 use App\Support\MobileApp\MobileOnboarding;
 use App\Support\MobileApp\MobilePages;
+use App\Support\MobileApp\MobileProfile;
 use App\Support\MobileApp\MobileUpdates;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -53,6 +54,8 @@ class AppStatusController extends Controller
                 'announcements' => AnnouncementResource::collection($announcements),
                 /** First-launch slides (admin → Mobile app → Onboarding); show once per `version`. */
                 'onboarding' => MobileOnboarding::forClient(),
+                /** The optional fields the Account screen shows (admin → Mobile app → Profile), besides the name. @var list<'photo'|'email'|'gender'|'date_of_birth'|'national_id'|'country'|'region'|'marketing'> */
+                'profile_fields' => MobileProfile::shown(),
                 /** Website pages to list in More / on the Services screen (admin → Mobile app → Pages), in order; open with `GET pages/{slug}`. */
                 'pages' => MobilePages::forClient(),
                 /** What the server understood from the headers (null = not sent or not recognised). */

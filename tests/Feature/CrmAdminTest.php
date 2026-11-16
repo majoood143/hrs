@@ -103,10 +103,10 @@ class CrmAdminTest extends TestCase
         $this->assertSame([$keen->id, $once->id], $ids(['marketing_only' => true, 'countries' => ['OM']]));
         $this->assertSame([$keen->id], $ids(['source' => 'app']));
 
-        $keen->forceFill(['name' => 'Aisha', 'email' => 'a@example.com', 'national_id' => '12345678'])->save();
+        $keen->forceFill(['name' => 'Aisha', 'email' => 'a@example.com', 'national_id' => '12345678', 'profile_photo' => 'customers/photos/a.jpg', 'country_id' => 1, 'region_id' => 1])->save();
         $this->assertSame(100, $keen->profileCompletion());
         $this->assertSame([$keen->id], $ids(['min_completion' => 100]));
-        $this->assertSame([$keen->id, $once->id, $old->id, $caller->id], $ids(['min_completion' => 40]));
+        $this->assertSame([$keen->id, $once->id, $old->id, $caller->id], $ids(['min_completion' => 25]));
     }
 
     public function test_a_campaign_to_a_segment_reaches_only_its_customers_signed_in_phones(): void

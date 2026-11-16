@@ -3,6 +3,10 @@
 return [
     'fields' => [
         'country' => 'الدولة',
+        'phone_country' => 'دولة الهاتف',
+        'profile_country' => 'دولة الإقامة',
+        'region' => 'المنطقة',
+        'photo' => 'الصورة',
         'gender' => 'الجنس',
         'date_of_birth' => 'تاريخ الميلاد',
         'national_id' => 'رقم البطاقة الشخصية',

@@ -11,6 +11,7 @@ use App\Models\StableBooking;
 use App\Models\StablePackagePurchase;
 use App\Models\StableReview;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * A customer deletes their account from the app (the stores require it). Orders, bookings and
@@ -53,5 +54,9 @@ class CustomerAccountDeletion
             $customer->tokens()->delete();
             $customer->delete();
         });
+
+        if ($customer->profile_photo) {
+            Storage::disk('public')->delete($customer->profile_photo);
+        }
     }
 }

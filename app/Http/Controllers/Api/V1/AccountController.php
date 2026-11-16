@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Services\Auth\CustomerAccountDeletion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 /** The signed-in customer's own details. */
@@ -24,11 +25,15 @@ class AccountController extends Controller
      * Update the profile
      *
      * Name and email (the booking form), and the optional profile: gender, date of birth, ID number,
-     * marketing consent. Send only the fields that change (a field left out stays as it is; `null`
-     * clears it). The phone is the one signed in with and cannot change.
+     * country and region (a public country from `GET lookups`, one of its regions), marketing consent.
+     * Send only the fields that change (a field left out stays as it is; `null` clears it). A new
+     * country clears a region that is not in it. The phone is the one signed in with and cannot change.
      */
     public function update(Request $request): CustomerResource
     {
+        $customer = $this->customer($request);
+        $countryId = $request->has('country_id') ? $request->input('country_id') : $customer->country_id;
+
         $data = $request->validate([
             'name' => ['sometimes', 'nullable', 'string', 'max:120'],
             'email' => ['sometimes', 'nullable', 'email', 'max:190'],
@@ -37,17 +42,58 @@ class AccountController extends Controller
             'date_of_birth' => ['sometimes', 'nullable', 'date_format:Y-m-d', 'after:1900-01-01', 'before:today'],
             /** Letters and digits. @example 12345678 */
             'national_id' => ['sometimes', 'nullable', 'string', 'regex:/^[A-Za-z0-9]{4,20}$/'],
+            'country_id' => ['sometimes', 'nullable', 'integer', Rule::exists('countries', 'id')->where('is_public', true)],
+            'region_id' => ['sometimes', 'nullable', 'integer', Rule::exists('regions', 'id')->where('country_id', $countryId)],
             'marketing_opt_in' => ['sometimes', 'boolean'],
         ]);
 
-        $customer = $this->customer($request);
         $customer->fill($data);
+
+        if ($customer->isDirty('country_id') && ! array_key_exists('region_id', $data)) {
+            $customer->region_id = null;
+        }
+
         $changed = array_keys($customer->getDirty());
         $customer->save();
 
         if ($changed !== []) {
             // which fields changed, never their values (the CRM shows the profile itself)
             AppEvent::record('profile_updated', $customer, ['fields' => implode(',', $changed), 'completion' => $customer->profileCompletion()], $request);
+        }
+
+        return CustomerResource::make($customer);
+    }
+
+    /**
+     * Change the profile photo
+     *
+     * `photo` is an image file (up to 4 MB); send multipart/form-data. Replaces the earlier one.
+     */
+    public function photo(Request $request): CustomerResource
+    {
+        $request->validate(['photo' => ['required', 'image', 'max:4096']]);
+
+        $customer = $this->customer($request);
+        $old = $customer->profile_photo;
+        $customer->update(['profile_photo' => $request->file('photo')->store('customers/photos', 'public')]);
+
+        if ($old) {
+            Storage::disk('public')->delete($old);
+        }
+
+        AppEvent::record('profile_updated', $customer, ['fields' => 'profile_photo', 'completion' => $customer->profileCompletion()], $request);
+
+        return CustomerResource::make($customer);
+    }
+
+    /** Remove the profile photo */
+    public function deletePhoto(Request $request): CustomerResource
+    {
+        $customer = $this->customer($request);
+
+        if ($customer->profile_photo) {
+            Storage::disk('public')->delete($customer->profile_photo);
+            $customer->update(['profile_photo' => null]);
         }
 
         return CustomerResource::make($customer);

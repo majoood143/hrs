@@ -6,8 +6,10 @@ use App\Filament\Resources\CrmSegmentResource\Pages\CreateCrmSegment;
 use App\Filament\Resources\CrmSegmentResource\Pages\EditCrmSegment;
 use App\Filament\Resources\CrmSegmentResource\Pages\ListCrmSegments;
 use App\Models\AppEvent;
+use App\Models\Country;
 use App\Models\CrmSegment;
 use App\Models\Customer;
+use App\Models\Region;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
@@ -92,7 +94,10 @@ class CrmSegmentResource extends Resource
                 ->columnSpanFull()
                 ->schema([
                     Select::make('rules.gender')->label(__('admin_crm.fields.gender'))->placeholder(__('admin_crm.segments.anyone'))->options(self::genderOptions())->live(),
-                    Select::make('rules.countries')->label(__('admin_crm.fields.country'))->placeholder(__('admin_crm.segments.anyone'))->multiple()->options(fn () => self::countryOptions())->live(),
+                    Select::make('rules.countries')->label(__('admin_crm.fields.phone_country'))->placeholder(__('admin_crm.segments.anyone'))->multiple()->options(fn () => self::countryOptions())->live(),
+                    Select::make('rules.profile_countries')->label(__('admin_crm.fields.profile_country'))->placeholder(__('admin_crm.segments.anyone'))->multiple()->options(fn () => self::profileCountryOptions())->live(),
+                    Select::make('rules.regions')->label(__('admin_crm.fields.region'))->placeholder(__('admin_crm.segments.anyone'))->multiple()->searchable()
+                        ->options(fn (Get $get) => self::regionOptions((array) $get('rules.profile_countries')))->live(),
                     Select::make('rules.source')->label(__('admin_crm.fields.source'))->placeholder(__('admin_crm.segments.anyone'))->options(self::sourceOptions())->live(),
                     $number('rules.age_min', 0, 120)->label(__('admin_crm.segments.fields.age_min')),
                     $number('rules.age_max', 0, 120)->label(__('admin_crm.segments.fields.age_max'))->gte('rules.age_min'),
@@ -137,6 +142,24 @@ class CrmSegmentResource extends Resource
     public static function countryOptions(): array
     {
         return Customer::query()->whereNotNull('country')->distinct()->orderBy('country')->pluck('country', 'country')->all();
+    }
+
+    /** @return array<int, string> the public countries (the ones the app offers) */
+    public static function profileCountryOptions(): array
+    {
+        return Country::query()->public()->orderBy('en_name')->get()->mapWithKeys(fn (Country $c) => [$c->id => $c->name])->all();
+    }
+
+    /**
+     * @param  array<int|string>  $countryIds  only these countries' regions (none: every public country's)
+     * @return array<int, string>
+     */
+    public static function regionOptions(array $countryIds = []): array
+    {
+        return Region::query()
+            ->whereIn('country_id', $countryIds !== [] ? $countryIds : Country::query()->public()->select('id'))
+            ->orderBy('en_name')->get()
+            ->mapWithKeys(fn (Region $r) => [$r->id => $r->name])->all();
     }
 
     public static function getPages(): array
