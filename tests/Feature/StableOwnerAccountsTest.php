@@ -322,6 +322,8 @@ class StableOwnerAccountsTest extends TestCase
 
         // Tuesdays within the default 30 days: Oct 6, 13, 20, 27
         $this->assertSame(4, BookingSlot::query()->where('stable_id', $stable->id)->count());
+        // a wall-clock time: not shifted to UTC (16:00 used to be saved as 12:00)
+        $this->assertSame(['16:00:00'], BookingSlot::query()->where('stable_id', $stable->id)->pluck('start_time')->map(fn ($t) => BookingSlot::normalizeTime($t))->unique()->values()->all());
 
         Carbon::setTestNow();
     }

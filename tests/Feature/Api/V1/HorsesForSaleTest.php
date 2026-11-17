@@ -71,7 +71,11 @@ class HorsesForSaleTest extends TestCase
         $this->assertSame('€ 2.300,00', SiteSetting::formatCurrency(2300));
 
         $this->seedApiSettings(['currency_decimals' => 0, 'thousands_separator' => 'space']);
-        $this->assertSame('1 250 501', SiteSetting::formatAmount('1250500.5'));
+        $this->assertSame('1 250 500', SiteSetting::formatAmount('1250500'));
+        // Never round a fraction away: 0.4 would read "0".
+        $this->assertSame('1 250 500.5', SiteSetting::formatAmount('1250500.5'));
+        $this->assertSame('0.4', SiteSetting::formatAmount('0.4'));
+        $this->assertSame('0.125', SiteSetting::formatAmount('0.125'));
     }
 
     public function test_the_list_filters_like_the_website(): void

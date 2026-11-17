@@ -30,6 +30,7 @@ use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
 use Filament\Support\Assets\Js;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentTimezone;
@@ -94,6 +95,9 @@ class AppServiceProvider extends ServiceProvider
 
         // every date and time in the panels in Oman's time (the server runs on UTC)
         FilamentTimezone::set(BookingSlot::timezone());
+        // ...except time-only fields (schedules, opening hours, event times): they are wall-clock
+        // times with no date, so converting them shifted 14:00 to 10:00 on save
+        TimePicker::configureUsing(fn (TimePicker $picker) => $picker->timezone(config('app.timezone')));
 
         Gate::define('viewApiDocs', function ($user) {
             return $user?->hasRole('super_admin') ?? false;

@@ -158,9 +158,16 @@ class SiteSetting extends Model
      */
     public static function formatAmount(float|int|string|null $amount): string
     {
+        $amount = (float) $amount;
+        $decimals = max(0, min(3, (int) static::get('currency_decimals', 3)));
+        // Fewer decimals than the amount has would show 0.4 as "0": add places until it is exact (baisa).
+        while ($decimals < 3 && round($amount, $decimals) != round($amount, 3)) {
+            $decimals++;
+        }
+
         return number_format(
-            (float) $amount,
-            max(0, min(3, (int) static::get('currency_decimals', 3))),
+            $amount,
+            $decimals,
             self::SEPARATORS[static::get('decimal_separator', 'dot')] ?? '.',
             self::SEPARATORS[static::get('thousands_separator', 'comma')] ?? ',',
         );
