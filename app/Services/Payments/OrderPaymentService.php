@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentGateway;
 use App\Enums\PaymentStatus;
 use App\Events\ServiceOrderReceived;
+use App\Events\ServiceOrderRefundDue;
 use App\Models\PaymentGatewayLog;
 use App\Models\ServiceOrder;
 use App\Services\Orders\PriceBreakdown;
@@ -119,6 +120,10 @@ class OrderPaymentService
 
         if (in_array($action, [self::ACTION_CONFIRM, self::ACTION_RECOVER], true)) {
             ServiceOrderReceived::dispatch($order);
+        }
+
+        if ($action === self::ACTION_NEEDS_REFUND) {
+            ServiceOrderRefundDue::dispatch($order, ServiceOrderRefundDue::PAID_AFTER_CANCEL);
         }
 
         return $action;

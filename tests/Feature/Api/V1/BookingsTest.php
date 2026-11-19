@@ -266,9 +266,14 @@ class BookingsTest extends TestCase
     {
         $this->seedSiteSettings(['enabled_gateways' => ['demo'], 'sms.driver' => 'demo', 'mobile.features' => ['bookings' => ['enabled' => false]]]);
 
-        $this->as($this->signIn())->postJson("/api/v1/bookings/slots/{$this->slot->id}", $this->form())
+        $token = $this->signIn();
+        $this->as($token)->postJson("/api/v1/bookings/slots/{$this->slot->id}", $this->form())
             ->assertForbidden()
             ->assertJsonPath('code', 'feature_disabled');
+        $this->getJson('/api/v1/bookings/search')->assertForbidden()->assertJsonPath('code', 'feature_disabled');
+        $this->getJson("/api/v1/bookings/slots/{$this->slot->id}")->assertForbidden();
+        // a customer still sees what they booked
+        $this->as($token)->getJson('/api/v1/account/bookings')->assertOk();
     }
 
     // ── my bookings ──────────────────────────────────────────────────────────

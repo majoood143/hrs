@@ -106,6 +106,7 @@ return [
     ],
 
     'errors' => [
+        'too_many_unpaid' => 'You already have :count bookings waiting for payment. Pay for one or cancel it in My bookings, then book this time.',
         'no_riders' => 'Please add at least one rider.',
         'slot_gone' => 'This time is no longer available.',
         'not_bookable' => 'This time cannot be booked at the moment.',

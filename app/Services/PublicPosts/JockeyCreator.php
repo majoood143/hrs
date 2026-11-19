@@ -2,7 +2,6 @@
 
 namespace App\Services\PublicPosts;
 
-use App\Events\PublicPostSubmitted;
 use App\Models\City;
 use App\Models\Jockey;
 use Illuminate\Database\Eloquent\Model;
@@ -41,7 +40,7 @@ class JockeyCreator extends PublicPostCreator
         ];
     }
 
-    public function create(array $data, array $files, string $contactNumber, string $status = 'active'): Model
+    protected function make(array $data, array $files, string $contactNumber, string $status): Model
     {
         $city = City::with('region')->findOrFail($data['city_id']);
 
@@ -60,8 +59,6 @@ class JockeyCreator extends PublicPostCreator
             'racing_jockey_id' => $data['racing_jockey_id'] ?? null,
             'status' => $status,
         ]);
-
-        PublicPostSubmitted::dispatch($post);
 
         return $post;
     }

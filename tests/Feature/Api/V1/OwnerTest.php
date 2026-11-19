@@ -200,6 +200,18 @@ class OwnerTest extends TestCase
         $this->as($admin->createToken('x')->plainTextToken)->getJson('/api/v1/owner/me')->assertForbidden()->assertJsonPath('code', 'not_stable_owner');
     }
 
+    public function test_a_new_password_signs_the_owner_out_of_the_app(): void
+    {
+        $token = $this->ownerToken();
+        $this->as($token)->getJson('/api/v1/owner/me')->assertOk();
+
+        $this->owner->forceFill(['name' => 'Renamed'])->save();
+        $this->as($token)->getJson('/api/v1/owner/me')->assertOk();
+
+        $this->owner->forceFill(['password' => 'a-new-password'])->save();
+        $this->as($token)->getJson('/api/v1/owner/me')->assertUnauthorized();
+    }
+
     public function test_another_owners_stable_is_not_found(): void
     {
         $other = $this->makeStable($this->makeOwner('other@example.com', '96899990000'), ['slug' => 'other-stable']);
@@ -346,13 +358,14 @@ class OwnerTest extends TestCase
         $this->as($token)->getJson($base)->assertOk()->assertJsonCount(0, 'data');
     }
 
-    public function test_changes_are_refused_while_the_feature_is_off(): void
+    public function test_the_owner_endpoints_are_refused_while_the_feature_is_off(): void
     {
         $token = $this->ownerToken();
         $this->seedSiteSettings(['enabled_gateways' => ['demo'], 'sms.driver' => 'demo', 'mobile.features' => ['stable_owner' => ['enabled' => false]]]);
 
         $this->as($token)->postJson("/api/v1/owner/stables/desert-riders/slots/{$this->slot->id}/close")->assertForbidden()->assertJsonPath('code', 'feature_disabled');
         $this->postJson('/api/v1/owner/auth/login', ['email' => 'owner@example.com', 'password' => 'secret-password'])->assertForbidden();
-        $this->as($token)->getJson('/api/v1/owner/stables/desert-riders')->assertOk();
+        $this->as($token)->getJson('/api/v1/owner/stables/desert-riders')->assertForbidden()->assertJsonPath('code', 'feature_disabled');
+        $this->as($token)->postJson('/api/v1/owner/auth/logout')->assertOk();
     }
 }

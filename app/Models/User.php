@@ -72,6 +72,17 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         ];
     }
 
+    protected static function booted(): void
+    {
+        // a new password (changed or reset on the website) signs the user out of the app everywhere;
+        // their booking alerts stop with those sign-ins (mobile_devices.owner_token_id)
+        static::updated(function (self $user): void {
+            if ($user->wasChanged('password')) {
+                $user->tokens()->delete();
+            }
+        });
+    }
+
     public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);

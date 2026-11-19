@@ -166,6 +166,11 @@ return [
         'none' => 'No notification has been sent for this order yet.',
     ],
 
+    'refund_alert' => [
+        'title' => 'Refund due: :number',
+        'view' => 'Open the order',
+    ],
+
     'filters' => [
         'needs_refund' => 'Needs a refund',
     ],

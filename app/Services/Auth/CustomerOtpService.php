@@ -20,7 +20,8 @@ use App\Support\WhatsAppSettings;
  *
  * A code is six digits, lives five minutes, allows five wrong tries and works once. Only a keyed
  * hash of it is stored. Asking for codes is limited per phone (one a minute, five an hour) and per
- * address (sixty an hour: mobile carriers put many phones behind one address), counted from the database so it holds whatever the cache driver is.
+ * address (200 an hour: mobile carriers put many phones behind one address; the per-phone limits
+ * are what stop one number being flooded), counted from the database so it holds whatever the cache driver is.
  */
 class CustomerOtpService
 {
@@ -32,7 +33,7 @@ class CustomerOtpService
 
     public const MAX_PER_PHONE_PER_HOUR = 5;
 
-    public const MAX_PER_IP_PER_HOUR = 60;
+    public const MAX_PER_IP_PER_HOUR = 200;
 
     public const VERIFIED = 'verified';
 
@@ -88,6 +89,11 @@ class CustomerOtpService
 
         // The app-review login (admin → Mobile app → Posting): its fixed code, nothing sent.
         if (($reviewerCode = MobilePosting::reviewerCode($phone)) !== null) {
+            // its code is fixed: the same waits as any phone, so it cannot be guessed by asking again and again
+            if (($wait = $this->throttleSeconds($phone, $ip)) > 0) {
+                return new OtpRequestResult(OtpRequestResult::THROTTLED, $wait);
+            }
+
             CustomerOtp::query()->where('phone', $phone)->whereNull('consumed_at')->update(['consumed_at' => now()]);
             CustomerOtp::create(['phone' => $phone, 'code_hash' => $this->hash($phone, $reviewerCode), 'expires_at' => now()->addMinutes(self::TTL_MINUTES), 'ip' => $ip]);
 

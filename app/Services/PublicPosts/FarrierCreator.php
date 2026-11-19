@@ -2,7 +2,6 @@
 
 namespace App\Services\PublicPosts;
 
-use App\Events\PublicPostSubmitted;
 use App\Models\City;
 use App\Models\Farrier;
 use Illuminate\Database\Eloquent\Model;
@@ -17,10 +16,10 @@ class FarrierCreator extends PublicPostCreator
             'specialty' => ['nullable', 'string', 'max:255'],
             'years_experience' => ['nullable', 'integer', 'min:0', 'max:80'],
             'city_id' => ['required', 'exists:cities,id'],
-            'price' => ['required', 'numeric', 'min:0'],
+            'price' => ['required', 'numeric', 'min:0', 'max:'.self::MAX_PRICE],
             'cover_photo' => ['required', 'image', 'max:4096'],
-            'description_en' => ['nullable', 'string'],
-            'description_ar' => ['nullable', 'string'],
+            'description_en' => ['nullable', 'string', 'max:5000'],
+            'description_ar' => ['nullable', 'string', 'max:5000'],
         ];
     }
 
@@ -37,7 +36,7 @@ class FarrierCreator extends PublicPostCreator
         ];
     }
 
-    public function create(array $data, array $files, string $contactNumber, string $status = 'active'): Model
+    protected function make(array $data, array $files, string $contactNumber, string $status): Model
     {
         $city = City::with('region')->findOrFail($data['city_id']);
 
@@ -56,8 +55,6 @@ class FarrierCreator extends PublicPostCreator
             'contact_number' => $contactNumber,
             'status' => $status,
         ]);
-
-        PublicPostSubmitted::dispatch($post);
 
         return $post;
     }

@@ -31,7 +31,7 @@ class ContentReport extends Model
         'jockeys' => [Jockey::class, JockeyResource::class],
     ];
 
-    protected $fillable = ['section', 'post_id', 'reason', 'details', 'ip', 'status'];
+    protected $fillable = ['section', 'post_id', 'reason', 'details', 'ip', 'install_id', 'status'];
 
     public function scopeOpen(Builder $query): Builder
     {

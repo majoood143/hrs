@@ -55,6 +55,19 @@ class RateLimitsTest extends TestCase
         $this->fromAddress('10.0.0.1')->getJson('/api/v1/app-config')->assertOk();
     }
 
+    public function test_view_counts_and_push_registrations_are_limited_per_phone_not_per_carrier_address(): void
+    {
+        $as = fn (string $install) => $this->fromAddress('10.0.0.1')->withHeaders(['X-Install-Id' => $install]);
+
+        foreach (range(1, 60) as $i) {
+            $this->assertNotSame(429, $as('install-a-0001')->postJson('/api/v1/views/horses/1')->status(), "view {$i}");
+        }
+        $as('install-a-0001')->postJson('/api/v1/views/horses/1')->assertStatus(429);
+
+        // another phone behind the same carrier address still gets through
+        $this->assertNotSame(429, $as('install-b-0001')->postJson('/api/v1/views/horses/1')->status());
+    }
+
     public function test_the_visitors_address_is_used_only_behind_a_trusted_proxy(): void
     {
         $this->fromAddress('10.0.0.1')->getJson('/api/v1/lookups', ['X-Forwarded-For' => '203.0.113.9']);

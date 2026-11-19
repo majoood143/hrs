@@ -2,7 +2,6 @@
 
 namespace App\Services\PublicPosts;
 
-use App\Events\PublicPostSubmitted;
 use App\Models\City;
 use App\Models\TransferPost;
 use Illuminate\Database\Eloquent\Model;
@@ -15,9 +14,9 @@ class TransferPostCreator extends PublicPostCreator
             'type' => ['required', 'in:offer,request'],
             'from_city_id' => ['required', 'different:to_city_id', 'exists:cities,id'],
             'to_city_id' => ['required', 'exists:cities,id'],
-            'capacity' => ['required', 'integer', 'min:1'],
+            'capacity' => ['required', 'integer', 'min:1', 'max:100'],
             'transfer_date' => ['required', 'date', 'after_or_equal:today'],
-            'price' => ['nullable', 'required_if:type,offer', 'numeric', 'min:0'],
+            'price' => ['nullable', 'required_if:type,offer', 'numeric', 'min:0', 'max:'.self::MAX_PRICE],
             'cover_photo' => ['nullable', 'image', 'max:4096'],
         ];
     }
@@ -35,7 +34,7 @@ class TransferPostCreator extends PublicPostCreator
         ];
     }
 
-    public function create(array $data, array $files, string $contactNumber, string $status = 'active'): Model
+    protected function make(array $data, array $files, string $contactNumber, string $status): Model
     {
         $fromCity = City::with('region')->findOrFail($data['from_city_id']);
         $toCity = City::with('region')->findOrFail($data['to_city_id']);
@@ -55,8 +54,6 @@ class TransferPostCreator extends PublicPostCreator
             'contact_number' => $contactNumber,
             'status' => $status,
         ]);
-
-        PublicPostSubmitted::dispatch($post);
 
         return $post;
     }

@@ -20,6 +20,20 @@ return [
         'admin' => '🛠 Review and approve: :link',
     ],
 
+    'refund_due' => [
+        'heading' => '💸 Refund due on :site',
+        'reason' => [
+            'booking_cancelled' => 'A paid booking was cancelled.',
+            'paid_after_cancel' => 'Money came in for an order that had already been cancelled.',
+        ],
+        'order' => '🧾 Order: :number',
+        'booking' => '🐎 Booking :reference at :stable',
+        'customer' => '👤 Customer: :name (:phone)',
+        'amount' => '💰 To refund: :amount',
+        'stable_account' => '🏦 Paid into the stable\'s own account: the refund is made from there.',
+        'admin' => '🛠 Refund it, then record it in the admin: :link',
+    ],
+
     'youtube' => [
         'heading' => '▶️ New on YouTube: :channel',
         'kind' => 'Type: :kind',
@@ -64,6 +78,7 @@ return [
         'race_result' => 'Race results (sent automatically once published)',
         'booking_ticket' => 'Booking tickets to customers (PDF with the check-in QR code)',
         'stable_sales_report' => 'Sales reports to stable owners (set on each stable)',
+        'refund_due' => 'Refunds due (a paid booking cancelled, or money in for a cancelled order)',
     ],
 
     'transfer_kinds' => [

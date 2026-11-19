@@ -5,6 +5,7 @@ namespace App\Services\Stables;
 use App\Enums\OrderStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\StableBookingStatus;
+use App\Events\ServiceOrderRefundDue;
 use App\Events\StableBookingCancelled;
 use App\Events\StableBookingConfirmed;
 use App\Jobs\SendStableBookingNotification;
@@ -34,6 +35,9 @@ class StableBookingActions
      */
     public const ATTENDANCE_DAYS = 7;
 
+    /** How a booking was cancelled when a late payment may still revive it: its checkout ran out, not on purpose. */
+    private const REVIVABLE_SOURCES = ['expired', 'gateway'];
+
     public function __construct(private readonly OrderPaymentService $payments) {}
 
     /**
@@ -43,7 +47,9 @@ class StableBookingActions
      */
     public function confirm(StableBooking $booking): bool
     {
-        $changed = DB::transaction(function () use ($booking): bool {
+        $refundDue = false;
+
+        $changed = DB::transaction(function () use ($booking, &$refundDue): bool {
             $locked = StableBooking::query()->whereKey($booking->getKey())->lockForUpdate()->first();
 
             if (! $locked || ! in_array($locked->status, [StableBookingStatus::Pending, StableBookingStatus::Cancelled], true)) {
@@ -52,6 +58,15 @@ class StableBookingActions
             }
 
             $revived = $locked->status === StableBookingStatus::Cancelled;
+
+            // Paid, but called off on purpose (the payment landed as the customer or the stable
+            // cancelled), or its time has passed: it stays cancelled and the order is cancelled
+            // too, so the money shows as a refund due.
+            if ($revived && (! in_array($locked->cancellation_source, self::REVIVABLE_SOURCES, true) || $locked->slot?->hasStarted())) {
+                $refundDue = $this->cancelPaidOrder($locked, in_array($locked->cancellation_source, self::REVIVABLE_SOURCES, true) ? 'late_payment' : (string) $locked->cancellation_source);
+
+                return false;
+            }
             $locked->forceFill([
                 'status' => StableBookingStatus::Confirmed,
                 'confirmed_at' => now(),
@@ -72,7 +87,26 @@ class StableBookingActions
             StableBookingConfirmed::dispatch($booking->refresh());
         }
 
+        if ($refundDue && $booking->order) {
+            ServiceOrderRefundDue::dispatch($booking->order->refresh(), ServiceOrderRefundDue::BOOKING_CANCELLED);
+        }
+
         return $changed;
+    }
+
+    /** Cancels a cancelled booking's paid order (under its lock); true when that left a refund due. */
+    private function cancelPaidOrder(StableBooking $booking, string $source): bool
+    {
+        $order = ServiceOrder::query()->whereKey($booking->service_order_id)->lockForUpdate()->first();
+
+        if (! $order || in_array($order->status, [OrderStatus::Cancelled, OrderStatus::Rejected], true)) {
+            return false;
+        }
+
+        $order->forceFill(['status' => OrderStatus::Cancelled, 'cancelled_at' => now(), 'cancellation_source' => $source])->save();
+        $order->recordEvent('booking_cancelled', null, ['source' => $source]);
+
+        return $order->refundDue();
     }
 
     /** Whether the customer may still cancel it themselves (the stable decides how late). */
@@ -181,7 +215,9 @@ class StableBookingActions
 
     private function cancel(StableBooking $booking, string $source, ?string $reason = null): StableBooking
     {
-        $notify = DB::transaction(function () use ($booking, $source, $reason): bool {
+        $refundDue = false;
+
+        $notify = DB::transaction(function () use ($booking, $source, $reason, &$refundDue): bool {
             $locked = StableBooking::query()->whereKey($booking->getKey())->lockForUpdate()->first();
 
             if (! $locked?->isActive()) {
@@ -207,6 +243,7 @@ class StableBookingActions
                     'cancellation_source' => $source,
                 ])->save();
                 $order->recordEvent('booking_cancelled', $reason, ['source' => $source]);
+                $refundDue = $order->refundDue();
             }
 
             return $wasConfirmed;
@@ -216,6 +253,10 @@ class StableBookingActions
 
         if ($notify) {
             StableBookingCancelled::dispatch($booking);
+        }
+
+        if ($refundDue && $booking->order) {
+            ServiceOrderRefundDue::dispatch($booking->order, ServiceOrderRefundDue::BOOKING_CANCELLED);
         }
 
         return $booking;

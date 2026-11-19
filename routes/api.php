@@ -118,7 +118,7 @@ Route::prefix('v1')
 
         // Stable bookings: the website's booking engine. Reading is open; booking, paying for a package,
         // cancelling and reviewing need a signed-in customer and the `bookings` feature.
-        Route::prefix('bookings')->name('bookings.')->controller(BookingController::class)->group(function () {
+        Route::prefix('bookings')->name('bookings.')->controller(BookingController::class)->middleware(EnsureMobileFeature::class.':bookings')->group(function () {
             Route::get('search', 'search')->name('search');
             Route::get('offerings/{id}', 'offering')->whereNumber('id')->name('offering');
             Route::get('slots/{id}', 'slot')->whereNumber('id')->name('slot');
@@ -159,9 +159,13 @@ Route::prefix('v1')
             });
 
             Route::middleware(['auth:owner_api', EnsureStableOwner::class])->group(function () {
+                // signing out and booking alerts keep working while the feature is off
                 Route::post('auth/logout', [OwnerAuthController::class, 'logout'])->name('auth.logout');
-                Route::get('me', [OwnerAuthController::class, 'me'])->name('me');
                 Route::post('devices', [OwnerAuthController::class, 'device'])->middleware('throttle:api-owner')->name('devices.store');
+            });
+
+            Route::middleware(['auth:owner_api', EnsureStableOwner::class, EnsureMobileFeature::class.':stable_owner'])->group(function () {
+                Route::get('me', [OwnerAuthController::class, 'me'])->name('me');
                 Route::get('check-in/{reference}', [OwnerBookingController::class, 'lookup'])->middleware('throttle:api-owner')->name('check-in');
 
                 Route::prefix('stables/{slug}')->name('stables.')->group(function () {
@@ -172,7 +176,7 @@ Route::prefix('v1')
                     Route::get('slots', [OwnerScheduleController::class, 'slots'])->name('slots.index');
                     Route::get('closures', [OwnerScheduleController::class, 'closures'])->name('closures.index');
 
-                    Route::middleware([EnsureMobileFeature::class.':stable_owner', 'throttle:api-owner'])->group(function () {
+                    Route::middleware('throttle:api-owner')->group(function () {
                         Route::post('bookings/{reference}/attended', [OwnerBookingController::class, 'attended'])->name('bookings.attended');
                         Route::post('bookings/{reference}/no-show', [OwnerBookingController::class, 'noShow'])->name('bookings.no-show');
                         Route::post('bookings/{reference}/cancel', [OwnerBookingController::class, 'cancel'])->name('bookings.cancel');

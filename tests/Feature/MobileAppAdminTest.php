@@ -54,6 +54,7 @@ class MobileAppAdminTest extends TestCase
             '2025_10_03_170350_add_batch_uuid_column_to_activity_log_table',
             '2026_10_13_120000_create_mobile_announcements_table',
             '2026_11_01_000002_create_content_reports_table',
+            '2026_11_19_000001_add_install_id_to_content_reports',
             '2026_09_15_100000_create_ad_zones_table',
         ] as $migration) {
             (require database_path("migrations/{$migration}.php"))->up();

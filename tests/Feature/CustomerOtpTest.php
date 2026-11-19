@@ -173,7 +173,7 @@ class CustomerOtpTest extends TestCase
         $this->assertTrue($this->ask()->sent(), 'an hour later it is fine again');
     }
 
-    public function test_only_sixty_codes_an_hour_per_address(): void
+    public function test_codes_per_address_are_capped_each_hour(): void
     {
         Carbon::setTestNow('2026-09-23 10:00:00');
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\AppEvent;
 use App\Models\ContentReport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,7 +19,8 @@ class ReportController extends Controller
      * Report a post
      *
      * `section` is one of horses-for-sale, tools-for-sale, farriers, transfer-board, jockeys; only
-     * posts visitors can see. Reporting the same post again from the same address adds nothing.
+     * posts visitors can see. Reporting the same post again from the same install (`X-Install-Id`;
+     * the same address without one) adds nothing.
      *
      * @unauthenticated
      */
@@ -35,9 +37,13 @@ class ReportController extends Controller
         $model = ContentReport::SECTIONS[$data['section']][0];
         $model::visible()->whereKey($data['id'])->firstOrFail();
 
+        // once per app install (one carrier address is many phones), per address only without one
+        $install = AppEvent::installId($request);
+
         ContentReport::query()->firstOrCreate(
-            ['section' => $data['section'], 'post_id' => $data['id'], 'ip' => $request->ip(), 'status' => ContentReport::STATUS_OPEN],
-            ['reason' => $data['reason'], 'details' => $data['details'] ?? null],
+            ['section' => $data['section'], 'post_id' => $data['id'], 'status' => ContentReport::STATUS_OPEN]
+                + ($install !== null ? ['install_id' => $install] : ['ip' => $request->ip(), 'install_id' => null]),
+            ['reason' => $data['reason'], 'details' => $data['details'] ?? null, 'ip' => $request->ip()],
         );
 
         return response()->json(['message' => __('api.reports.sent')], 201);

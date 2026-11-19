@@ -38,6 +38,8 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
+            // the bell: refunds due (SendRefundDueAlerts)
+            ->databaseNotifications()
             ->id('admin')
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')

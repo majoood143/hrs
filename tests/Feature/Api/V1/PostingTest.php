@@ -54,6 +54,7 @@ class PostingTest extends TestCase
             // after the directory tables: it changes the farriers' and transfers' status too
             '2026_10_13_000001_add_pending_status_to_public_posts',
             '2026_11_01_000002_create_content_reports_table',
+            '2026_11_19_000001_add_install_id_to_content_reports',
         ] as $migration) {
             (require database_path("migrations/{$migration}.php"))->up();
         }
@@ -199,6 +200,33 @@ class PostingTest extends TestCase
         Storage::disk('public')->assertExists($post->cover_photo);
         Storage::disk('public')->assertExists($post->passport_document);
         Event::assertDispatched(PublicPostSubmitted::class, fn ($event) => $event->post->is($post));
+    }
+
+    public function test_a_price_or_text_too_big_for_the_database_is_refused_and_nothing_is_stored(): void
+    {
+        $this->post('/api/v1/horses-for-sale', $this->horseForm(['price' => '1000000000', 'description_ar' => str_repeat('ح', 5001)]), ['Accept' => 'application/json'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['price', 'description_ar']);
+
+        $this->assertSame(0, HorseSalePost::query()->count());
+        $this->assertSame([], Storage::disk('public')->allFiles());
+    }
+
+    public function test_a_post_that_cannot_be_saved_leaves_no_photos_and_no_alert(): void
+    {
+        HorseSalePost::creating(fn () => throw new \RuntimeException('database down'));
+
+        $this->withoutExceptionHandling();
+
+        try {
+            $this->post('/api/v1/horses-for-sale', $this->horseForm(), ['Accept' => 'application/json']);
+            $this->fail('the insert should have failed');
+        } catch (\RuntimeException $e) {
+            $this->assertSame('database down', $e->getMessage());
+        }
+
+        $this->assertSame([], Storage::disk('public')->allFiles());
+        Event::assertNotDispatched(PublicPostSubmitted::class);
     }
 
     public function test_tools_farriers_and_transfers_can_be_posted_too(): void
@@ -356,7 +384,8 @@ class PostingTest extends TestCase
         $this->postJson('/api/v1/verification/request', ['phone' => self::PHONE])->assertStatus(503);
 
         $this->postJson('/api/v1/verification/verify', ['phone' => '90000001', 'code' => '111111'])->assertUnprocessable();
-        $this->postJson('/api/v1/verification/request', ['phone' => '90000001'])->assertOk();
+        // asking again resets nothing: the same waits as any phone, so the fixed code cannot be guessed
+        $this->postJson('/api/v1/verification/request', ['phone' => '90000001'])->assertStatus(429);
         $this->postJson('/api/v1/verification/verify', ['phone' => '90000001', 'code' => '246810'])->assertOk()->assertJsonStructure(['posting_token']);
         $this->assertSame(0, DB::table('notification_logs')->count());
 
@@ -377,6 +406,13 @@ class PostingTest extends TestCase
         $this->postJson('/api/v1/reports', $report)->assertCreated()->assertJsonStructure(['message']);
         $this->postJson('/api/v1/reports', $report)->assertCreated();
         $this->assertSame(1, ContentReport::query()->open()->count());
+
+        // two phones behind one carrier address are two reports; one phone again adds nothing
+        $this->postJson('/api/v1/reports', $report, ['X-Install-Id' => 'install-a-0001'])->assertCreated();
+        $this->postJson('/api/v1/reports', $report, ['X-Install-Id' => 'install-b-0001'])->assertCreated();
+        $this->postJson('/api/v1/reports', $report, ['X-Install-Id' => 'install-b-0001'])->assertCreated();
+        $this->assertSame(3, ContentReport::query()->open()->count());
+        ContentReport::query()->whereNotNull('install_id')->delete();
         $this->assertSame(['horses-for-sale', $horse->id, 'fraud'], [ContentReport::sole()->section, ContentReport::sole()->post_id, ContentReport::sole()->reason]);
 
         $this->postJson('/api/v1/reports', ['reason' => 'nonsense'] + $report)->assertUnprocessable()->assertJsonValidationErrors('reason');
@@ -384,6 +420,22 @@ class PostingTest extends TestCase
 
         $horse->update(['status' => 'pending']);
         $this->postJson('/api/v1/reports', $report)->assertNotFound();
+    }
+
+    /** @return array<string, mixed> */
+    private function horseForm(array $overrides = []): array
+    {
+        return $overrides + [
+            'posting_token' => $this->postingToken(),
+            'en_name' => 'Desert Wind',
+            'ar_name' => 'ريح الصحراء',
+            'type_id' => $this->ids['type'],
+            'gender_id' => $this->ids['gender'],
+            'city_id' => $this->ids['seeb'],
+            'price' => '1500',
+            'cover_photo' => UploadedFile::fake()->image('cover.jpg'),
+            'images' => [UploadedFile::fake()->image('a.jpg')],
+        ];
     }
 
     private function settings(array $overrides = []): void

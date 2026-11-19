@@ -20,6 +20,20 @@ return [
         'admin' => '🛠 للمراجعة والموافقة: :link',
     ],
 
+    'refund_due' => [
+        'heading' => '💸 استرداد مستحق على :site',
+        'reason' => [
+            'booking_cancelled' => 'أُلغي حجز مدفوع.',
+            'paid_after_cancel' => 'وصل الدفع لطلب كان قد أُلغي من قبل.',
+        ],
+        'order' => '🧾 الطلب: :number',
+        'booking' => '🐎 الحجز :reference في :stable',
+        'customer' => '👤 العميل: :name (:phone)',
+        'amount' => '💰 المبلغ المسترد: :amount',
+        'stable_account' => '🏦 دُفع المبلغ في حساب الإسطبل نفسه: يتم الاسترداد من هناك.',
+        'admin' => '🛠 أتمّ الاسترداد ثم سجّله في لوحة الإدارة: :link',
+    ],
+
     'youtube' => [
         'heading' => '▶️ جديد على يوتيوب: :channel',
         'kind' => 'النوع: :kind',
@@ -64,6 +78,7 @@ return [
         'race_result' => 'نتائج السباقات (تُرسل تلقائيًا عند نشرها)',
         'booking_ticket' => 'تذاكر الحجز للعملاء (PDF برمز QR لتسجيل الحضور)',
         'stable_sales_report' => 'تقارير المبيعات لملّاك الإسطبلات (تُضبط في كل إسطبل)',
+        'refund_due' => 'الاستردادات المستحقة (إلغاء حجز مدفوع، أو دفع لطلب ملغى)',
     ],
 
     'transfer_kinds' => [

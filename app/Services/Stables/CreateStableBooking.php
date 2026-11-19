@@ -7,6 +7,7 @@ use App\Enums\PaymentStatus;
 use App\Enums\StableBookingStatus;
 use App\Events\StableBookingConfirmed;
 use App\Models\BookingSlot;
+use App\Models\Customer;
 use App\Models\ServiceOrder;
 use App\Models\StableBooking;
 use App\Models\StablePackagePurchase;
@@ -31,6 +32,9 @@ class CreateStableBooking
     public const AT_STABLE = 'at_stable';
 
     public const PACKAGE = 'package';
+
+    /** Unpaid online checkouts one customer may wait on at once. */
+    public const MAX_UNPAID = 3;
 
     public function __construct(private readonly StableBookingPricing $pricing) {}
 
@@ -71,6 +75,10 @@ class CreateStableBooking
 
             $free = $quote->isFree();
             $atStable = ! $free && $paymentOption === self::AT_STABLE;
+
+            if (! $free && ! $atStable) {
+                $this->assertFewUnpaid($customer['customer_id'] ?? null);
+            }
             $account = ! $free && ! $atStable ? $stable->activePaymentAccount() : null;
 
             $order = ServiceOrder::create([
@@ -147,6 +155,31 @@ class CreateStableBooking
         }
 
         return $purchase;
+    }
+
+    /**
+     * An unpaid checkout holds its places until it expires, so one customer may wait on only a few
+     * at once: nobody can block a stable's times by booking and never paying. Their row is locked,
+     * so bookings sent together are counted one after the other.
+     *
+     * @throws BookingUnavailable
+     */
+    private function assertFewUnpaid(?int $customerId): void
+    {
+        if (! $customerId) {
+            return;
+        }
+
+        Customer::query()->whereKey($customerId)->lockForUpdate()->first();
+
+        $unpaid = StableBooking::query()
+            ->where('customer_id', $customerId)
+            ->where('status', StableBookingStatus::Pending->value)
+            ->count();
+
+        if ($unpaid >= self::MAX_UNPAID) {
+            throw new BookingUnavailable(__('stable_bookings.errors.too_many_unpaid', ['count' => self::MAX_UNPAID]));
+        }
     }
 
     /** @throws BookingUnavailable */

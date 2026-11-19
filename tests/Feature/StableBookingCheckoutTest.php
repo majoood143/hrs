@@ -6,8 +6,10 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentGateway;
 use App\Enums\PaymentStatus;
 use App\Enums\StableBookingStatus;
+use App\Events\ServiceOrderRefundDue;
 use App\Jobs\SendOrderNotification;
 use App\Jobs\SendStableBookingNotification;
+use App\Jobs\SendWhatsAppMessage;
 use App\Models\BookingSlot;
 use App\Models\Customer;
 use App\Models\NotificationLog;
@@ -26,10 +28,13 @@ use App\Services\Stables\SlotGenerator;
 use App\Services\Stables\StableBookingActions;
 use App\Services\Stables\StableBookingMessages;
 use App\Services\WhatsApp\BilingualMessage;
+use Illuminate\Notifications\SendQueuedNotifications;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
+use Spatie\Permission\Models\Permission;
 use Tests\Concerns\PreparesStableBookings;
 use Tests\TestCase;
 
@@ -272,6 +277,102 @@ class StableBookingCheckoutTest extends TestCase
         app(OrderPaymentService::class)->applyPaid($booking->order->refresh(), PaymentGateway::Demo, 'LATE');
 
         $this->assertSame(StableBookingStatus::Confirmed, $booking->refresh()->status);
+    }
+
+    public function test_a_payment_landing_as_the_customer_cancels_leaves_it_cancelled_with_a_refund_due(): void
+    {
+        Event::fake([ServiceOrderRefundDue::class]);
+        $booking = $this->book(2);
+        // the customer's cancel saved the booking, while the payment came in for the still-pending order
+        $booking->forceFill(['status' => StableBookingStatus::Cancelled, 'cancelled_at' => now(), 'cancellation_source' => 'customer'])->save();
+
+        app(OrderPaymentService::class)->applyPaid($booking->order->refresh(), PaymentGateway::Demo, 'RACE');
+
+        $order = $booking->order->refresh();
+        $this->assertSame(StableBookingStatus::Cancelled, $booking->refresh()->status, 'never brought back against the customer');
+        $this->assertSame([OrderStatus::Cancelled, 'customer'], [$order->status, $order->cancellation_source]);
+        $this->assertTrue($order->refundDue());
+        Event::assertDispatched(ServiceOrderRefundDue::class, fn ($event) => $event->order->is($order) && $event->reason === ServiceOrderRefundDue::BOOKING_CANCELLED);
+    }
+
+    public function test_a_late_payment_after_the_session_started_is_a_refund_not_a_booking(): void
+    {
+        Event::fake([ServiceOrderRefundDue::class]);
+        $booking = $this->book(2);
+        app(OrderPaymentService::class)->cancelPending($booking->order, 'system');
+
+        Carbon::setTestNow('2026-10-06 06:30:00'); // Tuesday 10:30 Muscat: the 10:00 session has started
+        app(OrderPaymentService::class)->applyPaid($booking->order->refresh(), PaymentGateway::Demo, 'LATE');
+
+        $order = $booking->order->refresh();
+        $this->assertSame(StableBookingStatus::Cancelled, $booking->refresh()->status);
+        $this->assertSame([OrderStatus::Cancelled, 'late_payment'], [$order->status, $order->cancellation_source]);
+        $this->assertTrue($order->refundDue());
+        Event::assertDispatched(ServiceOrderRefundDue::class);
+    }
+
+    public function test_money_for_an_order_cancelled_on_purpose_is_a_refund_due(): void
+    {
+        Event::fake([ServiceOrderRefundDue::class]);
+        $booking = $this->book(2);
+        app(StableBookingActions::class)->cancelByCustomer($booking);
+
+        app(OrderPaymentService::class)->applyPaid($booking->order->refresh(), PaymentGateway::Demo, 'LATE');
+
+        Event::assertDispatched(ServiceOrderRefundDue::class, fn ($event) => $event->reason === ServiceOrderRefundDue::PAID_AFTER_CANCEL);
+    }
+
+    public function test_one_customer_may_wait_on_only_a_few_unpaid_checkouts(): void
+    {
+        $customer = Customer::create(['phone' => '96891234567']);
+        app(SlotGenerator::class)->sync($this->makeSchedule($this->offering, [3], ['10:00', '11:00', '12:00', '13:00']));
+        $slots = BookingSlot::query()->where('date', '2026-10-07')->orderBy('start_time')->get();
+        $book = fn (BookingSlot $slot, string $option = 'online') => $this->bookings()->handle($slot, $this->riders(1), ['name' => 'Aisha', 'phone' => '91234567', 'customer_id' => $customer->id], $option);
+
+        foreach ($slots->take(CreateStableBooking::MAX_UNPAID) as $slot) {
+            $book($slot);
+        }
+
+        try {
+            $book($slots->last());
+            $this->fail('a fourth unpaid checkout should be refused');
+        } catch (BookingUnavailable $e) {
+            $this->assertStringContainsString((string) CreateStableBooking::MAX_UNPAID, $e->getMessage());
+        }
+
+        // paying for one frees a place in the count
+        $first = StableBooking::query()->where('customer_id', $customer->id)->oldest('id')->first();
+        app(OrderPaymentService::class)->applyPaid($first->order, PaymentGateway::Demo, 'PAID');
+        $this->assertSame(StableBookingStatus::Pending, $book($slots->last())->status);
+    }
+
+    public function test_a_refund_due_alerts_the_admins_on_whatsapp_and_in_the_panel(): void
+    {
+        Queue::fake();
+        (require database_path('migrations/2026_11_19_000002_create_notifications_table.php'))->up();
+        $this->seedSiteSettings(['enabled_gateways' => ['demo'], 'sms.driver' => 'demo', 'vat.enabled' => true, 'vat.rate' => '5', 'site_name_en' => 'Muhra', 'site_name_ar' => 'مهرة',
+            'whatsapp.enabled' => true, 'whatsapp.recipients' => [['name' => 'Office', 'phone' => '9876 5432']]]);
+        $admin = $this->makeAdminUser();
+        $admin->givePermissionTo(Permission::findOrCreate('ViewAny:ServiceOrder', 'web'));
+        $this->makeAdminUser('no-orders@example.com');
+
+        $booking = $this->book(2);
+        app(OrderPaymentService::class)->applyPaid($booking->order, PaymentGateway::Demo, 'DEMO-1');
+        $this->actions()->cancelByCustomer($booking->refresh());
+
+        Queue::assertPushed(SendWhatsAppMessage::class, function (SendWhatsAppMessage $job) use ($booking) {
+            [$en, $ar] = explode(BilingualMessage::DIVIDER, $job->message);
+
+            return $job->type === 'refund_due' && $job->to === '96898765432'
+                && str_contains($en, 'Refund due on Muhra') && str_contains($en, $booking->order->order_number) && str_contains($en, $booking->reference)
+                && str_contains($ar, 'استرداد مستحق على مهرة') && str_contains($ar, 'أُلغي حجز مدفوع');
+        });
+
+        // only staff who may see orders get it in the panel (Filament queues database notifications)
+        $panel = Queue::pushed(SendQueuedNotifications::class);
+        $this->assertCount(1, $panel);
+        $this->assertSame([$admin->id], $panel->first()->notifiables->pluck('id')->all());
+        $this->assertStringContainsString($booking->order->order_number, json_encode($panel->first()->notification->toDatabase($admin)));
     }
 
     public function test_the_customer_may_cancel_until_the_stables_cutoff(): void

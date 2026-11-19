@@ -144,12 +144,13 @@ Route::get('/pay/{order}', [PaymentController::class, 'show'])->middleware('thro
 Route::post('/pay/{order}', [PaymentController::class, 'begin'])->middleware('throttle:20,1')->name('payment.begin');
 Route::get('/pay/{order}/status', [PaymentController::class, 'status'])->middleware('throttle:60,1')->name('payment.status');
 
+// Browser returns ask the gateway each time: limited like /pay (the server-to-server callbacks are not).
 Route::prefix('payment')->name('payment.')->group(function () {
-    Route::get('thawani/return', [PaymentController::class, 'thawaniReturn'])->name('thawani.return');
-    Route::get('thawani/cancel', [PaymentController::class, 'thawaniCancel'])->name('thawani.cancel');
+    Route::get('thawani/return', [PaymentController::class, 'thawaniReturn'])->middleware('throttle:60,1')->name('thawani.return');
+    Route::get('thawani/cancel', [PaymentController::class, 'thawaniCancel'])->middleware('throttle:60,1')->name('thawani.cancel');
     // Server-to-server callbacks below are excluded from CSRF in bootstrap/app.php.
     Route::post('thawani/webhook', [PaymentController::class, 'thawaniWebhook'])->name('thawani.webhook');
-    Route::get('ompay/return', [PaymentController::class, 'ompayReturn'])->name('ompay.return');
+    Route::get('ompay/return', [PaymentController::class, 'ompayReturn'])->middleware('throttle:60,1')->name('ompay.return');
     Route::post('nbo/callback', [PaymentController::class, 'nboCallback'])->name('nbo.callback');
     Route::post('ccavenue/callback', [PaymentController::class, 'ccavenueCallback'])->name('ccavenue.callback');
     Route::get('demo/{order}', [PaymentController::class, 'demo'])->name('demo');

@@ -9,6 +9,7 @@ use App\Filament\RichEditor\TextDirectionPlugin;
 use App\Filament\Support\FieldPlaceholders;
 use App\Filament\Support\FormPaymentTab;
 use App\Http\Controllers\Api\V1\Owner\OwnerAuthController;
+use App\Models\AppEvent;
 use App\Models\BookingSlot;
 use App\Models\SiteSetting;
 use App\Policies\ActivityPolicy;
@@ -144,15 +145,17 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('api-owner', fn (Request $request) => Limit::perMinute(60)
             ->by(($request->user('owner_api') ? 'owner|'.$request->user('owner_api')->getKey() : 'ip|'.$request->ip())));
 
-        // Racing search asks the source each time; view counts are cheap but should not be inflated.
-        RateLimiter::for('api-racing-search', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
-        RateLimiter::for('api-views', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
+        // Racing search asks the source each time; view counts and push registrations are cheap but
+        // should not be inflated; reports go to an admin. Per phone, with a roomier cap per address
+        // (one carrier address is many phones), as for `api-public`.
+        RateLimiter::for('api-racing-search', fn (Request $request) => self::perPhone($request, Limit::perMinute(30), Limit::perMinute(120)));
+        RateLimiter::for('api-views', fn (Request $request) => self::perPhone($request, Limit::perMinute(60), Limit::perMinute(600)));
         // App events (CRM): per install, and per address on top.
         RateLimiter::for('api-events', fn (Request $request) => [
             Limit::perMinute(30)->by('install|'.$request->header('X-Install-Id')),
             Limit::perMinute(300)->by('ip|'.$request->ip()),
         ]);
-        RateLimiter::for('api-reports', fn (Request $request) => Limit::perHour(20)->by($request->ip()));
+        RateLimiter::for('api-reports', fn (Request $request) => self::perPhone($request, Limit::perHour(20), Limit::perHour(200)));
 
         // A stable owner's app token is a User token, which the admin API's guard would accept too:
         // it opens the owner endpoints only.
@@ -275,5 +278,21 @@ class AppServiceProvider extends ServiceProvider
             }
         } catch (QueryException) {
         }
+    }
+
+    /**
+     * A limit per phone (its sign-in token, push token or install id) when it sends one, and a roomier
+     * one per address on top, so made-up ids cannot get around it.
+     *
+     * @return list<Limit>
+     */
+    private static function perPhone(Request $request, Limit $phone, Limit $address): array
+    {
+        $device = $request->bearerToken() ?: $request->header('X-Push-Token') ?: AppEvent::installId($request);
+
+        return array_values(array_filter([
+            $device ? $phone->by('device:'.sha1($device)) : null,
+            $address->by('ip:'.$request->ip()),
+        ]));
     }
 }
