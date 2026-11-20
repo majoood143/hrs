@@ -184,6 +184,12 @@ class JockeyResource extends Resource
                     ->label(__('jockeys.tabs.racing'))
                     ->boolean(),
                 PendingPosts::activeToggle(Jockey::statusOptions()['active']),
+                TextColumn::make('views_count')
+                    ->label(__('admin_widgets.listing_views.views'))
+                    ->icon('heroicon-o-eye')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->label(__('jockeys.created_at'))
                     ->dateTime()

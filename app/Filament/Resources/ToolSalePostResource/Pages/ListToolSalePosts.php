@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\ToolSalePostResource\Pages;
 
 use App\Filament\Concerns\HasExportActions;
-use Filament\Actions\CreateAction;
 use App\Filament\Resources\ToolSalePostResource;
-use Filament\Actions;
+use App\Filament\Support\ListingViews\ListingViewWidgets;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListToolSalePosts extends ListRecords
@@ -19,5 +19,15 @@ class ListToolSalePosts extends ListRecords
         return [
             CreateAction::make(),
         ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return ListingViewWidgets::forList(static::$resource);
+    }
+
+    public function getHeaderWidgetsColumns(): int|array
+    {
+        return 3;
     }
 }

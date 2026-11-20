@@ -13,6 +13,8 @@
         ->orderBy('order')
         ->take($count)
         ->get();
+
+    \App\Support\Ads\AdStats::impressions($ads, 'web');
 @endphp
 
 @if($ads->isNotEmpty())

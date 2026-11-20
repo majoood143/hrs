@@ -5,6 +5,7 @@ namespace App\Filament\Resources\StableResource\Pages;
 use App\Filament\Concerns\HasExportActions;
 use App\Filament\Resources\StableResource;
 use App\Filament\Resources\StableResource\StableApprovalActions;
+use App\Filament\Support\ListingViews\ListingViewWidgets;
 use App\Filament\Widgets\Stables\StableChangeLogWidget;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
@@ -27,6 +28,6 @@ class ViewStable extends ViewRecord
 
     protected function getFooterWidgets(): array
     {
-        return [StableChangeLogWidget::class];
+        return [...ListingViewWidgets::forRecord(static::$resource), StableChangeLogWidget::class];
     }
 }

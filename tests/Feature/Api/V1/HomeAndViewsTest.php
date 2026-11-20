@@ -53,7 +53,7 @@ class HomeAndViewsTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.ads', [[
                 'id' => $ad, 'media_type' => 'image', 'media_url' => url('/storage/ads/one.jpg'),
-                'alt' => 'Sponsor', 'click_url' => route('promo.click', $ad),
+                'alt' => 'Sponsor', 'click_url' => route('promo.click', ['ad' => $ad, 'src' => 'app']),
             ]])
             ->assertJsonPath('data.horses.0.id', $horse)
             ->assertJsonPath('data.tools', [])
@@ -96,7 +96,7 @@ class HomeAndViewsTest extends TestCase
 
         $this->getJson('/api/v1/ads/horses')->assertOk()
             ->assertJsonPath('data.*.id', [$first, $second])
-            ->assertJsonPath('data.0.click_url', route('promo.click', $first));
+            ->assertJsonPath('data.0.click_url', route('promo.click', ['ad' => $first, 'src' => 'app']));
         $this->getJson('/api/v1/ads/tools')->assertOk()->assertJsonPath('data', []);
         $this->getJson('/api/v1/ads/transfers')->assertOk()->assertJsonPath('data', []);
         $this->getJson('/api/v1/ads/home')->assertNotFound();
@@ -150,10 +150,12 @@ class HomeAndViewsTest extends TestCase
     public function test_only_visible_listings_of_known_sections_can_be_counted(): void
     {
         $this->row('clinics', ['en_name' => 'Closed', 'slug' => 'closed', 'is_active' => false]);
-        $this->row('stables', ['en_name' => 'Stable', 'slug' => 'stable']);
+        $this->row('stables', ['en_name' => 'Stable', 'slug' => 'stable', 'approval_status' => 'pending']);
+        $this->row('stables', ['en_name' => 'Open', 'slug' => 'open']);
 
         $this->withHeader('User-Agent', self::PHONE)->postJson('/api/v1/views/clinics/closed')->assertNotFound();
         $this->withHeader('User-Agent', self::PHONE)->postJson('/api/v1/views/stables/stable')->assertNotFound();
+        $this->withHeader('User-Agent', self::PHONE)->postJson('/api/v1/views/stables/open')->assertOk()->assertJson(['counted' => true, 'views_count' => 1]);
         $this->withHeader('User-Agent', self::PHONE)->postJson('/api/v1/views/users/1')->assertNotFound();
         $this->getJson('/api/v1/views/clinics/closed')->assertNotFound();
     }

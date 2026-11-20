@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Insights;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dashboard;
+use App\Filament\Support\ListingViews;
 use App\Models\SiteSetting;
 use Ardavan\FilamentFileExplorer\FilamentFileExplorerPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -71,6 +72,10 @@ class AdminPanelProvider extends PanelProvider
                 Insights\InsightsTopStables::class,
                 Insights\InsightsOccupancy::class,
                 Insights\InsightsTopServices::class,
+                ListingViews\ListingViewsStats::class,
+                ListingViews\RecordViewsStats::class,
+                ListingViews\AppViewsChart::class,
+                ListingViews\TopViewedListings::class,
             ])
             ->navigationItems([
                 NavigationItem::make('api_docs')

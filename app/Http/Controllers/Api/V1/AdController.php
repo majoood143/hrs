@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\AdResource;
+use App\Support\Ads\AdStats;
 use App\Support\MobileApp\AppClient;
 use App\Support\MobileApp\MobileAds;
 use App\Support\MobileApp\MobileFeatures;
@@ -26,6 +27,9 @@ class AdController extends Controller
         $zone = MobileAds::zoneFor($placement);
         $on = MobileFeatures::enabledFor('promos', AppClient::fromRequest($request));
 
-        return AdResource::collection($on && $zone !== null ? MobileAds::ads($zone) : collect());
+        $ads = $on && $zone !== null ? MobileAds::ads($zone) : collect();
+        AdStats::impressions($ads, 'app');
+
+        return AdResource::collection($ads);
     }
 }

@@ -128,6 +128,7 @@ class StallionResource extends Resource
                 TextColumn::make('wins')->label(__('stallions.wins'))->sortable()->toggleable(),
                 TextColumn::make('city.'.$name)->label(__('stallions.city'))->toggleable(),
                 TextColumn::make('contact_number')->label(__('stallions.contact_number'))->searchable(),
+                TextColumn::make('views_count')->label(__('admin_widgets.listing_views.views'))->icon('heroicon-o-eye')->numeric()->sortable()->toggleable(),
                 ToggleColumn::make('is_active')->label(__('stallions.is_active')),
             ])
             ->defaultSort($name)

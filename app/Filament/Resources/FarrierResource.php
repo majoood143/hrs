@@ -175,6 +175,12 @@ class FarrierResource extends Resource
                     ->description(fn (Farrier $record): string => (string) $record->country?->{$name})
                     ->searchable(['en_name', 'ar_name']),
                 PendingPosts::activeToggle(Farrier::statusOptions()['active']),
+                TextColumn::make('views_count')
+                    ->label(__('admin_widgets.listing_views.views'))
+                    ->icon('heroicon-o-eye')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->label(__('admin_farrier.fields.created_at'))
                     ->dateTime()

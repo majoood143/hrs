@@ -231,6 +231,12 @@ class HorseSalePostResource extends Resource
                     })
                     ->sortable(),
                 PendingPosts::activeToggle(HorseSalePost::statusOptions()['active'], 'cancelled'),
+                TextColumn::make('views_count')
+                    ->label(__('admin_widgets.listing_views.views'))
+                    ->icon('heroicon-o-eye')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->label(__('admin_horse_sale_post.fields.created_at'))
                     ->dateTime()

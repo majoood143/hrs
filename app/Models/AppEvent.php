@@ -28,6 +28,7 @@ class AppEvent extends Model
         'signed_in', 'signed_out', 'push_opened',
         'listing_viewed', 'filter_applied', 'contact_tapped', 'shared',
         'saved_search_created', 'ad_clicked', 'video_played', 'booking_started',
+        'announcement_shown', 'announcement_clicked', 'announcement_dismissed',
     ];
 
     /** Recorded by the server only (the app cannot claim them). */

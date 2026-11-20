@@ -186,7 +186,7 @@ class DirectoryTest extends TestCase
             ->assertJsonCount(2, 'data.reviews')
             ->assertJsonPath('data.reviews.1.author', 'Aisha A.')
             ->assertJsonPath('data.reviews.1.reply', 'Thank you!')
-            ->assertJsonPath('data.views_count', null)
+            ->assertJsonPath('data.views_count', 0)
             ->assertJsonPath('data.share_url', route('stables.show', 'royal'));
 
         $this->getJson('/api/v1/stables/royal', ['Accept-Language' => 'ar'])->assertJsonPath('data.address', 'الموالح');

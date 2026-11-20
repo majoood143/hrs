@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\ClinicResource\Pages;
 
 use App\Filament\Concerns\HasExportActions;
-use Filament\Actions\EditAction;
 use App\Filament\Resources\ClinicResource;
-use Filament\Actions;
+use App\Filament\Support\ListingViews\ListingViewWidgets;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewClinic extends ViewRecord
@@ -19,5 +19,10 @@ class ViewClinic extends ViewRecord
         return [
             EditAction::make(),
         ];
+    }
+
+    protected function getFooterWidgets(): array
+    {
+        return ListingViewWidgets::forRecord(static::$resource);
     }
 }

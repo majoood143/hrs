@@ -8,6 +8,7 @@ use App\Filament\Resources\AdResource\Pages\ListAds;
 use App\Filament\Support\TranslatableInput;
 use App\Models\Ad;
 use App\Models\AdZone;
+use App\Support\Ads\AdInsights;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -27,6 +28,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 
 class AdResource extends Resource
@@ -152,6 +154,7 @@ class AdResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->withSum('stats as impressions_total', 'impressions'))
             ->columns([
                 ImageColumn::make('image_path')
                     ->label('')
@@ -197,6 +200,23 @@ class AdResource extends Resource
                         default => 'gray',
                     }),
 
+                TextColumn::make('impressions_total')
+                    ->label(__('admin_widgets.ads.impressions'))
+                    ->numeric()
+                    ->default(0)
+                    ->sortable(),
+
+                TextColumn::make('clicks')
+                    ->label(__('admin_widgets.ads.clicks'))
+                    ->numeric()
+                    ->sortable(),
+
+                TextColumn::make('ctr')
+                    ->label(__('admin_widgets.ads.ctr'))
+                    ->getStateUsing(fn (Ad $record) => (int) $record->impressions_total > 0
+                        ? AdInsights::rate((int) $record->clicks, (int) $record->impressions_total).'%'
+                        : '—'),
+
                 TextColumn::make('order')
                     ->label(__('ads.fields.order'))
                     ->sortable(),
@@ -233,6 +253,16 @@ class AdResource extends Resource
     public static function getRelations(): array
     {
         return [];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            AdResource\Widgets\AdStatsOverview::class,
+            AdResource\Widgets\AdActivityChart::class,
+            AdResource\Widgets\AdSources::class,
+            AdResource\Widgets\TopAds::class,
+        ];
     }
 
     public static function getPages(): array

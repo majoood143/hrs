@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\FarrierResource\Pages;
 
 use App\Filament\Resources\FarrierResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateFarrier extends CreateRecord

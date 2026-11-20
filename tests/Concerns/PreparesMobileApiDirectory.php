@@ -91,9 +91,7 @@ trait PreparesMobileApiDirectory
                 $table->string('delivery_scope')->nullable();
                 $table->json('payment_options')->nullable();
                 $table->string('approval_status')->default('approved');
-                if ($places !== 'stables') {
-                    $table->unsignedBigInteger('views_count')->default(0);
-                }
+                $table->unsignedBigInteger('views_count')->default(0);
                 $table->timestamps();
             });
 
@@ -232,6 +230,7 @@ trait PreparesMobileApiDirectory
             $table->unsignedInteger('clicks')->default(0);
             $table->timestamps();
         });
+        (require database_path('migrations/2026_11_20_000001_create_ad_daily_stats_table.php'))->up();
 
         (require database_path('migrations/2026_09_07_152631_create_media_table.php'))->up();
     }

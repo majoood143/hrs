@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\ClinicResource\Pages;
 
 use App\Filament\Concerns\HasExportActions;
-use Filament\Actions\CreateAction;
 use App\Filament\Resources\ClinicResource;
-use Filament\Actions;
+use App\Filament\Support\ListingViews\ListingViewWidgets;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
 class ListClinics extends ListRecords
@@ -19,5 +19,15 @@ class ListClinics extends ListRecords
         return [
             CreateAction::make(),
         ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return ListingViewWidgets::forList(static::$resource);
+    }
+
+    public function getHeaderWidgetsColumns(): int|array
+    {
+        return 3;
     }
 }

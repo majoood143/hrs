@@ -4,6 +4,7 @@ namespace App\Filament\Resources\FarrierResource\Pages;
 
 use App\Filament\Concerns\HasExportActions;
 use App\Filament\Resources\FarrierResource;
+use App\Filament\Support\ListingViews\ListingViewWidgets;
 use App\Filament\Support\PendingPosts;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
@@ -20,5 +21,10 @@ class ViewFarrier extends ViewRecord
             PendingPosts::approveAction(),
             EditAction::make(),
         ];
+    }
+
+    protected function getFooterWidgets(): array
+    {
+        return ListingViewWidgets::forRecord(static::$resource);
     }
 }

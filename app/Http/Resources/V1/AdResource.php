@@ -22,7 +22,7 @@ class AdResource extends JsonResource
             'media_type' => (string) ($this->media_type ?: 'image'),
             'media_url' => $this->media_path ? Storage::disk('public')->url($this->media_path) : null,
             'alt' => ($this->getTranslation('alt_text', app()->getLocale()) ?: $this->customer_name) ?: null,
-            'click_url' => $this->target_url ? route('promo.click', $this->resource) : null,
+            'click_url' => $this->target_url ? route('promo.click', ['ad' => $this->resource, 'src' => 'app']) : null,
         ];
     }
 }

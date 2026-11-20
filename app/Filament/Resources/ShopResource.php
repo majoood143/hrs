@@ -246,6 +246,12 @@ class ShopResource extends Resource
                     ->label(__('admin_shop.fields.is_active'))
                     ->disabled(fn (Shop $record): bool => ! static::canEdit($record))
                     ->sortable(),
+                TextColumn::make('views_count')
+                    ->label(__('admin_widgets.listing_views.views'))
+                    ->icon('heroicon-o-eye')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->label(__('admin_shop.fields.created_at'))
                     ->dateTime()

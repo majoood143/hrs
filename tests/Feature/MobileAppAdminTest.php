@@ -53,6 +53,7 @@ class MobileAppAdminTest extends TestCase
             '2025_10_03_170349_add_event_column_to_activity_log_table',
             '2025_10_03_170350_add_batch_uuid_column_to_activity_log_table',
             '2026_10_13_120000_create_mobile_announcements_table',
+            '2026_11_14_000002_create_app_events_table', // the announcements list shows their popup figures
             '2026_11_01_000002_create_content_reports_table',
             '2026_11_19_000001_add_install_id_to_content_reports',
             '2026_09_15_100000_create_ad_zones_table',

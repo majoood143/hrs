@@ -7,6 +7,7 @@ use App\Filament\Resources\MobileAnnouncementResource\Pages\CreateMobileAnnounce
 use App\Filament\Resources\MobileAnnouncementResource\Pages\EditMobileAnnouncement;
 use App\Filament\Resources\MobileAnnouncementResource\Pages\ListMobileAnnouncements;
 use App\Models\MobileAnnouncement;
+use App\Support\MobileApp\AnnouncementInsights;
 use App\Support\MobileApp\AppVersion;
 use App\Support\MobileApp\MobileScreens;
 use Filament\Actions\ActionGroup;
@@ -246,6 +247,22 @@ class MobileAnnouncementResource extends Resource
                         'ended' => 'heroicon-o-check-circle',
                         default => 'heroicon-o-pause-circle',
                     }),
+                TextColumn::make('shown')
+                    ->label(__('admin_widgets.announcements.shown'))
+                    ->state(fn (MobileAnnouncement $record): int => AnnouncementInsights::totals()[$record->getKey()]['shown'] ?? 0)
+                    ->icon('heroicon-o-eye')
+                    ->numeric()
+                    ->toggleable(),
+                TextColumn::make('clicked')
+                    ->label(__('admin_widgets.announcements.clicked'))
+                    ->state(fn (MobileAnnouncement $record): int => AnnouncementInsights::totals()[$record->getKey()]['clicked'] ?? 0)
+                    ->description(fn (MobileAnnouncement $record): string => AnnouncementInsights::rate(
+                        AnnouncementInsights::totals()[$record->getKey()]['clicked'] ?? 0,
+                        AnnouncementInsights::totals()[$record->getKey()]['shown'] ?? 0,
+                    ).'%')
+                    ->icon('heroicon-o-cursor-arrow-rays')
+                    ->numeric()
+                    ->toggleable(),
                 TextColumn::make('platforms')
                     ->label(__('admin_mobile_app.fields.platforms'))
                     ->badge()

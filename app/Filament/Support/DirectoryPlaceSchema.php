@@ -220,6 +220,12 @@ final class DirectoryPlaceSchema
                     ->label($label('is_active'))
                     ->disabled(fn (Model $record): bool => ! Gate::allows('update', $record))
                     ->sortable(),
+                TextColumn::make('views_count')
+                    ->label(__('admin_widgets.listing_views.views'))
+                    ->icon('heroicon-o-eye')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->label($label('created_at'))
                     ->dateTime()

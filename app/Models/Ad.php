@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Spatie\Translatable\HasTranslations;
 
 class Ad extends Model
@@ -27,6 +28,12 @@ class Ad extends Model
     public function zone(): BelongsTo
     {
         return $this->belongsTo(AdZone::class, 'zone_id');
+    }
+
+    /** Impressions and clicks per day and source (App\Support\Ads\AdStats). */
+    public function stats(): HasMany
+    {
+        return $this->hasMany(AdDailyStat::class);
     }
 
     public function scopeActive(Builder $query): Builder

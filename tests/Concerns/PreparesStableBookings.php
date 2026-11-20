@@ -109,6 +109,7 @@ trait PreparesStableBookings
             // closing the books: settlements and attendance check it
             '2026_11_15_000001_create_book_closings_table',
             '2026_11_15_000003_add_vat_registration_to_stables',
+            '2026_11_20_000002_add_views_count_to_stables',
         ] as $migration) {
             (require database_path("migrations/{$migration}.php"))->up();
         }

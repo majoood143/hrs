@@ -16,6 +16,7 @@ use App\Models\Event;
 use App\Models\HorseSalePost;
 use App\Models\ToolSalePost;
 use App\Models\TransferPost;
+use App\Support\Ads\AdStats;
 use App\Support\MobileApp\AppClient;
 use App\Support\MobileApp\MobileAds;
 use App\Support\MobileApp\MobileFeatures;
@@ -45,7 +46,7 @@ class HomeController extends Controller
 
         return [
             'data' => [
-                'ads' => AdResource::collection($on('promos') ? $this->ads() : collect()),
+                'ads' => AdResource::collection(tap($on('promos') ? $this->ads() : collect(), fn ($ads) => AdStats::impressions($ads, 'app'))),
                 'horses' => HorseForSaleListResource::collection($on('horses_for_sale')
                     ? HorseSalePost::visible()->with(['type', 'gender', 'city', 'country'])->latest('id')->take(self::PER_SECTION)->get()
                     : collect()),

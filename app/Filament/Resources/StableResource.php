@@ -248,6 +248,12 @@ class StableResource extends Resource
                     ->label(__('stable_panel.fields.is_active'))
                     ->disabled(fn (Stable $record): bool => ! static::canEdit($record))
                     ->sortable(),
+                TextColumn::make('views_count')
+                    ->label(__('admin_widgets.listing_views.views'))
+                    ->icon('heroicon-o-eye')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->label(__('admin_stable.fields.created_at'))
                     ->dateTime()

@@ -204,6 +204,12 @@ class TransferPostResource extends Resource
                     })
                     ->sortable(),
                 PendingPosts::activeToggle(TransferPost::statusOptions()['active'], 'cancelled'),
+                TextColumn::make('views_count')
+                    ->label(__('admin_widgets.listing_views.views'))
+                    ->icon('heroicon-o-eye')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->label(__('admin_transfer_post.fields.created_at'))
                     ->dateTime()
