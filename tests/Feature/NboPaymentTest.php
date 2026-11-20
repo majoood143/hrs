@@ -156,13 +156,13 @@ class NboPaymentTest extends TestCase
         $this->assertTrue($order->isPayable());
     }
 
-    public function test_an_explicit_error_from_nbo_shows_its_message(): void
+    public function test_an_explicit_error_from_nbo_is_shown_in_the_sites_language(): void
     {
         $order = $this->orderWithPayment();
 
         $this->post(route('payment.nbo.callback'), ['paymentid' => 'PID123', 'Error' => 'IPAY0100114', 'ErrorText' => 'Duplicate Record'])
             ->assertRedirect(route('payment.start', $order->order_number))
-            ->assertSessionHas('error', 'Duplicate Record');
+            ->assertSessionHas('error', __('payments.not_completed'));
 
         $this->assertSame('failed', PaymentGatewayLog::where('event', 'callback')->first()->outcome);
     }

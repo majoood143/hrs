@@ -6,6 +6,7 @@ return [
         '401' => 'Please sign in to continue.',
         '403' => 'You cannot do this.',
         '404' => 'We could not find what you are looking for.',
+        '419' => 'This page has expired. Please reload it and try again.',
         '429' => 'Too many attempts. Please wait a moment and try again.',
         '500' => 'The server could not answer right now. Please try again in a moment.',
     ],

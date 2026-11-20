@@ -320,13 +320,14 @@ class PaymentController extends Controller
             $errorText ??= __('payments.not_completed');
             PaymentGatewayLog::log($order, 'nbo', 'callback', $loggable, ['error' => $error, 'errorText' => $errorText]);
 
+            // NBO's errortext is English only; the customer gets ours, the log keeps NBO's
             if (! $order) {
-                return redirect('/')->with('error', $errorText);
+                return redirect('/')->with('error', __('payments.not_completed'));
             }
 
             $this->payments->markFailed($order, PaymentGateway::Nbo, $error);
 
-            return $this->toPayment($order, $errorText);
+            return $this->toPayment($order, __('payments.not_completed'));
         }
 
         if (! $paymentId || ! $order) {
@@ -452,7 +453,8 @@ class PaymentController extends Controller
 
         $this->payments->markFailed($order, PaymentGateway::CcAvenue, $status);
 
-        return $this->toPayment($order, $data['failure_message'] ?? $data['status_message'] ?? __('payments.not_completed'));
+        // the bank's failure_message is English only; it is in the gateway log above
+        return $this->toPayment($order, __('payments.not_completed'));
     }
 
     // ── Demo ─────────────────────────────────────────────────────────────────

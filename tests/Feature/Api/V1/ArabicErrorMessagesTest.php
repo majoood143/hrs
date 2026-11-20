@@ -12,6 +12,7 @@ use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\Request;
+use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -45,6 +46,20 @@ class ArabicErrorMessagesTest extends TestCase
 
             $this->assertSame($status, $response->getStatusCode());
             $this->assertSame(__("api.errors.{$status}", locale: 'ar'), $response->getData(true)['message']);
+            $this->assertNoLatin($response->getData(true)['message']);
+        }
+    }
+
+    public function test_the_websites_fetch_forms_get_their_errors_in_the_pages_language(): void
+    {
+        config(['app.debug' => false]);
+        app()->setLocale('ar');
+        $request = Request::create('/forms/race-entries', 'POST', server: ['HTTP_ACCEPT' => 'application/json']);
+
+        foreach ([[new ThrottleRequestsException, 429], [new TokenMismatchException, 419], [new RuntimeException('secret'), 500]] as [$exception, $status]) {
+            $response = app(ExceptionHandler::class)->render($request, $exception);
+
+            $this->assertSame($status, $response->getStatusCode());
             $this->assertNoLatin($response->getData(true)['message']);
         }
     }

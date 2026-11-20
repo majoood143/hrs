@@ -48,13 +48,22 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // The app shows `message`, and Laravel's own are English ("Unauthenticated.", "Server Error",
         // "No query results for model…"). The API's translated messages never arrive here as exceptions.
+        // The website's own fetch() forms (the form builder's /forms/{form}) show it too, in the page's language.
         $exceptions->respond(function (Response $response, Throwable $e, Request $request) {
-            if (! $request->is('api/v1/*') || ! $response instanceof JsonResponse || $e instanceof ValidationException || $e instanceof HttpResponseException) {
+            if (! $response instanceof JsonResponse || $e instanceof ValidationException || $e instanceof HttpResponseException) {
                 return $response;
             }
 
-            $status = in_array($response->getStatusCode(), [401, 403, 404, 429], true) ? $response->getStatusCode() : 500;
+            if ($request->is('api/v1/*')) {
+                $status = in_array($response->getStatusCode(), [401, 403, 404, 429], true) ? $response->getStatusCode() : 500;
 
-            return $response->setData(['message' => __("api.errors.{$status}", locale: SetApiLocale::resolve($request))] + $response->getData(true));
+                return $response->setData(['message' => __("api.errors.{$status}", locale: SetApiLocale::resolve($request))] + $response->getData(true));
+            }
+
+            $status = $response->getStatusCode();
+
+            return in_array($status, [403, 404, 419, 429, 500], true) && ! $request->is('api/*') && ! ($status === 500 && config('app.debug'))
+                ? $response->setData(['message' => __("api.errors.{$status}")] + $response->getData(true))
+                : $response;
         });
     })->create();

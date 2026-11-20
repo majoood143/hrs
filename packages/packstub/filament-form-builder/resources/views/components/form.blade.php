@@ -17,7 +17,7 @@
         <div class="fb-closed" role="status">{{ $closed }}</div>
     @else
         {!! app(\Packstub\FormBuilder\FormBuilder::class)->beforeFormHtml($form) !!}
-        <form method="post" action="{{ $action }}" enctype="multipart/form-data" class="fb-form__form" novalidate data-fb-enhance="{{ $enhance ? 'true' : 'false' }}">
+        <form method="post" action="{{ $action }}" enctype="multipart/form-data" class="fb-form__form" novalidate data-fb-enhance="{{ $enhance ? 'true' : 'false' }}" data-fb-message-invalid="{{ __('packstub-form-builder::form-builder.frontend.invalid') }}" data-fb-message-failed="{{ __('packstub-form-builder::form-builder.frontend.failed') }}">
             @if ($csrf)
                 @csrf
             @endif

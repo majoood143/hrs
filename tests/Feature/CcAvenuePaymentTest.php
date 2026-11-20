@@ -120,13 +120,13 @@ class CcAvenuePaymentTest extends TestCase
         $this->assertSame(PaymentStatus::Failed, $order->payment_status);
     }
 
-    public function test_a_failure_or_abort_keeps_the_order_payable_and_shows_the_reason(): void
+    public function test_a_failure_or_abort_keeps_the_order_payable_and_says_so_in_the_sites_language(): void
     {
         $order = $this->orderWithPayment();
 
         $this->post(route('payment.ccavenue.callback'), ['encResp' => $this->encResp($order, ['order_status' => 'Failure', 'failure_message' => 'Card declined'])])
             ->assertRedirect(route('payment.start', $order->order_number))
-            ->assertSessionHas('error', 'Card declined');
+            ->assertSessionHas('error', __('payments.not_completed'));
 
         $order->refresh();
         $this->assertTrue($order->isPayable());
