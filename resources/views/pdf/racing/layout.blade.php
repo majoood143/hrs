@@ -18,6 +18,7 @@
         .eyebrow { font-size: 8pt; color: #555555; text-transform: uppercase; letter-spacing: 0.5pt; }
         .muted { color: #666666; }
         .small { font-size: 8pt; }
+        .non-runner { color: #000000; font-weight: bold; font-size: 7pt; text-transform: uppercase; }
         .facts td { padding: 0.6mm 4mm 0.6mm 0; vertical-align: top; }
         .facts td.label { color: #666666; }
         table.box { width: 100%; border: 0.4mm solid #bbbbbb; background-color: #f2f2f2; }

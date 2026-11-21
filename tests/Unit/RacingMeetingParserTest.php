@@ -11,17 +11,17 @@ class RacingMeetingParserTest extends TestCase
 {
     private function fixture(string $name): string
     {
-        return file_get_contents(__DIR__ . "/../Fixtures/racing/{$name}");
+        return file_get_contents(__DIR__."/../Fixtures/racing/{$name}");
     }
 
     private function meeting(string $name): array
     {
-        return (new RacingMeetingParser())->parseMeeting($this->fixture($name));
+        return (new RacingMeetingParser)->parseMeeting($this->fixture($name));
     }
 
     private function fragment(string $page, string $name): array
     {
-        return (new RacingMeetingParser())->parseFragment($page, $this->fixture($name));
+        return (new RacingMeetingParser)->parseFragment($page, $this->fixture($name));
     }
 
     public function test_meeting_header_and_all_races(): void
@@ -91,7 +91,7 @@ class RacingMeetingParserTest extends TestCase
         $html = preg_replace('/(class="videoLink[^>]*?href=")[^"]*(")/s', '$1javascript:alert(1)$2', $this->fixture('meeting_results_9178.html'), -1, $count);
         $this->assertGreaterThan(0, $count, 'fixture has video links to tamper with');
 
-        $race = collect((new RacingMeetingParser())->parseMeeting($html)['races'])->firstWhere('id', 9178);
+        $race = collect((new RacingMeetingParser)->parseMeeting($html)['races'])->firstWhere('id', 9178);
 
         $this->assertNull($race['video_url']);
     }
@@ -141,7 +141,13 @@ class RacingMeetingParserTest extends TestCase
             'image' => '/img/OwnerColours/khalid mohamed falahi.jpg',
             'weight' => '58.0',
             'weight_note' => '(OR 83)',
+            'non_runner' => false,
         ], $detail['runners'][0]);
+
+        // the source keeps a withdrawn horse on the card (row class "nonrunner")
+        $nonRunners = array_values(array_filter($detail['runners'], fn (array $r) => $r['non_runner']));
+        $this->assertCount(1, $nonRunners);
+        $this->assertSame(3219, $nonRunners[0]['horse']['id']);
     }
 
     public function test_form_guide_fragment(): void
@@ -167,7 +173,7 @@ class RacingMeetingParserTest extends TestCase
 
     public function test_handicap_grid(): void
     {
-        $horses = (new RacingHandicapParser())->parse($this->fixture('handicap.json'));
+        $horses = (new RacingHandicapParser)->parse($this->fixture('handicap.json'));
         $byId = array_column($horses, null, 'id');
 
         $this->assertCount(31, $horses);
@@ -184,7 +190,7 @@ class RacingMeetingParserTest extends TestCase
 
     public function test_handicap_grid_with_no_rows_or_an_error_page(): void
     {
-        $parser = new RacingHandicapParser();
+        $parser = new RacingHandicapParser;
 
         $this->assertSame([], $parser->parse('{"TOTAL":0,"RECORDS":0,"PAGE":0,"ROWS":""}'));
 

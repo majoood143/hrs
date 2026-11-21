@@ -174,6 +174,7 @@ class RacingTest extends TestCase
     {
         $card = $this->getJson('/api/v1/racing/races/card/9178')->assertOk()->assertJsonPath('data.detail.available', true)->json('data.detail.runners.0');
         $this->assertArrayHasKey('weight', $card);
+        $this->assertFalse($card['non_runner']);
         $this->assertIsInt($card['horse']['id']);
 
         $guide = $this->getJson('/api/v1/racing/races/form-guide/9178')->assertOk()->json('data.detail.runners.0');

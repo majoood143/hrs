@@ -60,7 +60,7 @@ final class RacingData
     public static function runner(array $runner, string $page): array
     {
         $extra = $page === 'card'
-            ? ['weight' => $runner['weight'] ?? null, 'weight_note' => $runner['weight_note'] ?? null]
+            ? ['weight' => $runner['weight'] ?? null, 'weight_note' => $runner['weight_note'] ?? null, 'non_runner' => (bool) ($runner['non_runner'] ?? false)]
             : ['runs' => self::table($runner['runs'] ?? ['headers' => [], 'rows' => []])];
 
         return [

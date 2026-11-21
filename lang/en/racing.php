@@ -91,6 +91,7 @@ return [
         'owner' => 'Owner',
         'trainer' => 'Trainer',
         'jockey' => 'Jockey',
+        'non_runner' => 'Non-runner',
         'record' => 'Runs (1st-2nd-3rd)',
     ],
 

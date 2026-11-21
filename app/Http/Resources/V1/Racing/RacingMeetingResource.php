@@ -14,7 +14,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * detail by page:
  * - results: `table` (+ `owners`, `overweights`)
  * - entries: `table`
- * - card: `runners` with `weight` / `weight_note`
+ * - card: `runners` with `weight` / `weight_note` / `non_runner` (withdrawn, still listed)
  * - form-guide: `runners` with `runs` (their last races, a table)
  *
  * @property array{page: string, meeting: array<string, mixed>, selected: ?array<string, mixed>, detail: ?array<string, mixed>} $resource

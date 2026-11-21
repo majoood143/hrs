@@ -76,11 +76,11 @@
             </tr></thead>
             <tbody>
                 @foreach($detail['runners'] as $runner)
-                    <tr>
+                    <tr @if($runner['non_runner'] ?? false) style="background-color: #e6e6e6; color: #777777;" @endif>
                         <td>{{ $runner['no'] }}</td>
                         <td>{{ $runner['gate'] }}</td>
                         <td style="width: 10mm;">@if($runner['silks'])<img src="{{ $runner['silks'] }}" width="9mm" height="9mm" alt="">@endif</td>
-                        <td>@include('pdf.racing._entity', ['type' => 'horse', 'entity' => $runner['horse']])<br><span class="muted small">@foreach($runner['meta'] as $part){{ $d($part) }}@unless($loop->last) · @endunless @endforeach</span></td>
+                        <td>@if($runner['non_runner'] ?? false)<span class="non-runner">{{ __('racing.card_labels.non_runner') }}</span><br>@endif@include('pdf.racing._entity', ['type' => 'horse', 'entity' => $runner['horse']])<br><span class="muted small">@foreach($runner['meta'] as $part){{ $d($part) }}@unless($loop->last) · @endunless @endforeach</span></td>
                         <td><span dir="ltr">{{ $runner['record'] }}</span></td>
                         <td>@include('pdf.racing._entity', ['type' => 'owner', 'entity' => $runner['owner']])</td>
                         <td>@include('pdf.racing._entity', ['type' => 'trainer', 'entity' => $runner['trainer']])</td>
