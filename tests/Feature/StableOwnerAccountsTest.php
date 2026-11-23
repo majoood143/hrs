@@ -391,10 +391,13 @@ class StableOwnerAccountsTest extends TestCase
             ->assertHasFormErrors(['otp_code']);
         $this->assertSame(0, User::query()->count());
 
+        // a page remembered from an earlier /admin visit in the same browser must not be where the owner lands
+        session()->put('url.intended', url('/admin/promotions'));
         $page = Livewire::test(Register::class);
         $page->fillForm($form($code) + ['captcha' => $this->captcha()])
             ->call('register')
-            ->assertHasNoFormErrors();
+            ->assertHasNoFormErrors()
+            ->assertRedirect(Filament::getUrl(User::query()->sole()->stables()->sole()));
 
         $owner = User::query()->sole();
         $this->assertTrue($owner->isStableOwner());

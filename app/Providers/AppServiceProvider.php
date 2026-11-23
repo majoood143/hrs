@@ -9,6 +9,7 @@ use App\Filament\RichEditor\TextDirectionPlugin;
 use App\Filament\Support\FieldPlaceholders;
 use App\Filament\Support\FormPaymentTab;
 use App\Http\Controllers\Api\V1\Owner\OwnerAuthController;
+use App\Http\Responses\PanelHomeResponse;
 use App\Models\AppEvent;
 use App\Models\BookingSlot;
 use App\Models\SiteSetting;
@@ -28,6 +29,8 @@ use App\Support\PhoneNumber;
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Dedoc\Scramble\Scramble;
 use Filament\Actions\Action;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse;
+use Filament\Auth\Http\Responses\Contracts\RegistrationResponse;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
@@ -72,6 +75,10 @@ class AppServiceProvider extends ServiceProvider
         // Each form's Insights page (charts of its submissions). Registered here, not in boot(): Filament
         // loads its panel routes while the package providers boot, which is before this provider's boot().
         FormBuilder::registerResourcePage('insights', ViewFormInsights::class, '/{record}/insights');
+
+        // after signing in or registering, stay in that panel (a remembered /admin page sent new stable owners there)
+        $this->app->bind(LoginResponse::class, PanelHomeResponse::class);
+        $this->app->bind(RegistrationResponse::class, PanelHomeResponse::class);
     }
 
     /**
