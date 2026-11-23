@@ -138,6 +138,7 @@ class RacingMeetingParserTest extends TestCase
             'owner' => ['id' => 681, 'name' => 'Khalid bin Mohamed Al Falahi'],
             'trainer' => ['id' => 53, 'name' => 'Hassan bin Mohamed Al Falahi'],
             'jockey' => ['id' => 26, 'name' => 'Amur bin Ali Al Rasbi'],
+            'claim' => null,
             'image' => '/img/OwnerColours/khalid mohamed falahi.jpg',
             'weight' => '58.0',
             'weight_note' => '(OR 83)',
@@ -161,7 +162,24 @@ class RacingMeetingParserTest extends TestCase
         $this->assertSame(3125, $runner['horse']['id']);
         $this->assertSame(['Date', 'Crs', 'Surf', 'Dist', 'TC', 'Type', 'Jockey', 'DR', 'Wgt', 'FP/Rn', 'Beaten By', 'HR'], $runner['runs']['headers']);
         $this->assertCount(4, $runner['runs']['rows']);
-        $this->assertSame('Length: 12.1 Wgt: 58.0', $runner['runs']['rows'][0][10]['title']);
+        // the "Beaten By" tooltip becomes data, worded per language where it is shown
+        $beatenBy = $runner['runs']['rows'][0][10];
+        $this->assertNull($beatenBy['title']);
+        $this->assertSame(['length' => '12.1', 'weight' => '58.0'], $beatenBy['margin']);
+    }
+
+    public function test_an_apprentice_claim_is_kept_apart_from_the_jockey_name(): void
+    {
+        $runners = $this->fragment('card', 'fragment_card_10010.html')['runners'];
+
+        $byNo = array_column($runners, null, 'no');
+        $this->assertSame(['id' => 485, 'name' => 'Hamza bin Ibrahim Al Falahi'], $byNo['3']['jockey']);
+        $this->assertSame('3.0 kg', $byNo['3']['claim']);
+        $this->assertNull($byNo['1']['claim']);
+        $this->assertCount(6, array_filter(array_column($runners, 'claim')));
+        foreach ($runners as $runner) {
+            $this->assertStringNotContainsString('kg', $runner['jockey']['name'] ?? '');
+        }
     }
 
     public function test_pages_with_nothing_yet_are_not_available(): void

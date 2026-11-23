@@ -84,7 +84,7 @@
                         <td><span dir="ltr">{{ $runner['record'] }}</span></td>
                         <td>@include('pdf.racing._entity', ['type' => 'owner', 'entity' => $runner['owner']])</td>
                         <td>@include('pdf.racing._entity', ['type' => 'trainer', 'entity' => $runner['trainer']])</td>
-                        <td>@include('pdf.racing._entity', ['type' => 'jockey', 'entity' => $runner['jockey']])</td>
+                        <td>@include('pdf.racing._entity', ['type' => 'jockey', 'entity' => $runner['jockey']])@if($runner['claim'] ?? null)<br><span class="muted small">{{ __('racing.card_labels.claim') }} <span dir="ltr">{{ $runner['claim'] }}</span></span>@endif</td>
                         <td><span dir="ltr">{{ $runner['weight'] }}</span>@if($runner['weight_note'])<br><span class="muted small" dir="ltr">{{ $runner['weight_note'] }}</span>@endif</td>
                     </tr>
                 @endforeach
@@ -102,7 +102,7 @@
                         $runner['record'],
                         $runner['owner'] ? __('racing.card_labels.owner') . ': ' . $runner['owner']['name'] : null,
                         $runner['trainer'] ? __('racing.card_labels.trainer') . ': ' . $runner['trainer']['name'] : null,
-                        $runner['jockey'] ? __('racing.card_labels.jockey') . ': ' . $runner['jockey']['name'] : null,
+                        $runner['jockey'] ? __('racing.card_labels.jockey') . ': ' . $runner['jockey']['name'] . (($runner['claim'] ?? null) ? ' (' . __('racing.card_labels.claim') . ' ' . $runner['claim'] . ')' : '') : null,
                     ]);
                 @endphp
                 @foreach($line as $part){{ $d($part) }}@unless($loop->last) &nbsp;·&nbsp; @endunless @endforeach

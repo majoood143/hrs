@@ -28,16 +28,21 @@ use App\Services\Auth\CustomerOtpService;
 use App\Services\Stables\StableApproval;
 use App\Services\Stables\StableRegistration;
 use App\Services\WhatsApp\BilingualMessage;
+use Filament\Actions\Testing\TestAction;
 use Filament\Facades\Filament;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Schema;
 use InvalidArgumentException;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 use Tests\Concerns\PreparesStableBookings;
 use Tests\TestCase;
+use WallaceMartinss\FilamentEvolution\Models\WhatsappInstance;
+use WallaceMartinss\FilamentEvolution\Services\EvolutionClient;
 
 /** Stable owners: signing up, the admins' approval, what they may reach, and who is told. */
 class StableOwnerAccountsTest extends TestCase
@@ -395,6 +400,34 @@ class StableOwnerAccountsTest extends TestCase
         $this->assertTrue($owner->isStableOwner());
         $this->assertSame(StableApprovalStatus::Pending, $owner->stables()->sole()->approval_status);
         $this->assertTrue(Auth::check());
+    }
+
+    public function test_the_sign_up_code_goes_by_whatsapp_unless_general_settings_say_sms_only(): void
+    {
+        if (! Schema::hasTable('whatsapp_instances')) {
+            (require database_path('migrations/2026_09_26_140451_create_whatsapp_instances_table.php'))->up();
+        }
+        config(['filament-evolution.api.base_url' => 'https://evo.test', 'filament-evolution.api.api_key' => 'test-key']);
+        app()->forgetInstance(EvolutionClient::class);
+        WhatsappInstance::create(['name' => 'muhra', 'number' => '96890000001', 'status' => 'open']);
+        Http::fake(['evo.test/*' => Http::response(['key' => ['id' => 'MSG-1']], 201)]);
+        Filament::setCurrentPanel(Filament::getPanel('stable'));
+
+        Livewire::test(Register::class)
+            ->fillForm(['phone' => '91234567'])
+            ->callAction(TestAction::make('sendCode')->schemaComponent('phone'));
+
+        Http::assertSent(fn ($request) => $request->url() === 'https://evo.test/message/sendText/muhra' && $request['number'] === '96891234567');
+        $this->assertSame(1, CustomerOtp::query()->where('phone', '96891234567')->count());
+
+        // SMS only: the next phone gets an SMS, WhatsApp is not called again
+        $this->stableSiteSettings(['sms.driver' => 'demo', 'whatsapp.codes' => false]);
+        Livewire::test(Register::class)
+            ->fillForm(['phone' => '92345678'])
+            ->callAction(TestAction::make('sendCode')->schemaComponent('phone'));
+
+        Http::assertSentCount(1);
+        $this->assertSame(1, CustomerOtp::query()->where('phone', '96892345678')->count());
     }
 
     public function test_an_owner_signs_in_with_an_sms_code(): void

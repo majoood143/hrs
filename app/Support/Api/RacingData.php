@@ -38,8 +38,24 @@ final class RacingData
                 'text' => (string) $cell['text'],
                 'link' => self::link($cell['link'] ?? null),
                 'title' => $cell['title'] ?? null,
+                'note' => self::margin($cell),
             ], $row), $table['rows'] ?? []),
         ];
+    }
+
+    /** A form-guide "Beaten By" cell's margin and weight as one line ("8.4 lengths · 60.0 kg"), else null. */
+    public static function margin(array $cell): ?string
+    {
+        $length = $cell['margin']['length'] ?? null;
+        $weight = $cell['margin']['weight'] ?? null;
+
+        $parts = array_filter([
+            // the source writes "Dist" when no margin was recorded (a 4th place 13.7 lengths back showed it), not "a distance"
+            $length !== null && is_numeric($length) ? __('racing.margin.lengths', ['n' => $length]) : null,
+            $weight !== null ? __('racing.margin.weight', ['n' => $weight]) : null,
+        ]);
+
+        return $parts ? implode(' · ', $parts) : null;
     }
 
     /**
@@ -72,6 +88,7 @@ final class RacingData
             'owner' => self::entity($runner['owner'] ?? null),
             'trainer' => self::entity($runner['trainer'] ?? null),
             'jockey' => self::entity($runner['jockey'] ?? null),
+            'claim' => $runner['claim'] ?? null,
             'image_url' => self::image($runner['image'] ?? null),
         ] + $extra;
     }

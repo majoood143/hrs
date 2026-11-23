@@ -105,7 +105,7 @@ class AccountAuthController extends Controller
 
     private function issue(Request $request, string $phone, string $next): RedirectResponse
     {
-        $result = $this->otp->request($phone, $request->ip());
+        $result = $this->otp->request($phone, $request->ip(), CustomerOtpService::CHANNEL_WHATSAPP);
 
         return match ($result->status) {
             OtpRequestResult::INVALID_PHONE => back()->withInput()->withErrors(['phone' => __('account.phone_invalid')]),

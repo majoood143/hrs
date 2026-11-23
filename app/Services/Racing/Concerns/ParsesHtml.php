@@ -15,10 +15,10 @@ trait ParsesHtml
 {
     private function xpath(string $html): DOMXPath
     {
-        $doc = new DOMDocument();
+        $doc = new DOMDocument;
 
         $previous = libxml_use_internal_errors(true);
-        $doc->loadHTML('<?xml encoding="utf-8"?>' . $html, LIBXML_NOERROR | LIBXML_NOWARNING);
+        $doc->loadHTML('<?xml encoding="utf-8"?>'.$html, LIBXML_NOERROR | LIBXML_NOWARNING);
         libxml_clear_errors();
         libxml_use_internal_errors($previous);
 
@@ -62,13 +62,16 @@ trait ParsesHtml
     private function entity(DOMXPath $xp, DOMNode $context, string $class): ?array
     {
         /** @var ?DOMElement $a */
-        $a = $xp->query('.//a[@rel and contains(concat(" ", normalize-space(@class), " "), " ' . $class . ' ")]', $context)->item(0);
+        $a = $xp->query('.//a[@rel and contains(concat(" ", normalize-space(@class), " "), " '.$class.' ")]', $context)->item(0);
 
         if (! $a || (int) $a->getAttribute('rel') < 1) {
             return null;
         }
 
-        return ['id' => (int) $a->getAttribute('rel'), 'name' => $this->text($a)];
+        // a jockey's apprentice claim ("(3.0 kg)") sits inside the link, in a span.unit: never part of the name
+        $name = implode(' ', array_map(fn (DOMNode $t) => $this->text($t), iterator_to_array($xp->query('.//text()[not(ancestor::span[contains(concat(" ", normalize-space(@class), " "), " unit ")])]', $a))));
+
+        return ['id' => (int) $a->getAttribute('rel'), 'name' => trim(preg_replace('/\s+/u', ' ', $name) ?? $name)];
     }
 
     /** Image path on the source (always /img/...), or null for missing / placeholder art. */

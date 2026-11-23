@@ -9,8 +9,8 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Utilities\Get;
 
 /**
- * "Send me a code" on the owner sign-up and sign-in pages: the same SMS codes, lifetime and limits
- * as the customer phone sign-in (CustomerOtpService).
+ * "Send me a code" on the owner sign-up and sign-in pages: the same codes, lifetime and limits as the
+ * customer phone sign-in (CustomerOtpService), by WhatsApp or SMS as set in General Settings → WhatsApp.
  */
 trait SendsPhoneCodes
 {
@@ -26,7 +26,7 @@ trait SendsPhoneCodes
 
     protected function sendPhoneCode(?string $phone): void
     {
-        $result = app(CustomerOtpService::class)->request($phone, request()->ip());
+        $result = app(CustomerOtpService::class)->request($phone, request()->ip(), CustomerOtpService::CHANNEL_WHATSAPP);
 
         $notification = match ($result->status) {
             OtpRequestResult::SENT => Notification::make()->success()->title(__('account.code_sent'))

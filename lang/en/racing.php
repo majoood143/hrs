@@ -92,7 +92,13 @@ return [
         'trainer' => 'Trainer',
         'jockey' => 'Jockey',
         'non_runner' => 'Non-runner',
+        'claim' => 'Claim',
         'record' => 'Runs (1st-2nd-3rd)',
+    ],
+
+    'margin' => [
+        'lengths' => ':n lengths',
+        'weight' => ':n kg',
     ],
 
     'handicap' => [

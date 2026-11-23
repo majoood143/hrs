@@ -14,6 +14,9 @@
                     @foreach($row as $cell)
                         <td class="whitespace-nowrap px-4 py-3" @if($cell['title'] ?? null) title="{{ $cell['title'] }}" @endif>
                             <x-racing.cell :cell="$cell" />
+                            @if($note = \App\Support\Api\RacingData::margin($cell))
+                                <span class="block text-xs text-warm-900/60">{{ $note }}</span>
+                            @endif
                         </td>
                     @endforeach
                 </tr>

@@ -70,7 +70,7 @@ final class WhatsAppSettings
             'instance_id' => self::instanceId(),
             'recipients' => self::recipientRows(),
             'alerts' => self::alerts(),
-            'codes' => self::codesEnabled(),
+            'codes' => (int) self::codesEnabled(), // 1|0: the keys of the form's two-way choice
         ];
     }
 

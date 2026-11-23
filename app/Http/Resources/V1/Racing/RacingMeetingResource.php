@@ -15,7 +15,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * - results: `table` (+ `owners`, `overweights`)
  * - entries: `table`
  * - card: `runners` with `weight` / `weight_note` / `non_runner` (withdrawn, still listed)
- * - form-guide: `runners` with `runs` (their last races, a table)
+ * - form-guide: `runners` with `runs` (their last races, a table; the "Beaten By" cell's `note` = margin and weight)
+ * - both: a runner's `claim` (an apprentice's weight allowance, e.g. "3.0 kg"; English pages only)
  *
  * @property array{page: string, meeting: array<string, mixed>, selected: ?array<string, mixed>, detail: ?array<string, mixed>} $resource
  */

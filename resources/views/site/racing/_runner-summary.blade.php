@@ -21,7 +21,12 @@
             @foreach(['owner' => 'owner', 'trainer' => 'trainer', 'jockey' => 'jockey'] as $key => $type)
                 @if($runner[$key])
                     <dt class="text-warm-900/60">{{ __('racing.card_labels.' . $key) }}</dt>
-                    <dd><x-racing.entity :type="$type" :entity="$runner[$key]" /></dd>
+                    <dd>
+                        <x-racing.entity :type="$type" :entity="$runner[$key]" />
+                        @if($key === 'jockey' && ($runner['claim'] ?? null))
+                            <span class="badge-accent ms-1" dir="auto">{{ __('racing.card_labels.claim') }} <span dir="ltr">{{ $runner['claim'] }}</span></span>
+                        @endif
+                    </dd>
                 @endif
             @endforeach
         </dl>

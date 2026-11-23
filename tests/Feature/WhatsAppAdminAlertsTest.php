@@ -380,7 +380,7 @@ class WhatsAppAdminAlertsTest extends TestCase
             ->assertSee(__('admin_whatsapp.sections.codes'))
             ->assertFormSet([
                 'whatsapp.enabled' => false,
-                'whatsapp.codes' => true,
+                'whatsapp.codes' => 1,
                 'whatsapp.alerts.horse_sale_post' => true,
                 'whatsapp.alerts.farrier' => true,
             ]);
@@ -398,7 +398,7 @@ class WhatsAppAdminAlertsTest extends TestCase
                 'whatsapp.instance_id' => $instance->id,
                 'whatsapp.recipients' => [['name' => 'Majid', 'phone' => '9123 4567']],
                 'whatsapp.alerts.tool_sale_post' => false,
-                'whatsapp.codes' => false,
+                'whatsapp.codes' => 0,
             ])
             ->call('save')
             ->assertHasNoFormErrors();

@@ -16,6 +16,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
@@ -781,8 +782,12 @@ class GeneralSettings extends Page implements HasForms
                 Section::make(__('admin_whatsapp.sections.codes'))
                     ->description(__('admin_whatsapp.sections.codes_desc'))
                     ->schema([
-                        Toggle::make('whatsapp.codes')
+                        ToggleButtons::make('whatsapp.codes')
                             ->label(__('admin_whatsapp.fields.codes'))
+                            ->boolean(__('admin_whatsapp.fields.codes_whatsapp'), __('admin_whatsapp.fields.codes_sms'))
+                            ->icons([1 => 'heroicon-o-chat-bubble-left-right', 0 => 'heroicon-o-device-phone-mobile'])
+                            ->colors([1 => 'success', 0 => 'gray'])
+                            ->inline()
                             ->helperText(__('admin_whatsapp.fields.codes_helper')),
                     ]),
             ]);

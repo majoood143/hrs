@@ -83,7 +83,7 @@ class RacingRaceTest extends TestCase
             ->assertOk()
             ->assertSee('Form Guide')
             ->assertSee('Beaten By')
-            ->assertSee('title="Length: 12.1 Wgt: 58.0"', false)
+            ->assertSee('12.1 lengths · 58.0 kg')
             ->assertSee('Z.F. Alsoroor (OM)');
     }
 

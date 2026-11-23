@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Api\V1;
 
+use App\Support\Api\RacingData;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
@@ -180,6 +181,19 @@ class RacingTest extends TestCase
         $guide = $this->getJson('/api/v1/racing/races/form-guide/9178')->assertOk()->json('data.detail.runners.0');
         $this->assertArrayHasKey('runs', $guide);
         $this->assertArrayNotHasKey('weight', $guide);
+        $this->assertArrayHasKey('claim', $guide);
+        // the "Beaten By" tooltip comes back as a line in the request's language
+        $this->assertSame('12.1 lengths · 58.0 kg', $guide['runs']['rows'][0][10]['note']);
+        $this->assertNull($guide['runs']['rows'][0][0]['note']);
+
+        $this->assertSame('بفارق 12.1 طول · 58.0 كغم', $this->getJson('/api/v1/racing/races/form-guide/9178', ['Accept-Language' => 'ar'])->json('data.detail.runners.0.runs.rows.0.10.note'));
+    }
+
+    public function test_a_margin_the_source_did_not_record_shows_only_the_weight(): void
+    {
+        $this->assertSame('52.0 kg', RacingData::margin(['margin' => ['length' => 'Dist', 'weight' => '52.0']]));
+        $this->assertSame('58.0 kg', RacingData::margin(['margin' => ['length' => null, 'weight' => '58.0']]));
+        $this->assertNull(RacingData::margin(['text' => '1', 'title' => null]));
     }
 
     public function test_a_race_with_nothing_yet_says_so(): void

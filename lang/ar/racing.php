@@ -92,7 +92,13 @@ return [
         'trainer' => 'المدرب',
         'jockey' => 'الفارس',
         'non_runner' => 'غير مشارك',
+        'claim' => 'سماح',
         'record' => 'المشاركات (الأول-الثاني-الثالث)',
+    ],
+
+    'margin' => [
+        'lengths' => 'بفارق :n طول',
+        'weight' => ':n كغم',
     ],
 
     'handicap' => [

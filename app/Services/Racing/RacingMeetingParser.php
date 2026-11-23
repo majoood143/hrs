@@ -209,10 +209,28 @@ class RacingMeetingParser
 
             $runners[] = ['no' => $this->firstText($xp, './/div['.sprintf(self::CLASS_CONTAINS, 'saddleCloth').']', $block)]
                 + $this->runnerProfile($xp, $block)
-                + ['runs' => $table ? $this->tableData($xp, $table) : ['headers' => [], 'rows' => []]];
+                + ['runs' => $table ? $this->withMargins($this->tableData($xp, $table)) : ['headers' => [], 'rows' => []]];
         }
 
         return $runners ? ['available' => true, 'runners' => $runners] : ['available' => false];
+    }
+
+    /**
+     * The "Beaten By" cell's tooltip ("Length: 8.4  Wgt: 60.0"; "Length: Dist" when no margin was recorded) as data,
+     * worded per language where it is shown (RacingData::margin()), since this parse is cached per language.
+     */
+    private function withMargins(array $table): array
+    {
+        foreach ($table['rows'] as &$row) {
+            foreach ($row as &$cell) {
+                if (preg_match('/^Length:\s*(\S*)\s*Wgt:\s*(\S*)$/i', (string) $cell['title'], $m)) {
+                    $cell['margin'] = ['length' => $m[1] !== '' ? $m[1] : null, 'weight' => $m[2] !== '' ? $m[2] : null];
+                    $cell['title'] = null;
+                }
+            }
+        }
+
+        return $table;
     }
 
     /** The horse / owner / trainer / jockey block shared by the race card and the form guide. */
@@ -233,6 +251,8 @@ class RacingMeetingParser
             'owner' => $this->entity($xp, $context, 'popOwner'),
             'trainer' => $this->entity($xp, $context, 'popTrainer'),
             'jockey' => $this->entity($xp, $context, 'popJockey'),
+            // an apprentice's weight allowance, "(3.0 kg)" on the English pages (the Arabic ones leave it out)
+            'claim' => ($claim = trim($this->firstText($xp, './/a['.sprintf(self::CLASS_CONTAINS, 'popJockey').']/span['.sprintf(self::CLASS_CONTAINS, 'unit').']', $context) ?? '', ' ()')) !== '' ? $claim : null,
             'image' => $this->imagePath($img?->getAttribute('src')),
         ];
     }

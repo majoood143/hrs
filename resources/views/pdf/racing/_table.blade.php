@@ -12,7 +12,7 @@
             <tr>
                 @foreach($row as $cell)
                     @php $href = \App\Support\RacingLinks::href($cell['link'] ?? null); @endphp
-                    <td>@if($href)<a href="{{ $href }}">{{ $d($cell['text']) }}</a>@else{{ $d($cell['text']) }}@endif</td>
+                    <td>@if($href)<a href="{{ $href }}">{{ $d($cell['text']) }}</a>@else{{ $d($cell['text']) }}@endif@if($note = \App\Support\Api\RacingData::margin($cell))<br><span class="muted small">{{ $note }}</span>@endif</td>
                 @endforeach
             </tr>
         @endforeach
