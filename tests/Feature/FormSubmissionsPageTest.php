@@ -11,12 +11,14 @@ use Filament\Actions\ActionGroup;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use Packstub\FormBuilder\Filament\Resources\FormResource;
 use Packstub\FormBuilder\Filament\Resources\FormResource\Pages\EditForm;
 use Packstub\FormBuilder\Filament\Resources\FormResource\Pages\ListForms;
 use Packstub\FormBuilder\Filament\Resources\FormResource\Pages\ManageSubmissions;
+use Packstub\FormBuilder\Filament\SubmissionsCsv;
 use Packstub\FormBuilder\FormBuilder;
 use Packstub\FormBuilder\Models\Form;
 use Packstub\FormBuilder\Models\FormSubmission;
@@ -162,6 +164,20 @@ class FormSubmissionsPageTest extends TestCase
 
         $many = app(SubmissionsPdf::class)->document($form, collect(array_fill(0, SubmissionsPdf::MAX_SUBMISSIONS + 5, $submission)));
         $this->assertStringStartsWith('the first 300 of 305', $many->facts['Records']);
+    }
+
+    public function test_the_export_loads_the_form_once_however_many_submissions(): void
+    {
+        $form = $this->surveyForm();
+        $this->submit($form, ['full_name' => 'Salim']);
+        $this->submit($form, ['full_name' => 'Aisha']);
+        $this->submit($form, ['full_name' => 'Huda']);
+
+        DB::enableQueryLog();
+        $rows = SubmissionsCsv::rows($form, $form->submissions()->getQuery());
+
+        $this->assertCount(4, $rows);
+        $this->assertCount(1, DB::getQueryLog()); // the submissions only, never the form per row
     }
 
     public function test_the_page_downloads_xlsx_of_all_or_the_selected_submissions(): void

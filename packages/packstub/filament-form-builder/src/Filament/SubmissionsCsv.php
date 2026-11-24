@@ -70,7 +70,8 @@ class SubmissionsCsv
         $rows = [['id', 'submitted_at', ...$labels, 'source_url', 'ip', 'user_id']];
 
         foreach ($records as $record) {
-            $formatted = $record->formatted();
+            // One shared form: loading it per submission ran out of memory at a few hundred rows.
+            $formatted = $record->setRelation('form', $form)->formatted();
 
             $rows[] = [
                 $record->getKey(),
