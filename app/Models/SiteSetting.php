@@ -173,6 +173,22 @@ class SiteSetting extends Model
         );
     }
 
+    /**
+     * The currency format for scripts that show amounts the visitor types (auction bid box):
+     * symbol, decimals and separators as formatAmount() uses them.
+     *
+     * @return array{symbol: string, decimals: int, dec: string, thou: string}
+     */
+    public static function moneyFormat(): array
+    {
+        return [
+            'symbol' => static::currency()['symbol'],
+            'decimals' => max(0, min(3, (int) static::get('currency_decimals', 3))),
+            'dec' => self::SEPARATORS[static::get('decimal_separator', 'dot')] ?? '.',
+            'thou' => self::SEPARATORS[static::get('thousands_separator', 'comma')] ?? ',',
+        ];
+    }
+
     public static function formatCurrency(float|int|string|null $amount): string
     {
         return static::currency()['symbol'].' '.static::formatAmount($amount);

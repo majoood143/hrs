@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 class Status extends Model
 {
     //
-    protected $fillable = ['en_name','ar_name'];
+    protected $fillable = ['en_name', 'ar_name'];
 }

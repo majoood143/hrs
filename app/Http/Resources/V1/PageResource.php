@@ -34,6 +34,8 @@ class PageResource extends JsonResource
             /** True when every block is drawn natively and the page runs no scripts of its own; else open `web_url`. */
             'native' => ! in_array('unsupported', array_column($blocks, 'type'), true)
                 && blank($this->custom_head_scripts) && blank($this->custom_body_scripts),
+            /** True when the page has a part for signed-in customers (a game): the app signs its WebView in first (`POST account/web-session`). */
+            'sign_in' => in_array('game_campaign', array_column((array) $this->content, 'type'), true),
             /** The page for the app's WebView (no website header or footer), in this language. */
             'web_url' => route('page.show', $this->slug).'?app=1&lang='.$locale,
             /** The page on the website without a language, for sharing. */

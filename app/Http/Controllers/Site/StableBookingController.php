@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Site;
 use App\Http\Controllers\Controller;
 use App\Models\BookingSlot;
 use App\Models\Country;
+use App\Models\PromoCode;
 use App\Models\SiteSetting;
 use App\Models\Stable;
+use App\Models\StableExtra;
 use App\Models\StableOffering;
 use App\Models\StableService;
 use App\Services\Stables\BookingUnavailable;
@@ -123,6 +125,14 @@ class StableBookingController extends Controller
         }
 
         $customer = Auth::guard('customer')->user();
+        [$promo, $promoError] = $this->promo($request->query('promo_code'), $slot->stable, $customer?->phone);
+        $extrasError = null;
+
+        try {
+            $lines = StableExtra::lines($slot->offering, $riders, $request->query('extras'));
+        } catch (BookingUnavailable $e) {
+            [$lines, $extrasError] = [[], $e->getMessage()];
+        }
 
         return view('site.bookings.create', [
             'slot' => $slot,
@@ -130,7 +140,13 @@ class StableBookingController extends Controller
             'offering' => $slot->offering,
             'riders' => $riders,
             'settings' => $slot->stable->bookingSettings(),
-            'quote' => $this->pricing->quote($slot->offering, $riders, $slot->stable),
+            'quote' => $this->pricing->quote($slot->offering, $riders, $slot->stable, $promo, extras: StableExtra::totalBaisa($lines)),
+            'extras' => StableExtra::forOffering($slot->offering),
+            'extraLines' => $lines,
+            'extrasError' => $extrasError,
+            'promoCodes' => PromoCode::enabled(),
+            'promoCode' => is_string($request->query('promo_code')) ? PromoCode::normalize($request->query('promo_code')) : null,
+            'promoError' => $promoError,
             'customer' => $customer,
             'packages' => app(StablePackages::class)->usableFor($customer, $slot->offering)
                 ->filter(fn ($purchase) => $purchase->sessionsLeft() >= $riders && $slot->startsAt()->lte($purchase->expires_at))
@@ -142,15 +158,35 @@ class StableBookingController extends Controller
 
     public function store(Request $request, BookingSlot $slot, CreateStableBooking $bookings): RedirectResponse
     {
+        // the promo box's Apply (or the extras' "Update the price"): back to the form with what was typed, re-quoted
+        if ($request->boolean('apply_promo')) {
+            return redirect()
+                ->route('bookings.create', array_filter([
+                    'slot' => $slot,
+                    'riders' => $this->riders($request->input('riders_count')),
+                    'promo_code' => (string) $request->input('promo_code'),
+                    'extras' => array_filter(array_map('intval', (array) $request->input('extras', []))),
+                ]))
+                ->withInput($request->except(['_token', 'apply_promo', 'promo_code', 'extras']));
+        }
+
         $slot->load(['offering', 'stable']);
         $settings = $slot->stable?->bookingSettings() ?? StableBookingSettings::from([]);
         $count = $this->riders($request->input('riders_count'));
-        $quote = $slot->offering ? $this->pricing->quote($slot->offering, $count, $slot->stable) : null;
-
         // the route asks for the sign-in: the booking goes to the phone the code confirmed
         $customer = Auth::guard('customer')->user();
+        // a 100% code makes it free: the form then sends no payment option
+        [$promo] = $slot->stable ? $this->promo($request->input('promo_code'), $slot->stable, $customer->phone) : [null];
+        // extras that cannot be booked are refused by handle()
+        $lines = $slot->offering ? rescue(fn () => StableExtra::lines($slot->offering, $count, $request->input('extras')), [], false) : [];
+        $quote = $slot->offering ? $this->pricing->quote($slot->offering, $count, $slot->stable, $promo, extras: StableExtra::totalBaisa($lines)) : null;
+
         $data = $request->validate(
-            StableBookingForm::rules($settings, $count, $quote?->isFree() ?? true, true),
+            StableBookingForm::rules($settings, $count, $quote?->isFree() ?? true, true) + [
+                'promo_code' => ['nullable', 'string', 'max:50'],
+                'extras' => ['nullable', 'array', 'max:30'],
+                'extras.*' => ['integer', 'min:0', 'max:20'],
+            ],
             [],
             StableBookingForm::attributeNames($count),
         );
@@ -166,7 +202,7 @@ class StableBookingController extends Controller
                 'phone' => $customer->phone,
                 'locale' => app()->getLocale(),
                 'customer_id' => $customer->getKey(),
-            ], $data['payment_option'] ?? CreateStableBooking::ONLINE, $withPackage ? (int) ($data['package_purchase_id'] ?? 0) : null);
+            ], $data['payment_option'] ?? CreateStableBooking::ONLINE, $withPackage ? (int) ($data['package_purchase_id'] ?? 0) : null, $data['promo_code'] ?? null, extras: $data['extras'] ?? []);
         } catch (BookingUnavailable $e) {
             return back()->withInput()->with('error', $e->getMessage());
         }
@@ -176,6 +212,16 @@ class StableBookingController extends Controller
         return $order->isPayable()
             ? redirect()->route('payment.start', $order->order_number)
             : redirect()->route('orders.show', $order->order_number)->with('status', __('stable_bookings.form.booked'));
+    }
+
+    /** @return array{0: ?PromoCode, 1: ?string} the code typed, or why it cannot be used */
+    private function promo(mixed $code, Stable $stable, ?string $phone): array
+    {
+        try {
+            return [$this->pricing->promo(is_string($code) ? $code : null, $stable, $phone), null];
+        } catch (BookingUnavailable $e) {
+            return [null, $e->getMessage()];
+        }
     }
 
     private function liveStable(string $slug): Stable

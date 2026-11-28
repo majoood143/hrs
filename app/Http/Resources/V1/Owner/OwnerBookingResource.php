@@ -4,6 +4,7 @@ namespace App\Http\Resources\V1\Owner;
 
 use App\Enums\StableBookingStatus;
 use App\Filament\Stable\Resources\StableBookings\StableBookingResource;
+use App\Http\Resources\V1\Bookings\ExtraLineResource;
 use App\Http\Resources\V1\Bookings\SlotResource;
 use App\Http\Resources\V1\MoneyResource;
 use App\Http\Resources\V1\OptionResource;
@@ -26,7 +27,7 @@ class OwnerBookingResource extends JsonResource
     public function toArray(Request $request): array
     {
         $booking = $this->resource;
-        $booking->loadMissing(['slot.trainer', 'offering', 'order', 'packagePurchase']);
+        $booking->loadMissing(['slot.trainer', 'offering', 'order', 'packagePurchase', 'extras']);
         $order = $booking->order;
         $status = $booking->status;
         // from the session's day until the attendance window closes (then it is final)
@@ -45,6 +46,8 @@ class OwnerBookingResource extends JsonResource
             ],
             'slot' => SlotResource::make($booking->slot),
             'riders' => (int) $booking->riders,
+            /** The extras booked with it (their amounts are in the order's price). */
+            'extras' => ExtraLineResource::collection($booking->extras),
             /** As entered on the booking form: only the fields the stable asks for are set. */
             'riders_data' => collect($booking->riders_data ?? [])->map(fn (array $rider) => [
                 'name' => (string) ($rider['name'] ?? ''),
@@ -93,7 +96,7 @@ class OwnerBookingResource extends JsonResource
             'can_mark_no_show' => $due && in_array($status, [StableBookingStatus::Confirmed, StableBookingStatus::Completed], true),
             'can_cancel' => $booking->isActive(),
             /** What cancelling means for this one (a paid booking is refunded); shown before asking. */
-            'cancel_hint' => $order?->isPaid() ? __('stable_panel.bookings.cancel_paid_hint') : __('stable_panel.bookings.cancel_hint'),
+            'cancel_hint' => StableBookingResource::cancelHint($booking),
             /** @var string|null */
             'attended_at' => $booking->attended_at?->toIso8601String(),
             'created_at' => $booking->created_at?->toIso8601String(),

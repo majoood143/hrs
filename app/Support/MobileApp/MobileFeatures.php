@@ -2,7 +2,9 @@
 
 namespace App\Support\MobileApp;
 
+use App\Models\Expense;
 use App\Models\SiteSetting;
+use App\Support\StablePos;
 
 /**
  * The app's feature switches (admin → Mobile app → Features), stored in the `mobile.features` site
@@ -28,7 +30,8 @@ final class MobileFeatures
         'transfer' => ['transfer_board'],
         'posting' => ['post_horse', 'post_tool', 'post_farrier', 'post_transfer', 'post_jockey'],
         'racing' => ['racing', 'silks'],
-        'bookings' => ['bookings', 'stable_owner'],
+        'bookings' => ['bookings', 'stable_owner', 'stable_expenses', 'stable_pos'],
+        'auctions' => ['auctions'],
         'other' => ['promos', 'contact_call', 'contact_whatsapp', 'language_switch'],
     ];
 
@@ -57,12 +60,22 @@ final class MobileFeatures
      */
     public static function forClient(AppClient $client): array
     {
-        return collect(self::rules())->map(fn (array $rule) => self::state($rule, $client))->all();
+        return collect(self::rules())->map(fn (array $rule, string $key) => self::state($rule, $client, $key))->all();
     }
 
     public static function enabledFor(string $key, AppClient $client): bool
     {
-        return self::state(self::rules()[$key] ?? self::normalize([]), $client) === self::ON;
+        return self::state(self::rules()[$key] ?? self::normalize([]), $client, $key) === self::ON;
+    }
+
+    /** Features that also need a website module (General Settings → Modules): hidden while it is off. */
+    private static function moduleOff(string $key): bool
+    {
+        return match ($key) {
+            'stable_expenses' => ! Expense::enabled(),
+            'stable_pos' => ! StablePos::enabled(),
+            default => false,
+        };
     }
 
     /** @param  array<string, mixed>  $rules  feature key => rule, as the admin form sends it */
@@ -74,8 +87,12 @@ final class MobileFeatures
     }
 
     /** @param  array{enabled: bool, platforms: list<string>, min_version: string|null, when_off: string}  $rule */
-    private static function state(array $rule, AppClient $client): string
+    private static function state(array $rule, AppClient $client, string $key = ''): string
     {
+        if (self::moduleOff($key)) {
+            return self::HIDDEN;
+        }
+
         $on = $rule['enabled'] && $client->onPlatform($rule['platforms']) && $client->atLeast($rule['min_version']);
 
         return $on ? self::ON : $rule['when_off'];

@@ -33,14 +33,16 @@ class AccountPackageController extends Controller
      * Buy a package
      *
      * Answers 201 with the purchase: `pay_url` while it waits for the online payment (it is switched
-     * on when paid); a free one is active at once. 409 `booking_unavailable` when it is not sold now.
+     * on when paid); a free one is active at once. 409 `booking_unavailable` when it is not sold now,
+     * or when the `promo_code` cannot be used.
      */
     public function buy(Request $request, int $id, StablePackages $packages): JsonResponse
     {
+        $data = $request->validate(['promo_code' => ['nullable', 'string', 'max:50']]);
         $package = StablePackage::query()->findOrFail($id);
 
         try {
-            $purchase = $packages->purchase($package, $this->customer($request));
+            $purchase = $packages->purchase($package, $this->customer($request), $data['promo_code'] ?? null);
         } catch (BookingUnavailable $e) {
             return response()->json(['message' => $e->getMessage(), 'code' => 'booking_unavailable'], 409);
         }

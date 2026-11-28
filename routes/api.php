@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\AccountPackageController;
 use App\Http\Controllers\Api\V1\AdController;
 use App\Http\Controllers\Api\V1\AppConfigController;
 use App\Http\Controllers\Api\V1\AppStatusController;
+use App\Http\Controllers\Api\V1\AuctionController;
 use App\Http\Controllers\Api\V1\BlogController;
 use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\V1\CenterController;
@@ -19,6 +20,8 @@ use App\Http\Controllers\Api\V1\JockeyController;
 use App\Http\Controllers\Api\V1\LookupController;
 use App\Http\Controllers\Api\V1\Owner\OwnerAuthController;
 use App\Http\Controllers\Api\V1\Owner\OwnerBookingController;
+use App\Http\Controllers\Api\V1\Owner\OwnerExpenseController;
+use App\Http\Controllers\Api\V1\Owner\OwnerPosController;
 use App\Http\Controllers\Api\V1\Owner\OwnerScheduleController;
 use App\Http\Controllers\Api\V1\Owner\OwnerStableController;
 use App\Http\Controllers\Api\V1\PageController;
@@ -35,6 +38,7 @@ use App\Http\Controllers\Api\V1\TransferBoardController;
 use App\Http\Controllers\Api\V1\VerificationController;
 use App\Http\Controllers\Api\V1\VideoLibraryController;
 use App\Http\Controllers\Api\V1\ViewController;
+use App\Http\Controllers\Api\V1\WebSessionController;
 use App\Http\Middleware\EnsureMobileFeature;
 use App\Http\Middleware\EnsureStableOwner;
 use App\Http\Middleware\SetApiLocale;
@@ -63,6 +67,23 @@ Route::prefix('v1')
 
         Route::get('jockeys', [JockeyController::class, 'index'])->name('jockeys.index');
         Route::get('jockeys/{id}', [JockeyController::class, 'show'])->whereNumber('id')->name('jockeys.show');
+
+        // Online horse auctions (the website's /auctions). Lots by their number in the auction.
+        Route::prefix('auctions')->name('auctions.')->controller(AuctionController::class)->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('{slug}', 'show')->name('show');
+            Route::get('{slug}/state', 'lotsState')->name('state');
+            Route::get('{slug}/lots/{number}', 'lot')->whereNumber('number')->name('lot');
+            Route::get('{slug}/lots/{number}/state', 'state')->whereNumber('number')->name('lot.state');
+            Route::get('{slug}/lots/{number}/documents/{index}', 'document')->whereNumber(['number', 'index'])->middleware('signed')->name('document');
+
+            Route::middleware(['auth:customer_api', EnsureMobileFeature::class.':auctions', 'throttle:api-account'])->group(function () {
+                Route::post('{slug}/register', 'register')->name('register');
+                Route::post('{slug}/lots/{number}/bids', 'bid')->whereNumber('number')->name('bid');
+                Route::post('{slug}/lots/{number}/watch', 'watch')->whereNumber('number')->name('watch');
+                Route::delete('{slug}/lots/{number}/watch', 'unwatch')->whereNumber('number')->name('unwatch');
+            });
+        });
 
         Route::get('stallions', [StallionController::class, 'index'])->name('stallions.index');
         Route::get('stallions/{id}', [StallionController::class, 'show'])->whereNumber('id')->name('stallions.show');
@@ -137,9 +158,11 @@ Route::prefix('v1')
             Route::delete('account', [AccountController::class, 'destroy'])->middleware('throttle:api-account')->name('account.destroy');
             Route::post('account/photo', [AccountController::class, 'photo'])->middleware('throttle:api-account')->name('account.photo');
             Route::delete('account/photo', [AccountController::class, 'deletePhoto'])->middleware('throttle:api-account')->name('account.photo.destroy');
+            Route::post('account/web-session', WebSessionController::class)->middleware('throttle:api-account')->name('account.web-session');
             Route::get('account/bookings', [AccountBookingController::class, 'index'])->name('account.bookings.index');
             Route::get('account/bookings/{reference}', [AccountBookingController::class, 'show'])->name('account.bookings.show');
             Route::get('account/packages', [AccountPackageController::class, 'index'])->name('account.packages.index');
+            Route::get('account/auctions', [AuctionController::class, 'account'])->name('account.auctions');
 
             Route::middleware([EnsureMobileFeature::class.':bookings', 'throttle:api-account'])->group(function () {
                 Route::post('bookings/slots/{id}', [BookingController::class, 'store'])->whereNumber('id')->name('bookings.store');
@@ -184,6 +207,28 @@ Route::prefix('v1')
                         Route::post('slots/{id}/open', [OwnerScheduleController::class, 'open'])->whereNumber('id')->name('slots.open');
                         Route::post('closures', [OwnerScheduleController::class, 'storeClosure'])->name('closures.store');
                         Route::delete('closures/{id}', [OwnerScheduleController::class, 'destroyClosure'])->whereNumber('id')->name('closures.destroy');
+                    });
+
+                    // the stable's desk (POS): General Settings → Modules → POS, the stable's switch + the app feature
+                    Route::prefix('pos')->name('pos.')->middleware(EnsureMobileFeature::class.':stable_pos')->group(function () {
+                        Route::get('/', [OwnerPosController::class, 'show'])->name('show');
+                        Route::get('quote', [OwnerPosController::class, 'quote'])->name('quote');
+                        Route::get('customer', [OwnerPosController::class, 'customer'])->middleware('throttle:api-owner')->name('customer');
+                        Route::get('sales', [OwnerPosController::class, 'sales'])->name('sales.index');
+                        Route::middleware('throttle:api-owner')->group(function () {
+                            Route::post('sales', [OwnerPosController::class, 'store'])->name('sales.store');
+                            Route::post('sales/{number}/refund', [OwnerPosController::class, 'refund'])->name('sales.refund');
+                        });
+                    });
+
+                    // the stable's own expenses: General Settings → Modules → Expenses + the app feature
+                    Route::middleware(EnsureMobileFeature::class.':stable_expenses')->group(function () {
+                        Route::get('expenses', [OwnerExpenseController::class, 'index'])->name('expenses.index');
+                        Route::middleware('throttle:api-owner')->group(function () {
+                            Route::post('expenses', [OwnerExpenseController::class, 'store'])->name('expenses.store');
+                            Route::post('expenses/{id}', [OwnerExpenseController::class, 'update'])->whereNumber('id')->name('expenses.update');
+                            Route::delete('expenses/{id}', [OwnerExpenseController::class, 'destroy'])->whereNumber('id')->name('expenses.destroy');
+                        });
                     });
                 });
             });

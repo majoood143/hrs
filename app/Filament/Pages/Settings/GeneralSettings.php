@@ -2,12 +2,16 @@
 
 namespace App\Filament\Pages\Settings;
 
+use App\Models\Expense;
 use App\Models\SiteSetting;
+use App\Models\StableExtra;
 use App\Services\WhatsApp\WhatsAppNotifier;
 use App\Support\PhoneNumber;
+use App\Support\StablePos;
 use App\Support\WhatsAppSettings;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
@@ -95,15 +99,12 @@ class GeneralSettings extends Page implements HasForms
             'privacy_url_en' => SiteSetting::get('privacy_url_en', ''),
             'privacy_url_ar' => SiteSetting::get('privacy_url_ar', ''),
 
-            'module_kiosk_enabled' => (bool) SiteSetting::get('module_kiosk_enabled', true),
-            'module_extra_services_enabled' => (bool) SiteSetting::get('module_extra_services_enabled', true),
-            'module_private_events_enabled' => (bool) SiteSetting::get('module_private_events_enabled', true),
             'module_promo_codes_enabled' => (bool) SiteSetting::get('module_promo_codes_enabled', true),
-            'module_expenses_enabled' => (bool) SiteSetting::get('module_expenses_enabled', true),
-            'module_commission_enabled' => (bool) SiteSetting::get('module_commission_enabled', true),
+            'module_expenses_enabled' => Expense::enabled(),
             'module_cms_enabled' => (bool) SiteSetting::get('module_cms_enabled', true),
-            'module_pos_enabled' => (bool) SiteSetting::get('module_pos_enabled', true),
-            'module_pos_shop_enabled' => (bool) SiteSetting::get('module_pos_shop_enabled', true),
+            'module_pos_enabled' => StablePos::enabled(),
+            'module_extras_enabled' => StableExtra::enabled(),
+            'pos_payment_methods' => StablePos::siteMethods(),
 
             'social_facebook_url' => SiteSetting::get('social_facebook_url', ''),
             'social_instagram_url' => SiteSetting::get('social_instagram_url', ''),
@@ -446,17 +447,6 @@ class GeneralSettings extends Page implements HasForms
                                 Section::make(__('general_settings.sections.modules'))
                                     ->description(__('general_settings.sections.modules_desc'))
                                     ->schema([
-                                        Toggle::make('module_kiosk_enabled')
-                                            ->label(__('general_settings.fields.module_kiosk_enabled'))
-                                            ->helperText(__('general_settings.fields.module_kiosk_enabled_helper')),
-
-                                        Toggle::make('module_extra_services_enabled')
-                                            ->label(__('general_settings.fields.module_extra_services_enabled'))
-                                            ->helperText(__('general_settings.fields.module_extra_services_enabled_helper')),
-
-                                        Toggle::make('module_private_events_enabled')
-                                            ->label(__('general_settings.fields.module_private_events_enabled'))
-                                            ->helperText(__('general_settings.fields.module_private_events_enabled_helper')),
 
                                         Toggle::make('module_promo_codes_enabled')
                                             ->label(__('general_settings.fields.module_promo_codes_enabled'))
@@ -466,9 +456,9 @@ class GeneralSettings extends Page implements HasForms
                                             ->label(__('general_settings.fields.module_expenses_enabled'))
                                             ->helperText(__('general_settings.fields.module_expenses_enabled_helper')),
 
-                                        Toggle::make('module_commission_enabled')
-                                            ->label(__('general_settings.fields.module_commission_enabled'))
-                                            ->helperText(__('general_settings.fields.module_commission_enabled_helper')),
+                                        Toggle::make('module_extras_enabled')
+                                            ->label(__('general_settings.fields.module_extras_enabled'))
+                                            ->helperText(__('general_settings.fields.module_extras_enabled_helper')),
 
                                         Toggle::make('module_cms_enabled')
                                             ->label(__('general_settings.fields.module_cms_enabled'))
@@ -476,11 +466,16 @@ class GeneralSettings extends Page implements HasForms
 
                                         Toggle::make('module_pos_enabled')
                                             ->label(__('general_settings.fields.module_pos_enabled'))
-                                            ->helperText(__('general_settings.fields.module_pos_enabled_helper')),
+                                            ->helperText(__('general_settings.fields.module_pos_enabled_helper'))
+                                            ->live(),
 
-                                        Toggle::make('module_pos_shop_enabled')
-                                            ->label(__('general_settings.fields.module_pos_shop_enabled'))
-                                            ->helperText(__('general_settings.fields.module_pos_shop_enabled_helper')),
+                                        CheckboxList::make('pos_payment_methods')
+                                            ->label(__('stable_pos.admin.methods'))
+                                            ->helperText(__('stable_pos.admin.methods_help'))
+                                            ->options(StablePos::options())
+                                            ->columns(3)
+                                            ->required()
+                                            ->visible(fn (Get $get) => (bool) $get('module_pos_enabled')),
                                     ]),
                             ]),
 
@@ -859,20 +854,20 @@ class GeneralSettings extends Page implements HasForms
         }
 
         $booleans = [
-            'module_kiosk_enabled',
-            'module_extra_services_enabled',
-            'module_private_events_enabled',
             'module_promo_codes_enabled',
             'module_expenses_enabled',
-            'module_commission_enabled',
+            'module_extras_enabled',
             'module_cms_enabled',
             'module_pos_enabled',
-            'module_pos_shop_enabled',
             'image_compression_enabled',
         ];
 
         foreach ($booleans as $key) {
             SiteSetting::set($key, ! empty($state[$key]), 'boolean', null, 'general_settings');
+        }
+
+        if (array_key_exists('pos_payment_methods', $state)) {
+            SiteSetting::set('pos_payment_methods', json_encode(array_values(array_intersect(StablePos::METHODS, (array) $state['pos_payment_methods']))), 'json', null, 'general_settings');
         }
 
         WhatsAppSettings::save($state['whatsapp'] ?? []);

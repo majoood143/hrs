@@ -18,7 +18,7 @@ class CmsPage extends Model implements HasMedia
     public const SECTIONS = ['transfer-board', 'horses-for-sale', 'stables', 'clinics', 'centers', 'shops', 'farriers', 'jockeys', 'tools-for-sale', 'events', 'video-library', 'racing'];
 
     /** Never a page, not even for SEO. */
-    public const RESERVED = ['admin', 'transportation', 'blog'];
+    public const RESERVED = ['admin', 'transportation', 'blog', 'auctions'];
 
     /** Whether a page may take this slug: one `/{slug}` serves, or exactly a section's name (its SEO texts). */
     public static function slugIsAllowed(string $slug): bool

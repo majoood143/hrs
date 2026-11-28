@@ -29,6 +29,15 @@
     @endforeach
 </div>
 
+@if(\App\Models\Expense::enabled())
+    @include('filament.partials.expenses-profit', [
+        'income' => $t['stable_share'],
+        'incomeLabel' => __('stable_statement.cards.stable_share'),
+        'report' => new \App\Services\Reports\ExpenseReport($statement->stable, $statement->from, $statement->to),
+        'netLabel' => __('expenses.profit'),
+    ])
+@endif
+
 <x-filament::section :heading="__('stable_statement.sections.balance')" icon="heroicon-o-scale">
     <table class="w-full text-sm">
         <tbody class="divide-y divide-gray-200 dark:divide-white/10">

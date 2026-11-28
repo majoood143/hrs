@@ -9,6 +9,8 @@ use App\Models\ServiceFeeSetting;
  * The money of one order, in baisa (integers, so nothing drifts by a rounding error).
  *
  * total = price + fee + vatOnPrice + vatOnFee
+ *
+ * A promo code's discount is already taken off `price` (fee, commission and VAT follow the lower price).
  */
 final class PriceBreakdown
 {
@@ -25,6 +27,8 @@ final class PriceBreakdown
         public readonly ?CommissionSetting $commissionSetting = null,
         /** VAT on the commission, when the setting is on: owed to us by the client, not paid by the customer */
         public readonly int $vatOnCommission = 0,
+        /** a promo code's discount, already taken off `price` */
+        public readonly int $discount = 0,
     ) {}
 
     public function total(): int

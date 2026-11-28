@@ -4,6 +4,7 @@ namespace App\Filament\Blocks\Cms;
 
 use App\Filament\Support\TranslatableInput;
 use App\Models\AdZone;
+use App\Models\GameCampaign;
 use App\Models\VideoFolder;
 use App\Services\Racing\RacingSearchType;
 use App\Support\FormChartBlock;
@@ -36,6 +37,7 @@ class CmsBlocks
             static::raceCalendar(),
             static::raceWidget(),
             static::silksDesigner(),
+            static::gameCampaign(),
             static::transferBoard(),
             static::featuredHorses(),
             static::successStories(),
@@ -176,6 +178,26 @@ class CmsBlocks
             ->schema([
                 static::headingField(required: false),
                 static::subheadingField(),
+            ]);
+    }
+
+    /** A game campaign (admin → Games): its prizes, the leaderboard and the game itself for signed-in customers. */
+    public static function gameCampaign(): Block
+    {
+        return Block::make('game_campaign')
+            ->label(__('cms.blocks.game_campaign'))
+            ->icon('heroicon-o-trophy')
+            ->schema([
+                Select::make('campaign_id')
+                    ->label(__('cms.blocks.game_campaign_campaign'))
+                    ->helperText(__('cms.blocks.game_campaign_helper'))
+                    ->placeholder(__('cms.blocks.game_campaign_placeholder'))
+                    ->options(fn () => GameCampaign::query()->latest('starts_at')->get()
+                        ->mapWithKeys(fn (GameCampaign $campaign) => [$campaign->id => $campaign->name]))
+                    ->searchable()
+                    ->native(false)
+                    ->required()
+                    ->columnSpanFull(),
             ]);
     }
 

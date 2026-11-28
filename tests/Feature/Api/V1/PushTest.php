@@ -8,7 +8,9 @@ use App\Models\Customer;
 use App\Models\MobileDevice;
 use App\Models\PushCampaign;
 use App\Models\PushDelivery;
+use App\Models\PushSavedSearch;
 use App\Services\Push\ExpoPush;
+use App\Support\MobileApp\PushInsights;
 use Filament\Facades\Filament;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\DB;
@@ -149,6 +151,39 @@ class PushTest extends TestCase
 
         Http::assertSentCount(2);
         $this->assertSame([$devices->last()->id], $accepted);
+    }
+
+    public function test_a_removed_phone_is_found_by_the_receipts_left_out_and_back_when_it_registers_again(): void
+    {
+        $kept = $this->device('kept');
+        $gone = $this->device('gone');
+        PushSavedSearch::query()->create(['mobile_device_id' => $gone->id, 'section' => 'horses', 'filters' => []]);
+        Http::fake([
+            'exp.host/--/api/v2/push/send' => Http::response(['data' => [['status' => 'ok', 'id' => 'r-kept'], ['status' => 'ok', 'id' => 'r-gone']]]),
+            'exp.host/--/api/v2/push/getReceipts' => Http::response(['data' => [
+                'r-kept' => ['status' => 'ok'],
+                'r-gone' => ['status' => 'error', 'details' => ['error' => 'DeviceNotRegistered']],
+            ]]),
+        ]);
+
+        app(ExpoPush::class)->send(collect([$kept, $gone]), fn () => ['title' => 'Hi', 'body' => 'There']);
+        $this->assertSame(2, DB::table('push_receipts')->count());
+
+        // Expo's receipts are read only after 15 minutes
+        $this->artisan('push:check-receipts')->assertSuccessful();
+        $this->assertSame(2, MobileDevice::query()->count());
+
+        $this->travel(16)->minutes();
+        $this->artisan('push:check-receipts')->expectsOutput('Marked 1 phones as uninstalled.')->assertSuccessful();
+        $this->assertSame([$kept->id], MobileDevice::query()->pluck('id')->all());
+        $this->assertSame(0, DB::table('push_receipts')->count());
+        $this->assertSame(0, PushSavedSearch::query()->count());
+        $this->assertSame(1, PushInsights::losses()['uninstalled']);
+
+        // installed again with the same token: a phone again, not a second row
+        $this->postJson('/api/v1/devices', ['token' => 'ExponentPushToken[gone]'])->assertOk();
+        $this->assertSame(2, MobileDevice::query()->count());
+        $this->assertSame(2, DB::table('mobile_devices')->count());
     }
 
     public function test_a_draft_is_not_sent_and_a_sent_campaign_cannot_change(): void

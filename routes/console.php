@@ -22,6 +22,15 @@ Schedule::command('stables:close-attendance')->dailyAt('00:40')->withoutOverlapp
 
 // Push campaigns set to go out at a time (admin → Mobile app → Notifications).
 Schedule::command('push:send-due')->everyMinute()->withoutOverlapping();
+// Expo's receipts: phones the app was removed from (counted in the admin, never pushed to again).
+Schedule::command('push:check-receipts')->everyFiveMinutes()->withoutOverlapping();
+
+// Auction lots whose time is up become sold / unsold (a bid can never land after a lot's ends_at).
+Schedule::command('auctions:close-due')->everyMinute()->withoutOverlapping();
+// watchers of a lot closing within 15 minutes get one SMS
+Schedule::command('auctions:remind-ending')->everyMinute()->withoutOverlapping();
+// winners' invoices: a reminder a day before they are due, then the overdue flag
+Schedule::command('auctions:invoices')->hourly()->withoutOverlapping();
 
 // Unpaid service orders are cancelled after config('payments.pending_ttl_minutes'); a Thawani
 // session can still be paid for 24 hours afterwards, so recently cancelled ones are re-checked.
@@ -56,3 +65,6 @@ Schedule::command('youtube:check')->everyFifteenMinutes()->withoutOverlapping();
 // WhatsApp (Evolution API plugin): drop old webhook events and message history
 // (config/filament-evolution.php → cleanup; the admin alerts' own log is notification_logs).
 Schedule::command('evolution:cleanup')->dailyAt('03:30');
+
+// Game races nobody finished (admin → Games → Races shows them as abandoned).
+Schedule::command('games:expire-attempts')->everyTenMinutes()->withoutOverlapping();

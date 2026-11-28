@@ -6,6 +6,7 @@ use App\Filament\Resources\PushCampaignResource\Pages\CreatePushCampaign;
 use App\Filament\Resources\PushCampaignResource\Pages\ListPushCampaigns;
 use App\Filament\Resources\PushCampaignResource\Pages\ViewPushCampaign;
 use App\Filament\Resources\PushCampaignResource\Widgets\PushStatsOverview;
+use App\Models\AppEvent;
 use App\Models\MobileDevice;
 use App\Models\PushCampaign;
 use App\Models\PushDelivery;
@@ -81,6 +82,31 @@ class PushInsightsTest extends TestCase
         $this->assertNull(PushInsights::change(5, 0));
     }
 
+    public function test_installs_count_each_phones_latest_permission(): void
+    {
+        $event = fn (string $install, string $name, array $properties = [], int $daysAgo = 0) => AppEvent::query()->create([
+            'install_id' => $install, 'name' => $name, 'properties' => $properties ?: null, 'occurred_at' => now()->subDays($daysAgo),
+        ]);
+        $event('a', 'push_permission', ['status' => 'undetermined'], 2);
+        $event('a', 'push_permission', ['status' => 'granted'], 1); // asked on Home: counts once, as allowed
+        $event('b', 'push_permission', ['status' => 'denied']);
+        $event('c', 'app_launched');
+        $event('old', 'push_permission', ['status' => 'granted'], 40);
+
+        $this->assertSame(['installs' => 3, 'granted' => 1, 'denied' => 1, 'undetermined' => 0], PushInsights::permissions());
+    }
+
+    public function test_lapsed_installs_opened_the_app_before_but_not_in_the_last_30_days(): void
+    {
+        $event = fn (string $install, int $daysAgo) => AppEvent::query()->create(['install_id' => $install, 'name' => 'app_launched', 'occurred_at' => now()->subDays($daysAgo)]);
+        $event('stayed', 45);
+        $event('stayed', 2);
+        $event('left', 40);
+        $event('long-gone', 90);
+
+        $this->assertSame(['uninstalled' => 0, 'lapsed' => 1], PushInsights::losses());
+    }
+
     public function test_the_page_shows_the_widgets_and_the_report_to_admins_only(): void
     {
         $campaign = $this->sentCampaign();
@@ -90,7 +116,7 @@ class PushInsightsTest extends TestCase
         $this->actingAs($this->makeAdminUser());
 
         Livewire::test(ListPushCampaigns::class)->assertSuccessful()->assertSeeLivewire(PushStatsOverview::class);
-        Livewire::test(PushStatsOverview::class)->assertSuccessful()->assertSee(__('admin_widgets.push.reachable'));
+        Livewire::test(PushStatsOverview::class)->assertSuccessful()->assertSee(__('admin_widgets.push.reachable'))->assertSee(__('admin_widgets.push.installs'))->assertSee(__('admin_widgets.push.uninstalled'));
         Livewire::test(ViewPushCampaign::class, ['record' => $campaign->getKey()])->assertSuccessful();
         Livewire::test(ListPushCampaigns::class, ['activeTab' => 'scheduled'])->assertCanNotSeeTableRecords([$campaign]);
     }

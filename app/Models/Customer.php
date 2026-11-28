@@ -32,6 +32,7 @@ class Customer extends Authenticatable
             'date_of_birth' => 'date',
             'national_id' => 'encrypted',
             'marketing_opt_in' => 'boolean',
+            'games_blocked_at' => 'datetime',
         ];
     }
 

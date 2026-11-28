@@ -88,7 +88,13 @@
     <h2>{{ __('order_pdf.amounts') }}</h2>
     <table class="lines">
         <tr><th>{{ __('receipt.description') }}</th><th class="amount">{{ __('receipt.amount') }}</th></tr>
-        <tr><td>{{ $d($serviceName) }}</td><td class="amount"><span dir="ltr">{{ $money($order->price) }}</span></td></tr>
+        <tr><td>{{ $d($serviceName) }}</td><td class="amount"><span dir="ltr">{{ $money($order->priceBeforeDiscount()) }}</span></td></tr>
+        @foreach($order->extraLines() as $line)
+            <tr><td>{{ $d(__('stable_extras.line', ['name' => $line->name, 'quantity' => $line->quantity])) }}</td><td class="amount"><span dir="ltr">{{ $money($line->amount) }}</span></td></tr>
+        @endforeach
+        @if($order->hasDiscount())
+            <tr><td>{{ $d($order->discountLabel()) }}</td><td class="amount"><span dir="ltr">−{{ $money($order->discount_amount) }}</span></td></tr>
+        @endif
         @if((float) $order->fee_amount > 0)
             <tr><td>{{ __('orders.service_fee') }}</td><td class="amount"><span dir="ltr">{{ $money($order->fee_amount) }}</span></td></tr>
         @endif

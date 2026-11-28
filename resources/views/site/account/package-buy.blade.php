@@ -28,7 +28,10 @@
             @endif
 
             <dl class="mt-5 space-y-1 border-t border-warm-100 pt-4 text-sm">
-                <div class="flex justify-between"><dt class="text-warm-700">{{ $package->name }}</dt><dd dir="ltr">{!! $money($quote->price) !!}</dd></div>
+                <div class="flex justify-between"><dt class="text-warm-700">{{ $package->name }}</dt><dd dir="ltr">{!! $money($quote->price + $quote->discount) !!}</dd></div>
+                @if($quote->discount > 0)
+                    <div class="flex justify-between text-emerald-700"><dt>{{ __('promo_codes.discount') }}</dt><dd dir="ltr">−{!! $money($quote->discount) !!}</dd></div>
+                @endif
                 @if($quote->fee > 0)
                     <div class="flex justify-between"><dt class="text-warm-700">{{ __('orders.service_fee') }}</dt><dd dir="ltr">{!! $money($quote->fee) !!}</dd></div>
                 @endif
@@ -43,8 +46,15 @@
                 </p>
             @endif
 
+            @if($promoCodes)
+                <form id="promo-code" method="GET" action="{{ route('account.packages.buy', $package) }}"></form>
+            @endif
             <form method="POST" action="{{ route('account.packages.purchase', $package) }}" class="mt-6">
                 @csrf
+                @if($promoCodes)
+                    <x-promo-code :code="$promoCode" :error="$promoError" :discount="$quote->discount" />
+                    <div class="mt-4"></div>
+                @endif
                 <button type="submit" class="btn-warm w-full justify-center">
                     <x-heroicon-o-credit-card class="h-5 w-5" aria-hidden="true" />{{ __('stable_packages.buy_now') }}
                 </button>

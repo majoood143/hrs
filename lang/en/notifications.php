@@ -8,6 +8,18 @@ return [
         'completed' => ':site: your order :number is completed. Details: :url',
         'rejected' => ':site: your request :number could not be approved. Details: :url',
         'refunded' => ':site: a refund of :amount for order :number was processed. Details: :url',
+        'auction_approved' => ':site: you can now bid in :auction. :url',
+        'auction_outbid' => ':site: you were outbid on lot :lot :horse (now :price). Bid again: :url',
+        'auction_ending' => ':site: lot :lot :horse closes in :minutes min (now :price). :url',
+        'auction_won' => ':site: you won lot :lot :horse for :price. Pay :total by :due: :url',
+        'auction_invoice_due' => ':site: your invoice for lot :lot :horse (:total) is due :due. Pay: :url',
+        'auction_application_approved' => ':site: your horse :horse is accepted for :auction. Follow it: :url',
+        'auction_application_rejected' => ':site: we cannot take :horse into an auction for now: :reason :url',
+        'auction_seller_sold' => ':site: your horse :horse (lot :lot) sold for :price. We will pay you :payout once the buyer pays. :url',
+        'auction_seller_unsold' => ':site: your horse :horse (lot :lot) did not reach its reserve and was not sold. :url',
+        'auction_seller_paid' => ':site: we paid you :payout for :horse (lot :lot). :url',
+        'game_award' => ':site: congratulations :name! You finished #:rank in :campaign. Your prize: :prize. We will contact you to hand it over.',
+        'game_award_code' => ':site: congratulations :name! You finished #:rank in :campaign. Your prize: :prize. Your promo code :code works for your number until :until when booking a stable session.',
     ],
 
     'mail' => [

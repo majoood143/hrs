@@ -111,7 +111,7 @@ class ArabicErrorMessagesTest extends TestCase
             }
         }
 
-        foreach (['riders_count', 'name', 'email', 'payment_option', 'package_purchase_id', 'riders', 'waiver', 'gender', 'date_of_birth', 'national_id', 'marketing_opt_in', 'country', 'events', 'events.*.name'] as $field) {
+        foreach (['riders_count', 'name', 'email', 'payment_option', 'package_purchase_id', 'riders', 'waiver', 'gender', 'date_of_birth', 'national_id', 'marketing_opt_in', 'country', 'events', 'events.*.name', 'category_id', 'spent_on', 'amount', 'horse_id', 'vendor', 'note', 'receipt', 'remove_receipt', 'period', 'slot_id', 'package_id', 'riders.*', 'phone', 'link', 'payments', 'payments.*.method', 'payments.*.amount', 'payments.*.reference', 'promo_code', 'reason'] as $field) {
             $this->assertNoLatin($names[$field] ?? $field);
         }
 

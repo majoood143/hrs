@@ -3,6 +3,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { raceWidget } from './race-widget';
 import { racingSearch } from './racing-search';
 import { silksDesigner } from './silks-designer';
+import { auctionLive } from './auction-live';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -1416,4 +1417,5 @@ document.addEventListener('DOMContentLoaded', () => {
     raceWidget();
     racingSearch();
     silksDesigner();
+    auctionLive();
 });

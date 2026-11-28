@@ -365,6 +365,7 @@ return [
         'cancel' => 'Cancel booking',
         'cancel_hint' => 'The customer is told by SMS (and email), with your reason.',
         'cancel_paid_hint' => 'It is paid: the customer is told, with your reason, and a refund becomes due.',
+        'cancel_desk_hint' => 'Paid at your desk: give the customer the money back. It is recorded as refunded, and the customer is told, with your reason.',
         'reason_hint' => 'The customer sees this.',
         'updated' => 'Booking updated',
         'empty_heading' => 'No bookings',

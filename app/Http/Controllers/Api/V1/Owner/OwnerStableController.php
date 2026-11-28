@@ -10,7 +10,9 @@ use App\Http\Resources\V1\OptionResource;
 use App\Http\Resources\V1\Owner\OwnerBookingResource;
 use App\Http\Resources\V1\Owner\OwnerStableResource;
 use App\Models\BookingSlot;
+use App\Models\Expense;
 use App\Models\Stable;
+use App\Services\Reports\ExpenseReport;
 use App\Services\Reports\StableLedgerRow;
 use App\Services\Reports\StableStatement;
 use Carbon\CarbonImmutable;
@@ -77,6 +79,7 @@ class OwnerStableController extends Controller
                 'riders' => $month['riders'],
                 'stable_share' => new MoneyResource($month['stable_share'] / 1000),
                 'commission' => new MoneyResource(($month['commission'] + $month['vat_on_commission']) / 1000),
+                ...$this->expenses($stable, 'this_month', $month['stable_share']),
             ],
             'balance' => $this->balance($stable),
             /** Past pay-at-the-stable sessions not marked yet: they count in the money only once attended. */
@@ -128,6 +131,7 @@ class OwnerStableController extends Controller
                 'fee' => $money($t['fee']),
                 'payouts' => $money($t['payouts']),
                 'receipts' => $money($t['receipts']),
+                ...$this->expenses($stable, $period, $t['stable_share']),
             ],
             'balance' => $this->balance($stable),
             'unmarked_at_stable' => StableStatement::unmarkedAtStable($stable),
@@ -146,6 +150,22 @@ class OwnerStableController extends Controller
                 'stable_share' => $money($row->stableShare()),
             ])->all(),
         ]);
+    }
+
+    /**
+     * The period's expenses and the share left after them, while the Expenses module is on (else both null).
+     *
+     * @return array{expenses: MoneyResource|null, profit: MoneyResource|null}
+     */
+    private function expenses(Stable $stable, string $period, int $share): array
+    {
+        if (! Expense::enabled()) {
+            return ['expenses' => null, 'profit' => null];
+        }
+
+        $spent = ExpenseReport::forPeriod($stable, $period)->total();
+
+        return ['expenses' => new MoneyResource($spent / 1000), 'profit' => new MoneyResource(($share - $spent) / 1000)];
     }
 
     /** @return array{amount: MoneyResource, direction: string, label: string} positive = we owe the stable */

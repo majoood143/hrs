@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * A phone that receives push notifications (an Expo push token; see App\Services\Push\ExpoPush):
- * booking alerts to the stable owner and the customer signed in on it, and campaigns.
+ * booking alerts to the stable owner and the customer signed in on it, and campaigns. A phone the
+ * app was removed from keeps its row with `uninstalled_at` (counted in the admin) and is left out of
+ * every query by the "installed" scope; registering the same token again brings it back.
  */
 class MobileDevice extends Model
 {
@@ -18,12 +20,34 @@ class MobileDevice extends Model
 
     protected $fillable = [
         'expo_token', 'platform', 'app_version', 'locale', 'topics', 'enabled',
-        'user_id', 'owner_token_id', 'customer_id', 'customer_token_id', 'last_seen_at',
+        'user_id', 'owner_token_id', 'customer_id', 'customer_token_id', 'last_seen_at', 'uninstalled_at',
     ];
+
+    protected static function booted(): void
+    {
+        static::addGlobalScope('installed', fn (Builder $query) => $query->whereNull('uninstalled_at'));
+    }
+
+    /** The register endpoints' query: finds a removed phone too, so its token is brought back, not duplicated. */
+    public static function anyToken(): Builder
+    {
+        return static::query()->withoutGlobalScope('installed');
+    }
+
+    /** Apple/Google no longer know these phones (DeviceNotRegistered): the app was removed. */
+    public static function markUninstalled(array $ids): void
+    {
+        if ($ids === []) {
+            return;
+        }
+
+        static::query()->whereKey($ids)->update(['uninstalled_at' => now()]);
+        PushSavedSearch::query()->whereIn('mobile_device_id', $ids)->delete();
+    }
 
     protected function casts(): array
     {
-        return ['topics' => 'array', 'enabled' => 'boolean', 'last_seen_at' => 'datetime'];
+        return ['topics' => 'array', 'enabled' => 'boolean', 'last_seen_at' => 'datetime', 'uninstalled_at' => 'datetime'];
     }
 
     /** The phones these stable owners/staff are signed in on (signed out = the token is gone). */

@@ -6,6 +6,7 @@ use App\Enums\StableBookingStatus;
 use App\Models\Concerns\LogsStableActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
@@ -86,6 +87,11 @@ class StableBooking extends Model
     public function packagePurchase(): BelongsTo
     {
         return $this->belongsTo(StablePackagePurchase::class, 'stable_package_purchase_id');
+    }
+
+    public function extras(): HasMany
+    {
+        return $this->hasMany(StableBookingExtra::class);
     }
 
     public function review(): HasOne

@@ -270,6 +270,10 @@ class AdminSweepTest extends TestCase
         DB::table('payment_gateway_logs')->insert(['gateway' => 'thawani', 'event' => 'session_created', 'created_at' => $now, 'updated_at' => $now]);
         DB::table('whatsapp_webhooks')->insert(['event' => 'messages.upsert', 'payload' => '{}', 'created_at' => $now, 'updated_at' => $now]);
 
+        if ($customer = DB::table('customers')->value('id')) {
+            DB::table('auction_applications')->insert(['customer_id' => $customer, 'horse_name' => 'Sweep Horse', 'gender' => 'mare', 'owner_name' => 'Sweep Owner', 'status' => 'pending', 'created_at' => $now, 'updated_at' => $now]);
+        }
+
         if ($instance = DB::table('whatsapp_instances')->value('id')) {
             DB::table('whatsapp_messages')->insert(['id' => (string) str()->uuid(), 'instance_id' => $instance, 'message_id' => 'sweep', 'remote_jid' => '96899887766@s.whatsapp.net', 'phone' => '96899887766', 'direction' => 'outgoing', 'created_at' => $now, 'updated_at' => $now]);
         }
@@ -352,10 +356,11 @@ class AdminSweepTest extends TestCase
             $field instanceof TextInput => str("sweep-{$unique}")->limit(max(3, (int) ($field->getMaxLength() ?? 40)), '')->toString(),
             $field instanceof Textarea, $field instanceof RichEditor, $field instanceof MarkdownEditor => 'Sweep text '.$unique,
             $field instanceof ColorPicker => '#336699',
-            $field instanceof TimePicker => '09:00',
+            $field instanceof TimePicker => str_starts_with($name, 'end') ? '17:00' : '09:00',
             // DatePicker extends DateTimePicker: the plain date first
             $field instanceof DatePicker => $field->getMinDate() ? substr($field->getMinDate(), 0, 10) : ($field->getMaxDate() ? now()->subYear()->format('Y-m-d') : now()->addDay()->format('Y-m-d')),
-            $field instanceof DateTimePicker => ($field->getMinDate() ? substr($field->getMinDate(), 0, 10) : now()->addDay()->format('Y-m-d')).' 10:00:00',
+            // an end (ends_at) later the same day than any start, which forms check with after()
+            $field instanceof DateTimePicker => ($field->getMinDate() ? substr($field->getMinDate(), 0, 10) : now()->addDay()->format('Y-m-d')).(str_ends_with($name, 'ends_at') ? ' 20:00:00' : ' 10:00:00'),
             $field instanceof Toggle, $field instanceof Checkbox => true,
             $field instanceof CheckboxList, $field instanceof TagsInput => $this->firstOption($field, multiple: true),
             $field instanceof Select, $field instanceof Radio, $field instanceof ToggleButtons => $this->firstOption($field, multiple: method_exists($field, 'isMultiple') && $field->isMultiple()),

@@ -44,6 +44,7 @@ return [
         'online_ours' => 'Online, through us',
         'online_own' => 'Online, stable\'s gateway',
         'at_stable' => 'At the stable',
+        'desk' => 'Sold at the desk',
         'refund' => 'Refund',
     ],
 

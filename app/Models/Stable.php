@@ -94,6 +94,8 @@ class Stable extends Model implements HasAvatar, HasName
         'commission_value' => 'decimal:3',
         'vat_registered' => 'boolean',
         'booking_settings' => 'array',
+        'pos_enabled' => 'boolean',
+        'extras_enabled' => 'boolean',
         'sales_report' => 'array',
     ];
 
@@ -177,9 +179,19 @@ class Stable extends Model implements HasAvatar, HasName
         return $this->hasMany(StableHorse::class);
     }
 
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class);
+    }
+
     public function packages(): HasMany
     {
         return $this->hasMany(StablePackage::class);
+    }
+
+    public function extras(): HasMany
+    {
+        return $this->hasMany(StableExtra::class);
     }
 
     public function packagePurchases(): HasMany
@@ -348,6 +360,6 @@ class Stable extends Model implements HasAvatar, HasName
     /** @return list<string> */
     protected function stableActivityAttributes(): array
     {
-        return ['en_name', 'ar_name', 'slug', 'country_id', 'region_id', 'city_id', 'en_address', 'ar_address', 'map_link', 'website_url', 'instagram_url', 'x_url', 'facebook_url', 'tiktok_url', 'youtube_url', 'en_description', 'ar_description', 'logo', 'cover_photo', 'gallery', 'opening_hours', 'is_active', 'phone', 'email', 'approval_status', 'commission_type', 'commission_value', 'vat_registered', 'vat_number', 'booking_settings', 'sales_report', 'rejection_reason'];
+        return ['en_name', 'ar_name', 'slug', 'country_id', 'region_id', 'city_id', 'en_address', 'ar_address', 'map_link', 'website_url', 'instagram_url', 'x_url', 'facebook_url', 'tiktok_url', 'youtube_url', 'en_description', 'ar_description', 'logo', 'cover_photo', 'gallery', 'opening_hours', 'is_active', 'phone', 'email', 'approval_status', 'commission_type', 'commission_value', 'vat_registered', 'vat_number', 'booking_settings', 'pos_enabled', 'extras_enabled', 'sales_report', 'rejection_reason'];
     }
 }

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Packstub\FormBuilder\FormBuilder;
 use Spatie\Activitylog\LogOptions;
@@ -45,6 +46,7 @@ class ServiceOrder extends Model
             'payment_method' => PaymentGateway::class,
             'requires_document' => 'boolean',
             'price' => 'decimal:3',
+            'discount_amount' => 'decimal:3',
             'fee_amount' => 'decimal:3',
             'vat_rate' => 'decimal:2',
             'vat_on_price' => 'decimal:3',
@@ -126,6 +128,44 @@ class ServiceOrder extends Model
         return $this->hasOne(StableBooking::class, 'service_order_id');
     }
 
+    /** The promo code taken off `price` (still shown after the code is deleted). */
+    public function promoCode(): BelongsTo
+    {
+        return $this->belongsTo(PromoCode::class)->withTrashed();
+    }
+
+    public function hasDiscount(): bool
+    {
+        return (float) $this->discount_amount > 0;
+    }
+
+    /**
+     * The service's own line: the price before the promo code's discount, less the booking's extras
+     * (each listed under it, `extraLines()`).
+     */
+    public function priceBeforeDiscount(): float
+    {
+        return round((float) $this->price + (float) $this->discount_amount - (float) $this->extraLines()->sum('amount'), 3);
+    }
+
+    /**
+     * The extras a stable booking took (part of `price`), for the order's lines.
+     *
+     * @return Collection<int, StableBookingExtra>
+     */
+    public function extraLines(): Collection
+    {
+        return $this->stable_id ? ($this->stableBooking?->extras ?? collect()) : collect();
+    }
+
+    /** "Promo code discount (SAVE20)", for the order's lines. */
+    public function discountLabel(): string
+    {
+        $code = $this->promoCode?->code;
+
+        return __('promo_codes.discount').($code ? " ({$code})" : '');
+    }
+
     public function stable(): BelongsTo
     {
         return $this->belongsTo(Stable::class);
@@ -135,6 +175,18 @@ class ServiceOrder extends Model
     public function packagePurchase(): HasOne
     {
         return $this->hasOne(StablePackagePurchase::class, 'service_order_id');
+    }
+
+    /** The auction registration this order is the bidding deposit of, when it is one. */
+    public function auctionBidder(): BelongsTo
+    {
+        return $this->belongsTo(AuctionBidder::class);
+    }
+
+    /** The auction lot this order is the winner's invoice of, when it is one. */
+    public function auctionLot(): BelongsTo
+    {
+        return $this->belongsTo(AuctionLot::class);
     }
 
     public function paymentAccount(): BelongsTo
@@ -167,6 +219,14 @@ class ServiceOrder extends Model
             return trim(($purchase->package?->name ?? $purchase->name).' · '.($purchase->stable?->name ?? ''), ' ·');
         }
 
+        if ($this->auction_lot_id && ($lot = $this->auctionLot)) {
+            return __('auctions.site.invoice_for', ['number' => $lot->lot_number, 'name' => $lot->name, 'auction' => $lot->auction?->title]);
+        }
+
+        if ($this->auction_bidder_id && ($bidder = $this->auctionBidder)) {
+            return __('auctions.site.deposit_for', ['auction' => $bidder->auction?->title]);
+        }
+
         return __('orders.service');
     }
 
@@ -188,6 +248,24 @@ class ServiceOrder extends Model
     public function refunds(): HasMany
     {
         return $this->hasMany(OrderRefund::class, 'service_order_id')->orderBy('id');
+    }
+
+    /** The payments taken at the stable's desk (a desk sale), one per method. */
+    public function posPayments(): HasMany
+    {
+        return $this->hasMany(PosPayment::class, 'service_order_id')->orderBy('id');
+    }
+
+    /** Who made the sale at the stable's desk (paid there or sent as a payment link); null = not a desk sale. */
+    public function deskSeller(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'desk_sold_by');
+    }
+
+    /** Sold at the stable's desk (the POS) and paid there. */
+    public function isDeskSale(): bool
+    {
+        return $this->payment_method === PaymentGateway::Desk;
     }
 
     public function documents(): HasMany

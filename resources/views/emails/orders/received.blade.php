@@ -14,7 +14,13 @@
 <x-mail::table>
 | {{ __('receipt.description') }} | {{ __('receipt.amount') }} |
 |:--|--:|
-| {{ $serviceName }} | {{ $money($order->price) }} |
+| {{ $serviceName }} | {{ $money($order->priceBeforeDiscount()) }} |
+@foreach($order->extraLines() as $line)
+| {{ __('stable_extras.line', ['name' => $line->name, 'quantity' => $line->quantity]) }} | {{ $money($line->amount) }} |
+@endforeach
+@if($order->hasDiscount())
+| {{ $order->discountLabel() }} | −{{ $money($order->discount_amount) }} |
+@endif
 @if((float) $order->fee_amount > 0)
 | {{ __('orders.service_fee') }} | {{ $money($order->fee_amount) }} |
 @endif

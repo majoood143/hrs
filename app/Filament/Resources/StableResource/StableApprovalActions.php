@@ -7,10 +7,12 @@ use App\Enums\StableApprovalStatus;
 use App\Filament\Stable\Pages\Dashboard;
 use App\Models\SiteSetting;
 use App\Models\Stable;
+use App\Models\StableExtra;
 use App\Models\User;
 use App\Services\Stables\StableApproval;
 use App\Services\Stables\StableSalesReports;
 use App\Support\StableBookingSettings;
+use App\Support\StablePos;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Radio;
@@ -31,7 +33,7 @@ final class StableApprovalActions
     /** @return array<int, Action> */
     public static function all(): array
     {
-        return [self::approve(), self::commission(), self::vat(), self::linkOwner(), self::reject(), self::suspend()];
+        return [self::approve(), self::commission(), self::vat(), self::pos(), self::extras(), self::linkOwner(), self::reject(), self::suspend()];
     }
 
     /**
@@ -149,6 +151,48 @@ final class StableApprovalActions
                 app(StableApproval::class)->setVat($record, (bool) $data['vat_registered'], $data['vat_number'] ?? null);
 
                 Notification::make()->success()->title(__('admin_stable.vat.saved'))->send();
+            });
+    }
+
+    /** Desk sales (POS) for this stable, while General Settings → Modules → POS is on. */
+    public static function pos(): Action
+    {
+        return Action::make('stablePos')
+            ->label(__('stable_pos.admin.stable_switch'))
+            ->icon('heroicon-o-calculator')
+            ->color('gray')
+            ->visible(fn (Stable $record) => StablePos::enabled() && self::allowed($record))
+            ->fillForm(fn (Stable $record) => ['pos_enabled' => (bool) $record->pos_enabled])
+            ->schema([
+                Toggle::make('pos_enabled')
+                    ->label(__('stable_pos.admin.stable_switch'))
+                    ->helperText(__('stable_pos.admin.stable_switch_help')),
+            ])
+            ->action(function (Stable $record, array $data): void {
+                $record->forceFill(['pos_enabled' => (bool) $data['pos_enabled']])->save();
+
+                Notification::make()->success()->title(__('stable_pos.admin.saved'))->send();
+            });
+    }
+
+    /** Extras on this stable's bookings, while General Settings → Modules → Extras is on. */
+    public static function extras(): Action
+    {
+        return Action::make('stableExtras')
+            ->label(__('stable_extras.admin.stable_switch'))
+            ->icon('heroicon-o-sparkles')
+            ->color('gray')
+            ->visible(fn (Stable $record) => StableExtra::enabled() && self::allowed($record))
+            ->fillForm(fn (Stable $record) => ['extras_enabled' => (bool) $record->extras_enabled])
+            ->schema([
+                Toggle::make('extras_enabled')
+                    ->label(__('stable_extras.admin.stable_switch'))
+                    ->helperText(__('stable_extras.admin.stable_switch_help')),
+            ])
+            ->action(function (Stable $record, array $data): void {
+                $record->forceFill(['extras_enabled' => (bool) $data['extras_enabled']])->save();
+
+                Notification::make()->success()->title(__('stable_extras.admin.saved'))->send();
             });
     }
 

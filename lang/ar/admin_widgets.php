@@ -52,6 +52,10 @@ return [
     'push' => [
         'reachable' => 'الهواتف التي يمكن الوصول إليها',
         'active_7' => ':count استخدموا التطبيق في آخر 7 أيام',
+        'installs' => 'الهواتف التي فتحت التطبيق',
+        'uninstalled' => 'حذفوا التطبيق (30 يومًا)',
+        'lapsed' => ':count آخرون توقفوا عن فتحه (لم يفتحوه منذ 30 يومًا). الأرقام الكاملة: Play Console وApp Store Connect.',
+        'installs_help' => 'آخر 30 يومًا. الإشعارات: :granted سمحوا، :denied رفضوا، :undetermined لم يُسألوا بعد',
         'delivered' => 'تم التوصيل',
         'opened' => 'تم الفتح',
         'targeted' => 'المستهدفون',

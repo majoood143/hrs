@@ -101,5 +101,9 @@ return [
         'booking_confirmed' => 'تأكّد الحجز',
         'booking_cancelled' => 'أُلغي الحجز',
         'package_activated' => 'اشترى باقة حصص',
+        'auction_viewed' => 'شاهد حصانًا في مزاد',
+        'auction_registered' => 'سجّل في مزاد',
+        'bid_placed' => 'قدّم مزايدة',
+        'lot_won' => 'فاز بحصان في مزاد',
     ],
 ];

@@ -101,5 +101,9 @@ return [
         'booking_confirmed' => 'Booking confirmed',
         'booking_cancelled' => 'Booking cancelled',
         'package_activated' => 'Bought a lesson package',
+        'auction_viewed' => 'Viewed an auction lot',
+        'auction_registered' => 'Registered for an auction',
+        'bid_placed' => 'Placed a bid',
+        'lot_won' => 'Won an auction lot',
     ],
 ];

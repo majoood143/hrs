@@ -5,6 +5,7 @@ namespace App\Http\Resources\V1;
 use App\Http\Resources\V1\Bookings\OfferingResource;
 use App\Http\Resources\V1\Bookings\StablePackageResource;
 use App\Models\BookingSlot;
+use App\Models\PromoCode;
 use App\Models\Shop;
 use App\Models\Stable;
 use App\Models\StableOffering;
@@ -150,7 +151,7 @@ class PlaceResource extends JsonResource
         ];
     }
 
-    /** @return array{offerings: list<array{offering: OfferingResource, next_date: string|null}>, packages: list<array<string, mixed>>} */
+    /** @return array{offerings: list<array{offering: OfferingResource, next_date: string|null}>, packages: list<array<string, mixed>>, promo_codes: bool} */
     private function booking(Stable $stable): array
     {
         $today = BookingSlot::today();
@@ -167,6 +168,8 @@ class PlaceResource extends JsonResource
             'packages' => StablePackageResource::collection(
                 $stable->packages()->active()->with('offering')->whereHas('offering', fn ($q) => $q->where('is_active', true))->orderBy('price')->get()
             )->resolve(),
+            /** Whether a promo code can be typed when buying a package or booking (General Settings → Modules). */
+            'promo_codes' => PromoCode::enabled(),
         ];
     }
 }

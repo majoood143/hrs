@@ -106,10 +106,14 @@ trait PreparesStableBookings
             // the owners' phones: every booking looks for one to push to
             '2026_11_04_000001_create_mobile_devices_table',
             '2026_11_07_000001_add_enabled_to_mobile_devices',
+            '2026_11_28_000002_track_uninstalled_mobile_devices',
+            '2026_11_04_000003_create_push_saved_searches_table', // dropped when a phone is found removed
             // closing the books: settlements and attendance check it
             '2026_11_15_000001_create_book_closings_table',
             '2026_11_15_000003_add_vat_registration_to_stables',
             '2026_11_20_000002_add_views_count_to_stables',
+            '2026_11_29_000001_create_promo_codes_table', // promo codes on the orders
+            '2026_12_01_000001_create_stable_extras_tables', // extras added to a booking
         ] as $migration) {
             (require database_path("migrations/{$migration}.php"))->up();
         }

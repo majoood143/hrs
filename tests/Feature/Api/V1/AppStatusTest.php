@@ -50,7 +50,8 @@ class AppStatusTest extends TestCase
             ->assertJsonPath('data.announcements', [])
             ->assertJsonPath('data.client', ['platform' => 'ios', 'version' => '1.0.0']);
 
-        $this->assertSame(array_fill_keys(MobileFeatures::keys(), 'on'), $response->json('data.features'));
+        // stable_expenses also needs General Settings → Modules → Expenses, off until an admin turns it on
+        $this->assertSame(array_merge(array_fill_keys(MobileFeatures::keys(), 'on'), ['stable_expenses' => 'hidden']), $response->json('data.features'));
         $this->assertContains('X-App-Version', $response->baseResponse->getVary());
     }
 

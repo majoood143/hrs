@@ -122,6 +122,45 @@
                     </div>
                 </fieldset>
 
+                @if($extras->isNotEmpty())
+                    @php
+                        $chosen = collect($extraLines)->mapWithKeys(fn ($line) => [$line['extra']->id => $line['quantity']]);
+                    @endphp
+                    <fieldset class="card-warm space-y-3 p-6">
+                        <legend class="flex items-center gap-2 font-display text-lg font-semibold text-warm-900">
+                            <x-heroicon-o-sparkles class="h-5 w-5 text-warm-600" aria-hidden="true" />
+                            {{ __('stable_extras.add_heading') }}
+                        </legend>
+                        <p class="text-sm text-warm-700">{{ __('stable_extras.add_hint') }}</p>
+                        @if($extrasError)
+                            <p class="flex items-center gap-1.5 text-sm text-red-700"><x-heroicon-o-exclamation-circle class="h-4 w-4" aria-hidden="true" />{{ $extrasError }}</p>
+                        @endif
+                        @foreach($extras as $extra)
+                            <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-warm-200 p-4 has-[:checked]:border-warm-600 has-[:checked]:bg-warm-50">
+                                @if($extra->max_quantity === 1)
+                                    <input type="checkbox" name="extras[{{ $extra->id }}]" value="1" class="mt-1" @checked($chosen->get($extra->id, 0) > 0)>
+                                @endif
+                                @if($extra->photo_url)
+                                    <img src="{{ $extra->photo_url }}" alt="" class="h-14 w-14 shrink-0 rounded-lg object-cover">
+                                @endif
+                                <span class="flex-1">
+                                    <span class="block font-semibold text-warm-900">{{ $extra->name }}</span>
+                                    @if($extra->description)
+                                        <span class="mt-0.5 block text-sm text-warm-700">{{ $extra->description }}</span>
+                                    @endif
+                                    <span class="mt-1 block text-sm font-medium text-warm-900"><span dir="ltr">{!! \App\Models\SiteSetting::formatCurrencyHtml($extra->price) !!}</span> {{ __('stable_extras.'.$extra->pricing) }}</span>
+                                </span>
+                                @if($extra->max_quantity > 1)
+                                    <input type="number" name="extras[{{ $extra->id }}]" value="{{ $chosen->get($extra->id, 0) }}" min="0" max="{{ $extra->max_quantity }}" placeholder="0" aria-label="{{ $extra->name }}" class="w-20 shrink-0 rounded-xl border border-warm-200 bg-white px-3 py-2 text-sm text-warm-900 focus:border-warm-500 focus:outline-none" dir="ltr">
+                                @endif
+                            </label>
+                        @endforeach
+                        <button type="submit" name="apply_promo" value="1" formnovalidate class="btn-warm-outline px-3 py-2 text-sm">
+                            <x-heroicon-o-arrow-path class="h-4 w-4" aria-hidden="true" />{{ __('stable_extras.update_price') }}
+                        </button>
+                    </fieldset>
+                @endif
+
                 @unless($quote->isFree())
                     <fieldset class="card-warm space-y-3 p-6">
                         @foreach($packages as $purchase)
@@ -189,10 +228,16 @@
                     </ul>
 
                     <dl class="mt-4 space-y-1 border-t border-warm-100 pt-4 text-sm">
-                        @if($quote->isFree())
+                        @if($quote->isFree() && $quote->discount === 0)
                             <div class="flex justify-between font-semibold text-warm-900"><dt>{{ __('orders.total') }}</dt><dd>{{ __('stable_bookings.free') }}</dd></div>
                         @else
-                            <div class="flex justify-between"><dt class="text-warm-700">{{ $offering->name }}</dt><dd dir="ltr">{!! $money($quote->price) !!}</dd></div>
+                            <div class="flex justify-between"><dt class="text-warm-700">{{ $offering->name }}</dt><dd dir="ltr">{!! $money($quote->price + $quote->discount - \App\Models\StableExtra::totalBaisa($extraLines)) !!}</dd></div>
+                            @foreach($extraLines as $line)
+                                <div class="flex justify-between"><dt class="text-warm-700">{{ __('stable_extras.line', ['name' => $line['extra']->name, 'quantity' => $line['quantity']]) }}</dt><dd dir="ltr">{!! $money($line['amount']) !!}</dd></div>
+                            @endforeach
+                            @if($quote->discount > 0)
+                                <div class="flex justify-between text-emerald-700"><dt>{{ __('promo_codes.discount') }}</dt><dd dir="ltr">−{!! $money($quote->discount) !!}</dd></div>
+                            @endif
                             @if($quote->fee > 0)
                                 <div class="flex justify-between"><dt class="text-warm-700">{{ __('orders.service_fee') }}</dt><dd dir="ltr">{!! $money($quote->fee) !!}</dd></div>
                             @endif
@@ -202,6 +247,10 @@
                             <div class="flex justify-between pt-1 text-base font-semibold text-warm-900"><dt>{{ __('orders.total') }}</dt><dd dir="ltr">{!! $money($quote->total()) !!}</dd></div>
                         @endif
                     </dl>
+
+                    @if($promoCodes)
+                        <x-promo-code :apply-to="route('bookings.store', $slot)" :code="$promoCode" :error="$promoError" :discount="$quote->discount" />
+                    @endif
 
                     <button type="submit" class="btn-warm mt-5 w-full justify-center">
                         <x-heroicon-o-check-circle class="h-5 w-5" aria-hidden="true" />

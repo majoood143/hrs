@@ -31,6 +31,8 @@ class PaymentGateways
             PaymentGateway::CcAvenue => CcAvenueGateway::class,
             PaymentGateway::Ompay => OmpayGateway::class,
             PaymentGateway::Demo => DemoGateway::class,
+            PaymentGateway::BankTransfer => throw new \LogicException('A bank transfer is recorded by an admin, it has no checkout.'),
+            PaymentGateway::Desk => throw new \LogicException('A desk sale is paid at the stable, it has no checkout.'),
         });
     }
 
@@ -46,7 +48,7 @@ class PaymentGateways
         return collect(is_array($decoded) ? $decoded : [])
             ->map(fn ($key) => PaymentGateway::tryFrom((string) $key))
             ->filter()
-            ->reject(fn (PaymentGateway $key) => $key === PaymentGateway::Demo && app()->isProduction())
+            ->reject(fn (PaymentGateway $key) => ($key === PaymentGateway::Demo && app()->isProduction()) || in_array($key, [PaymentGateway::BankTransfer, PaymentGateway::Desk], true))
             ->values()
             ->all();
     }

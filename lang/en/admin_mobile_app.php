@@ -29,6 +29,7 @@ return [
         'posting' => 'Posting from the app',
         'racing' => 'Racing',
         'bookings' => 'Stable bookings',
+        'auctions' => 'Auctions',
         'other' => 'Other',
     ],
 
@@ -86,6 +87,12 @@ return [
         'bookings_help' => 'Book riding sessions and lesson packages at stables, pay online and see or cancel bookings, after signing in with a phone number.',
         'stable_owner' => 'My stable (owners)',
         'stable_owner_help' => 'More → My stable: stable owners sign in (phone code or email and password) to see today\'s bookings, mark riders attended or no-show, call bookings off, close times or whole days, and see their income. Setup stays on the website\'s stable panel. Also refused by the server while off.',
+        'stable_expenses' => 'My stable: expenses',
+        'stable_expenses_help' => 'My stable → Expenses: owners record what they spend (feed, vet, rent…) with a receipt photo, and see their profit after expenses. Also needs General Settings → Modules → Expenses; hidden while that is off.',
+        'stable_pos' => 'My stable: the desk (POS)',
+        'stable_pos_help' => 'My stable → New sale: owners sell a session or a lesson package at their desk, or book for a customer, take cash, card, transfer or wallet (or send a payment link), refund, and see the desk\'s sales report. Also needs General Settings → Modules → POS and the stable\'s own switch (admin → the stable); hidden while the module is off.',
+        'auctions' => 'Online auctions',
+        'auctions_help' => 'Services → Auctions: browse lots, register, bid (also by maximum), watch, pay the invoice. Bidding and registering are also refused by the server while off.',
     ],
 
     'updates' => [

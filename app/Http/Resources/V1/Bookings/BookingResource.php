@@ -25,7 +25,7 @@ class BookingResource extends JsonResource
     public function toArray(Request $request): array
     {
         $booking = $this->resource;
-        $booking->loadMissing(['slot', 'offering.service', 'stable.region', 'stable.city', 'order', 'review', 'packagePurchase.package']);
+        $booking->loadMissing(['slot', 'offering.service', 'stable.region', 'stable.city', 'order', 'review', 'packagePurchase.package', 'extras']);
         $order = $booking->order;
         $slot = $booking->slot;
         $customer = $request->user('customer_api');
@@ -50,6 +50,8 @@ class BookingResource extends JsonResource
                 /** @var string|null */
                 'level' => isset($rider['level']) ? __('stable_bookings.levels.'.$rider['level']) : null,
             ])->values()->all(),
+            /** The extras booked with it (their amounts are in the order's price). */
+            'extras' => ExtraLineResource::collection($booking->extras),
             /** `online`, `at_stable`, `package` or `free`. */
             'payment_option' => $booking->payment_option,
             /** One line about the money, e.g. "Paid online" or "To pay at the stable: OMR 31.500". */
@@ -59,7 +61,10 @@ class BookingResource extends JsonResource
                 'number' => (string) $order->order_number,
                 'status' => OptionResource::of($order->status->value, $order->status->label()),
                 'payment_status' => OptionResource::of($order->payment_status->value, $order->payment_status->label()),
+                /** After the promo code's discount, if any. */
                 'price' => new MoneyResource($order->price),
+                /** The promo code's discount (already taken off `price`); null without one. */
+                'discount' => (float) $order->discount_amount > 0 ? new MoneyResource($order->discount_amount) : null,
                 'fee' => new MoneyResource($order->fee_amount),
                 'vat' => new MoneyResource((float) $order->vat_on_price + (float) $order->vat_on_fee),
                 'total' => new MoneyResource($total),
@@ -110,6 +115,7 @@ class BookingResource extends JsonResource
             $booking->payment_option === 'package' => __('stable_bookings.payment.package', ['reference' => (string) $booking->packagePurchase?->reference]),
             $booking->payment_option === 'free' || $order?->payment_status?->value === 'free' => __('stable_bookings.payment.free'),
             $booking->payment_option === 'at_stable' => __('stable_bookings.payment.at_stable', ['total' => $total]),
+            (bool) $order?->isDeskSale() && $order->isPaid() => __('stable_pos.paid_at_desk'),
             (bool) $order?->isPaid() => __('stable_bookings.payment.paid_online'),
             default => __('stable_bookings.payment.pending'),
         };

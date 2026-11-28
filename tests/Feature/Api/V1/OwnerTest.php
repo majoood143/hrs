@@ -147,7 +147,7 @@ class OwnerTest extends TestCase
         $this->assertSame('sent', DB::table('notification_logs')->where('channel', 'push')->where('type', 'booking_confirmed')->value('status'));
     }
 
-    public function test_a_phone_the_app_was_removed_from_is_forgotten(): void
+    public function test_a_phone_the_app_was_removed_from_is_marked_and_skipped(): void
     {
         Http::fake(['exp.host/*' => Http::response(['data' => [['status' => 'error', 'message' => 'gone', 'details' => ['error' => 'DeviceNotRegistered']]]])]);
         $token = $this->ownerToken();
@@ -155,7 +155,8 @@ class OwnerTest extends TestCase
 
         $this->customerBooks();
 
-        $this->assertSame(0, DB::table('mobile_devices')->count());
+        $this->assertSame(0, DB::table('mobile_devices')->whereNull('uninstalled_at')->count());
+        $this->assertSame(1, DB::table('mobile_devices')->whereNotNull('uninstalled_at')->count());
         $this->assertSame('skipped', DB::table('notification_logs')->where('channel', 'push')->value('status'));
     }
 

@@ -127,7 +127,8 @@ class OwnerAuthController extends Controller
         ]);
         $client = AppClient::fromRequest($request);
 
-        MobileDevice::query()->updateOrCreate(['expo_token' => $data['token']], [
+        MobileDevice::anyToken()->updateOrCreate(['expo_token' => $data['token']], [
+            'uninstalled_at' => null,
             'platform' => $client->platform,
             'app_version' => $client->version,
             'locale' => app()->getLocale(),

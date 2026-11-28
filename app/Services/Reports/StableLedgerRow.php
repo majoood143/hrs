@@ -28,6 +28,9 @@ final class StableLedgerRow
 
     public const AT_STABLE = 'at_stable';
 
+    /** Sold and paid at the stable's desk (the POS): the stable holds it, dated when paid. */
+    public const DESK = 'desk';
+
     public const SALE = 'sale';
 
     public const REFUND = 'refund';
@@ -105,6 +108,7 @@ final class StableLedgerRow
             date: CarbonImmutable::instance($date)->setTimezone(BookingSlot::timezone()),
             kind: match (true) {
                 $order->payment_status === PaymentStatus::OnSite => self::AT_STABLE,
+                $order->isDeskSale() => self::DESK,
                 $order->collected_by === 'stable' => self::ONLINE_OWN,
                 default => self::ONLINE_OURS,
             },

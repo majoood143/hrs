@@ -7,6 +7,18 @@ return [
         'completed' => ':site: تم إكمال طلبك :number. التفاصيل: :url',
         'rejected' => ':site: تعذّرت الموافقة على طلبك :number. التفاصيل: :url',
         'refunded' => ':site: تمت معالجة استرداد :amount للطلب :number. التفاصيل: :url',
+        'auction_approved' => ':site: يمكنك الآن المزايدة في :auction. :url',
+        'auction_outbid' => ':site: تمت المزايدة عليك في الحصان :lot :horse (السعر الآن :price). زايد مجددًا: :url',
+        'auction_ending' => ':site: الحصان :lot :horse يُغلق خلال :minutes دقيقة (السعر الآن :price). :url',
+        'auction_won' => ':site: فزت بالحصان :lot :horse بسعر :price. ادفع :total قبل :due: :url',
+        'auction_invoice_due' => ':site: فاتورة الحصان :lot :horse (:total) مستحقة في :due. ادفع: :url',
+        'auction_application_approved' => ':site: قُبل حصانك :horse في :auction. تابعه: :url',
+        'auction_application_rejected' => ':site: لا يمكننا عرض :horse في مزاد حاليًا: :reason :url',
+        'auction_seller_sold' => ':site: بِيع حصانك :horse (رقم :lot) بسعر :price. سندفع لك :payout بعد دفع المشتري. :url',
+        'auction_seller_unsold' => ':site: لم يبلغ حصانك :horse (رقم :lot) السعر الأدنى ولم يُبع. :url',
+        'auction_seller_paid' => ':site: دفعنا لك :payout عن :horse (رقم :lot). :url',
+        'game_award' => ':site: مبروك :name! حللت في المرتبة :rank في :campaign. جائزتك: :prize. سنتواصل معك لتسليمها.',
+        'game_award_code' => ':site: مبروك :name! حللت في المرتبة :rank في :campaign. جائزتك: :prize. رمز الخصم :code يعمل لرقمك حتى :until عند حجز جلسة في إسطبل.',
     ],
 
     'mail' => [

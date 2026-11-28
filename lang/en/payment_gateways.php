@@ -29,6 +29,8 @@ return [
         'nbo' => 'NBO',
         'ccavenue' => 'CCAvenue',
         'demo' => 'Demo (no real payment)',
+        'bank_transfer' => 'Bank transfer',
+        'desk' => 'At the stable desk',
         'demo_desc' => 'For demonstrations only: customers approve or decline a pretend payment. Untick it before going live.',
     ],
 

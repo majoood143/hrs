@@ -10,7 +10,9 @@ use App\Models\BookingSlot;
 use App\Models\Customer;
 use App\Models\ServiceOrder;
 use App\Models\StableBooking;
+use App\Models\StableExtra;
 use App\Models\StablePackagePurchase;
+use App\Services\Orders\PriceBreakdown;
 use App\Support\PhoneNumber;
 use Illuminate\Support\Facades\DB;
 
@@ -24,6 +26,11 @@ use Illuminate\Support\Facades\DB;
  *   stable's own account when the stable chose that and an admin approved its keys;
  * - at the stable: confirmed at once, nothing is collected online;
  * - free (price 0): confirmed at once.
+ *
+ * From the stable's desk (the POS, `$atDesk`, StablePos): no service fee (we take the commission
+ * only), the stable's own payment options and the unpaid-checkout limit do not apply, and a time can
+ * be sold until it starts. DESK is paid there and then (StablePos marks it paid); ONLINE is a
+ * payment link the stable sends the customer.
  */
 class CreateStableBooking
 {
@@ -33,6 +40,9 @@ class CreateStableBooking
 
     public const PACKAGE = 'package';
 
+    /** Sold and paid at the stable's desk (the POS). */
+    public const DESK = 'desk';
+
     /** Unpaid online checkouts one customer may wait on at once. */
     public const MAX_UNPAID = 3;
 
@@ -41,10 +51,12 @@ class CreateStableBooking
     /**
      * @param  list<array<string, mixed>>  $riders  one entry per rider (already validated against the stable's rider fields)
      * @param  array{name?: ?string, email?: ?string, phone?: ?string, locale?: ?string, customer_id?: ?int}  $customer
+     * @param  ?string  $promoCode  a promo code typed by the customer (not with a package; online or free only)
+     * @param  bool  $atDesk  sold by the stable at its desk (the POS): see the class notes
      *
      * @throws BookingUnavailable
      */
-    public function handle(BookingSlot $slot, array $riders, array $customer, string $paymentOption = self::ONLINE, ?int $packagePurchaseId = null): StableBooking
+    public function handle(BookingSlot $slot, array $riders, array $customer, string $paymentOption = self::ONLINE, ?int $packagePurchaseId = null, ?string $promoCode = null, bool $atDesk = false, array $extras = []): StableBooking
     {
         $count = count($riders);
 
@@ -52,7 +64,11 @@ class CreateStableBooking
             throw new BookingUnavailable(__('stable_bookings.errors.no_riders'));
         }
 
-        [$booking] = DB::transaction(function () use ($slot, $riders, $count, $customer, $paymentOption, $packagePurchaseId): array {
+        if ($paymentOption === self::DESK && ! $atDesk) {
+            throw new BookingUnavailable(__('stable_bookings.errors.payment_option'));
+        }
+
+        [$booking] = DB::transaction(function () use ($slot, $riders, $count, $customer, $paymentOption, $packagePurchaseId, $promoCode, $atDesk, $extras): array {
             /** @var BookingSlot|null $locked */
             $locked = BookingSlot::query()->whereKey($slot->getKey())->lockForUpdate()->first();
 
@@ -61,30 +77,44 @@ class CreateStableBooking
             }
 
             $locked->load(['offering', 'stable']);
-            $this->assertBookable($locked, $count);
+            $this->assertBookable($locked, $count, $atDesk);
 
             $offering = $locked->offering;
             $stable = $locked->stable;
             $purchase = $paymentOption === self::PACKAGE ? $this->lockPackage($packagePurchaseId, $customer, $locked, $count) : null;
             // sessions from a package were paid for when it was bought: this booking itself costs nothing
-            $quote = $purchase ? $this->pricing->quotePrice(0, $stable) : $this->pricing->quote($offering, $count, $stable);
+            $promo = $purchase ? null : $this->pricing->promo($promoCode, $stable, $customer['phone'] ?? null, lock: true);
+            $lines = StableExtra::lines($offering, $count, $extras);
 
-            if (! $purchase && ! $quote->isFree() && ! in_array($paymentOption, $stable->bookingSettings()->paymentOptions(), true)) {
+            // a package's session has a free order: extras would need a payment of their own
+            if ($purchase && $lines) {
+                throw new BookingUnavailable(__('stable_extras.errors.with_package'));
+            }
+
+            $quote = $purchase ? $this->pricing->quotePrice(0, $stable) : $this->pricing->quote($offering, $count, $stable, $promo, withFee: ! $atDesk, extras: StableExtra::totalBaisa($lines));
+
+            // the stable collects at its desk what it likes: a code is taken off an online payment only
+            if ($promo && ! $quote->isFree() && $paymentOption === self::AT_STABLE) {
+                throw new BookingUnavailable(__('promo_codes.errors.online_only'));
+            }
+
+            if (! $atDesk && ! $purchase && ! $quote->isFree() && ! in_array($paymentOption, $stable->bookingSettings()->paymentOptions(), true)) {
                 throw new BookingUnavailable(__('stable_bookings.errors.payment_option'));
             }
 
             $free = $quote->isFree();
             $atStable = ! $free && $paymentOption === self::AT_STABLE;
+            $desk = ! $free && $paymentOption === self::DESK;
 
-            if (! $free && ! $atStable) {
+            if (! $free && ! $atStable && ! $atDesk) {
                 $this->assertFewUnpaid($customer['customer_id'] ?? null);
             }
-            $account = ! $free && ! $atStable ? $stable->activePaymentAccount() : null;
+            $account = ! $free && ! $atStable && ! $desk ? $stable->activePaymentAccount() : null;
 
             $order = ServiceOrder::create([
                 'stable_id' => $stable->getKey(),
                 'stable_payment_account_id' => $account?->getKey(),
-                'collected_by' => $free ? null : (($atStable || $account) ? 'stable' : 'platform'),
+                'collected_by' => $free ? null : (($atStable || $desk || $account) ? 'stable' : 'platform'),
                 'customer_id' => $customer['customer_id'] ?? null,
                 'customer_name' => $customer['name'] ?? null,
                 'customer_email' => $customer['email'] ?? null,
@@ -98,7 +128,7 @@ class CreateStableBooking
                     $atStable => PaymentStatus::OnSite,
                     default => PaymentStatus::Pending,
                 },
-            ] + $this->pricing->orderAttributes($quote, $stable));
+            ] + $this->pricing->orderAttributes($quote, $stable, $promo));
 
             $booking = StableBooking::create([
                 'stable_id' => $stable->getKey(),
@@ -113,6 +143,17 @@ class CreateStableBooking
                 'status' => ($free || $atStable) ? StableBookingStatus::Confirmed : StableBookingStatus::Pending,
                 'confirmed_at' => ($free || $atStable) ? now() : null,
             ]);
+
+            foreach ($lines as $line) {
+                $booking->extras()->create([
+                    'stable_extra_id' => $line['extra']->getKey(),
+                    'en_name' => $line['extra']->en_name,
+                    'ar_name' => $line['extra']->ar_name,
+                    'unit_price' => $line['extra']->price,
+                    'quantity' => $line['quantity'],
+                    'amount' => PriceBreakdown::toOmr($line['amount']),
+                ]);
+            }
 
             $order->recordEvent('created', __('orders.events.created'), ['booking' => $booking->reference]);
 
@@ -183,7 +224,7 @@ class CreateStableBooking
     }
 
     /** @throws BookingUnavailable */
-    public function assertBookable(BookingSlot $slot, int $riders): void
+    public function assertBookable(BookingSlot $slot, int $riders, bool $atDesk = false): void
     {
         $offering = $slot->offering;
         $stable = $slot->stable;
@@ -192,7 +233,8 @@ class CreateStableBooking
             throw new BookingUnavailable(__('stable_bookings.errors.not_bookable'));
         }
 
-        if ($slot->bookingClosesAt()->isPast()) {
+        // the desk sells a time until it starts (the rider is standing there), the website until its cutoff
+        if ($atDesk ? $slot->hasStarted() : $slot->bookingClosesAt()->isPast()) {
             throw new BookingUnavailable(__('stable_bookings.errors.closed'));
         }
 

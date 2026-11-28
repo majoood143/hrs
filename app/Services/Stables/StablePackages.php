@@ -22,8 +22,13 @@ class StablePackages
 {
     public function __construct(private readonly StableBookingPricing $pricing) {}
 
-    /** @throws BookingUnavailable */
-    public function purchase(StablePackage $package, Customer $customer): StablePackagePurchase
+    /**
+     * @param  ?string  $deskOption  sold at the stable's desk (the POS): CreateStableBooking::DESK (paid there,
+     *                               StablePos marks it paid) or ::ONLINE (a payment link); no service fee then
+     *
+     * @throws BookingUnavailable
+     */
+    public function purchase(StablePackage $package, Customer $customer, ?string $promoCode = null, ?string $deskOption = null): StablePackagePurchase
     {
         $package->loadMissing(['stable', 'offering']);
         $stable = $package->stable;
@@ -32,14 +37,16 @@ class StablePackages
             throw new BookingUnavailable(__('stable_packages.errors.not_available'));
         }
 
-        [$purchase, $free] = DB::transaction(function () use ($package, $stable, $customer): array {
-            $quote = $this->pricing->quotePackage($package);
-            $account = $quote->isFree() ? null : $stable->activePaymentAccount();
+        [$purchase, $free] = DB::transaction(function () use ($package, $stable, $customer, $promoCode, $deskOption): array {
+            $promo = $this->pricing->promo($promoCode, $stable, $customer->phone, lock: true);
+            $quote = $this->pricing->quotePackage($package, $promo, withFee: $deskOption === null);
+            $desk = $deskOption === CreateStableBooking::DESK;
+            $account = $quote->isFree() || $desk ? null : $stable->activePaymentAccount();
 
             $order = ServiceOrder::create([
                 'stable_id' => $stable->getKey(),
                 'stable_payment_account_id' => $account?->getKey(),
-                'collected_by' => $quote->isFree() ? null : ($account ? 'stable' : 'platform'),
+                'collected_by' => $quote->isFree() ? null : (($account || $desk) ? 'stable' : 'platform'),
                 'customer_id' => $customer->getKey(),
                 'customer_name' => $customer->name,
                 'customer_email' => $customer->email,
@@ -49,7 +56,7 @@ class StablePackages
                 'user_agent' => request()->userAgent(),
                 'status' => $quote->isFree() ? OrderStatus::New : OrderStatus::PendingPayment,
                 'payment_status' => $quote->isFree() ? PaymentStatus::Free : PaymentStatus::Pending,
-            ] + $this->pricing->orderAttributes($quote, $stable));
+            ] + $this->pricing->orderAttributes($quote, $stable, $promo));
 
             $purchase = StablePackagePurchase::create([
                 'stable_id' => $stable->getKey(),

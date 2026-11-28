@@ -1,16 +1,21 @@
 <?php
 
 use App\Http\Controllers\Admin\LogDownloadController;
+use App\Http\Controllers\Site\AccountAuctionController;
 use App\Http\Controllers\Site\AccountAuthController;
 use App\Http\Controllers\Site\AccountOrderController;
 use App\Http\Controllers\Site\AccountPackageController;
 use App\Http\Controllers\Site\AdClickController;
 use App\Http\Controllers\Site\AppLinksController;
+use App\Http\Controllers\Site\AppSignInController;
+use App\Http\Controllers\Site\AuctionApplicationController;
+use App\Http\Controllers\Site\AuctionController;
 use App\Http\Controllers\Site\BookingTicketController;
 use App\Http\Controllers\Site\CenterController;
 use App\Http\Controllers\Site\ClinicController;
 use App\Http\Controllers\Site\EventController;
 use App\Http\Controllers\Site\FarrierController;
+use App\Http\Controllers\Site\GameController;
 use App\Http\Controllers\Site\HorseForSaleController;
 use App\Http\Controllers\Site\JockeyController;
 use App\Http\Controllers\Site\OrderController;
@@ -92,6 +97,28 @@ Route::get('/jockeys/{jockey}', [JockeyController::class, 'show'])->whereNumber(
 
 Route::get('/stallions', [StallionController::class, 'index'])->name('stallions.index');
 Route::get('/stallions/{stallion}', [StallionController::class, 'show'])->whereNumber('stallion')->name('stallions.show');
+
+// Online horse auctions (docs/horse-auctions-plan.md). Lots are addressed by their lot number.
+Route::prefix('auctions')->name('auctions.')->group(function () {
+    Route::get('/', [AuctionController::class, 'index'])->name('index');
+    // before {auction}: "sell" is not an auction (AuctionResource refuses it as a slug)
+    Route::middleware('auth:customer')->group(function () {
+        Route::get('sell', [AuctionApplicationController::class, 'create'])->name('sell');
+        Route::post('sell', [AuctionApplicationController::class, 'store'])->middleware('throttle:5,1')->name('sell.store');
+    });
+    Route::get('{auction}', [AuctionController::class, 'show'])->name('show');
+    Route::get('{auction}/state', [AuctionController::class, 'lotsState'])->middleware('throttle:60,1')->name('state');
+    Route::get('{auction}/lots/{lot}', [AuctionController::class, 'lot'])->whereNumber('lot')->name('lot');
+    Route::get('{auction}/lots/{lot}/state', [AuctionController::class, 'state'])->whereNumber('lot')->middleware('throttle:120,1')->name('lot.state');
+
+    Route::middleware('auth:customer')->group(function () {
+        Route::get('{auction}/register', [AuctionController::class, 'registerForm'])->name('register');
+        Route::post('{auction}/register', [AuctionController::class, 'register'])->middleware('throttle:10,1')->name('register.store');
+        Route::post('{auction}/lots/{lot}/bids', [AuctionController::class, 'bid'])->whereNumber('lot')->middleware('throttle:30,1')->name('bid');
+        Route::post('{auction}/lots/{lot}/watch', [AuctionController::class, 'watch'])->whereNumber('lot')->middleware('throttle:30,1')->name('watch');
+        Route::get('{auction}/lots/{lot}/documents/{index}', [AuctionController::class, 'document'])->whereNumber(['lot', 'index'])->middleware('throttle:30,1')->name('document');
+    });
+});
 
 Route::get('/tools-for-sale', [ToolSaleController::class, 'index'])->name('tools-for-sale.index');
 Route::get('/tools-for-sale/post', [ToolSaleController::class, 'create'])->name('tools-for-sale.create');
@@ -181,6 +208,8 @@ Route::prefix('account')->name('account.')->group(function () {
     Route::get('verify', [AccountAuthController::class, 'verifyForm'])->name('verify');
     Route::post('verify', [AccountAuthController::class, 'verify'])->middleware('throttle:10,1')->name('verify.check');
     Route::post('verify/resend', [AccountAuthController::class, 'resend'])->middleware('throttle:10,1')->name('resend');
+    // the app's WebView signing in as the app's customer (a one-time link from POST api/v1/account/web-session)
+    Route::get('app-sign-in/{token}', AppSignInController::class)->middleware('throttle:30,1')->name('app-sign-in');
 
     Route::middleware('auth:customer')->group(function () {
         Route::post('logout', [AccountAuthController::class, 'logout'])->name('logout');
@@ -191,9 +220,25 @@ Route::prefix('account')->name('account.')->group(function () {
         Route::post('orders/{order}/cancel-booking', [AccountOrderController::class, 'cancelBooking'])->middleware('throttle:10,1')->name('orders.cancel-booking');
         Route::post('orders/{order}/review', [AccountOrderController::class, 'review'])->middleware('throttle:10,1')->name('orders.review');
         Route::get('packages', [AccountPackageController::class, 'index'])->name('packages');
+        Route::get('auctions', [AccountAuctionController::class, 'index'])->name('auctions');
         Route::get('packages/buy/{package}', [AccountPackageController::class, 'buy'])->whereNumber('package')->name('packages.buy');
         Route::post('packages/buy/{package}', [AccountPackageController::class, 'purchase'])->whereNumber('package')->middleware('throttle:10,1')->name('packages.purchase');
         Route::get('orders/{order}/documents/{document}', [OrderDocumentController::class, 'customer'])->middleware('throttle:30,1')->whereNumber('document')->name('orders.document');
+    });
+});
+
+// Game campaigns (admin → Games): the horse racing game (public/games/horse-racing) calls these for a
+// campaign on the website session. Players are signed-in customers; "Play" signs them in first.
+// the commentator's recorded clips (admin → Games → Commentator sounds), for every race, campaign or not
+Route::get('game-sounds', [GameController::class, 'sounds'])->middleware('throttle:60,1')->name('games.sounds');
+
+Route::prefix('play/{campaign:slug}')->name('games.')->group(function () {
+    Route::get('/', [GameController::class, 'play'])->middleware('auth:customer')->name('play');
+    Route::get('config', [GameController::class, 'config'])->middleware('throttle:60,1')->name('config');
+    Route::get('leaderboard', [GameController::class, 'leaderboard'])->middleware('throttle:60,1')->name('leaderboard');
+    Route::middleware(['auth:customer', 'throttle:games'])->group(function () {
+        Route::post('attempts', [GameController::class, 'start'])->name('start');
+        Route::post('attempts/{attempt}/finish', [GameController::class, 'finish'])->name('finish');
     });
 });
 

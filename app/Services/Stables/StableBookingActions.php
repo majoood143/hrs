@@ -13,6 +13,7 @@ use App\Models\BookingSlot;
 use App\Models\ServiceOrder;
 use App\Models\StableBooking;
 use App\Models\User;
+use App\Services\Orders\OrderRefundService;
 use App\Services\Payments\OrderPaymentService;
 use App\Services\Payments\PaymentGateways;
 use App\Services\Reports\ClosedBooks;
@@ -152,7 +153,14 @@ class StableBookingActions
             throw new BookingUnavailable(__('stable_bookings.errors.cannot_cancel'));
         }
 
-        return $this->cancel($booking, 'stable', trim($reason));
+        // a desk sale's money is in the stable's hands: it gives it back there, so the refund is
+        // recorded first (then nothing is left due, and no one is asked to refund it)
+        $order = $booking->order;
+        if ($order?->isDeskSale() && $order->isPaid() && ($left = app(OrderRefundService::class)->refundable($order)) > 0) {
+            app(OrderRefundService::class)->record($order, $left, trim($reason), auth()->id(), reference: CreateStableBooking::DESK);
+        }
+
+        return $this->cancel($booking->refresh(), 'stable', trim($reason));
     }
 
     /**

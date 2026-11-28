@@ -29,11 +29,13 @@ class AppEvent extends Model
         'listing_viewed', 'filter_applied', 'contact_tapped', 'shared',
         'saved_search_created', 'ad_clicked', 'video_played', 'booking_started',
         'announcement_shown', 'announcement_clicked', 'announcement_dismissed',
+        'auction_viewed', 'push_permission',
     ];
 
     /** Recorded by the server only (the app cannot claim them). */
     public const SERVER = [
         'signed_up', 'profile_updated', 'post_submitted', 'booking_confirmed', 'booking_cancelled', 'package_activated',
+        'auction_registered', 'bid_placed', 'lot_won',
     ];
 
     public const MAX_PROPERTIES = 20;

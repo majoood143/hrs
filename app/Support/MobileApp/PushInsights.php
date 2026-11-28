@@ -3,6 +3,7 @@
 namespace App\Support\MobileApp;
 
 use App\Filament\Support\CachedWidgetCounts;
+use App\Models\AppEvent;
 use App\Models\BookingSlot;
 use App\Models\MobileDevice;
 use App\Models\PushCampaign;
@@ -38,6 +39,50 @@ class PushInsights
                 'targeted' => (int) (clone $campaigns)->sum('recipients'),
                 'accepted' => (int) (clone $campaigns)->sum('accepted'),
                 'campaign_opens' => (int) (clone $campaigns)->sum('opened'),
+            ];
+        });
+    }
+
+    /**
+     * Phones (install ids) that opened the app in the last DAYS days, and each one's latest
+     * notification permission as the app reported it (`push_permission`), so the admin sees why reach is smaller.
+     *
+     * @return array{installs: int, granted: int, denied: int, undetermined: int}
+     */
+    public static function permissions(): array
+    {
+        return CachedWidgetCounts::remember('push.permissions', function () {
+            $from = now()->subDays(self::DAYS);
+            $latest = AppEvent::query()->where('name', 'push_permission')->whereNotNull('install_id')
+                ->where('occurred_at', '>=', $from)->selectRaw('max(id)')->groupBy('install_id');
+            $status = fn (string $value) => AppEvent::query()->whereIn('id', $latest)->where('properties->status', $value)->count();
+
+            return [
+                'installs' => AppEvent::query()->whereNotNull('install_id')->where('occurred_at', '>=', $from)->distinct()->count('install_id'),
+                'granted' => $status('granted'),
+                'denied' => $status('denied'),
+                'undetermined' => $status('undetermined'),
+            ];
+        });
+    }
+
+    /**
+     * Phones lost in the last DAYS days: `uninstalled` = Apple/Google said the app is gone (push
+     * phones only), `lapsed` = installs that opened the app in the DAYS before but not since (everyone).
+     *
+     * @return array{uninstalled: int, lapsed: int}
+     */
+    public static function losses(): array
+    {
+        return CachedWidgetCounts::remember('push.losses', function () {
+            $from = now()->subDays(self::DAYS);
+            $seen = fn ($start, $end = null) => AppEvent::query()->whereNotNull('install_id')->where('occurred_at', '>=', $start)
+                ->when($end, fn ($q) => $q->where('occurred_at', '<', $end));
+
+            return [
+                'uninstalled' => MobileDevice::query()->withoutGlobalScope('installed')->where('uninstalled_at', '>=', $from)->count(),
+                'lapsed' => $seen($from->copy()->subDays(self::DAYS), $from)->whereNotIn('install_id', $seen($from)->select('install_id'))
+                    ->distinct()->count('install_id'),
             ];
         });
     }

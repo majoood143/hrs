@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\Bookings\BookingResource;
 use App\Http\Resources\V1\Bookings\BookingStableResource;
+use App\Http\Resources\V1\Bookings\ExtraResource;
 use App\Http\Resources\V1\Bookings\OfferingResource;
 use App\Http\Resources\V1\Bookings\QuoteResource;
 use App\Http\Resources\V1\Bookings\SlotResource;
 use App\Http\Resources\V1\OptionResource;
 use App\Models\BookingSlot;
 use App\Models\Customer;
+use App\Models\PromoCode;
+use App\Models\StableExtra;
 use App\Models\StableOffering;
 use App\Models\StablePackagePurchase;
 use App\Models\StableService;
@@ -147,7 +150,9 @@ class BookingController extends Controller
      *
      * The time, the price for `riders`, the rider fields this stable asks for, how one can pay and,
      * for a signed-in customer, their packages that can pay for it. 409 `booking_unavailable` when
-     * the time can no longer be booked for that many riders.
+     * the time can no longer be booked for that many riders. With `promo_code` the quote is less its
+     * discount, or `promo_code_error` says why it cannot be used. `extras` lists what can be added;
+     * with `extras[<id>]=<quantity>` the quote includes them, or `extras_error` says why it cannot.
      *
      * @unauthenticated
      */
@@ -155,6 +160,9 @@ class BookingController extends Controller
     {
         $data = $request->validate([
             'riders' => ['nullable', 'integer', 'min:1', 'max:'.StableBookingForm::MAX_RIDERS],
+            'promo_code' => ['nullable', 'string', 'max:50'],
+            'extras' => ['nullable', 'array', 'max:30'],
+            'extras.*' => ['integer', 'min:0', 'max:20'],
         ]);
 
         $slot = BookingSlot::query()->with(['offering', 'stable.region', 'stable.city', 'trainer'])->findOrFail($id);
@@ -167,8 +175,24 @@ class BookingController extends Controller
         }
 
         $settings = $slot->stable->bookingSettings();
-        $quote = $this->pricing->quote($slot->offering, $riders, $slot->stable);
         $customer = $request->user('customer_api');
+        $promoError = null;
+
+        try {
+            $promo = $this->pricing->promo($data['promo_code'] ?? null, $slot->stable, $customer instanceof Customer ? $customer->phone : null);
+        } catch (BookingUnavailable $e) {
+            [$promo, $promoError] = [null, $e->getMessage()];
+        }
+
+        $extrasError = null;
+
+        try {
+            $lines = StableExtra::lines($slot->offering, $riders, $data['extras'] ?? []);
+        } catch (BookingUnavailable $e) {
+            [$lines, $extrasError] = [[], $e->getMessage()];
+        }
+
+        $quote = $this->pricing->quote($slot->offering, $riders, $slot->stable, $promo, extras: StableExtra::totalBaisa($lines));
         $hours = $settings->cancellationHours();
 
         return response()->json([
@@ -176,7 +200,15 @@ class BookingController extends Controller
             'offering' => OfferingResource::make($slot->offering),
             'slot' => SlotResource::make($slot),
             'riders' => $riders,
-            'quote' => QuoteResource::make($quote),
+            'quote' => QuoteResource::make($quote)->withExtras($lines),
+            /** What can be added to this booking (empty when none, or switched off); not with a package. */
+            'extras' => ExtraResource::collection(StableExtra::forOffering($slot->offering)),
+            /** Why the `extras` sent cannot be booked (they are left out of the quote); null when fine. @var string|null */
+            'extras_error' => $extrasError,
+            /** Whether a promo code can be typed (General Settings → Modules); it is taken off an online payment only. */
+            'promo_codes' => PromoCode::enabled(),
+            /** Why the `promo_code` sent cannot be used; null when it was applied or none was sent. @var string|null */
+            'promo_code_error' => $promoError,
             /** The rider fields to ask, in order (name is always asked and required). */
             'rider_fields' => collect(StableBookingForm::RIDER_FIELDS)
                 ->filter(fn (string $field) => $settings->showsRiderField($field))
@@ -214,8 +246,9 @@ class BookingController extends Controller
      *
      * One entry in `riders` per rider. Answers 201 with the booking: `pay_url` is set when it waits
      * for an online payment (open it in a browser; the places are held until the checkout expires),
-     * else it is already confirmed (free, at the stable, or a package). 409 `booking_unavailable`
-     * when the time was taken meanwhile.
+     * else it is already confirmed (free, at the stable, or a package). `extras[<id>]=<quantity>` adds
+     * extras (not with a package). 409 `booking_unavailable` when the time was taken meanwhile or an
+     * extra cannot be booked.
      */
     public function store(Request $request, int $id, CreateStableBooking $bookings): JsonResponse
     {
@@ -224,11 +257,19 @@ class BookingController extends Controller
         $slot = BookingSlot::query()->with(['offering', 'stable'])->findOrFail($id);
         $settings = $slot->stable?->bookingSettings() ?? StableBookingSettings::from([]);
         $count = is_array($request->input('riders')) ? StableBookingForm::riderCount(count($request->input('riders'))) : 1;
-        $quote = $slot->offering ? $this->pricing->quote($slot->offering, $count, $slot->stable) : null;
+        // a 100% code makes it free: no payment option is then needed (a code that cannot be used is refused by handle())
+        $promo = $slot->stable ? rescue(fn () => $this->pricing->promo((string) $request->input('promo_code'), $slot->stable, $customer->phone), null, false) : null;
+        // extras that cannot be booked are refused by handle()
+        $lines = $slot->offering ? rescue(fn () => StableExtra::lines($slot->offering, $count, $request->input('extras')), [], false) : [];
+        $quote = $slot->offering ? $this->pricing->quote($slot->offering, $count, $slot->stable, $promo, extras: StableExtra::totalBaisa($lines)) : null;
 
         $request->merge(['riders_count' => $count]);
         $data = $request->validate(
-            StableBookingForm::rules($settings, $count, $quote?->isFree() ?? true, signedIn: true),
+            StableBookingForm::rules($settings, $count, $quote?->isFree() ?? true, signedIn: true) + [
+                'promo_code' => ['nullable', 'string', 'max:50'],
+                'extras' => ['nullable', 'array', 'max:30'],
+                'extras.*' => ['integer', 'min:0', 'max:20'],
+            ],
             [],
             StableBookingForm::attributeNames($count),
         );
@@ -242,7 +283,7 @@ class BookingController extends Controller
                 'phone' => $customer->phone,
                 'locale' => app()->getLocale(),
                 'customer_id' => $customer->getKey(),
-            ], $data['payment_option'] ?? CreateStableBooking::ONLINE, $withPackage ? (int) ($data['package_purchase_id'] ?? 0) : null);
+            ], $data['payment_option'] ?? CreateStableBooking::ONLINE, $withPackage ? (int) ($data['package_purchase_id'] ?? 0) : null, $data['promo_code'] ?? null, extras: $data['extras'] ?? []);
         } catch (BookingUnavailable $e) {
             return $this->unavailable($e);
         }

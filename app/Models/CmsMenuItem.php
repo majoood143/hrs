@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Route;
 use Spatie\Translatable\HasTranslations;
 
 class CmsMenuItem extends Model
@@ -42,10 +43,10 @@ class CmsMenuItem extends Model
     public function resolvedUrl(): string
     {
         if ($this->page) {
-            return $this->page->is_homepage ? '/' : '/' . $this->page->slug;
+            return $this->page->is_homepage ? '/' : '/'.$this->page->slug;
         }
 
-        if ($this->route_name && \Illuminate\Support\Facades\Route::has($this->route_name)) {
+        if ($this->route_name && Route::has($this->route_name)) {
             return route($this->route_name);
         }
 

@@ -24,6 +24,8 @@ class NotificationText
         'rejected' => ['mail.rejected.subject', 'mail.rejected.intro', 'mail.rejected.reason', 'mail.rejected.refund'],
         'refunded' => ['mail.refunded.subject', 'mail.refunded.intro', 'mail.refunded.timing', 'mail.refunded.fee_kept'],
         'common' => ['mail.greeting', 'mail.greeting_guest', 'mail.track_button'],
+        'auctions' => ['sms.auction_approved', 'sms.auction_outbid', 'sms.auction_ending', 'sms.auction_won', 'sms.auction_invoice_due', 'sms.auction_application_approved', 'sms.auction_application_rejected', 'sms.auction_seller_sold', 'sms.auction_seller_unsold', 'sms.auction_seller_paid'],
+        'games' => ['sms.game_award', 'sms.game_award_code'],
     ];
 
     /** Placeholders a text may lose without harm: the rest of them carry what the customer needs to know. */

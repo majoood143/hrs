@@ -7,6 +7,7 @@ use App\Filament\Resources\StableResource\Pages\CreateStable;
 use App\Filament\Resources\StableResource\Pages\EditStable;
 use App\Filament\Resources\StableResource\Pages\ListStables;
 use App\Filament\Resources\StableResource\Pages\ViewStable;
+use App\Filament\Resources\StableResource\RelationManagers\ExtrasRelationManager;
 use App\Filament\Resources\StableResource\RelationManagers\OfferingsRelationManager;
 use App\Filament\Resources\StableResource\RelationManagers\PaymentAccountsRelationManager;
 use App\Filament\Resources\StableResource\RelationManagers\ReviewsRelationManager;
@@ -103,6 +104,7 @@ class StableResource extends Resource
     {
         return [
             OfferingsRelationManager::class,
+            ExtrasRelationManager::class,
             PaymentAccountsRelationManager::class,
             SettlementsRelationManager::class,
             ReviewsRelationManager::class,

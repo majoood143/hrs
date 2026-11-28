@@ -8,6 +8,7 @@ use App\Models\StablePaymentAccount;
 use App\Services\Stables\SlotGenerator;
 use App\Services\Stables\StablePaymentAccounts;
 use App\Support\StableBookingSettings;
+use App\Support\StablePos;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Radio;
@@ -78,6 +79,7 @@ class BookingSettings extends Page implements HasForms
         $settings['allow_cancellation'] = $settings['cancellation_hours'] !== null;
         $settings['cancellation_hours'] ??= 24;
         $settings['payment_gateway'] ??= 'thawani';
+        $settings['pos_methods'] = StablePos::methodsFor($this->stable());
 
         foreach ($this->stable()->paymentAccounts()->get() as $account) {
             $settings['accounts'][$account->gateway->value] = [
@@ -135,6 +137,17 @@ class BookingSettings extends Page implements HasForms
                             ->descriptions(collect(StableBookingSettings::PAYMENT_OPTIONS)->mapWithKeys(fn (string $o) => [$o => __('stable_panel.settings.payment_desc.'.$o)]))
                             ->required()
                             ->minItems(1),
+                    ]),
+                Section::make(__('stable_pos.admin.stable_methods'))
+                    ->icon('heroicon-o-calculator')
+                    ->visible(fn () => StablePos::openFor($this->stable()))
+                    ->schema([
+                        CheckboxList::make('pos_methods')
+                            ->label(__('stable_pos.admin.stable_methods'))
+                            ->helperText(__('stable_pos.admin.stable_methods_help'))
+                            ->options(StablePos::options(StablePos::siteMethods()))
+                            ->columns(3)
+                            ->required(),
                     ]),
                 Section::make(__('stable_panel.payments.title'))
                     ->description(__('stable_panel.payments.description'))
@@ -299,6 +312,10 @@ class BookingSettings extends Page implements HasForms
             'staff_enabled' => (bool) ($state['staff_enabled'] ?? false),
             'send_reminders' => (bool) ($state['send_reminders'] ?? true),
             'rider_fields' => $riderFields,
+            // shown only while the desk is open: otherwise the owner's earlier choice is kept
+            'pos_methods' => array_key_exists('pos_methods', $state)
+                ? array_values(array_intersect(StablePos::METHODS, (array) $state['pos_methods']))
+                : ($stable->booking_settings['pos_methods'] ?? null),
             'waiver_text' => [
                 'en' => filled($state['waiver_text']['en'] ?? null) ? $state['waiver_text']['en'] : null,
                 'ar' => filled($state['waiver_text']['ar'] ?? null) ? $state['waiver_text']['ar'] : null,

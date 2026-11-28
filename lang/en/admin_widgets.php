@@ -52,6 +52,10 @@ return [
     'push' => [
         'reachable' => 'Phones you can reach',
         'active_7' => ':count used the app in the last 7 days',
+        'installs' => 'Phones that opened the app',
+        'uninstalled' => 'Removed the app (30 days)',
+        'lapsed' => ':count more stopped opening it (no launch in 30 days). Store totals: Play Console and App Store Connect.',
+        'installs_help' => 'Last 30 days. Notifications: :granted allowed, :denied refused, :undetermined not asked yet',
         'delivered' => 'Delivered',
         'opened' => 'Opened',
         'targeted' => 'Targeted',

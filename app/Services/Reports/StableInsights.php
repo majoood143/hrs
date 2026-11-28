@@ -7,6 +7,7 @@ use App\Models\BookingSlot;
 use App\Models\ServiceOrder;
 use App\Models\Stable;
 use App\Models\StableBooking;
+use App\Models\StableBookingExtra;
 use App\Models\StableReview;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -131,6 +132,38 @@ class StableInsights
         }
 
         return $series;
+    }
+
+    /**
+     * The extras added to the period's sessions that went ahead (confirmed, attended, no-show): their
+     * revenue, the share of those bookings with at least one, the best sellers, and (every stable)
+     * the stables that sell the most.
+     * shortcut: amounts are as booked, before any refund; read them off the ledger if refunds of extras become common
+     *
+     * @return array{revenue: int, bookings: int, with_extras: int, rate: ?int, top: Collection<int, array{name: string, quantity: int, amount: int}>, stables: Collection<int, array{name: string, amount: int}>}
+     */
+    public function extras(int $limit = 8): array
+    {
+        $sold = $this->sessionBookings()->whereIn('stable_bookings.status', [
+            StableBookingStatus::Confirmed->value, StableBookingStatus::Completed->value, StableBookingStatus::NoShow->value,
+        ]);
+        $bookings = (clone $sold)->count();
+        $lines = StableBookingExtra::query()->with('booking.stable')->whereIn('stable_booking_id', (clone $sold)->select('stable_bookings.id'))->get();
+        $baisa = fn (Collection $rows) => (int) $rows->sum(fn (StableBookingExtra $l) => (int) round((float) $l->amount * 1000));
+        $withExtras = $lines->pluck('stable_booking_id')->unique()->count();
+
+        return [
+            'revenue' => $baisa($lines),
+            'bookings' => $bookings,
+            'with_extras' => $withExtras,
+            'rate' => $bookings > 0 ? (int) round($withExtras * 100 / $bookings) : null,
+            'top' => $lines->groupBy(fn (StableBookingExtra $l) => $l->stable_extra_id ?? 'x'.$l->id)
+                ->map(fn (Collection $rows) => ['name' => $rows->first()->name, 'quantity' => (int) $rows->sum('quantity'), 'amount' => $baisa($rows)])
+                ->sortByDesc('amount')->take($limit)->values(),
+            'stables' => $this->stable ? collect() : $lines->groupBy(fn (StableBookingExtra $l) => (int) $l->booking?->stable_id)
+                ->map(fn (Collection $rows) => ['name' => (string) $rows->first()->booking?->stable?->name, 'amount' => $baisa($rows)])
+                ->sortByDesc('amount')->take(5)->values(),
+        ];
     }
 
     /** @return Builder<StableBooking> bookings whose session falls in the period */

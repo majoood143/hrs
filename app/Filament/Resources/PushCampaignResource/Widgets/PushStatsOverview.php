@@ -6,7 +6,7 @@ use App\Support\MobileApp\PushInsights;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
-/** Reach, sends, opens and open rate over the last 30 days, against the 30 before. */
+/** Reach (against the phones that opened the app and their notification permission), sends, opens and open rate over the last 30 days, against the 30 before. */
 class PushStatsOverview extends StatsOverviewWidget
 {
     protected static ?int $sort = 1;
@@ -22,6 +22,8 @@ class PushStatsOverview extends StatsOverviewWidget
     {
         $s = PushInsights::summary();
         $daily = PushInsights::daily();
+        $p = PushInsights::permissions();
+        $lost = PushInsights::losses();
         $rate = PushInsights::rate($s['opened'], $s['sent']);
         $rateBefore = PushInsights::rate($s['opened_before'], $s['sent_before']);
         $change = fn (?float $pct) => $pct === null
@@ -36,6 +38,14 @@ class PushStatsOverview extends StatsOverviewWidget
                 ->description(__('admin_widgets.push.active_7', ['count' => number_format($s['active'])]))
                 ->descriptionIcon('heroicon-m-device-phone-mobile')
                 ->color('primary'),
+            Stat::make(__('admin_widgets.push.installs'), number_format($p['installs']))
+                ->description(__('admin_widgets.push.installs_help', array_map('number_format', array_diff_key($p, ['installs' => 0]))))
+                ->descriptionIcon('heroicon-m-bell-alert')
+                ->color('gray'),
+            Stat::make(__('admin_widgets.push.uninstalled'), number_format($lost['uninstalled']))
+                ->description(__('admin_widgets.push.lapsed', ['count' => number_format($lost['lapsed'])]))
+                ->descriptionIcon('heroicon-m-arrow-right-start-on-rectangle')
+                ->color($lost['uninstalled'] > 0 ? 'warning' : 'gray'),
             Stat::make(__('admin_widgets.push.delivered'), number_format($s['sent']))
                 ->description($change($sentChange))
                 ->descriptionIcon($icon($sentChange))

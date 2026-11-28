@@ -214,6 +214,29 @@ return [
     ],
 
     'models' => [
+        'promo_code' => [
+            'code' => 'مثل: SAVE10',
+            'name' => 'مثل: عرض العيد الوطني',
+            'description' => 'لمن أُعطي ولماذا',
+            'discount_value' => 'مثل: 10',
+            'max_discount_amount' => 'مثل: 20.000',
+            'max_uses' => 'مثل: 100',
+            'restricted_mobile' => 'مثل: 9123 4567',
+        ],
+        'game_prize' => [
+            'discount_value' => 'مثل: 50',
+            'max_discount_amount' => 'مثل: 20.000',
+            'valid_days' => 'مثل: 30',
+        ],
+        'expense' => [
+            'amount' => 'مثل: 45.500',
+            'vendor' => 'مثل: الباطنة لتجارة الأعلاف',
+            'note' => 'مثل: 20 كيس شعير لشهر مارس',
+        ],
+        'expense_category' => [
+            'en_name' => 'مثل: Feed',
+            'ar_name' => 'مثل: الأعلاف',
+        ],
         'horse' => [
             'name' => 'مثل: أحمد البلوشي',
             'password' => '8 أحرف على الأقل',
@@ -389,6 +412,8 @@ return [
     ],
 
     'dirs' => [
+        'expenses_receipts' => 'صورة أو نسخة ممسوحة من الإيصال أو الفاتورة',
+        'games_commentary' => 'مقطع قصير (بضع ثوانٍ)',
         'cms_hero' => '1920 × 1080 بكسل، أفقية (يبقى وسطها ظاهراً)',
         'cms_images' => 'عرض 1600 بكسل على الأقل',
         'cms_columns' => 'أيقونة، نحو 96 × 96 بكسل، بخلفية شفافة',

@@ -162,6 +162,9 @@ class AppServiceProvider extends ServiceProvider
             Limit::perMinute(30)->by('install|'.$request->header('X-Install-Id')),
             Limit::perMinute(300)->by('ip|'.$request->ip()),
         ]);
+        // Game races (/play/{campaign}/attempts…): per signed-in customer, a race takes a minute or more.
+        RateLimiter::for('games', fn (Request $request) => Limit::perMinute(20)
+            ->by(($request->user('customer') ? 'customer|'.$request->user('customer')->getKey() : 'ip|'.$request->ip())));
         RateLimiter::for('api-reports', fn (Request $request) => self::perPhone($request, Limit::perHour(20), Limit::perHour(200)));
 
         // A stable owner's app token is a User token, which the admin API's guard would accept too:

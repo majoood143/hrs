@@ -37,6 +37,15 @@
             @endforeach
         </div>
 
+        @if(\App\Models\Expense::enabled() && $statement->serviceId === null && $statement->gateway === null)
+            @include('filament.partials.expenses-profit', [
+                'income' => $t['net_to_us'] + $fromStables,
+                'incomeLabel' => __('expenses.our_income'),
+                'report' => new \App\Services\Reports\ExpenseReport(null, $statement->from, $statement->to),
+                'netLabel' => __('expenses.net_after_expenses'),
+            ])
+        @endif
+
         @if($t['orders'] === 0)
             <x-filament::section>
                 <p class="text-center text-sm text-gray-500 dark:text-gray-400">{{ __('admin_income_report.empty') }}</p>

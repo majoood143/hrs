@@ -341,7 +341,8 @@ class ViewServiceOrder extends ViewRecord
                 Section::make(__('admin_service_order.sections.money'))
                     ->columns(4)
                     ->schema([
-                        TextEntry::make('price')->label(__('admin_service_order.fields.price'))->formatStateUsing($money),
+                        TextEntry::make('price')->label(__('admin_service_order.fields.price'))->formatStateUsing($money)
+                            ->helperText(fn (ServiceOrder $record) => $record->hasDiscount() ? __('promo_codes.admin.after_discount', ['amount' => $money($record->discount_amount), 'code' => $record->promoCode?->code ?? '—']) : null),
                         TextEntry::make('fee_amount')->label(__('admin_service_order.fields.fee_amount'))->formatStateUsing($money),
                         TextEntry::make('vat_on_price')->label(__('admin_service_order.fields.vat_on_price'))->formatStateUsing($money),
                         TextEntry::make('vat_on_fee')->label(__('admin_service_order.fields.vat_on_fee'))->formatStateUsing($money),

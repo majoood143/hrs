@@ -7,6 +7,9 @@
                 <p class="mt-1 text-sm text-warm-700" dir="ltr">{{ $customer->displayName() }}</p>
             </div>
             <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('account.auctions') }}" class="btn-warm-outline">
+                    <x-heroicon-o-megaphone class="h-5 w-5" aria-hidden="true" />{{ __('auctions.site.account_title') }}
+                </a>
                 <a href="{{ route('account.packages') }}" class="btn-warm-outline">
                     <x-heroicon-o-rectangle-stack class="h-5 w-5" aria-hidden="true" />{{ __('stable_packages.account.title') }}
                 </a>

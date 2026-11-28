@@ -3,7 +3,10 @@
 namespace App\Filament\Stable\Widgets;
 
 use App\Filament\Stable\Pages\Statement;
+use App\Filament\Stable\Resources\StableExpenses\StableExpenseResource;
+use App\Models\Expense;
 use App\Models\Stable;
+use App\Services\Reports\ExpenseReport;
 use App\Services\Reports\StableStatement;
 use App\Support\Money;
 use Filament\Facades\Filament;
@@ -36,7 +39,7 @@ class StableFinanceOverview extends StatsOverviewWidget
         $balance = StableStatement::balance($stable);
         $url = Statement::getUrl();
 
-        return [
+        $stats = [
             Stat::make(__('stable_statement.widget.bookings'), (string) $t['bookings'])
                 ->description(trans_choice('stable_bookings.riders_count', $t['riders'], ['count' => $t['riders']]))
                 ->icon('heroicon-o-ticket'),
@@ -53,5 +56,17 @@ class StableFinanceOverview extends StatsOverviewWidget
                 ->color($balance > 0 ? 'success' : ($balance < 0 ? 'warning' : 'gray'))
                 ->url($url),
         ];
+
+        if (Expense::enabled()) {
+            $spent = ExpenseReport::forPeriod($stable, 'this_month')->total();
+            $profit = $t['stable_share'] - $spent;
+            $stats[] = Stat::make(__('expenses.profit'), Money::formatHtml($profit))
+                ->description(__('expenses.widget_hint', ['spent' => Money::format($spent)]))
+                ->icon('heroicon-o-calculator')
+                ->color($profit > 0 ? 'success' : ($profit < 0 ? 'danger' : 'gray'))
+                ->url(StableExpenseResource::getUrl());
+        }
+
+        return $stats;
     }
 }

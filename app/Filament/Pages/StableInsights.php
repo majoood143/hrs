@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Insights\InsightsExtras;
 use App\Filament\Insights\InsightsFilters;
 use App\Filament\Insights\InsightsKpis;
 use App\Filament\Insights\InsightsOccupancy;
@@ -68,7 +69,7 @@ class StableInsights extends BaseDashboard
 
     public function getWidgets(): array
     {
-        return [InsightsKpis::class, InsightsSalesChart::class, InsightsTopStables::class, InsightsOccupancy::class, InsightsTopServices::class];
+        return [InsightsKpis::class, InsightsSalesChart::class, InsightsTopStables::class, InsightsOccupancy::class, InsightsTopServices::class, InsightsExtras::class];
     }
 
     protected function getHeaderActions(): array

@@ -4,6 +4,7 @@ namespace App\Http\Resources\V1\Owner;
 
 use App\Http\Resources\V1\OptionResource;
 use App\Models\Stable;
+use App\Support\StablePos;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -31,6 +32,8 @@ class OwnerStableResource extends JsonResource
             'approval_tone' => $approval->color(),
             /** Shown on the site, approved and with a commission agreed: customers can book it. */
             'accepts_bookings' => $stable->acceptsBookings(),
+            /** Its desk (POS) is open: the app shows "New sale" and the desk's sales. */
+            'pos' => StablePos::openFor($stable),
             /** The owner's place in it: `owner` or `staff`. @var string|null */
             'role' => $stable->pivot?->role,
             /** The website's /stable panel for it (services, schedules, prices, statements…). */

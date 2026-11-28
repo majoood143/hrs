@@ -3,6 +3,7 @@
 namespace App\Services\Stables;
 
 use App\Enums\FeeType;
+use App\Models\PromoCode;
 use App\Models\ServiceFeeSetting;
 use App\Models\SiteSetting;
 use App\Models\Stable;
@@ -24,27 +25,59 @@ class StableBookingPricing
 {
     public function __construct(private readonly OrderPricing $orders) {}
 
-    public function quote(StableOffering $offering, int $riders, ?Stable $stable = null): PriceBreakdown
+    /**
+     * `$withFee` false: sold at the stable's desk (the POS), where we take the commission only.
+     * `$extras` (baisa, `StableExtra::totalBaisa()`) is part of the price, so fee, VAT, commission and
+     * the promo code's discount apply to it too.
+     */
+    public function quote(StableOffering $offering, int $riders, ?Stable $stable = null, ?PromoCode $promo = null, bool $withFee = true, int $extras = 0): PriceBreakdown
     {
-        return $this->quotePrice((int) round((float) $offering->price * 1000) * max(1, $riders), $stable ?? $offering->stable);
+        return $this->quotePrice((int) round((float) $offering->price * 1000) * max(1, $riders) + $extras, $stable ?? $offering->stable, $promo, $withFee);
     }
 
     /** A lesson package: its own price, by the same rules. */
-    public function quotePackage(StablePackage $package): PriceBreakdown
+    public function quotePackage(StablePackage $package, ?PromoCode $promo = null, bool $withFee = true): PriceBreakdown
     {
-        return $this->quotePrice((int) round((float) $package->price * 1000), $package->stable);
+        return $this->quotePrice((int) round((float) $package->price * 1000), $package->stable, $promo, $withFee);
     }
 
-    /** The breakdown of a price in baisa sold by a stable. */
-    public function quotePrice(int $price, Stable $stable): PriceBreakdown
+    /**
+     * The promo code typed, if any, checked for this stable and phone. `$lock` (inside the order's
+     * transaction) holds its row while its uses are counted, so two orders cannot both take the last.
+     *
+     * @throws BookingUnavailable
+     */
+    public function promo(?string $code, Stable $stable, ?string $phone, bool $lock = false): ?PromoCode
     {
-        $currency = SiteSetting::currency()['code'];
-
-        if ($price <= 0) {
-            return new PriceBreakdown(0, 0, 0, 0, 0.0, $currency);
+        if (blank($code)) {
+            return null;
         }
 
-        $feeSetting = ServiceFeeSetting::resolveGlobal();
+        $promo = PromoCode::enabled()
+            ? PromoCode::query()->where('code', PromoCode::normalize($code))->when($lock, fn ($query) => $query->lockForUpdate())->first()
+            : null;
+
+        if (! $promo) {
+            throw new BookingUnavailable(__('promo_codes.errors.invalid'));
+        }
+
+        $promo->assertUsable($stable, $phone);
+
+        return $promo;
+    }
+
+    /** The breakdown of a price in baisa sold by a stable, less the promo code's discount. */
+    public function quotePrice(int $price, Stable $stable, ?PromoCode $promo = null, bool $withFee = true): PriceBreakdown
+    {
+        $currency = SiteSetting::currency()['code'];
+        $discount = $promo?->discountOn($price) ?? 0;
+        $price -= $discount;
+
+        if ($price <= 0) {
+            return new PriceBreakdown(0, 0, 0, 0, 0.0, $currency, discount: $discount);
+        }
+
+        $feeSetting = $withFee ? ServiceFeeSetting::resolveGlobal() : null;
         $fee = $feeSetting?->calculateBaisa($price) ?? 0;
         $commission = $this->commission($stable, $price);
         $ours = $this->orders->vatRate();
@@ -60,6 +93,7 @@ class StableBookingPricing
             feeSetting: $feeSetting,
             commission: $commission,
             vatOnCommission: $this->orders->vatOnCommission() ? $this->vat($commission, $ours) : 0,
+            discount: $discount,
         );
     }
 
@@ -69,13 +103,15 @@ class StableBookingPricing
      *
      * @return array<string, mixed>
      */
-    public function orderAttributes(PriceBreakdown $quote, Stable $stable): array
+    public function orderAttributes(PriceBreakdown $quote, Stable $stable, ?PromoCode $promo = null): array
     {
         return [
             ...$quote->toOrderAttributes(),
             'commission_type' => $quote->price > 0 ? $stable->commission_type?->value : null,
             'commission_value' => $quote->price > 0 ? $stable->commission_value : null,
             'stable_vat_number' => $quote->vatOnPrice > 0 ? $stable->vat_number : null,
+            'promo_code_id' => $quote->discount > 0 ? $promo?->getKey() : null,
+            'discount_amount' => PriceBreakdown::toOmr($quote->discount),
         ];
     }
 

@@ -215,6 +215,29 @@ return [
     ],
 
     'models' => [
+        'promo_code' => [
+            'code' => 'e.g. SAVE10',
+            'name' => 'e.g. National Day offer',
+            'description' => 'Who it was given to and why',
+            'discount_value' => 'e.g. 10',
+            'max_discount_amount' => 'e.g. 20.000',
+            'max_uses' => 'e.g. 100',
+            'restricted_mobile' => 'e.g. 9123 4567',
+        ],
+        'game_prize' => [
+            'discount_value' => 'e.g. 50',
+            'max_discount_amount' => 'e.g. 20.000',
+            'valid_days' => 'e.g. 30',
+        ],
+        'expense' => [
+            'amount' => 'e.g. 45.500',
+            'vendor' => 'e.g. Al Batinah Feed Trading',
+            'note' => 'e.g. 20 bags of barley for March',
+        ],
+        'expense_category' => [
+            'en_name' => 'e.g. Feed',
+            'ar_name' => 'e.g. الأعلاف',
+        ],
         'horse' => [
             'name' => 'e.g. Ahmed Al Balushi',
             'password' => 'At least 8 characters',
@@ -392,6 +415,8 @@ return [
 
     // the same, by upload folder, where one field name has several uses
     'dirs' => [
+        'expenses_receipts' => 'A photo or scan of the receipt or invoice',
+        'games_commentary' => 'A short clip (a few seconds)',
         'cms_hero' => '1920 × 1080 px, landscape (the middle stays in view)',
         'cms_images' => 'At least 1600 px wide',
         'cms_columns' => 'Icon, about 96 × 96 px, transparent background',

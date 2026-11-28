@@ -121,6 +121,20 @@ class StableBookingResource extends Resource
                             ->visible(fn (StableBooking $record) => $record->status === StableBookingStatus::Cancelled)
                             ->placeholder('—'),
                     ]),
+                Section::make(__('stable_extras.plural'))
+                    ->icon('heroicon-o-sparkles')
+                    ->columnSpanFull()
+                    ->visible(fn (StableBooking $record) => $record->extras->isNotEmpty())
+                    ->schema([
+                        RepeatableEntry::make('extras')
+                            ->hiddenLabel()
+                            ->columns(3)
+                            ->schema([
+                                TextEntry::make('name')->label(__('stable_panel.fields.name')),
+                                TextEntry::make('quantity')->label(__('stable_extras.fields.quantity')),
+                                TextEntry::make('amount')->label(__('stable_extras.fields.amount'))->formatStateUsing(fn ($state) => SiteSetting::formatCurrencyHtml($state)),
+                            ]),
+                    ]),
                 Section::make(__('stable_panel.bookings.sections.riders'))
                     ->icon('heroicon-o-user-group')
                     ->columnSpanFull()
@@ -149,7 +163,7 @@ class StableBookingResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['slot', 'offering', 'order']))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['slot', 'offering', 'order', 'extras']))
             ->defaultSort(fn (Builder $query) => $query
                 ->orderBy(BookingSlot::query()->select('date')->whereColumn('booking_slots.id', 'stable_bookings.booking_slot_id'))
                 ->orderBy(BookingSlot::query()->select('start_time')->whereColumn('booking_slots.id', 'stable_bookings.booking_slot_id')))
@@ -176,6 +190,12 @@ class StableBookingResource extends Resource
                     ->label(__('stable_bookings.fields.riders'))
                     ->icon('heroicon-o-user-group')
                     ->description(fn (StableBooking $record) => str($record->riderNames())->limit(40)),
+                TextColumn::make('extras_list')
+                    ->label(__('stable_extras.plural'))
+                    ->state(fn (StableBooking $record) => $record->extras->map(fn ($line) => __('stable_extras.line', ['name' => $line->name, 'quantity' => $line->quantity]))->implode(', ') ?: null)
+                    ->placeholder('—')
+                    ->wrap()
+                    ->toggleable(),
                 TextColumn::make('payment')
                     ->label(__('stable_bookings.fields.payment'))
                     ->state(fn (StableBooking $record) => static::paymentLabel($record))
@@ -254,6 +274,7 @@ class StableBookingResource extends Resource
             $record->payment_option === 'at_stable' => __('stable_bookings.payment_options.at_stable'),
             $record->payment_option === 'free' => __('stable_bookings.payment.free'),
             $record->payment_option === 'package' => __('stable_packages.paid_with_package'),
+            $record->payment_option === 'desk' => (bool) $record->order?->isPaid() ? __('stable_pos.paid_at_desk') : (string) $record->order?->payment_status?->label(),
             (bool) $record->order?->isPaid() => __('stable_bookings.payment.paid_online'),
             default => (string) $record->order?->payment_status?->label(),
         };
@@ -285,6 +306,16 @@ class StableBookingResource extends Resource
             ->action(fn (StableBooking $record) => static::run(fn () => app(StableBookingActions::class)->markNoShow($record)));
     }
 
+    /** What cancelling it does: a desk sale's refund is recorded at once (the stable hands the money back). */
+    public static function cancelHint(StableBooking $record): string
+    {
+        return match (true) {
+            $record->order?->isDeskSale() && $record->order->isPaid() => __('stable_panel.bookings.cancel_desk_hint'),
+            (bool) $record->order?->isPaid() => __('stable_panel.bookings.cancel_paid_hint'),
+            default => __('stable_panel.bookings.cancel_hint'),
+        };
+    }
+
     public static function cancelAction(): Action
     {
         return Action::make('cancelBooking')
@@ -292,9 +323,7 @@ class StableBookingResource extends Resource
             ->icon('heroicon-o-x-circle')
             ->color('danger')
             ->visible(fn (StableBooking $record) => $record->isActive())
-            ->modalDescription(fn (StableBooking $record) => $record->order?->isPaid()
-                ? __('stable_panel.bookings.cancel_paid_hint')
-                : __('stable_panel.bookings.cancel_hint'))
+            ->modalDescription(fn (StableBooking $record) => static::cancelHint($record))
             ->schema([
                 Textarea::make('reason')
                     ->label(__('stable_bookings.fields.reason'))

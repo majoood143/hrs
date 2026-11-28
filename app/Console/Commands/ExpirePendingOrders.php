@@ -10,6 +10,7 @@ use App\Services\Payments\OrderPaymentService;
 use App\Services\Payments\PaymentGateways;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 class ExpirePendingOrders extends Command
@@ -26,6 +27,8 @@ class ExpirePendingOrders extends Command
             ->where('status', OrderStatus::PendingPayment->value)
             ->where('payment_status', '!=', PaymentStatus::Paid->value)
             ->where('created_at', '<', $cutoff)
+            // an auction winner's invoice has days to be paid, not minutes (auctions:invoices handles it)
+            ->when(Schema::hasColumn('service_orders', 'auction_lot_id'), fn ($query) => $query->whereNull('auction_lot_id'))
             ->get();
 
         $cancelled = 0;
